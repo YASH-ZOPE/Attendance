@@ -257,6 +257,24 @@
       background: linear-gradient(135deg, #F5D6D6 0%, #EDCACA 100%);
       color: #8A5A5A;
     }
+   .go-btn {
+  width: 84vw;
+  height: 10vh;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  background: #4facfe;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  }
+
+  .go-btn:hover {
+  background: #00c6ff;
+  }
+
+
   </style>
 </head>
 <body>
@@ -282,6 +300,9 @@
             <a class="nav-link" href="#upload-section"><i class="bi bi-upload me-1"></i>Upload</a>
           </li>
           <li class="nav-item">
+            <a class="nav-link" href="#camera-section"><i class="bi bi-camera me-1"></i>Camera</a>
+          </li>
+          <li class="nav-item">
             <a class="nav-link" href="#attendance-section"><i class="bi bi-table me-1"></i>Attendance</a>
           </li>
           <li class="nav-item">
@@ -301,6 +322,7 @@
     <a href="#subject-section"><i class="bi bi-book"></i></a>
     <a href="#month-section"><i class="bi bi-calendar3"></i></a>
     <a href="#upload-section"><i class="bi bi-upload"></i></a>
+    <a href="#camera-section"><i class="bi bi-camera"></i></a>
     <a href="#attendance-section"><i class="bi bi-table"></i></a>
     <a href="#defaulter-section"><i class="bi bi-exclamation-triangle"></i></a>
   </div>
@@ -555,7 +577,12 @@
         </div>
       </div>
     </section>
-
+    <section id="camera-section" class="nav-section">
+ 	 <button class="go-btn" onclick="window.location.href='face-recognition.html'">
+    Attendance Section
+	 </button>
+<br>
+<br>
     <!-- Attendance Section -->
     <section id="attendance-section" class="nav-section">
       <div class="section-card">

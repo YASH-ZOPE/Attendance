@@ -181,6 +181,23 @@
       font-weight: 600;
       font-size: 14px;
     }
+    .button-grid {
+     display: grid;
+     grid-template-columns: 1fr 1fr;
+     gap: 10px;
+     }
+
+    .button-grid button {
+    width: 100%;
+    }
+    .button-grid button {
+    width: 100%;
+    min-height: 50px;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    }
   </style>
 </head>
 <body>
@@ -250,8 +267,29 @@
               </div>
             </div>
           </div>
-        </div>
+          <br>
+          <button class="btn btn-primary w-100 mb-2" onclick="window.location.href='index.html'">
+  Main Dashboard
+          </button>
+          <br>
+          <br>
 
+            <div class="button-grid">
+  <button id="testConnectionBtn" class="btn btn-outline-info w-100 mb-2">
+    <i class="bi bi-plug me-2"></i>Test Main System Connection
+  </button>
+  <button id="refreshStatusBtn" class="btn btn-outline-secondary w-100 mb-2">
+    <i class="bi bi-arrow-clockwise me-2"></i>Refresh Status
+  </button>
+  <button id="syncToMainBtn" class="btn btn-success w-100 mb-2">
+    <i class="bi bi-arrow-right-circle me-2"></i>Sync to Main System
+  </button>
+  <button id="clearAllFacesBtn" class="btn btn-outline-danger w-100">
+    <i class="bi bi-trash me-2"></i>Clear All Faces
+  </button>
+</div>
+
+          </div>
         <!-- Right Column - Mode Selection & Student List -->
         <div class="col-lg-5">
           <!-- Mode Selection -->
@@ -337,20 +375,7 @@
           </div>
 
           <!-- Actions -->
-<div class="mt-3">
-  <button id="testConnectionBtn" class="btn btn-outline-info w-100 mb-2">
-    <i class="bi bi-plug me-2"></i>Test Main System Connection
-  </button>
-  <button id="refreshStatusBtn" class="btn btn-outline-secondary w-100 mb-2">
-    <i class="bi bi-arrow-clockwise me-2"></i>Refresh Status
-  </button>
-  <button id="syncToMainBtn" class="btn btn-success w-100 mb-2">
-    <i class="bi bi-arrow-right-circle me-2"></i>Sync to Main System
-  </button>
-  <button id="clearAllFacesBtn" class="btn btn-outline-danger w-100">
-    <i class="bi bi-trash me-2"></i>Clear All Faces
-  </button>
-</div>
+
 
   <!-- Toast Notification -->
   <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
