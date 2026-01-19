@@ -4,7 +4,7 @@
 const COGNITO_CONFIG = {
     region: 'ap-south-1',                    // REPLACE with your region
     userPoolId: 'ap-south-1_JsWqNfIto',      // REPLACE with your User Pool ID
-    clientId: '7i9vgkp2m0ifchpdjuas555v9e'   // REPLACE with your Client ID
+    clientId: '6qhlvd3rkvj3rlegcmcgcdtnav'   // REPLACE with your Client ID
 };
 
 // Export for use in other files
