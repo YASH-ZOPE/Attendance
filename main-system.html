@@ -1,0 +1,2411 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Smart Attendance System</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  
+  <!-- AWS Cognito SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.3.7/dist/amazon-cognito-identity.min.js"></script>
+
+  <!-- Cognito Config -->
+  <script src="cognito-config.js"></script>
+
+  <!-- Auth Functions -->
+  <script src="auth.js"></script>
+
+  <style>
+    :root {
+      --primary-color: #E8C4D8;
+      --success-color: #D4E8D4;
+      --danger-color: #F5D6D6;
+      --warning-color: #F9E8D9;
+    }
+    
+    body { 
+      background: #F8F6F4; 
+      padding-top: 70px;
+    }
+    
+    .navbar-brand {
+      font-weight: 700;
+      font-size: 1.4rem;
+    }
+    
+    .nav-section {
+      scroll-margin-top: 80px;
+    }
+    
+    .section-card {
+      background: #FFFEF9;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .section-title {
+      font-weight: 600;
+      color: #7A7A7A;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #F0EDE8;
+    }
+    
+    .present { background: #E8F4E8 !important; }
+    .absent { background: #FDECED !important; }
+    .table-container { max-height: 50vh; overflow: auto; }
+    
+    .file-drop { 
+      border: 2px dashed #E8C4D8; 
+      padding: 30px; 
+      text-align: center; 
+      border-radius: 10px; 
+      background: #FBF8FA;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+    
+    .file-drop:hover, .file-drop.dragover {
+      border-color: #D9A8C4;
+      background: #F7F0F5;
+    }
+    
+    .day-grid { 
+      display: grid; 
+      grid-template-columns: repeat(7, 1fr); 
+      gap: 5px; 
+      margin-top: 10px; 
+    }
+    
+    .day-btn { 
+      padding: 10px 5px; 
+      text-align: center; 
+      border: 1px solid #EFEAE5; 
+      border-radius: 6px; 
+      cursor: pointer; 
+      background: #FFFEF9; 
+      transition: all 0.2s;
+      font-weight: 500;
+      color: #7A7A7A;
+    }
+    
+    .day-btn:hover { 
+      background: #F7F0F5; 
+      border-color: var(--primary-color);
+      transform: scale(1.05);
+    }
+    
+    .day-btn.active { 
+      background: #E8C4D8; 
+      color: #8B5A7A; 
+      border-color: #E8C4D8; 
+    }
+    
+    .day-btn.has-data { 
+      background: #E8F0E8; 
+      border-color: #C8DCC8; 
+    }
+    
+    .day-btn.has-data.active { 
+      background: #D4E8D4; 
+      color: #5A7A5A; 
+    }
+    
+    .day-btn.holiday { 
+      background: #FDF5F5 !important; 
+      border-color: #F5D6D6 !important; 
+      color: #B08080; 
+    }
+    
+    .day-btn.holiday.active { 
+      background: #F5D6D6 !important; 
+      color: #9A6A6A !important; 
+    }
+    
+    .day-header { 
+      font-weight: bold; 
+      text-align: center; 
+      padding: 8px; 
+      background: #F5F3F0; 
+      border-radius: 6px;
+      font-size: 0.85rem;
+      color: #8A8A8A;
+    }
+    
+    .subject-tag { 
+      display: inline-flex;
+      align-items: center;
+      background: #F7F0F5; 
+      border: 1px solid #E8C4D8; 
+      padding: 5px 12px; 
+      border-radius: 20px; 
+      margin: 3px;
+      font-size: 0.9rem;
+      color: #8B5A7A;
+    }
+    
+    .subject-tag.active {
+      background: #E8C4D8;
+      color: #6A4A5A;
+    }
+    
+    .subject-tag .delete-btn { 
+      cursor: pointer; 
+      margin-left: 8px; 
+      color: #D89AA8;
+      font-weight: bold;
+    }
+    
+    .subject-tag.active .delete-btn {
+      color: #9A6A7A;
+    }
+    
+    .stats-card {
+      background: linear-gradient(135deg, #E8C4D8 0%, #DDB8CC 100%);
+      color: #6A4A5A;
+      border-radius: 10px;
+      padding: 15px;
+    }
+    
+    .stats-card.success {
+      background: linear-gradient(135deg, #D4E8D4 0%, #C4DCC4 100%);
+      color: #4A6A4A;
+    }
+    
+    .stats-card.danger {
+      background: linear-gradient(135deg, #F5D6D6 0%, #EDCACA 100%);
+      color: #8A5A5A;
+    }
+    
+    .stats-card.warning {
+      background: linear-gradient(135deg, #F9E8D9 0%, #F0DCCD 100%);
+      color: #8A6A4A;
+    }
+    
+    .defaulter-badge { 
+      background: #F5D6D6; 
+      color: #9A6A6A; 
+      padding: 3px 10px; 
+      border-radius: 15px; 
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    
+    .good-badge { 
+      background: #D4E8D4; 
+      color: #5A7A5A; 
+      padding: 3px 10px; 
+      border-radius: 15px; 
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    
+    .btn-action {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    
+    .btn-action:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    
+    .holiday-badge {
+      background: #FDF5EB;
+      color: #A08060;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.75rem;
+    }
+    
+    .quick-nav {
+      position: fixed;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 1000;
+      background: #FFFEF9;
+      border-radius: 10px;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.06);
+      padding: 10px;
+    }
+    
+    .quick-nav a {
+      display: block;
+      padding: 8px 12px;
+      color: #9A9A9A;
+      text-decoration: none;
+      border-radius: 6px;
+      margin: 2px 0;
+      font-size: 0.85rem;
+    }
+    
+    .quick-nav a:hover, .quick-nav a.active {
+      background: #E8C4D8;
+      color: #6A4A5A;
+    }
+    
+    @media (max-width: 768px) {
+      .quick-nav {
+        display: none;
+      }
+    }
+    
+    .info-alert {
+      background: linear-gradient(135deg, #E8E4F0 0%, #DDD8E8 100%);
+      border: none;
+      border-left: 4px solid #C8B8D8;
+      color: #6A5A7A;
+    }
+    
+    .modal-header-custom {
+      background: linear-gradient(135deg, #F5D6D6 0%, #EDCACA 100%);
+      color: #8A5A5A;
+    }
+   .go-btn {
+  width: 84vw;
+  height: 10vh;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  background: #4facfe;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  }
+
+  .go-btn:hover {
+  background: #00c6ff;
+  }
+
+
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top shadow">
+    <div class="container">
+      <a class="navbar-brand" href="#">
+        <i class="bi bi-calendar-check me-2"></i>Smart Attendance
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="#subject-section"><i class="bi bi-book me-1"></i>Subjects</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#month-section"><i class="bi bi-calendar3 me-1"></i>Month</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#upload-section"><i class="bi bi-upload me-1"></i>Upload</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#camera-section"><i class="bi bi-camera me-1"></i>Camera</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#attendance-section"><i class="bi bi-table me-1"></i>Attendance</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#defaulter-section"><i class="bi bi-exclamation-triangle me-1"></i>Defaulters</a>
+          </li>
+        </ul>
+        <div class="d-flex align-items-center">
+          <span class="badge bg-light text-dark me-2" id="navSubjectBadge">No Subject</span>
+          <span class="badge bg-warning text-dark" id="navMonthBadge">No Month</span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Quick Navigation (Right Side) -->
+  <div class="quick-nav d-none d-lg-block">
+    <a href="#subject-section"><i class="bi bi-book"></i></a>
+    <a href="#month-section"><i class="bi bi-calendar3"></i></a>
+    <a href="#upload-section"><i class="bi bi-upload"></i></a>
+    <a href="#camera-section"><i class="bi bi-camera"></i></a>
+    <a href="#attendance-section"><i class="bi bi-table"></i></a>
+    <a href="#defaulter-section"><i class="bi bi-exclamation-triangle"></i></a>
+  </div>
+
+  <div class="container py-4">
+    
+    <!-- Info Box -->
+    <div class="alert info-alert mb-4">
+      <h5><i class="bi bi-info-circle me-2"></i>How to Use</h5>
+      <ol class="mb-0">
+        <li><strong>Add Subject</strong> - Create subjects like Math, Science, etc.</li>
+        <li><strong>Select Month</strong> - Choose the month and year</li>
+        <li><strong>Upload CSV</strong> - Upload attendance file (ID, Name, Day1, Day2...Day31)</li>
+        <li><strong>Manage Attendance</strong> - View, edit, mark holidays, check defaulters</li>
+      </ol>
+    </div>
+
+    <!-- Subject Section -->
+    <section id="subject-section" class="nav-section">
+      <div class="section-card">
+        <h4 class="section-title"><i class="bi bi-book me-2"></i>Subject Management</h4>
+        
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Add New Subject</label>
+            <div class="input-group">
+              <input type="text" id="newSubjectInput" class="form-control" placeholder="Enter subject name">
+              <button id="addSubjectBtn" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-1"></i>Add
+              </button>
+            </div>
+          </div>
+          
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Select Subject</label>
+            <select id="subjectSelect" class="form-select">
+              <option value="">-- Choose Subject --</option>
+            </select>
+          </div>
+          
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Actions</label>
+            <div>
+              <button id="deleteSubjectBtn" class="btn btn-outline-danger">
+                <i class="bi bi-trash me-1"></i>Delete Selected
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="mt-3">
+          <label class="form-label fw-bold">Available Subjects:</label>
+          <div id="subjectTags">
+            <span class="text-muted">No subjects added yet. Add your first subject above.</span>
+          </div>
+        </div>
+        
+        <div class="alert alert-info mt-3 mb-0" id="subjectStatus">
+          <i class="bi bi-info-circle me-2"></i>
+          <strong>Current Subject:</strong> <span id="currentSubjectDisplay">None selected</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Month Section -->
+    <section id="month-section" class="nav-section">
+      <div class="section-card">
+        <h4 class="section-title"><i class="bi bi-calendar3 me-2"></i>Month & Calendar</h4>
+        
+        <div class="row g-3 align-items-end">
+          <div class="col-md-3">
+            <label class="form-label fw-bold">Month</label>
+            <select id="monthSelect" class="form-select">
+              <option value="0">January</option>
+              <option value="1">February</option>
+              <option value="2">March</option>
+              <option value="3">April</option>
+              <option value="4">May</option>
+              <option value="5">June</option>
+              <option value="6">July</option>
+              <option value="7">August</option>
+              <option value="8">September</option>
+              <option value="9">October</option>
+              <option value="10">November</option>
+              <option value="11">December</option>
+            </select>
+          </div>
+          
+          <div class="col-md-2">
+            <label class="form-label fw-bold">Year</label>
+            <select id="yearSelect" class="form-select"></select>
+          </div>
+          
+          <div class="col-md-3">
+            <button id="applyMonthBtn" class="btn btn-success btn-action w-100">
+              <i class="bi bi-check-lg me-1"></i>Apply Month
+            </button>
+          </div>
+          
+          <div class="col-md-4">
+            <div class="alert alert-success mb-0 py-2">
+              <strong>Selected:</strong> <span id="currentMonthDisplay">None</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Calendar Grid -->
+        <div id="calendarContainer" class="mt-4" style="display: none;">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0"><i class="bi bi-calendar-week me-2"></i>Select Day</h5>
+            <div>
+              <button id="toggleHolidayBtn" class="btn btn-outline-danger btn-sm">
+                <i class="bi bi-sun me-1"></i>Toggle Holiday
+              </button>
+              <button id="clearHolidaysBtn" class="btn btn-outline-secondary btn-sm ms-2">
+                <i class="bi bi-x-circle me-1"></i>Clear All Holidays
+              </button>
+            </div>
+          </div>
+          
+          <div class="day-grid mb-2">
+            <div class="day-header">Sun</div>
+            <div class="day-header">Mon</div>
+            <div class="day-header">Tue</div>
+            <div class="day-header">Wed</div>
+            <div class="day-header">Thu</div>
+            <div class="day-header">Fri</div>
+            <div class="day-header">Sat</div>
+          </div>
+          <div id="dayGrid" class="day-grid"></div>
+          
+          <div class="row mt-3">
+            <div class="col-md-6">
+              <div class="alert alert-warning mb-0">
+                <strong><i class="bi bi-sun me-1"></i>Holidays:</strong> 
+                <span id="holidayList">None</span>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="alert alert-info mb-0">
+                <strong><i class="bi bi-calendar-check me-1"></i>Current Day:</strong> 
+                <span id="currentDayDisplay">None</span>
+                <span id="holidayIndicator" class="badge bg-danger ms-2" style="display: none;">HOLIDAY</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Statistics Section -->
+    <section id="stats-section" class="nav-section">
+      <div class="row g-3 mb-4">
+        <div class="col-md-3">
+          <div class="stats-card">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="mb-1">Total Students</h6>
+                <h3 class="mb-0" id="statsTotalStudents">0</h3>
+              </div>
+              <i class="bi bi-people fs-1 opacity-50"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stats-card success">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="mb-1">Present Today</h6>
+                <h3 class="mb-0" id="statsPresentToday">0</h3>
+              </div>
+              <i class="bi bi-check-circle fs-1 opacity-50"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stats-card danger">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="mb-1">Absent Today</h6>
+                <h3 class="mb-0" id="statsAbsentToday">0</h3>
+              </div>
+              <i class="bi bi-x-circle fs-1 opacity-50"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stats-card warning">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="mb-1">Working Days</h6>
+                <h3 class="mb-0" id="statsWorkingDays">0</h3>
+              </div>
+              <i class="bi bi-calendar-date fs-1 opacity-50"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Upload Section -->
+    <section id="upload-section" class="nav-section">
+      <div class="section-card">
+        <h4 class="section-title"><i class="bi bi-upload me-2"></i>Upload Attendance</h4>
+        
+        <div class="row g-3">
+          <div class="col-md-8">
+            <div class="file-drop" id="fileDrop">
+              <i class="bi bi-cloud-upload fs-1 text-primary"></i>
+              <h5 class="mt-2">Drop CSV file here</h5>
+              <p class="text-muted mb-2">or click to browse</p>
+              <input type="file" id="fileInput" accept=".csv" style="display: none;">
+              <button class="btn btn-primary" id="browseBtn">
+                <i class="bi bi-folder2-open me-1"></i>Browse Files
+              </button>
+            </div>
+            <div id="fileInfo" class="alert alert-info mt-2" style="display: none;"></div>
+          </div>
+          
+          <div class="col-md-4">
+            <div class="card h-100">
+              <div class="card-header bg-light">
+                <strong><i class="bi bi-file-earmark-text me-1"></i>CSV Format</strong>
+              </div>
+              <div class="card-body">
+                <small>
+                  <strong>Columns:</strong> ID, Name, Day1, Day2...Day31<br><br>
+                  <strong>Example:</strong><br>
+                  <code>1, YASH, Present, Absent, Present...</code><br>
+                  <code>2, SHAM, Absent, Present, Present...</code>
+                </small>
+              </div>
+              <div class="card-footer">
+                <button id="downloadTemplateBtn" class="btn btn-outline-info btn-sm w-100">
+                  <i class="bi bi-download me-1"></i>Download Template
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+       <div class="mt-3">
+          <button id="downloadReportBtn" class="btn btn-success btn-action me-2">
+            <i class="bi bi-file-earmark-arrow-down me-1"></i>Download Report
+          </button>
+          <button id="clearAllBtn" class="btn btn-outline-danger btn-action">
+            <i class="bi bi-trash me-1"></i>Clear All Data
+          </button>
+          <button id="debugSaveBtn" class="btn btn-warning btn-action ms-2">
+            <i class="bi bi-bug me-1"></i>DEBUG: Check Saved Data
+          </button>
+        </div>
+      </div>
+    </section>
+    <section id="camera-section" class="nav-section">
+ 	 <button class="go-btn" onclick="window.location.href='face-recognition.html'">
+    Attendance Section
+	 </button>
+<br>
+<br>
+    <!-- Attendance Section -->
+    <section id="attendance-section" class="nav-section">
+      <div class="section-card">
+        <h4 class="section-title"><i class="bi bi-table me-2"></i>Attendance Table</h4>
+        
+        <!-- Day Navigation -->
+        <div class="row g-3 mb-3">
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Select Day</label>
+            <select id="dateSelect" class="form-select" disabled>
+              <option value="">-- Select month first --</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Navigation</label>
+            <div class="btn-group w-100">
+              <button id="prevDayBtn" class="btn btn-outline-primary" disabled>
+                <i class="bi bi-chevron-left"></i> Previous
+              </button>
+              <button id="nextDayBtn" class="btn btn-outline-primary" disabled>
+                Next <i class="bi bi-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Quick Actions</label>
+            <div class="btn-group w-100">
+              <button id="markAllPresentBtn" class="btn btn-outline-success">All Present</button>
+              <button id="markAllAbsentBtn" class="btn btn-outline-danger">All Absent</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Search and Filter -->
+        <div class="row g-3 mb-3">
+          <div class="col-md-4">
+            <div class="input-group">
+              <input type="text" id="searchInput" class="form-control" placeholder="Search by ID or Name">
+              <button id="searchBtn" class="btn btn-outline-primary">
+                <i class="bi bi-search"></i>
+              </button>
+              <button id="resetSearchBtn" class="btn btn-outline-secondary">
+                <i class="bi bi-x"></i>
+              </button>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <select id="sortSelect" class="form-select">
+              <option value="">Sort by...</option>
+              <option value="id-asc">ID (Low to High)</option>
+              <option value="id-desc">ID (High to Low)</option>
+              <option value="name-asc">Name (A to Z)</option>
+              <option value="name-desc">Name (Z to A)</option>
+              <option value="attendance-asc">Attendance % (Low to High)</option>
+              <option value="attendance-desc">Attendance % (High to Low)</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <select id="filterSelect" class="form-select">
+              <option value="all">Show All</option>
+              <option value="present">Present Only</option>
+              <option value="absent">Absent Only</option>
+              <option value="defaulter">Defaulters Only</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <button id="refreshTableBtn" class="btn btn-outline-primary w-100">
+              <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+            </button>
+          </div>
+        </div>
+        
+        <!-- Table -->
+        <div class="table-responsive table-container border rounded">
+          <table id="attendanceTable" class="table table-hover mb-0">
+            <thead class="table-light sticky-top">
+              <tr>
+                <th width="10%">ID</th>
+                <th width="25%">Name</th>
+                <th width="15%">Today</th>
+                <th width="25%">Monthly Stats</th>
+                <th width="25%">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="attendanceTableBody">
+              <tr>
+                <td colspan="5" class="text-center text-muted py-5">
+                  <i class="bi bi-inbox fs-1"></i>
+                  <p class="mt-2">No data loaded. Please select a subject, month, and upload a CSV file.</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Summary -->
+        <div class="d-flex justify-content-between align-items-center mt-3 p-3 bg-light rounded">
+          <div>
+            <strong>Total:</strong> <span id="summaryTotal" class="badge bg-primary">0</span>
+            <strong class="ms-3">Present:</strong> <span id="summaryPresent" class="badge bg-success">0</span>
+            <strong class="ms-3">Absent:</strong> <span id="summaryAbsent" class="badge bg-danger">0</span>
+          </div>
+          <div>
+            <strong>Attendance Rate:</strong> <span id="summaryRate" class="badge bg-info">0%</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Defaulter Section -->
+    <section id="defaulter-section" class="nav-section">
+      <div class="section-card">
+        <h4 class="section-title"><i class="bi bi-exclamation-triangle me-2"></i>Defaulter Management</h4>
+        
+        <div class="row g-3 align-items-end">
+          <div class="col-md-3">
+            <label class="form-label fw-bold">Minimum Attendance Threshold</label>
+            <div class="input-group">
+              <input type="number" id="thresholdInput" class="form-control" value="75" min="0" max="100">
+              <span class="input-group-text">%</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <button id="showDefaultersBtn" class="btn btn-danger btn-action w-100">
+              <i class="bi bi-list-ul me-1"></i>Show Defaulters
+            </button>
+          </div>
+          <div class="col-md-3">
+            <button id="exportDefaultersBtn" class="btn btn-outline-danger btn-action w-100">
+              <i class="bi bi-download me-1"></i>Export Defaulters
+            </button>
+          </div>
+          <div class="col-md-3">
+            <div class="alert alert-danger mb-0 py-2 text-center">
+              <strong>Defaulters:</strong> <span id="defaulterCount">0</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Defaulter Table -->
+        <div id="defaulterTableContainer" class="mt-4" style="display: none;">
+          <h5><i class="bi bi-people me-2"></i>Defaulter List</h5>
+          <div class="table-responsive">
+            <table class="table table-striped table-hover">
+              <thead class="table-danger">
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Present Days</th>
+                  <th>Absent Days</th>
+                  <th>Working Days</th>
+                  <th>Attendance %</th>
+                </tr>
+              </thead>
+              <tbody id="defaulterTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Defaulter Modal -->
+  <div class="modal fade" id="defaulterModal" tabindex="-1" aria-labelledby="defaulterModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header modal-header-custom">
+          <h5 class="modal-title" id="defaulterModalLabel">
+            <i class="bi bi-exclamation-triangle me-2"></i>Defaulters Report
+          </h5>
+          <button type="button" class="btn-close btn-close-white" id="modalCloseBtn" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row mb-3">
+            <div class="col-4">
+              <strong>Subject:</strong> <span id="modalSubject">-</span>
+            </div>
+            <div class="col-4">
+              <strong>Month:</strong> <span id="modalMonth">-</span>
+            </div>
+            <div class="col-4">
+              <strong>Threshold:</strong> <span id="modalThreshold">75%</span>
+            </div>
+          </div>
+          
+          <div id="modalDefaulterContent">
+            <table class="table table-striped">
+              <thead class="table-danger">
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Present</th>
+                  <th>Absent</th>
+                  <th>Working Days</th>
+                  <th>Attendance %</th>
+                </tr>
+              </thead>
+              <tbody id="modalDefaulterTableBody"></tbody>
+            </table>
+          </div>
+          
+          <div id="noDefaultersAlert" class="alert alert-success" style="display: none;">
+            <i class="bi bi-emoji-smile me-2"></i>
+            Great! No defaulters found. All students have attendance above the threshold.
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="modalCloseBtnFooter">Close</button>
+          <button type="button" class="btn btn-danger" id="modalExportBtn">
+            <i class="bi bi-download me-1"></i>Export to CSV
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+
+
+    // ==================== AUTHENTICATION CHECK ====================
+    async function checkAuthAndInit() {
+    try {
+    // Check if logged in
+    const user = await getCurrentUser();
+    
+    if (!user) {
+      // Not logged in - redirect to login
+      window.location.href = 'index.html';
+      return;
+    }
+    
+    // Get role
+    const role = await getUserRole();
+    
+    // Check access (admin or teacher allowed)
+    if (role !== 'admin' && role !== 'teacher') {
+      alert('Access denied: Admin or Teacher only');
+      await logout();
+      window.location.href = 'index.html';
+      return;
+    }
+    
+    // Show user info (if you add user badge later)
+    console.log(`Logged in as: ${user.attributes.email} (${role})`);
+    
+    // Continue with normal initialization
+    initialize(); // Your existing init function
+    
+  } catch (error) {
+    console.error('Auth check failed:', error);
+    window.location.href = 'index.html';
+  }
+}
+
+// Logout function (if you add logout button)
+async function handleLogout() {
+  if (confirm('Are you sure you want to logout?')) {
+    await logout();
+    window.location.href = 'index.html';
+  }
+}
+
+// Call on page load
+window.addEventListener('DOMContentLoaded', checkAuthAndInit);
+
+// ==================== YOUR EXISTING CODE BELOW ====================
+async function initialize() {
+  // Your existing initialization code...
+  await openDatabase();
+  // ... rest of code
+}
+
+
+
+    // ==================== INDEXEDDB SETUP ====================
+    let db = null;
+    let dbReady = false;
+
+    function openDatabase() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open("SmartAttendanceDB", 1);
+
+        request.onupgradeneeded = (event) => {
+          db = event.target.result;
+          if (!db.objectStoreNames.contains("appData")) {
+            db.createObjectStore("appData", { keyPath: "key" });
+          }
+        };
+
+        request.onsuccess = (event) => {
+          db = event.target.result;
+          dbReady = true;
+          console.log("Database opened successfully");
+          resolve(db);
+        };
+
+        request.onerror = (event) => {
+          console.error("Database error:", event.target.error);
+          reject(event.target.error);
+        };
+      });
+    }
+
+    function saveToDatabase(key, data) {
+      return new Promise((resolve, reject) => {
+        if (!dbReady) {
+          console.warn("Database not ready");
+          resolve();
+          return;
+        }
+
+        try {
+          const transaction = db.transaction(["appData"], "readwrite");
+          const store = transaction.objectStore("appData");
+          store.put({ key: key, value: data });
+
+          transaction.oncomplete = () => resolve();
+          transaction.onerror = () => reject(transaction.error);
+        } catch (error) {
+          console.error("Save error:", error);
+          reject(error);
+        }
+      });
+    }
+
+    function loadFromDatabase(key) {
+      return new Promise((resolve, reject) => {
+        if (!dbReady) {
+          resolve(null);
+          return;
+        }
+
+        try {
+          const transaction = db.transaction(["appData"], "readonly");
+          const store = transaction.objectStore("appData");
+          const request = store.get(key);
+
+          request.onsuccess = () => {
+            resolve(request.result ? request.result.value : null);
+          };
+          request.onerror = () => reject(request.error);
+        } catch (error) {
+          console.error("Load error:", error);
+          reject(error);
+        }
+      });
+    }
+
+    async function saveAllData() {
+      try {
+        await saveToDatabase("subjects", appState.subjects);
+        await saveToDatabase("selectedSubject", appState.selectedSubject);
+        await saveToDatabase("selectedMonth", appState.selectedMonth);
+        await saveToDatabase("selectedYear", appState.selectedYear);
+        await saveToDatabase("currentDay", appState.currentDay);
+        await saveToDatabase("attendanceData", appState.attendanceData);
+        await saveToDatabase("holidays", appState.holidays);
+        await saveToDatabase("threshold", appState.threshold);
+        console.log("All data saved");
+      } catch (error) {
+        console.error("Failed to save data:", error);
+      }
+    }
+
+    async function loadAllData() {
+      try {
+        const subjects = await loadFromDatabase("subjects");
+        const selectedSubject = await loadFromDatabase("selectedSubject");
+        const selectedMonth = await loadFromDatabase("selectedMonth");
+        const selectedYear = await loadFromDatabase("selectedYear");
+        const currentDay = await loadFromDatabase("currentDay");
+        const attendanceData = await loadFromDatabase("attendanceData");
+        const holidays = await loadFromDatabase("holidays");
+        const threshold = await loadFromDatabase("threshold");
+
+        if (subjects) appState.subjects = subjects;
+        if (selectedSubject) appState.selectedSubject = selectedSubject;
+        if (selectedMonth !== null) appState.selectedMonth = selectedMonth;
+        if (selectedYear !== null) appState.selectedYear = selectedYear;
+        if (currentDay !== null) appState.currentDay = currentDay;
+        if (attendanceData) appState.attendanceData = attendanceData;
+        if (holidays) appState.holidays = holidays;
+        if (threshold !== null) appState.threshold = threshold;
+
+        console.log("All data loaded");
+        return true;
+      } catch (error) {
+        console.error("Failed to load data:", error);
+        return false;
+      }
+    }
+
+    // ==================== APPLICATION STATE ====================
+    const appState = {
+      subjects: [],
+      selectedSubject: null,
+      selectedMonth: null,
+      selectedYear: null,
+      currentDay: 1,
+      daysInMonth: 31,
+      attendanceData: {},  // { "2025-01": { "Math": { "1": { _name: "YASH", 1: "Present", 2: "Absent" } } } }
+      holidays: {},        // { "2025-01": [1, 15, 26] }
+      threshold: 75,
+      studentList: []      // For current display
+    };
+
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                        'July', 'August', 'September', 'October', 'November', 'December'];
+
+    // ==================== DOM ELEMENTS ====================
+    const elements = {
+      // Subject elements
+      newSubjectInput: document.getElementById('newSubjectInput'),
+      addSubjectBtn: document.getElementById('addSubjectBtn'),
+      subjectSelect: document.getElementById('subjectSelect'),
+      deleteSubjectBtn: document.getElementById('deleteSubjectBtn'),
+      subjectTags: document.getElementById('subjectTags'),
+      currentSubjectDisplay: document.getElementById('currentSubjectDisplay'),
+      
+      // Month elements
+      monthSelect: document.getElementById('monthSelect'),
+      yearSelect: document.getElementById('yearSelect'),
+      applyMonthBtn: document.getElementById('applyMonthBtn'),
+      currentMonthDisplay: document.getElementById('currentMonthDisplay'),
+      calendarContainer: document.getElementById('calendarContainer'),
+      dayGrid: document.getElementById('dayGrid'),
+      
+      // Holiday elements
+      toggleHolidayBtn: document.getElementById('toggleHolidayBtn'),
+      clearHolidaysBtn: document.getElementById('clearHolidaysBtn'),
+      holidayList: document.getElementById('holidayList'),
+      holidayIndicator: document.getElementById('holidayIndicator'),
+      currentDayDisplay: document.getElementById('currentDayDisplay'),
+      
+      // Upload elements
+      fileDrop: document.getElementById('fileDrop'),
+      fileInput: document.getElementById('fileInput'),
+      browseBtn: document.getElementById('browseBtn'),
+      fileInfo: document.getElementById('fileInfo'),
+      downloadTemplateBtn: document.getElementById('downloadTemplateBtn'),
+      downloadReportBtn: document.getElementById('downloadReportBtn'),
+      clearAllBtn: document.getElementById('clearAllBtn'),
+      
+      // Attendance table elements
+      dateSelect: document.getElementById('dateSelect'),
+      prevDayBtn: document.getElementById('prevDayBtn'),
+      nextDayBtn: document.getElementById('nextDayBtn'),
+      markAllPresentBtn: document.getElementById('markAllPresentBtn'),
+      markAllAbsentBtn: document.getElementById('markAllAbsentBtn'),
+      searchInput: document.getElementById('searchInput'),
+      searchBtn: document.getElementById('searchBtn'),
+      resetSearchBtn: document.getElementById('resetSearchBtn'),
+      sortSelect: document.getElementById('sortSelect'),
+      filterSelect: document.getElementById('filterSelect'),
+      refreshTableBtn: document.getElementById('refreshTableBtn'),
+      attendanceTableBody: document.getElementById('attendanceTableBody'),
+      
+      // Summary elements
+      summaryTotal: document.getElementById('summaryTotal'),
+      summaryPresent: document.getElementById('summaryPresent'),
+      summaryAbsent: document.getElementById('summaryAbsent'),
+      summaryRate: document.getElementById('summaryRate'),
+      
+      // Stats elements
+      statsTotalStudents: document.getElementById('statsTotalStudents'),
+      statsPresentToday: document.getElementById('statsPresentToday'),
+      statsAbsentToday: document.getElementById('statsAbsentToday'),
+      statsWorkingDays: document.getElementById('statsWorkingDays'),
+      
+      // Defaulter elements
+      thresholdInput: document.getElementById('thresholdInput'),
+      showDefaultersBtn: document.getElementById('showDefaultersBtn'),
+      exportDefaultersBtn: document.getElementById('exportDefaultersBtn'),
+      defaulterCount: document.getElementById('defaulterCount'),
+      defaulterTableContainer: document.getElementById('defaulterTableContainer'),
+      defaulterTableBody: document.getElementById('defaulterTableBody'),
+      
+      // Modal elements
+      modalCloseBtn: document.getElementById('modalCloseBtn'),
+      modalCloseBtnFooter: document.getElementById('modalCloseBtnFooter'),
+      modalSubject: document.getElementById('modalSubject'),
+      modalMonth: document.getElementById('modalMonth'),
+      modalThreshold: document.getElementById('modalThreshold'),
+      modalDefaulterTableBody: document.getElementById('modalDefaulterTableBody'),
+      noDefaultersAlert: document.getElementById('noDefaultersAlert'),
+      modalExportBtn: document.getElementById('modalExportBtn'),
+      
+      // Navbar badges
+      navSubjectBadge: document.getElementById('navSubjectBadge'),
+      navMonthBadge: document.getElementById('navMonthBadge')
+    };
+
+    // ==================== UTILITY FUNCTIONS ====================
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function getMonthKey() {
+    if (appState.selectedMonth === null || appState.selectedYear === null) return null;
+    return `${appState.selectedYear}-${String(appState.selectedMonth).padStart(2, '0')}`;
+    }
+
+    function getDaysInMonth(month, year) {
+      return new Date(year, month + 1, 0).getDate();
+    }
+
+    function getFirstDayOfMonth(month, year) {
+      return new Date(year, month, 1).getDay();
+    }
+
+    function formatDate(day) {
+      if (appState.selectedMonth === null || appState.selectedYear === null) return 'None';
+      return `${day} ${monthNames[appState.selectedMonth]} ${appState.selectedYear}`;
+    }
+
+    function normalizeStatus(status) {
+      const s = String(status || '').trim().toLowerCase();
+      if (s.startsWith('p') || s === '1' || s === 'yes' || s === 'y' || s === 'true') {
+        return 'Present';
+      }
+      return 'Absent';
+    }
+
+    function showAlert(message, type = 'info') {
+      alert(message);
+    }
+
+    // ==================== SUBJECT FUNCTIONS ====================
+    function populateSubjectDropdown() {
+      elements.subjectSelect.innerHTML = '<option value="">-- Choose Subject --</option>';
+      
+      appState.subjects.forEach(subject => {
+        const option = document.createElement('option');
+        option.value = subject;
+        option.textContent = subject;
+        if (subject === appState.selectedSubject) {
+          option.selected = true;
+        }
+        elements.subjectSelect.appendChild(option);
+      });
+    }
+
+    function renderSubjectTags() {
+      if (appState.subjects.length === 0) {
+        elements.subjectTags.innerHTML = '<span class="text-muted">No subjects added yet. Add your first subject above.</span>';
+        return;
+      }
+
+      elements.subjectTags.innerHTML = '';
+      appState.subjects.forEach(subject => {
+        const tag = document.createElement('span');
+        tag.className = `subject-tag ${subject === appState.selectedSubject ? 'active' : ''}`;
+        tag.innerHTML = `
+          ${escapeHtml(subject)}
+          <span class="delete-btn" data-subject="${escapeHtml(subject)}">&times;</span>
+        `;
+        
+        tag.addEventListener('click', (e) => {
+          if (!e.target.classList.contains('delete-btn')) {
+            selectSubject(subject);
+          }
+        });
+        
+        elements.subjectTags.appendChild(tag);
+      });
+
+      // Add delete event listeners
+      document.querySelectorAll('.subject-tag .delete-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const subject = e.target.getAttribute('data-subject');
+          deleteSubject(subject);
+        });
+      });
+    }
+
+    function addSubject(name) {
+      name = String(name).trim();
+      
+      if (!name) {
+        showAlert('Please enter a subject name!', 'warning');
+        return false;
+      }
+      
+      if (appState.subjects.includes(name)) {
+        showAlert('Subject already exists!', 'warning');
+        return false;
+      }
+
+      appState.subjects.push(name);
+      populateSubjectDropdown();
+      renderSubjectTags();
+      saveAllData();
+      
+      showAlert(`Subject "${name}" added successfully!`, 'success');
+      return true;
+    }
+
+    function deleteSubject(name) {
+      if (!confirm(`Delete subject "${name}"?\n\nThis will also delete all attendance data for this subject!`)) {
+        return;
+      }
+
+      appState.subjects = appState.subjects.filter(s => s !== name);
+      
+      // Remove attendance data for this subject
+      for (const monthKey in appState.attendanceData) {
+        if (appState.attendanceData[monthKey] && appState.attendanceData[monthKey][name]) {
+          delete appState.attendanceData[monthKey][name];
+        }
+      }
+
+      if (appState.selectedSubject === name) {
+        appState.selectedSubject = null;
+        updateSubjectDisplay();
+      }
+
+      populateSubjectDropdown();
+      renderSubjectTags();
+      refreshAttendanceTable();
+      saveAllData();
+      
+      showAlert(`Subject "${name}" deleted!`, 'info');
+    }
+
+    function selectSubject(name) {
+      appState.selectedSubject = name;
+      elements.subjectSelect.value = name;
+      updateSubjectDisplay();
+      renderSubjectTags();
+      refreshAttendanceTable();
+      saveAllData();
+    }
+
+    function updateSubjectDisplay() {
+      const subject = appState.selectedSubject || 'None selected';
+      elements.currentSubjectDisplay.textContent = subject;
+      elements.navSubjectBadge.textContent = appState.selectedSubject || 'No Subject';
+    }
+
+    // ==================== MONTH FUNCTIONS ====================
+    function populateYearDropdown() {
+      const currentYear = new Date().getFullYear();
+      elements.yearSelect.innerHTML = '';
+      
+      for (let y = currentYear - 5; y <= currentYear + 5; y++) {
+        const option = document.createElement('option');
+        option.value = y;
+        option.textContent = y;
+        if (y === currentYear) option.selected = true;
+        elements.yearSelect.appendChild(option);
+      }
+    }
+
+    function applyMonth() {
+      appState.selectedMonth = parseInt(elements.monthSelect.value);
+      appState.selectedYear = parseInt(elements.yearSelect.value);
+      appState.daysInMonth = getDaysInMonth(appState.selectedMonth, appState.selectedYear);
+      appState.currentDay = 1;
+
+      updateMonthDisplay();
+      populateDayDropdown();
+      renderCalendarGrid();
+      updateHolidayDisplay();
+      elements.calendarContainer.style.display = 'block';
+      
+      refreshAttendanceTable();
+      saveAllData();
+
+      showAlert(`Month set to ${monthNames[appState.selectedMonth]} ${appState.selectedYear}`, 'success');
+    }
+
+    function updateMonthDisplay() {
+      const display = appState.selectedMonth !== null 
+        ? `${monthNames[appState.selectedMonth]} ${appState.selectedYear} (${appState.daysInMonth} days)`
+        : 'None';
+      
+      elements.currentMonthDisplay.textContent = display;
+      elements.navMonthBadge.textContent = appState.selectedMonth !== null 
+        ? `${monthNames[appState.selectedMonth].substring(0, 3)} ${appState.selectedYear}`
+        : 'No Month';
+    }
+
+    function populateDayDropdown() {
+      elements.dateSelect.innerHTML = '';
+      
+      for (let day = 1; day <= appState.daysInMonth; day++) {
+        const option = document.createElement('option');
+        option.value = day;
+        option.textContent = formatDate(day);
+        if (isHoliday(day)) {
+          option.textContent += ' (Holiday)';
+        }
+        elements.dateSelect.appendChild(option);
+      }
+
+      elements.dateSelect.value = appState.currentDay;
+      elements.dateSelect.disabled = false;
+      updateDayNavigation();
+    }
+
+    function renderCalendarGrid() {
+      elements.dayGrid.innerHTML = '';
+      
+      const firstDay = getFirstDayOfMonth(appState.selectedMonth, appState.selectedYear);
+      const monthKey = getMonthKey();
+      const subjectData = getSubjectData();
+
+      // Empty cells before first day
+      for (let i = 0; i < firstDay; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.style.visibility = 'hidden';
+        elements.dayGrid.appendChild(emptyCell);
+      }
+
+      // Day buttons
+      for (let day = 1; day <= appState.daysInMonth; day++) {
+        const dayBtn = document.createElement('div');
+        dayBtn.className = 'day-btn';
+        dayBtn.textContent = day;
+        dayBtn.setAttribute('data-day', day);
+
+        // Check if has data
+        let hasData = false;
+        if (subjectData) {
+          for (const studentId in subjectData) {
+            if (!studentId.startsWith('_') && subjectData[studentId][day]) {
+              hasData = true;
+              break;
+            }
+          }
+        }
+
+        if (isHoliday(day)) {
+          dayBtn.classList.add('holiday');
+        } else if (hasData) {
+          dayBtn.classList.add('has-data');
+        }
+
+        if (day === appState.currentDay) {
+          dayBtn.classList.add('active');
+        }
+
+        dayBtn.addEventListener('click', () => selectDay(day));
+        elements.dayGrid.appendChild(dayBtn);
+      }
+
+      updateCurrentDayDisplay();
+    }
+
+    function selectDay(day) {
+      appState.currentDay = day;
+      elements.dateSelect.value = day;
+      
+      // Update calendar UI
+      document.querySelectorAll('.day-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (parseInt(btn.getAttribute('data-day')) === day) {
+          btn.classList.add('active');
+        }
+      });
+
+      updateCurrentDayDisplay();
+      updateDayNavigation();
+      refreshAttendanceTable();
+      saveAllData();
+    }
+
+    function updateCurrentDayDisplay() {
+      elements.currentDayDisplay.textContent = formatDate(appState.currentDay);
+      
+      if (isHoliday(appState.currentDay)) {
+        elements.holidayIndicator.style.display = 'inline';
+      } else {
+        elements.holidayIndicator.style.display = 'none';
+      }
+    }
+
+    function updateDayNavigation() {
+      elements.prevDayBtn.disabled = appState.currentDay <= 1;
+      elements.nextDayBtn.disabled = appState.currentDay >= appState.daysInMonth;
+    }
+
+    // ==================== HOLIDAY FUNCTIONS ====================
+    function getHolidaysForMonth() {
+      const monthKey = getMonthKey();
+      if (!monthKey) return [];
+      return appState.holidays[monthKey] || [];
+    }
+
+    function isHoliday(day) {
+      return getHolidaysForMonth().includes(day);
+    }
+
+    function toggleHoliday() {
+      if (appState.selectedMonth === null) {
+        showAlert('Please select a month first!', 'warning');
+        return;
+      }
+
+      const monthKey = getMonthKey();
+      if (!appState.holidays[monthKey]) {
+        appState.holidays[monthKey] = [];
+      }
+
+      const day = appState.currentDay;
+      const index = appState.holidays[monthKey].indexOf(day);
+      
+      if (index > -1) {
+        appState.holidays[monthKey].splice(index, 1);
+        showAlert(`Day ${day} unmarked as holiday`, 'info');
+      } else {
+        appState.holidays[monthKey].push(day);
+        appState.holidays[monthKey].sort((a, b) => a - b);
+        showAlert(`Day ${day} marked as holiday`, 'success');
+      }
+
+      updateHolidayDisplay();
+      renderCalendarGrid();
+      populateDayDropdown();
+      refreshAttendanceTable();
+      updateStats();
+      saveAllData();
+    }
+
+    function clearAllHolidays() {
+      if (!confirm('Clear all holidays for this month?')) return;
+
+      const monthKey = getMonthKey();
+      if (monthKey) {
+        appState.holidays[monthKey] = [];
+      }
+
+      updateHolidayDisplay();
+      renderCalendarGrid();
+      populateDayDropdown();
+      refreshAttendanceTable();
+      updateStats();
+      saveAllData();
+      
+      showAlert('All holidays cleared', 'info');
+    }
+
+    function updateHolidayDisplay() {
+      const holidays = getHolidaysForMonth();
+      if (holidays.length === 0) {
+        elements.holidayList.textContent = 'None';
+      } else {
+        elements.holidayList.textContent = holidays.map(d => `Day ${d}`).join(', ');
+      }
+    }
+
+    function getWorkingDays() {
+      const holidays = getHolidaysForMonth();
+      return appState.daysInMonth - holidays.length;
+    }
+
+    // ==================== FILE HANDLING ====================
+    function parseCSV(text) {
+      // Remove BOM
+      text = text.replace(/^\ufeff/, '');
+      
+      const lines = text.split(/\r?\n/).filter(line => line.trim());
+      const rows = [];
+
+      for (const line of lines) {
+        const cols = [];
+        let current = '';
+        let inQuotes = false;
+
+        for (let i = 0; i < line.length; i++) {
+          const char = line[i];
+          
+          if (char === '"') {
+            inQuotes = !inQuotes;
+          } else if (char === ',' && !inQuotes) {
+            cols.push(current.trim());
+            current = '';
+          } else {
+            current += char;
+          }
+        }
+        cols.push(current.trim());
+        rows.push(cols);
+      }
+
+      return rows;
+    }
+
+    function processCSVData(text) {
+      if (!appState.selectedSubject) {
+        throw new Error('Please select a subject first!');
+      }
+      
+      if (appState.selectedMonth === null) {
+        throw new Error('Please select a month first!');
+      }
+
+      const rows = parseCSV(text);
+      
+      if (rows.length < 2) {
+        throw new Error('CSV must have at least a header row and one data row');
+      }
+
+      const monthKey = getMonthKey();
+      const subject = appState.selectedSubject;
+
+      if (!appState.attendanceData[monthKey]) {
+        appState.attendanceData[monthKey] = {};
+      }
+      if (!appState.attendanceData[monthKey][subject]) {
+        appState.attendanceData[monthKey][subject] = {};
+      }
+
+      let studentCount = 0;
+
+      // Skip header row, process data rows
+      for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        if (row.length < 2) continue;
+
+        const id = String(row[0]).trim();
+        const name = String(row[1]).trim();
+
+        if (!id || !name) continue;
+
+        appState.attendanceData[monthKey][subject][id] = { _name: name };
+
+        // Parse daily attendance (columns 2 onwards)
+        for (let day = 1; day <= appState.daysInMonth; day++) {
+          const colIndex = day + 1; // Column index for this day
+          const status = row[colIndex] !== undefined ? normalizeStatus(row[colIndex]) : 'Absent';
+          appState.attendanceData[monthKey][subject][id][day] = status;
+        }
+
+        studentCount++;
+      }
+
+      return studentCount;
+    }
+
+    function handleFileUpload(file) {
+      if (!file) return;
+
+      if (!file.name.endsWith('.csv')) {
+        showAlert('Please upload a CSV file!', 'warning');
+        return;
+      }
+
+      const reader = new FileReader();
+      
+      reader.onload = (event) => {
+        try {
+          const text = event.target.result;
+          const studentCount = processCSVData(text);
+
+          if (studentCount === 0) {
+            showAlert('No valid student data found in CSV', 'warning');
+            return;
+          }
+
+          elements.fileInfo.style.display = 'block';
+          elements.fileInfo.innerHTML = `
+            <i class="bi bi-check-circle text-success me-2"></i>
+            <strong>Upload Successful!</strong><br>
+            File: ${escapeHtml(file.name)}<br>
+            Students: ${studentCount}<br>
+            Subject: ${appState.selectedSubject}<br>
+            Month: ${monthNames[appState.selectedMonth]} ${appState.selectedYear}
+          `;
+
+          renderCalendarGrid();
+          refreshAttendanceTable();
+          updateStats();
+          saveAllData();
+
+          showAlert(`Successfully uploaded ${studentCount} students!`, 'success');
+        } catch (error) {
+          console.error('File processing error:', error);
+          showAlert('Error: ' + error.message, 'danger');
+        }
+      };
+
+      reader.onerror = () => {
+        showAlert('Error reading file!', 'danger');
+      };
+
+      reader.readAsText(file);
+    }
+
+    function downloadTemplate() {
+      if (appState.selectedMonth === null) {
+        showAlert('Please select a month first!', 'warning');
+        return;
+      }
+
+      const headers = ['ID', 'Name'];
+      for (let day = 1; day <= appState.daysInMonth; day++) {
+        headers.push(`Day${day}`);
+      }
+
+      const sampleData = [
+        headers,
+        ['1', 'Student One', ...Array(appState.daysInMonth).fill('Present')],
+        ['2', 'Student Two', ...Array(appState.daysInMonth).fill('Absent')],
+        ['3', 'Student Three', ...Array(appState.daysInMonth).fill('Present')]
+      ];
+
+      const csv = sampleData.map(row => row.map(cell => `"${cell}"`).join(',')).join('\r\n');
+      downloadFile(csv, `attendance_template_${monthNames[appState.selectedMonth]}_${appState.selectedYear}.csv`);
+    }
+
+    function downloadReport() {
+      if (!appState.selectedSubject) {
+        showAlert('Please select a subject first!', 'warning');
+        return;
+      }
+
+      if (appState.selectedMonth === null) {
+        showAlert('Please select a month first!', 'warning');
+        return;
+      }
+
+      const subjectData = getSubjectData();
+      if (!subjectData || Object.keys(subjectData).length === 0) {
+        showAlert('No data to download!', 'warning');
+        return;
+      }
+
+      const holidays = getHolidaysForMonth();
+      const headers = ['ID', 'Name'];
+      
+      for (let day = 1; day <= appState.daysInMonth; day++) {
+        headers.push(`Day ${day}${holidays.includes(day) ? ' (H)' : ''}`);
+      }
+      headers.push('Present', 'Absent', 'Working Days', 'Percentage');
+
+      const rows = [headers];
+
+      for (const studentId in subjectData) {
+        if (studentId.startsWith('_')) continue;
+        
+        const student = subjectData[studentId];
+        const stats = getStudentStats(studentId);
+        const row = [studentId, student._name || studentId];
+
+        for (let day = 1; day <= appState.daysInMonth; day++) {
+          if (holidays.includes(day)) {
+            row.push('Holiday');
+          } else {
+            row.push(student[day] || 'Absent');
+          }
+        }
+
+        row.push(stats.present, stats.absent, stats.workingDays, `${stats.percentage}%`);
+        rows.push(row);
+      }
+
+      const csv = rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+      downloadFile(csv, `attendance_${appState.selectedSubject}_${monthNames[appState.selectedMonth]}_${appState.selectedYear}.csv`);
+    }
+
+    function downloadFile(content, filename) {
+      const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    async function clearAllData() {
+      if (!confirm('⚠️ DELETE ALL DATA?\n\nThis will permanently remove:\n- All subjects\n- All attendance records\n- All holidays\n\nThis action cannot be undone!')) {
+        return;
+      }
+
+      appState.subjects = [];
+      appState.selectedSubject = null;
+      appState.selectedMonth = null;
+      appState.selectedYear = null;
+      appState.currentDay = 1;
+      appState.attendanceData = {};
+      appState.holidays = {};
+      appState.studentList = [];
+
+      // Reset UI
+      populateSubjectDropdown();
+      renderSubjectTags();
+      updateSubjectDisplay();
+      elements.currentMonthDisplay.textContent = 'None';
+      elements.navMonthBadge.textContent = 'No Month';
+      elements.calendarContainer.style.display = 'none';
+      elements.dateSelect.innerHTML = '<option value="">-- Select month first --</option>';
+      elements.dateSelect.disabled = true;
+      elements.fileInfo.style.display = 'none';
+      
+      refreshAttendanceTable();
+      updateStats();
+      
+      await saveAllData();
+      
+      showAlert('All data has been cleared!', 'info');
+    }
+
+    // ==================== ATTENDANCE TABLE FUNCTIONS ====================
+    function getSubjectData() {
+      const monthKey = getMonthKey();
+      if (!monthKey || !appState.selectedSubject) return null;
+      
+      return appState.attendanceData[monthKey]?.[appState.selectedSubject] || null;
+    }
+
+    function getStudentStats(studentId) {
+      const subjectData = getSubjectData();
+      if (!subjectData || !subjectData[studentId]) {
+        return { present: 0, absent: 0, workingDays: 0, percentage: 0 };
+      }
+
+      const student = subjectData[studentId];
+      const holidays = getHolidaysForMonth();
+      let present = 0;
+      let absent = 0;
+
+      for (let day = 1; day <= appState.daysInMonth; day++) {
+        if (holidays.includes(day)) continue;
+        if (student[day] === 'Present') {
+          present++;
+        } else {
+          absent++;
+        }
+      }
+
+      const workingDays = present + absent;
+      const percentage = workingDays > 0 ? Math.round((present / workingDays) * 100) : 0;
+
+      return { present, absent, workingDays, percentage };
+    }
+
+    function loadStudentList() {
+      appState.studentList = [];
+      const subjectData = getSubjectData();
+      
+      if (!subjectData) return;
+
+      for (const studentId in subjectData) {
+        if (studentId.startsWith('_')) continue;
+        
+        const student = subjectData[studentId];
+        const todayStatus = student[appState.currentDay] || 'Absent';
+        
+        appState.studentList.push({
+          id: studentId,
+          name: student._name || studentId,
+          status: todayStatus
+        });
+      }
+    }
+
+    function refreshAttendanceTable() {
+      loadStudentList();
+      
+      let displayList = [...appState.studentList];
+
+      // Apply filter
+      const filter = elements.filterSelect.value;
+      if (filter === 'present') {
+        displayList = displayList.filter(s => s.status === 'Present');
+      } else if (filter === 'absent') {
+        displayList = displayList.filter(s => s.status === 'Absent');
+      } else if (filter === 'defaulter') {
+        const threshold = appState.threshold;
+        displayList = displayList.filter(s => {
+          const stats = getStudentStats(s.id);
+          return stats.percentage < threshold;
+        });
+      }
+
+      // Apply search
+      const searchTerm = elements.searchInput.value.trim().toLowerCase();
+      if (searchTerm) {
+        displayList = displayList.filter(s => 
+          s.id.toLowerCase().includes(searchTerm) || 
+          s.name.toLowerCase().includes(searchTerm)
+        );
+      }
+
+      // Apply sort
+      const sortValue = elements.sortSelect.value;
+      if (sortValue) {
+        const [key, direction] = sortValue.split('-');
+        displayList.sort((a, b) => {
+          let valA, valB;
+          
+          if (key === 'id') {
+            valA = isNaN(a.id) ? a.id : Number(a.id);
+            valB = isNaN(b.id) ? b.id : Number(b.id);
+          } else if (key === 'name') {
+            valA = a.name.toLowerCase();
+            valB = b.name.toLowerCase();
+          } else if (key === 'attendance') {
+            valA = getStudentStats(a.id).percentage;
+            valB = getStudentStats(b.id).percentage;
+          }
+
+          if (valA < valB) return direction === 'asc' ? -1 : 1;
+          if (valA > valB) return direction === 'asc' ? 1 : -1;
+          return 0;
+        });
+      }
+
+      renderAttendanceTable(displayList);
+      updateSummary(displayList);
+      updateStats();
+    }
+
+    function renderAttendanceTable(students) {
+      if (!students || students.length === 0) {
+        elements.attendanceTableBody.innerHTML = `
+          <tr>
+            <td colspan="5" class="text-center text-muted py-5">
+              <i class="bi bi-inbox fs-1"></i>
+              <p class="mt-2">No students found. Upload a CSV file to get started.</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      const isHolidayToday = isHoliday(appState.currentDay);
+      const threshold = appState.threshold;
+
+      elements.attendanceTableBody.innerHTML = '';
+
+      students.forEach(student => {
+        const stats = getStudentStats(student.id);
+        const isDefaulter = stats.percentage < threshold;
+        
+        const row = document.createElement('tr');
+        row.className = student.status === 'Present' ? 'present' : 'absent';
+        
+        row.innerHTML = `
+          <td><strong>${escapeHtml(student.id)}</strong></td>
+          <td>${escapeHtml(student.name)}</td>
+          <td>
+            <span class="badge ${student.status === 'Present' ? 'bg-success' : 'bg-danger'}">
+              ${student.status}
+            </span>
+            ${isHolidayToday ? '<span class="holiday-badge ms-1">Holiday</span>' : ''}
+          </td>
+          <td>
+            ${stats.present}/${stats.workingDays} days
+            <span class="${isDefaulter ? 'defaulter-badge' : 'good-badge'} ms-2">
+              ${stats.percentage}%
+            </span>
+          </td>
+          <td>
+            <button class="btn btn-sm btn-outline-success mark-present-btn" 
+                    data-id="${escapeHtml(student.id)}" 
+                    ${isHolidayToday ? 'disabled' : ''}>
+              <i class="bi bi-check"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-danger mark-absent-btn" 
+                    data-id="${escapeHtml(student.id)}" 
+                    ${isHolidayToday ? 'disabled' : ''}>
+              <i class="bi bi-x"></i>
+            </button>
+          </td>
+        `;
+
+        elements.attendanceTableBody.appendChild(row);
+      });
+
+      // Add event listeners for mark buttons
+      document.querySelectorAll('.mark-present-btn').forEach(btn => {
+        btn.addEventListener('click', () => markAttendance(btn.dataset.id, 'Present'));
+      });
+
+      document.querySelectorAll('.mark-absent-btn').forEach(btn => {
+        btn.addEventListener('click', () => markAttendance(btn.dataset.id, 'Absent'));
+      });
+    }
+
+    function markAttendance(studentId, status) {
+      const monthKey = getMonthKey();
+      if (!monthKey || !appState.selectedSubject) return;
+
+      if (!appState.attendanceData[monthKey]) {
+        appState.attendanceData[monthKey] = {};
+      }
+      if (!appState.attendanceData[monthKey][appState.selectedSubject]) {
+        appState.attendanceData[monthKey][appState.selectedSubject] = {};
+      }
+      if (!appState.attendanceData[monthKey][appState.selectedSubject][studentId]) {
+        return;
+      }
+
+      appState.attendanceData[monthKey][appState.selectedSubject][studentId][appState.currentDay] = status;
+      
+      refreshAttendanceTable();
+      renderCalendarGrid();
+      saveAllData();
+    }
+
+    function markAllAttendance(status) {
+      if (isHoliday(appState.currentDay)) {
+        showAlert('Cannot mark attendance on a holiday!', 'warning');
+        return;
+      }
+
+      const subjectData = getSubjectData();
+      if (!subjectData) return;
+
+      for (const studentId in subjectData) {
+        if (studentId.startsWith('_')) continue;
+        subjectData[studentId][appState.currentDay] = status;
+      }
+
+      refreshAttendanceTable();
+      renderCalendarGrid();
+      saveAllData();
+      
+      showAlert(`All students marked as ${status}!`, 'success');
+    }
+
+    function updateSummary(students) {
+      const total = students.length;
+      const present = students.filter(s => s.status === 'Present').length;
+      const absent = total - present;
+      const rate = total > 0 ? Math.round((present / total) * 100) : 0;
+
+      elements.summaryTotal.textContent = total;
+      elements.summaryPresent.textContent = present;
+      elements.summaryAbsent.textContent = absent;
+      elements.summaryRate.textContent = `${rate}%`;
+    }
+
+    function updateStats() {
+      const subjectData = getSubjectData();
+      let totalStudents = 0;
+      let presentToday = 0;
+      let absentToday = 0;
+
+      if (subjectData) {
+        for (const studentId in subjectData) {
+          if (studentId.startsWith('_')) continue;
+          totalStudents++;
+          
+          if (subjectData[studentId][appState.currentDay] === 'Present') {
+            presentToday++;
+          } else {
+            absentToday++;
+          }
+        }
+      }
+
+      elements.statsTotalStudents.textContent = totalStudents;
+      elements.statsPresentToday.textContent = presentToday;
+      elements.statsAbsentToday.textContent = absentToday;
+      elements.statsWorkingDays.textContent = getWorkingDays();
+    }
+
+    // ==================== DEFAULTER FUNCTIONS ====================
+    function getDefaultersList() {
+      const defaulters = [];
+      const subjectData = getSubjectData();
+      const threshold = appState.threshold;
+
+      if (!subjectData) return defaulters;
+
+      for (const studentId in subjectData) {
+        if (studentId.startsWith('_')) continue;
+
+        const stats = getStudentStats(studentId);
+        if (stats.percentage < threshold) {
+          defaulters.push({
+            id: studentId,
+            name: subjectData[studentId]._name || studentId,
+            ...stats
+          });
+        }
+      }
+
+      defaulters.sort((a, b) => a.percentage - b.percentage);
+      return defaulters;
+    }
+
+    function updateDefaulterCount() {
+      const defaulters = getDefaultersList();
+      elements.defaulterCount.textContent = defaulters.length;
+    }
+
+    function showDefaulterTable() {
+      const defaulters = getDefaultersList();
+      
+      if (defaulters.length === 0) {
+        elements.defaulterTableContainer.style.display = 'none';
+        showAlert('No defaulters found! All students are above the threshold.', 'success');
+        return;
+      }
+
+      elements.defaulterTableBody.innerHTML = '';
+      
+      defaulters.forEach(d => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${escapeHtml(d.id)}</td>
+          <td>${escapeHtml(d.name)}</td>
+          <td>${d.present}</td>
+          <td>${d.absent}</td>
+          <td>${d.workingDays}</td>
+          <td><span class="defaulter-badge">${d.percentage}%</span></td>
+        `;
+        elements.defaulterTableBody.appendChild(row);
+      });
+
+      elements.defaulterTableContainer.style.display = 'block';
+    }
+
+    function showDefaulterModal() {
+      if (!appState.selectedSubject) {
+        showAlert('Please select a subject first!', 'warning');
+        return;
+      }
+
+      if (appState.selectedMonth === null) {
+        showAlert('Please select a month first!', 'warning');
+        return;
+      }
+
+      const defaulters = getDefaultersList();
+      
+      elements.modalSubject.textContent = appState.selectedSubject;
+      elements.modalMonth.textContent = `${monthNames[appState.selectedMonth]} ${appState.selectedYear}`;
+      elements.modalThreshold.textContent = `${appState.threshold}%`;
+
+      if (defaulters.length === 0) {
+        elements.noDefaultersAlert.style.display = 'block';
+        document.getElementById('modalDefaulterContent').style.display = 'none';
+      } else {
+        elements.noDefaultersAlert.style.display = 'none';
+        document.getElementById('modalDefaulterContent').style.display = 'block';
+        
+        elements.modalDefaulterTableBody.innerHTML = '';
+        defaulters.forEach(d => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${escapeHtml(d.id)}</td>
+            <td>${escapeHtml(d.name)}</td>
+            <td>${d.present}</td>
+            <td>${d.absent}</td>
+            <td>${d.workingDays}</td>
+            <td><span class="defaulter-badge">${d.percentage}%</span></td>
+          `;
+          elements.modalDefaulterTableBody.appendChild(row);
+        });
+      }
+
+      const modal = new bootstrap.Modal(document.getElementById('defaulterModal'));
+      modal.show();
+    }
+
+    function exportDefaulters() {
+      if (!appState.selectedSubject || appState.selectedMonth === null) {
+        showAlert('Please select a subject and month first!', 'warning');
+        return;
+      }
+
+      const defaulters = getDefaultersList();
+      
+      if (defaulters.length === 0) {
+        showAlert('No defaulters to export!', 'info');
+        return;
+      }
+
+      const headers = ['ID', 'Name', 'Present Days', 'Absent Days', 'Working Days', 'Attendance %'];
+      const rows = [headers];
+
+      defaulters.forEach(d => {
+        rows.push([d.id, d.name, d.present, d.absent, d.workingDays, `${d.percentage}%`]);
+      });
+
+      const csv = rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+      downloadFile(csv, `defaulters_${appState.selectedSubject}_${monthNames[appState.selectedMonth]}_${appState.selectedYear}.csv`);
+    }
+
+    // ==================== EVENT LISTENERS ====================
+    function initializeEventListeners() {
+      // Subject events
+      elements.addSubjectBtn.addEventListener('click', () => {
+        if (addSubject(elements.newSubjectInput.value)) {
+          elements.newSubjectInput.value = '';
+        }
+      });
+
+      elements.newSubjectInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          if (addSubject(elements.newSubjectInput.value)) {
+            elements.newSubjectInput.value = '';
+          }
+        }
+      });
+
+      elements.subjectSelect.addEventListener('change', () => {
+        selectSubject(elements.subjectSelect.value);
+      });
+
+      elements.deleteSubjectBtn.addEventListener('click', () => {
+        if (!appState.selectedSubject) {
+          showAlert('Please select a subject first!', 'warning');
+          return;
+        }
+        deleteSubject(appState.selectedSubject);
+      });
+
+      // Month events
+      elements.applyMonthBtn.addEventListener('click', applyMonth);
+
+      // Holiday events
+      elements.toggleHolidayBtn.addEventListener('click', toggleHoliday);
+      elements.clearHolidaysBtn.addEventListener('click', clearAllHolidays);
+
+      // File upload events
+      elements.browseBtn.addEventListener('click', () => {
+        elements.fileInput.click();
+      });
+
+      elements.fileDrop.addEventListener('click', () => {
+        elements.fileInput.click();
+      });
+
+      elements.fileInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+          handleFileUpload(e.target.files[0]);
+          e.target.value = ''; // Reset for same file upload
+        }
+      });
+
+      elements.fileDrop.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        elements.fileDrop.classList.add('dragover');
+      });
+
+      elements.fileDrop.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        elements.fileDrop.classList.remove('dragover');
+      });
+
+      elements.fileDrop.addEventListener('drop', (e) => {
+        e.preventDefault();
+        elements.fileDrop.classList.remove('dragover');
+        
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+          handleFileUpload(e.dataTransfer.files[0]);
+        }
+      });
+
+      elements.downloadTemplateBtn.addEventListener('click', downloadTemplate);
+      elements.downloadReportBtn.addEventListener('click', downloadReport);
+      elements.clearAllBtn.addEventListener('click', clearAllData);
+      // DEBUG BUTTON - Check what's saved in database
+      document.getElementById('debugSaveBtn').addEventListener('click', async () => {
+        const data = {
+          subjects: await loadFromDatabase('subjects'),
+          selectedSubject: await loadFromDatabase('selectedSubject'),
+          selectedMonth: await loadFromDatabase('selectedMonth'),
+          selectedYear: await loadFromDatabase('selectedYear'),
+          currentDay: await loadFromDatabase('currentDay'),
+          attendanceData: await loadFromDatabase('attendanceData'),
+          holidays: await loadFromDatabase('holidays')
+        };
+        
+        console.log('=== DATABASE CONTENT ===');
+        console.log('Subjects:', data.subjects);
+        console.log('Selected Subject:', data.selectedSubject);
+        console.log('Selected Month:', data.selectedMonth, '(0=Jan, 1=Feb, etc.)');
+        console.log('Selected Year:', data.selectedYear);
+        console.log('Current Day:', data.currentDay);
+        console.log('Attendance Data Keys:', Object.keys(data.attendanceData || {}));
+        console.log('Holidays:', data.holidays);
+        console.log('========================');
+        
+        let message = '📊 DATABASE CONTENT:\n\n';
+        message += `Subjects: ${data.subjects?.length || 0}\n`;
+        message += `Selected Subject: ${data.selectedSubject || 'NONE'}\n`;
+        message += `Selected Month: ${data.selectedMonth !== null ? data.selectedMonth + ' (0=Jan)' : 'NONE'}\n`;
+        message += `Selected Year: ${data.selectedYear || 'NONE'}\n`;
+        message += `Current Day: ${data.currentDay || 'NONE'}\n`;
+        message += `\nAttendance Data Month Keys:\n`;
+        if (data.attendanceData) {
+          Object.keys(data.attendanceData).forEach(key => {
+            message += `  - ${key}\n`;
+          });
+        } else {
+          message += '  - NONE\n';
+        }
+        message += '\n✓ Check browser console for full details';
+        
+        alert(message);
+      });
+
+
+      // Day navigation events
+      elements.dateSelect.addEventListener('change', () => {
+        selectDay(parseInt(elements.dateSelect.value));
+      });
+
+      elements.prevDayBtn.addEventListener('click', () => {
+        if (appState.currentDay > 1) {
+          selectDay(appState.currentDay - 1);
+        }
+      });
+
+      elements.nextDayBtn.addEventListener('click', () => {
+        if (appState.currentDay < appState.daysInMonth) {
+          selectDay(appState.currentDay + 1);
+        }
+      });
+
+      // Attendance actions
+      elements.markAllPresentBtn.addEventListener('click', () => markAllAttendance('Present'));
+      elements.markAllAbsentBtn.addEventListener('click', () => markAllAttendance('Absent'));
+
+      // Search and filter events
+      elements.searchBtn.addEventListener('click', refreshAttendanceTable);
+      elements.searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') refreshAttendanceTable();
+      });
+      elements.resetSearchBtn.addEventListener('click', () => {
+        elements.searchInput.value = '';
+        refreshAttendanceTable();
+      });
+      elements.sortSelect.addEventListener('change', refreshAttendanceTable);
+      elements.filterSelect.addEventListener('change', refreshAttendanceTable);
+      elements.refreshTableBtn.addEventListener('click', refreshAttendanceTable);
+
+      // Threshold event
+      elements.thresholdInput.addEventListener('change', () => {
+        appState.threshold = parseInt(elements.thresholdInput.value) || 75;
+        updateDefaulterCount();
+        refreshAttendanceTable();
+        saveAllData();
+      });
+
+      // Defaulter events
+      elements.showDefaultersBtn.addEventListener('click', showDefaulterModal);
+      elements.exportDefaultersBtn.addEventListener('click', exportDefaulters);
+      elements.modalExportBtn.addEventListener('click', exportDefaulters);
+
+      // Modal close events
+      elements.modalCloseBtn.addEventListener('click', () => {
+        const modal = bootstrap.Modal.getInstance(document.getElementById('defaulterModal'));
+        if (modal) modal.hide();
+      });
+
+      elements.modalCloseBtnFooter.addEventListener('click', () => {
+        const modal = bootstrap.Modal.getInstance(document.getElementById('defaulterModal'));
+        if (modal) modal.hide();
+      });
+
+      // Smooth scroll for navigation
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute('href'));
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth' });
+          }
+        });
+      });
+    }
+
+    // ==================== INITIALIZATION ====================
+    async function initialize() {
+      try {
+        // Open database
+        await openDatabase();
+        
+        // Load saved data
+        await loadAllData();
+
+        // Populate year dropdown
+        populateYearDropdown();
+
+        // Set current month/year as default
+        const now = new Date();
+        if (appState.selectedMonth === null) {
+          elements.monthSelect.value = now.getMonth();
+        } else {
+          elements.monthSelect.value = appState.selectedMonth;
+        }
+        
+        if (appState.selectedYear === null) {
+          elements.yearSelect.value = now.getFullYear();
+        } else {
+          elements.yearSelect.value = appState.selectedYear;
+        }
+
+        // Update threshold input
+        elements.thresholdInput.value = appState.threshold;
+
+        // Populate subject dropdown and tags
+        populateSubjectDropdown();
+        renderSubjectTags();
+        updateSubjectDisplay();
+
+        // If month was selected, restore calendar
+        if (appState.selectedMonth !== null && appState.selectedYear !== null) {
+          appState.daysInMonth = getDaysInMonth(appState.selectedMonth, appState.selectedYear);
+          updateMonthDisplay();
+          populateDayDropdown();
+          renderCalendarGrid();
+          updateHolidayDisplay();
+          elements.calendarContainer.style.display = 'block';
+          refreshAttendanceTable();
+        }
+
+        // Initialize event listeners
+        initializeEventListeners();
+
+        // Update stats
+        updateStats();
+        updateDefaulterCount();
+
+        console.log('Application initialized successfully');
+      } catch (error) {
+        console.error('Initialization error:', error);
+        showAlert('Failed to initialize application. Please refresh the page.', 'danger');
+      }
+    }
+
+    // Start the application
+    initialize();
+    // Listen for refresh requests from face recognition system
+setupRefreshListener();
+
+function setupRefreshListener() {
+  // Method 1: BroadcastChannel (modern browsers)
+  if (typeof BroadcastChannel !== 'undefined') {
+    const channel = new BroadcastChannel('attendance-system');
+    
+    channel.onmessage = (event) => {
+      if (event.data.type === 'REFRESH_REQUIRED' && event.data.source === 'face-recognition') {
+        console.log('📢 Received refresh request from face recognition system');
+        handleRefreshRequest();
+      }
+    };
+    
+    console.log('✅ BroadcastChannel listener active');
+  }
+  
+  // Method 2: Storage event (fallback for cross-tab communication)
+  window.addEventListener('storage', (event) => {
+    if (event.key === '_refreshRequired' && event.newValue) {
+      console.log('📢 Detected refresh flag in storage');
+      handleRefreshRequest();
+    }
+  });
+  
+  // Method 3: Periodic polling (fallback)
+  setInterval(async () => {
+    try {
+      const refreshFlag = await loadFromDatabase('_refreshRequired');
+      if (refreshFlag && refreshFlag.timestamp) {
+        const timeSinceRefresh = Date.now() - refreshFlag.timestamp;
+        // If refresh flag is recent (within last 5 seconds)
+        if (timeSinceRefresh < 5000) {
+          console.log('📢 Found recent refresh flag via polling');
+          handleRefreshRequest();
+          // Clear the flag
+          await saveToDatabase('_refreshRequired', null);
+        }
+      }
+    } catch (error) {
+      // Silently ignore errors in polling
+    }
+  }, 2000); // Check every 2 seconds
+}
+
+async function handleRefreshRequest() {
+  console.log('🔄 Refreshing attendance data...');
+  
+  // Show notification to user
+  const notification = document.createElement('div');
+  notification.className = 'alert alert-success position-fixed top-0 start-50 translate-middle-x mt-3';
+  notification.style.zIndex = '9999';
+  notification.innerHTML = `
+    <i class="bi bi-check-circle me-2"></i>
+    <strong>Synced!</strong> Attendance updated from face recognition system.
+  `;
+  document.body.appendChild(notification);
+  
+  // Reload data from database
+  await loadAllData();
+  
+  // Refresh the UI
+  refreshAttendanceTable();
+  updateStats();
+  renderCalendarGrid();
+  
+  console.log('✅ Data refreshed successfully');
+  
+  // Remove notification after 3 seconds
+  setTimeout(() => {
+    notification.remove();
+  }, 3000);
+}
+  </script>
+</body>
+</html>

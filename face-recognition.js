@@ -33,7 +33,27 @@ class FaceRecognitionSystem {
    * Initialize the system
    */
   async init() {
-    try {
+  try {
+    // ✅ CHECK AUTHENTICATION FIRST
+    const user = await getCurrentUser();
+    
+    if (!user) {
+      // Not logged in - redirect
+      window.location.href = 'index.html';
+      return;
+    }
+    
+    // Get role
+    const role = await getUserRole();
+    window.currentUserRole = role; // Store globally
+    
+    console.log(`Logged in as: ${user.attributes.email} (${role})`);
+    
+    // ✅ CONTINUE WITH EXISTING INITIALIZATION
+    this.showLoading();
+    await faceStorage.init();
+    // ... rest of your existing init code
+
       // Show loading overlay
       this.showLoading();
       
