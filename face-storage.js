@@ -1,4 +1,5 @@
 /**
+ * face-storage.js
  * Face Storage Module
  * Handles all face data storage and retrieval using IndexedDB
  */

@@ -1,4 +1,5 @@
 /**
+ * face-recognition.js
  * Face Recognition Core Module
  * Main logic for face detection, recognition, and attendance marking
  */ 

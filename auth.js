@@ -1,4 +1,5 @@
 /**
+ * auth.js
  * AWS Cognito Authentication Module
  * Handles all authentication operations for the Smart Attendance System
  */

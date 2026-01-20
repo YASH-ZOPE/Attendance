@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+main-system.html
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Smart Attendance System</title>
@@ -901,40 +902,6 @@
     
     // Get role
     const role = await getUserRole();
-    
-    // ==================== ROLE-BASED UI HIDING ====================
-async function applyRoleBasedUI() {
-  try {
-    const role = await getUserRole();
-    console.log('Applying UI for role:', role);
-    
-    if (role === 'admin') {
-      // Admin sees everything - no changes needed
-      return;
-    }
-    
-    if (role === 'teacher') {
-      // Hide admin-only elements
-      hideElements('.admin-only');
-      hideElements('.admin-only-inline');
-      
-    } else if (role === 'student') {
-      // Hide admin-only AND teacher-only elements
-      hideElements('.admin-only');
-      hideElements('.admin-only-inline');
-      hideElements('.teacher-only');
-      hideElements('.teacher-only-inline');
-      hideElements('.hide-for-student');
-      hideElements('.hide-for-student-inline');
-      
-      // Make table read-only
-      makeTableReadOnly();
-    }
-    
-  } catch (error) {
-    console.error('Error applying role-based UI:', error);
-  }
-}
 
 function hideElements(selector) {
   document.querySelectorAll(selector).forEach(el => {
@@ -979,6 +946,39 @@ initialize();
 }
 }
 
+   // ==================== ROLE-BASED UI HIDING ====================
+async function applyRoleBasedUI() {
+  try {
+    const role = await getUserRole();
+    console.log('Applying UI for role:', role);
+    
+    if (role === 'admin') {
+      // Admin sees everything - no changes needed
+      return;
+    }
+    
+    if (role === 'teacher') {
+      // Hide admin-only elements
+      hideElements('.admin-only');
+      hideElements('.admin-only-inline');
+      
+    } else if (role === 'student') {
+      // Hide admin-only AND teacher-only elements
+      hideElements('.admin-only');
+      hideElements('.admin-only-inline');
+      hideElements('.teacher-only');
+      hideElements('.teacher-only-inline');
+      hideElements('.hide-for-student');
+      hideElements('.hide-for-student-inline');
+      
+      // Make table read-only
+      makeTableReadOnly();
+    }
+    
+  } catch (error) {
+    console.error('Error applying role-based UI:', error);
+  }
+}
 
 function hideElements(selector) {
   document.querySelectorAll(selector).forEach(el => {
