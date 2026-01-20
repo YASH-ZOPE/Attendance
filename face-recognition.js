@@ -9,7 +9,8 @@ class FaceRecognitionSystem {
     this.video = document.getElementById('video');
     this.canvas = document.getElementById('canvas');
     this.ctx = this.canvas.getContext('2d');
-    
+    this.storage = null;
+
     this.isModelLoaded = false;
     this.isCameraRunning = false;
     this.currentMode = 'recognition'; // 'register', 'recognition', or 'bulkImport'
@@ -52,7 +53,19 @@ class FaceRecognitionSystem {
     
     // ✅ CONTINUE WITH EXISTING INITIALIZATION
     this.showLoading();
-    await faceStorage.init();
+    // ✅ INITIALIZE CLOUD STORAGE WITH FALLBACK
+    try {
+      await cloudStorage.init();
+      this.storage = cloudStorage;
+      console.log('✅ Using Firebase Cloud Storage');
+      this.showToast('Connected to cloud storage', 'success');
+    } catch (cloudError) {
+      console.warn('⚠️ Cloud storage unavailable, using local storage fallback');
+      console.error('Cloud error:', cloudError);
+      await faceStorage.init();
+      this.storage = faceStorage;
+      this.showToast('Using offline storage (cloud unavailable)', 'warning');
+    }
     // ... rest of your existing init code
 
       // Show loading overlay
@@ -174,7 +187,7 @@ class FaceRecognitionSystem {
       this.lastAttendanceTime = {};
       
       // Reset all attendance in database
-      await faceStorage.resetAllAttendance();
+      await this.storage.resetAllAttendance();
       
       // Save new day
       await faceStorage.setLastKnownDay(newDay);
@@ -418,7 +431,7 @@ class FaceRecognitionSystem {
     }
 
     // Mark attendance
-    const success = await faceStorage.markAttendance(studentId);
+    const success = await this.storage.markAttendance(studentId);
     
     if (success) {
       this.lastAttendanceTime[studentId] = now;
@@ -435,7 +448,7 @@ class FaceRecognitionSystem {
    * Load face matcher from storage
    */
   async loadFaceMatcher() {
-    const labeledDescriptors = await faceStorage.getLabeledDescriptors();
+    const labeledDescriptors = await this.storage.getLabeledDescriptors();
     
     if (labeledDescriptors.length === 0) {
       this.faceMatcher = null;
@@ -514,18 +527,18 @@ async captureFace() {
       
       if (action === 'replace') {
         // Replace completely
-        await faceStorage.saveFace(studentId, studentName, detection.descriptor, imageData);
+        await this.storage.saveFace(studentId, studentName, detection.descriptor, imageData);
         this.showToast(`✓ Face replaced for ${studentName} (${studentId})`, 'success');
       } else if (action === 'add') {
         // Add to existing descriptors
-        await faceStorage.addFaceToExisting(studentId, studentName, detection.descriptor, imageData);
+        await this.storage.addFaceToExisting(studentId, studentName, detection.descriptor, imageData);
         this.showToast(`✓ Face added to existing record for ${studentName} (${studentId})`, 'success');
       } else {
         return; // Cancelled
       }
     } else {
       // New student - save normally
-      await faceStorage.saveFace(studentId, studentName, detection.descriptor, imageData);
+      await this.storage.saveFace(studentId, studentName, detection.descriptor, imageData);
       this.showToast(`✓ Face registered for ${studentName} (${studentId})`, 'success');
     }
 
@@ -587,7 +600,7 @@ async showFaceExistsDialog(existingFace) {
    * Update student list UI
    */
   async updateStudentList() {
-    const faces = await faceStorage.getAllFaces();
+    const faces = await this.storage.getAllFaces();
     const listContainer = document.getElementById('studentList');
 
     if (faces.length === 0) {
@@ -622,7 +635,7 @@ async showFaceExistsDialog(existingFace) {
         e.stopPropagation();
         const id = btn.dataset.id;
         if (confirm('Delete this registered face?')) {
-          await faceStorage.deleteFace(id);
+          await this.storage.deleteFace(id);
           await this.loadFaceMatcher();
           await this.updateStudentList();
           await this.updateStats();
@@ -636,7 +649,7 @@ async showFaceExistsDialog(existingFace) {
    * Update statistics
    */
   async updateStats() {
-    const stats = await faceStorage.getStats();
+    const stats = await this.storage.getStats();
     document.getElementById('statRegistered').textContent = stats.total;
     document.getElementById('statRecognized').textContent = stats.presentToday;
     document.getElementById('statUnknown').textContent = this.unknownCount;
@@ -648,7 +661,7 @@ async showFaceExistsDialog(existingFace) {
   async clearTodayAttendance() {
   if (!confirm('Clear today\'s attendance for all students?')) return;
 
-  await faceStorage.resetAllAttendance(); // ✅ Use the new method
+  await this.storage.resetAllAttendance(); // ✅ Use the new method
   this.recognizedToday.clear();
   this.lastAttendanceTime = {};
     
@@ -664,7 +677,7 @@ async showFaceExistsDialog(existingFace) {
   async clearAllFaces() {
     if (!confirm('⚠️ DELETE ALL REGISTERED FACES?\n\nThis action cannot be undone!')) return;
 
-    await faceStorage.clearAllFaces();
+    await this.storage.clearAllFaces();
     this.faceMatcher = null;
     this.recognizedToday.clear();
     this.lastAttendanceTime = {};
@@ -905,10 +918,10 @@ async startBulkImport() {
       // Save based on action
       if (existing && bulkAction === 'add') {
         // Add to existing record
-        await faceStorage.addBulkFacesToExisting(studentId, studentName, descriptors, files[0]);
+        await this.storage.addBulkFacesToExisting(studentId, studentName, descriptors, files[0]);
       } else {
         // Replace or new student
-        await faceStorage.saveBulkFaces(studentId, studentName, descriptors, files[0]);
+        await this.storage.saveBulkFaces(studentId, studentName, descriptors, files[0]);
       }
       
       results.success.push({
@@ -1211,7 +1224,7 @@ async syncToMainSystem() {
     // Check for day change before syncing
     await this.checkForDayChange();
 
-    const attendanceData = await faceStorage.exportAttendanceData();
+    const attendanceData = await this.storage.exportAttendanceData();
     
     if (attendanceData.length === 0) {
       this.showToast('No attendance data to sync', 'warning');
