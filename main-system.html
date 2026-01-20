@@ -249,7 +249,67 @@
       background: #E8C4D8;
       color: #6A4A5A;
     }
-    
+    /* Mobile responsiveness for stats cards */
+    @media (max-width: 768px) {
+    .stats-card h3 {
+    font-size: 1.5rem;
+    }
+  
+    .section-card {
+    padding: 15px;
+    }
+  
+    .section-title {
+    font-size: 1.1rem;
+    }
+  
+    .btn-action {
+    font-size: 0.9rem;
+    padding: 6px 12px;
+    }
+  
+    .day-grid {
+    gap: 3px;
+    }
+  
+    .day-btn {
+    padding: 8px 3px;
+    font-size: 0.85rem;
+    }
+  }
+
+  @media (max-width: 576px) {
+  body {
+    padding-top: 60px;
+  }
+  
+  .navbar-brand {
+    font-size: 1.1rem;
+  }
+  
+  .stats-card {
+    padding: 12px;
+  }
+  
+  .stats-card h3 {
+    font-size: 1.3rem;
+  }
+  
+  .stats-card h6 {
+    font-size: 0.85rem;
+  }
+  
+  .table-responsive {
+    font-size: 0.85rem;
+  }
+  
+  .go-btn {
+    width: 100%;
+    height: auto;
+    padding: 15px;
+    font-size: 1rem;
+  }
+}
     @media (max-width: 768px) {
       .quick-nav {
         display: none;
@@ -283,7 +343,19 @@
   .go-btn:hover {
   background: #00c6ff;
   }
+  /* Role-based visibility */
+.admin-only { display: block; }
+.teacher-only { display: block; }
+.student-only { display: none; }
 
+.hide-for-teacher { display: none; }
+.hide-for-student { display: none; }
+
+/* For buttons/inline elements */
+.admin-only-inline { display: inline-block; }
+.teacher-only-inline { display: inline-block; }
+.hide-for-teacher-inline { display: none; }
+.hide-for-student-inline { display: none; }
 
   </style>
 </head>
@@ -351,7 +423,7 @@
     </div>
 
     <!-- Subject Section -->
-    <section id="subject-section" class="nav-section">
+    <section id="subject-section" class="nav-section teacher-only">
       <div class="section-card">
         <h4 class="section-title"><i class="bi bi-book me-2"></i>Subject Management</h4>
         
@@ -373,7 +445,7 @@
             </select>
           </div>
           
-          <div class="col-md-4">
+          <div class="col-md-4 admin-only">
             <label class="form-label fw-bold">Actions</label>
             <div>
               <button id="deleteSubjectBtn" class="btn btn-outline-danger">
@@ -398,7 +470,7 @@
     </section>
 
     <!-- Month Section -->
-    <section id="month-section" class="nav-section">
+    <section id="month-section" class="nav-section teacher-only">
       <div class="section-card">
         <h4 class="section-title"><i class="bi bi-calendar3 me-2"></i>Month & Calendar</h4>
         
@@ -443,7 +515,7 @@
         <div id="calendarContainer" class="mt-4" style="display: none;">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="mb-0"><i class="bi bi-calendar-week me-2"></i>Select Day</h5>
-            <div>
+            <div class="teacher-only">
               <button id="toggleHolidayBtn" class="btn btn-outline-danger btn-sm">
                 <i class="bi bi-sun me-1"></i>Toggle Holiday
               </button>
@@ -534,7 +606,7 @@
     </section>
 
     <!-- Upload Section -->
-    <section id="upload-section" class="nav-section">
+    <section id="upload-section" class="nav-section teacher-only">
       <div class="section-card">
         <h4 class="section-title"><i class="bi bi-upload me-2"></i>Upload Attendance</h4>
         
@@ -574,14 +646,15 @@
           </div>
         </div>
         
+
        <div class="mt-3">
-          <button id="downloadReportBtn" class="btn btn-success btn-action me-2">
+          <button id="downloadReportBtn" class="btn btn-success btn-action me-2 teacher-only-inline">
             <i class="bi bi-file-earmark-arrow-down me-1"></i>Download Report
           </button>
-          <button id="clearAllBtn" class="btn btn-outline-danger btn-action">
+          <button id="clearAllBtn" class="btn btn-outline-danger btn-action admin-only-inline">
             <i class="bi bi-trash me-1"></i>Clear All Data
           </button>
-          <button id="debugSaveBtn" class="btn btn-warning btn-action ms-2">
+          <button id="debugSaveBtn" class="btn btn-warning btn-action ms-2 admin-only-inline">
             <i class="bi bi-bug me-1"></i>DEBUG: Check Saved Data
           </button>
         </div>
@@ -617,7 +690,7 @@
               </button>
             </div>
           </div>
-          <div class="col-md-4">
+          <div class="col-md-4 teacher-only">
             <label class="form-label fw-bold">Quick Actions</label>
             <div class="btn-group w-100">
               <button id="markAllPresentBtn" class="btn btn-outline-success">All Present</button>
@@ -627,7 +700,7 @@
         </div>
         
         <!-- Search and Filter -->
-        <div class="row g-3 mb-3">
+        <div class="row g-3 mb-3 teacher-only">
           <div class="col-md-4">
             <div class="input-group">
               <input type="text" id="searchInput" class="form-control" placeholder="Search by ID or Name">
@@ -829,6 +902,62 @@
     // Get role
     const role = await getUserRole();
     
+    // ==================== ROLE-BASED UI HIDING ====================
+async function applyRoleBasedUI() {
+  try {
+    const role = await getUserRole();
+    console.log('Applying UI for role:', role);
+    
+    if (role === 'admin') {
+      // Admin sees everything - no changes needed
+      return;
+    }
+    
+    if (role === 'teacher') {
+      // Hide admin-only elements
+      hideElements('.admin-only');
+      hideElements('.admin-only-inline');
+      
+    } else if (role === 'student') {
+      // Hide admin-only AND teacher-only elements
+      hideElements('.admin-only');
+      hideElements('.admin-only-inline');
+      hideElements('.teacher-only');
+      hideElements('.teacher-only-inline');
+      hideElements('.hide-for-student');
+      hideElements('.hide-for-student-inline');
+      
+      // Make table read-only
+      makeTableReadOnly();
+    }
+    
+  } catch (error) {
+    console.error('Error applying role-based UI:', error);
+  }
+}
+
+function hideElements(selector) {
+  document.querySelectorAll(selector).forEach(el => {
+    el.style.display = 'none';
+  });
+}
+
+function makeTableReadOnly() {
+  // Disable all input fields
+  document.querySelectorAll('input, select, button').forEach(el => {
+    if (!el.id.includes('logout') && !el.id.includes('navbarNav')) {
+      el.disabled = true;
+    }
+  });
+  
+  // Hide action buttons in table
+  const style = document.createElement('style');
+  style.textContent = `
+    .mark-present-btn, .mark-absent-btn { display: none !important; }
+  `;
+  document.head.appendChild(style);
+}
+
     // Check access (admin or teacher allowed)
     if (role !== 'admin' && role !== 'teacher') {
       alert('Access denied: Admin or Teacher only');
@@ -1840,33 +1969,36 @@ async function initialize() {
         const row = document.createElement('tr');
         row.className = student.status === 'Present' ? 'present' : 'absent';
         
+
+
+
         row.innerHTML = `
           <td><strong>${escapeHtml(student.id)}</strong></td>
-          <td>${escapeHtml(student.name)}</td>
+            <td>${escapeHtml(student.name)}</td>
           <td>
             <span class="badge ${student.status === 'Present' ? 'bg-success' : 'bg-danger'}">
-              ${student.status}
+                ${student.status}
             </span>
-            ${isHolidayToday ? '<span class="holiday-badge ms-1">Holiday</span>' : ''}
-          </td>
-          <td>
-            ${stats.present}/${stats.workingDays} days
+                ${isHolidayToday ? '<span class="holiday-badge ms-1">Holiday</span>' : ''}
+            </td>
+            <td>
+                ${stats.present}/${stats.workingDays} days
             <span class="${isDefaulter ? 'defaulter-badge' : 'good-badge'} ms-2">
-              ${stats.percentage}%
-            </span>
-          </td>
-          <td>
-            <button class="btn btn-sm btn-outline-success mark-present-btn" 
-                    data-id="${escapeHtml(student.id)}" 
-                    ${isHolidayToday ? 'disabled' : ''}>
-              <i class="bi bi-check"></i>
+                ${stats.percentage}%
+             </span>
+             </td>
+            <td class="teacher-only">
+             <button class="btn btn-sm btn-outline-success mark-present-btn" 
+            data-id="${escapeHtml(student.id)}" 
+            ${isHolidayToday ? 'disabled' : ''}>
+            <i class="bi bi-check"></i>
             </button>
-            <button class="btn btn-sm btn-outline-danger mark-absent-btn" 
-                    data-id="${escapeHtml(student.id)}" 
-                    ${isHolidayToday ? 'disabled' : ''}>
-              <i class="bi bi-x"></i>
+             <button class="btn btn-sm btn-outline-danger mark-absent-btn" 
+            data-id="${escapeHtml(student.id)}" 
+            ${isHolidayToday ? 'disabled' : ''}>
+            <i class="bi bi-x"></i>
             </button>
-          </td>
+            </td>
         `;
 
         elements.attendanceTableBody.appendChild(row);
@@ -2323,7 +2455,11 @@ async function initialize() {
         updateStats();
         updateDefaulterCount();
 
-        console.log('Application initialized successfully');
+       console.log('Application initialized successfully');
+        
+        // Apply role-based UI
+        await applyRoleBasedUI();
+        
       } catch (error) {
         console.error('Initialization error:', error);
         showAlert('Failed to initialize application. Please refresh the page.', 'danger');
