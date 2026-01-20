@@ -693,10 +693,9 @@ main-system.html
               </button>
             </div>
           </div>
-          <div class="col-md-4 teacher-only">
-            <label class="form-label fw-bold">Quick Actions</label>
             <div class="col-md-4 teacher-only">
-              <div class="btn-group w-100">
+              <label class="form-label fw-bold">Quick Actions</label>
+              <div class="btn-group w-100">  <!-- ✅ Remove duplicate col-md-4 div -->
                 <button id="markAllPresentBtn" class="btn btn-outline-success">All Present</button>
                 <button id="markAllAbsentBtn" class="btn btn-outline-danger">All Absent</button>
               </div>
@@ -907,40 +906,6 @@ main-system.html
     // Get role
     const role = await getUserRole();
 
-function hideElements(selector) {
-  document.querySelectorAll(selector).forEach(el => {
-    el.style.display = 'none';
-  });
-}
-
-function makeTableReadOnly() {
-  // Disable ONLY teacher controls, not navigation
-  document.querySelectorAll('.teacher-only input, .teacher-only select, .teacher-only button').forEach(el => {
-    el.disabled = true;
-  });
-  
-  // Keep day navigation enabled
-  elements.prevDayBtn.disabled = false;
-  elements.nextDayBtn.disabled = false;
-  elements.dateSelect.disabled = false;
-  
-  // Hide action buttons in table
-  const style = document.createElement('style');
-  style.textContent = `
-    .mark-present-btn, .mark-absent-btn { display: none !important; }
-    .teacher-only { opacity: 0.6; pointer-events: none; }
-  `;
-  document.head.appendChild(style);
-}
-
-    // Check access (admin or teacher allowed)
-    // Check access (admin or teacher allowed)
-if (role !== 'admin' && role !== 'teacher') {
-  alert('Access denied: Admin or Teacher only');
-  await logout();
-  window.location.href = 'index.html';
-  return;
-}
 
 // Show user info
 console.log(`Logged in as: ${user.attributes.email} (${role})`);
