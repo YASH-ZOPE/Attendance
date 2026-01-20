@@ -203,6 +203,71 @@
     align-items: center;
     justify-content: center;
     }
+
+    /* Role-based visibility */
+.admin-only { display: block; }
+.teacher-only { display: block; }
+.student-only { display: none; }
+
+.hide-for-teacher { display: none; }
+.hide-for-student { display: none; }
+
+/* For buttons/inline elements */
+.admin-only-inline { display: inline-block; }
+.teacher-only-inline { display: inline-block; }
+.hide-for-teacher-inline { display: none; }
+.hide-for-student-inline { display: none; }
+
+/* Responsive fixes */
+@media (max-width: 768px) {
+  .main-card {
+    margin: 10px;
+  }
+  
+  .header h1 {
+    font-size: 1.3rem;
+  }
+  
+  .mode-card {
+    padding: 15px;
+  }
+  
+  .button-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .student-card {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .face-preview {
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 576px) {
+  body {
+    padding: 10px;
+  }
+  
+  .header {
+    padding: 15px;
+  }
+  
+  .header h1 {
+    font-size: 1.1rem;
+  }
+  
+  .content-area {
+    padding: 15px;
+  }
+  
+  .btn-face {
+    font-size: 0.9rem;
+    padding: 10px 20px;
+  }
+ }
   </style>
 </head>
 <body>
@@ -280,16 +345,16 @@
           <br>
 
             <div class="button-grid">
-  <button id="testConnectionBtn" class="btn btn-outline-info w-100 mb-2">
+  <button id="testConnectionBtn" class="btn btn-outline-info w-100 mb-2 admin-only-inline">
     <i class="bi bi-plug me-2"></i>Test Main System Connection
   </button>
-  <button id="refreshStatusBtn" class="btn btn-outline-secondary w-100 mb-2">
+  <button id="refreshStatusBtn" class="btn btn-outline-secondary w-100 mb-2 admin-only-inline">
     <i class="bi bi-arrow-clockwise me-2"></i>Refresh Status
   </button>
-  <button id="syncToMainBtn" class="btn btn-success w-100 mb-2">
+  <button id="syncToMainBtn" class="btn btn-success w-100 mb-2 teacher-only-inline">
     <i class="bi bi-arrow-right-circle me-2"></i>Sync to Main System
   </button>
-  <button id="clearAllFacesBtn" class="btn btn-outline-danger w-100">
+  <button id="clearAllFacesBtn" class="btn btn-outline-danger w-100 admin-only-inline">
     <i class="bi bi-trash me-2"></i>Clear All Faces
   </button>
 </div>
@@ -300,7 +365,7 @@
           <!-- Mode Selection -->
           <h5 class="mb-3"><i class="bi bi-gear me-2"></i>Operation Mode</h5>
           
-          <div class="mode-card" id="registerMode">
+          <div class="mode-card teacher-only" id="registerMode">
             <div class="d-flex align-items-center">
               <i class="bi bi-person-plus-fill fs-1 text-primary me-3"></i>
               <div>
@@ -340,7 +405,7 @@
             </div>
           </div>
 
-          <div class="mode-card" id="bulkImportMode">
+          <div class="mode-card teacher-only" id="bulkImportMode">
   <div class="d-flex align-items-center">
     <i class="bi bi-folder-plus fs-1 text-info me-3"></i>
     <div>
@@ -421,5 +486,101 @@
 <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 <script src="face-storage.js"></script>
 <script src="face-recognition.js"></script>
+
+<script>
+// ==================== ROLE-BASED UI HIDING ====================
+async function applyRoleBasedUIForFaceRecognition() {
+  try {
+    const role = await getUserRole();
+    console.log('Applying Face Recognition UI for role:', role);
+    
+    if (role === 'admin') {
+      // Admin sees everything - no changes needed
+      return;
+    }
+    
+    if (role === 'teacher') {
+      // Hide admin-only elements
+      hideElements('.admin-only');
+      hideElements('.admin-only-inline');
+      
+    } else if (role === 'student') {
+      // Hide admin-only AND teacher-only elements
+      hideElements('.admin-only');
+      hideElements('.admin-only-inline');
+      hideElements('.teacher-only');
+      hideElements('.teacher-only-inline');
+      
+      // Hide delete buttons in student list (will be applied when list renders)
+      hideDeleteButtonsForStudents();
+    }
+    
+  } catch (error) {
+    console.error('Error applying role-based UI:', error);
+  }
+}
+
+function hideElements(selector) {
+  document.querySelectorAll(selector).forEach(el => {
+    el.style.display = 'none';
+  });
+}
+
+function hideDeleteButtonsForStudents() {
+  // Add CSS to hide delete buttons
+  const style = document.createElement('style');
+  style.id = 'student-role-style';
+  style.textContent = `
+    .student-card .btn-danger { display: none !important; }
+  `;
+  document.head.appendChild(style);
+  
+  // Also observe for dynamically added delete buttons
+  const observer = new MutationObserver(() => {
+    document.querySelectorAll('.student-card .btn-danger').forEach(btn => {
+      btn.style.display = 'none';
+    });
+  });
+  
+  const studentList = document.getElementById('studentList');
+  if (studentList) {
+    observer.observe(studentList, { childList: true, subtree: true });
+  }
+}
+
+// ==================== AUTHENTICATION CHECK ====================
+async function checkAuthAndInitFaceRecognition() {
+  try {
+    // Check if logged in
+    const user = await getCurrentUser();
+    
+    if (!user) {
+      // Not logged in - redirect to login
+      window.location.href = 'index.html';
+      return;
+    }
+    
+    // Get role
+    const role = await getUserRole();
+    console.log(`Face Recognition - Logged in as: ${user.attributes.email} (${role})`);
+    
+    // Apply role-based UI
+    await applyRoleBasedUIForFaceRecognition();
+    
+    console.log('Face Recognition UI initialized for role:', role);
+    
+  } catch (error) {
+    console.error('Auth check failed:', error);
+    window.location.href = 'index.html';
+  }
+}
+
+// Call on page load (after models are loaded)
+window.addEventListener('DOMContentLoaded', () => {
+  // Wait a bit for face-api models to start loading
+  setTimeout(checkAuthAndInitFaceRecognition, 500);
+});
+</script>
+
 </body>
 </html>

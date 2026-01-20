@@ -959,23 +959,45 @@ function makeTableReadOnly() {
 }
 
     // Check access (admin or teacher allowed)
-    if (role !== 'admin' && role !== 'teacher') {
-      alert('Access denied: Admin or Teacher only');
-      await logout();
-      window.location.href = 'index.html';
-      return;
+    // Check access (admin or teacher allowed)
+if (role !== 'admin' && role !== 'teacher') {
+  alert('Access denied: Admin or Teacher only');
+  await logout();
+  window.location.href = 'index.html';
+  return;
+}
+
+// Show user info
+console.log(`Logged in as: ${user.attributes.email} (${role})`);
+
+// Continue with normal initialization
+initialize();
+
+} catch (error) {
+  console.error('Auth check failed:', error);
+  window.location.href = 'index.html';
+}
+}
+
+
+function hideElements(selector) {
+  document.querySelectorAll(selector).forEach(el => {
+    el.style.display = 'none';
+  });
+}
+
+function makeTableReadOnly() {
+  document.querySelectorAll('input, select, button').forEach(el => {
+    if (!el.id.includes('logout') && !el.id.includes('navbarNav')) {
+      el.disabled = true;
     }
-    
-    // Show user info (if you add user badge later)
-    console.log(`Logged in as: ${user.attributes.email} (${role})`);
-    
-    // Continue with normal initialization
-    initialize(); // Your existing init function
-    
-  } catch (error) {
-    console.error('Auth check failed:', error);
-    window.location.href = 'index.html';
-  }
+  });
+  
+  const style = document.createElement('style');
+  style.textContent = `
+    .mark-present-btn, .mark-absent-btn { display: none !important; }
+  `;
+  document.head.appendChild(style);
 }
 
 // Logout function (if you add logout button)
