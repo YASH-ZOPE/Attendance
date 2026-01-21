@@ -16,6 +16,13 @@
   <!-- Auth Functions -->
   <script src="auth.js"></script>
 
+  <!-- Firebase SDK (Add AFTER AWS Cognito SDK) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+  <!-- Firebase Config (reuse same file) -->
+  <script src="firebase-config.js"></script>
+
   <style>
     :root {
       --primary-color: #E8C4D8;
@@ -663,7 +670,7 @@
       </div>
     </section>
     <section id="camera-section" class="nav-section">
- 	 <button class="go-btn" onclick="window.location.href='face-recognition.html'">
+ 	 <button class="go-btn" onclick="window.location.href='/face-recognition'">
     Attendance Section
 	 </button>
 <br>
@@ -888,6 +895,75 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
 
+// ==================== FIREBASE CLOUD STORAGE ====================
+let firebaseDB = null;
+let useCloud = false;
+
+// Initialize Firebase
+async function initFirebase() {
+  try {
+    if (typeof firebase === 'undefined') {
+      console.warn('⚠️ Firebase not loaded, using IndexedDB only');
+      return false;
+    }
+    
+    firebaseDB = firebase.database();
+    
+    // Test connection
+    await firebaseDB.ref('.info/connected').once('value');
+    
+    useCloud = true;
+    console.log('✅ Firebase connected for main system');
+    return true;
+  } catch (error) {
+    console.error('❌ Firebase connection failed:', error);
+    useCloud = false;
+    return false;
+  }
+}
+
+// Save data (cloud + local hybrid)
+async function saveToStorage(key, data) {
+  // Save to IndexedDB (always, as backup)
+  await saveToDatabase(key, data);
+  
+  // Also save to Firebase if connected
+  if (useCloud && firebaseDB) {
+    try {
+      await firebaseDB.ref(`mainSystem/${key}`).set(data);
+      console.log(`✅ Saved to cloud: ${key}`);
+    } catch (error) {
+      console.warn(`⚠️ Cloud save failed for ${key}:`, error);
+    }
+  }
+}
+
+// Load data (try cloud first, fallback to local)
+async function loadFromStorage(key) {
+  if (useCloud && firebaseDB) {
+    try {
+      const snapshot = await firebaseDB.ref(`mainSystem/${key}`).once('value');
+      const cloudData = snapshot.val();
+      
+      if (cloudData !== null) {
+        console.log(`✅ Loaded from cloud: ${key}`);
+        return cloudData;
+      }
+    } catch (error) {
+      console.warn(`⚠️ Cloud load failed for ${key}:`, error);
+    }
+  }
+  
+  // Fallback to IndexedDB
+  console.log(`📂 Loading from local: ${key}`);
+  return await loadFromDatabase(key);
+}
+
+// ==================== END FIREBASE FUNCTIONS ====================
+
+// ==================== AUTHENTICATION CHECK ====================
+// ... your existing authentication code ...
+    
 
     // ==================== AUTHENTICATION CHECK ====================
     async function checkAuthAndInit() {
@@ -1071,32 +1147,32 @@ async function initialize() {
       });
     }
 
-    async function saveAllData() {
-      try {
-        await saveToDatabase("subjects", appState.subjects);
-        await saveToDatabase("selectedSubject", appState.selectedSubject);
-        await saveToDatabase("selectedMonth", appState.selectedMonth);
-        await saveToDatabase("selectedYear", appState.selectedYear);
-        await saveToDatabase("currentDay", appState.currentDay);
-        await saveToDatabase("attendanceData", appState.attendanceData);
-        await saveToDatabase("holidays", appState.holidays);
-        await saveToDatabase("threshold", appState.threshold);
-        console.log("All data saved");
-      } catch (error) {
-        console.error("Failed to save data:", error);
-      }
-    }
+   async function saveAllData() {
+    try {
+      await saveToStorage("subjects", appState.subjects);
+      await saveToStorage("selectedSubject", appState.selectedSubject);
+      await saveToStorage("selectedMonth", appState.selectedMonth);
+      await saveToStorage("selectedYear", appState.selectedYear);
+      await saveToStorage("currentDay", appState.currentDay);
+      await saveToStorage("attendanceData", appState.attendanceData);
+      await saveToStorage("holidays", appState.holidays);
+      await saveToStorage("threshold", appState.threshold);
+    console.log("All data saved (cloud + local)");
+  } catch (error) {
+    console.error("Failed to save data:", error);
+  }
+}
 
     async function loadAllData() {
-      try {
-        const subjects = await loadFromDatabase("subjects");
-        const selectedSubject = await loadFromDatabase("selectedSubject");
-        const selectedMonth = await loadFromDatabase("selectedMonth");
-        const selectedYear = await loadFromDatabase("selectedYear");
-        const currentDay = await loadFromDatabase("currentDay");
-        const attendanceData = await loadFromDatabase("attendanceData");
-        const holidays = await loadFromDatabase("holidays");
-        const threshold = await loadFromDatabase("threshold");
+    try {
+      const subjects = await loadFromStorage("subjects");
+      const selectedSubject = await loadFromStorage("selectedSubject");
+      const selectedMonth = await loadFromStorage("selectedMonth");
+      const selectedYear = await loadFromStorage("selectedYear");
+      const currentDay = await loadFromStorage("currentDay");
+      const attendanceData = await loadFromStorage("attendanceData");
+      const holidays = await loadFromStorage("holidays");
+      const threshold = await loadFromStorage("threshold");
 
         if (subjects) appState.subjects = subjects;
         if (selectedSubject) appState.selectedSubject = selectedSubject;
@@ -2405,6 +2481,10 @@ async function initialize() {
     // ==================== INITIALIZATION ====================
     async function initialize() {
       try {
+        // Initialize Firebase
+        await initFirebase();
+
+
         // Open database
         await openDatabase();
         
@@ -2455,7 +2535,13 @@ async function initialize() {
         updateDefaulterCount();
 
        console.log('Application initialized successfully');
-        
+      
+      
+        // ✅ ADD REAL-TIME SYNC HERE
+        if (useCloud && firebaseDB) {
+        setupRealtimeSync();
+      } 
+      
         // Apply role-based UI
         await applyRoleBasedUI();
         
@@ -2465,8 +2551,34 @@ async function initialize() {
       }
     }
 
+// ==================== REAL-TIME SYNC ====================
+function setupRealtimeSync() {
+  firebaseDB.ref('mainSystem/attendanceData').on('value', (snapshot) => {
+    const cloudData = snapshot.val();
+    
+    if (cloudData && JSON.stringify(cloudData) !== JSON.stringify(appState.attendanceData)) {
+      console.log('📡 Attendance data updated from cloud');
+      appState.attendanceData = cloudData;
+      refreshAttendanceTable();
+      updateStats();
+      
+      // Show notification
+      const notification = document.createElement('div');
+      notification.className = 'alert alert-info position-fixed top-0 end-0 m-3';
+      notification.style.zIndex = '9999';
+      notification.innerHTML = '<i class="bi bi-cloud-arrow-down me-2"></i>Attendance synced from cloud';
+      document.body.appendChild(notification);
+      
+      setTimeout(() => notification.remove(), 3000);
+    }
+  });
+  
+  console.log('📡 Real-time sync enabled');
+}
+
     // Start the application
     initialize();
+    
     // Listen for refresh requests from face recognition system
 setupRefreshListener();
 

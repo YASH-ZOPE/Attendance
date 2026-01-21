@@ -359,12 +359,12 @@ async function redirectBasedOnRole() {
     console.log('Redirecting user with role:', role);
 
     if (role === 'admin' || role === 'teacher') {
-      window.location.href = 'main-system.html';
+      window.location.href = '/main-system';
     } else if (role === 'student') {
-      window.location.href = 'face-recognition.html';
+      window.location.href = '/face-recognition';
     } else {
       // Default to face recognition for unknown roles
-      window.location.href = 'face-recognition.html';
+      window.location.href = '/face-recognition';
     }
   } catch (error) {
     console.error('Redirect error:', error);
