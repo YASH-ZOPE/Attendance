@@ -1298,10 +1298,11 @@ async function initialize() {
       return div.innerHTML;
     }
 
-    function getMonthKey() {
-    if (appState.selectedMonth === null || appState.selectedYear === null) return null;
-    return `${appState.selectedYear}-${String(appState.selectedMonth).padStart(2, '0')}`;
-    }
+   function getMonthKey() {
+  if (appState.selectedMonth === null || appState.selectedYear === null) return null;
+  return `${appState.selectedYear}-${String(appState.selectedMonth + 1).padStart(2, '0')}`;
+  //Adds 1 for human format ✅
+}
 
     function getDaysInMonth(month, year) {
       return new Date(year, month + 1, 0).getDate();
