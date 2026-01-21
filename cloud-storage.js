@@ -446,6 +446,77 @@ class CloudStorage {
     }
   }
 
+
+  /**
+ * Sync face-recognition attendance to main system database
+ * Reads current subject/month/day from main system settings
+ * Writes attendance in main system's expected format
+ */
+async syncToMainSystem() {
+  if (!this.isInitialized) {
+    throw new Error('Cloud storage not initialized');
+  }
+
+  try {
+    // 1. Get main system settings
+    const settingsSnapshot = await this.db.ref('mainSystem').once('value');
+    const settings = settingsSnapshot.val();
+    
+    if (!settings || !settings.selectedSubject || settings.selectedMonth === null) {
+      throw new Error('Main system not configured. Please select subject and month in main system first.');
+    }
+    
+    const subject = settings.selectedSubject;
+    const month = settings.selectedMonth;
+    const year = settings.selectedYear;
+    const day = settings.currentDay;
+    
+    // Create month key (format: "2025-01")
+    const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+    
+    // 2. Get all faces with attendance status
+    const facesSnapshot = await this.facesRef.once('value');
+    const facesData = facesSnapshot.val();
+    
+    if (!facesData) {
+      throw new Error('No students registered in face recognition system');
+    }
+    
+    // 3. Prepare updates for main system
+    const mainSystemPath = `mainSystem/attendanceData/${monthKey}/${subject}`;
+    const updates = {};
+    
+    for (const studentId in facesData) {
+      const face = facesData[studentId];
+      
+      // Set student name
+      updates[`${studentId}/_name`] = face.name;
+      
+      // Set attendance for current day
+      const status = face.attendanceToday ? 'Present' : 'Absent';
+      updates[`${studentId}/${day}`] = status;
+    }
+    
+    // 4. Write to main system's Firebase path
+    await this.db.ref(mainSystemPath).update(updates);
+    
+    console.log(`✅ Synced to main system: ${subject} / ${monthKey} / Day ${day}`);
+    console.log(`   Students synced: ${Object.keys(facesData).length}`);
+    
+    return {
+      success: true,
+      subject: subject,
+      month: monthKey,
+      day: day,
+      studentsCount: Object.keys(facesData).length
+    };
+    
+  } catch (error) {
+    console.error('❌ Failed to sync to main system:', error);
+    throw error;
+  }
+}
+
   /**
    * Get labeled face descriptors for face-api.js
    * @returns {Array} Array of labeled descriptor objects

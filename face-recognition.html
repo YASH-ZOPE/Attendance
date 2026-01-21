@@ -584,6 +584,29 @@ async function checkAuthAndInitFaceRecognition() {
   }
 }
 
+// After other button handlers, add:
+document.getElementById('syncToMainBtn').addEventListener('click', async () => {
+  try {
+    const btn = document.getElementById('syncToMainBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Syncing...';
+    
+    const result = await cloudStorage.syncToMainSystem();
+    
+    showToast(`✅ Synced! ${result.studentsCount} students marked for ${result.subject}`, 'success');
+    
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-arrow-right-circle me-2"></i>Sync to Main System';
+    
+  } catch (error) {
+    showToast(`❌ ${error.message}`, 'danger');
+    
+    const btn = document.getElementById('syncToMainBtn');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-arrow-right-circle me-2"></i>Sync to Main System';
+  }
+});
+
 // Call on page load (after models are loaded)
 window.addEventListener('DOMContentLoaded', () => {
   // Wait a bit for face-api models to start loading
