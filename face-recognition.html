@@ -591,20 +591,22 @@ document.getElementById('syncToMainBtn').addEventListener('click', async () => {
     btn.disabled = true;
     btn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Syncing...';
     
-    const result = await cloudStorage.syncToMainSystem();
+    // ✅ NEW: Use the storage instance from faceSystem
+    const result = await faceSystem.storage.syncToMainSystem();
     
-    showToast(`✅ Synced! ${result.studentsCount} students marked for ${result.subject}`, 'success');
+    showToast(`✅ Force synced! ${result.studentsCount} students to ${result.subject}, Day ${result.day}`, 'success');
     
     btn.disabled = false;
-    btn.innerHTML = '<i class="bi bi-arrow-right-circle me-2"></i>Sync to Main System';
+    btn.innerHTML = '<i class="bi bi-arrow-right-circle me-2"></i>Force Sync All Students';
     
   } catch (error) {
     showToast(`❌ ${error.message}`, 'danger');
     
     const btn = document.getElementById('syncToMainBtn');
     btn.disabled = false;
-    btn.innerHTML = '<i class="bi bi-arrow-right-circle me-2"></i>Sync to Main System';
+    btn.innerHTML = '<i class="bi bi-arrow-right-circle me-2"></i>Force Sync All Students';
   }
+
 });
 
 // Call on page load (after models are loaded)

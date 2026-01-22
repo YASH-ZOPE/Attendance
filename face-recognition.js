@@ -145,35 +145,102 @@ class FaceRecognitionSystem {
     /**
    * Check if day has changed and reset attendance if needed
    */
-  async checkForDayChange() {
-    try {
-      // Get current day from main system
-      const currentDay = await this.getFromMainDB('currentDay');
+  /**
+ * Enhanced day change detection - checks BOTH calendar date AND main system day
+ */
+async checkForDayChange() {
+  try {
+    // ✅ CHECK 1: Real Calendar Date
+    const today = new Date().toDateString(); // "Wed Jan 22 2025"
+    const lastKnownDate = await faceStorage.getLastKnownDate();
+    
+    if (lastKnownDate && today !== lastKnownDate) {
+      console.log(`📅 CALENDAR DATE CHANGED! ${lastKnownDate} → ${today}`);
       
-      if (!currentDay) {
-        return; // Main system not initialized yet
-      }
+      // Reset attendance because it's a new day
+      await this.handleDayChange('calendar-auto-reset');
       
-      // Get last known day
-      const lastKnownDay = await faceStorage.getLastKnownDay();
+      // Save new date
+      await faceStorage.setLastKnownDate(today);
       
-      if (lastKnownDay === null) {
-        // First time - just save current day
-        await faceStorage.setLastKnownDay(currentDay);
-        console.log(`📅 Day tracker initialized: Day ${currentDay}`);
-        return;
-      }
-      
-      // Check if day changed
-      if (currentDay !== lastKnownDay) {
-        console.log(`📅 DAY CHANGED! ${lastKnownDay} → ${currentDay}`);
-        await this.handleDayChange(currentDay);
-      }
-      
-    } catch (error) {
-      console.error('Error checking day change:', error);
+      this.showToast(
+        `🌅 New day detected! All attendance reset automatically.`,
+        'info'
+      );
     }
+    
+    // Save today's date if first time
+    if (!lastKnownDate) {
+      await faceStorage.setLastKnownDate(today);
+      console.log(`📅 Calendar date tracker initialized: ${today}`);
+    }
+    
+    // ✅ CHECK 2: Main System Day Number (for manual control)
+    const currentDay = await this.getFromMainDB('currentDay');
+    
+    if (!currentDay) {
+      console.warn('⚠️ Main system not initialized - using calendar-only mode');
+      return; 
+    }
+    
+    const lastKnownDay = await faceStorage.getLastKnownDay();
+    
+    if (lastKnownDay === null) {
+      await faceStorage.setLastKnownDay(currentDay);
+      console.log(`📅 Day counter initialized: Day ${currentDay}`);
+      return;
+    }
+    
+    // Check if day counter changed in main system
+    if (currentDay !== lastKnownDay) {
+      console.log(`📅 DAY COUNTER CHANGED! ${lastKnownDay} → ${currentDay}`);
+      await this.handleDayChange(currentDay);
+      await faceStorage.setLastKnownDay(currentDay);
+    }
+    
+  } catch (error) {
+    console.error('Error checking day change:', error);
   }
+}
+
+/**
+ * Handle day change - reset all attendance
+ */
+async handleDayChange(newDay) {
+  try {
+    console.log(`🔄 Resetting attendance for: ${newDay}...`);
+    
+    // Clear in-memory tracking
+    this.recognizedToday.clear();
+    this.lastAttendanceTime = {};
+    
+    // Reset all attendance in database
+    await this.storage.resetAllAttendance();
+    
+    // Update UI
+    await this.updateStudentList();
+    await this.updateStats();
+    
+    // Notify user
+    if (newDay === 'calendar-auto-reset') {
+      this.showToast(
+        `📅 New calendar day! All attendance reset to "Not Present".`,
+        'info'
+      );
+    } else {
+      this.showToast(
+        `📅 Day changed to Day ${newDay}. All attendance reset to "Not Present".`,
+        'info'
+      );
+    }
+    
+    console.log(`✅ Attendance reset complete`);
+    
+  } catch (error) {
+    console.error('Error handling day change:', error);
+    this.showToast('Failed to reset attendance for new day', 'danger');
+  }
+}
 
   /**
    * Handle day change - reset all attendance
@@ -440,6 +507,17 @@ class FaceRecognitionSystem {
         this.recognizedToday.add(studentId);
         this.showToast(`✓ Attendance marked for ${studentName}`, 'success');
         await this.updateStudentList();
+
+         // ✅ NEW: Auto-sync to main system immediately
+      try {
+        const result = await this.storage.syncToMainSystem();
+        console.log(`✅ Auto-synced ${studentName} to main system`);
+      } catch (error) {
+        console.warn('Auto-sync failed:', error);
+        // Don't show error to user - silent failure
+      }
+      
+      await this.updateStudentList();
       }
     }
   }
@@ -1225,6 +1303,10 @@ async syncToMainSystem() {
     await this.checkForDayChange();
 
     const attendanceData = await this.storage.exportAttendanceData();
+
+    // ✅ FILTER: Only get students marked "Present"
+    const presentStudents = attendanceData.filter(student => student.status === 'Present');
+    
     
     if (attendanceData.length === 0) {
       this.showToast('No attendance data to sync', 'warning');

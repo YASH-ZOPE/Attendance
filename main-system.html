@@ -1205,6 +1205,9 @@ async function initialize() {
       studentList: []      // For current display
     };
 
+    let isUpdatingSubjectDropdown = false;
+    let isUpdatingDayDropdown = false;    
+
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                         'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -1429,7 +1432,9 @@ async function initialize() {
 
     function selectSubject(name) {
       appState.selectedSubject = name;
+      isUpdatingSubjectDropdown = true;
       elements.subjectSelect.value = name;
+      isUpdatingSubjectDropdown = false;
       updateSubjectDisplay();
       renderSubjectTags();
       refreshAttendanceTable();
@@ -1554,7 +1559,9 @@ async function initialize() {
 
     function selectDay(day) {
       appState.currentDay = day;
-      elements.dateSelect.value = day;
+      isUpdatingDayDropdown = true;
+      elements.dateSelect.value = day; 
+      isUpdatingDayDropdown = false;
       
       // Update calendar UI
       document.querySelectorAll('.day-btn').forEach(btn => {
@@ -2311,6 +2318,7 @@ async function initialize() {
       });
 
       elements.subjectSelect.addEventListener('change', () => {
+         if (isUpdatingSubjectDropdown) return;
         selectSubject(elements.subjectSelect.value);
       });
 
@@ -2411,6 +2419,7 @@ async function initialize() {
 
       // Day navigation events
       elements.dateSelect.addEventListener('change', () => {
+         if (isUpdatingDayDropdown) return;
         selectDay(parseInt(elements.dateSelect.value));
       });
 
