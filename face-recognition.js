@@ -209,7 +209,7 @@ class FaceRecognitionSystem {
     }
   }
 
-  /**
+/**
  * Handle date change from Firebase
  */
 async handleFirebaseDateChange(newDate, oldDate) {
@@ -220,11 +220,8 @@ async handleFirebaseDateChange(newDate, oldDate) {
   const today = new Date().toDateString();
   
   if (newDate !== today) {
-    // Main system date is outdated, reset attendance
     console.log('📅 Resetting attendance due to date change');
     await this.handleDayChange('calendar-auto-reset');
-    
-    // Update to current date
     await this.firebaseSync.updateCurrentDate(today);
   }
   
@@ -245,7 +242,12 @@ async handleFirebaseSubjectChange(newSubject, oldSubject) {
     this.showToast(`📚 Subject changed to: ${newSubject}`, 'info');
   }
   
-  // Reload face matcher (might be different subject)
+  // Reset attendance when subject changes
+  if (oldSubject && oldSubject !== newSubject) {
+    console.log('📚 Subject changed - resetting attendance');
+    await this.handleDayChange('subject-change');
+  }
+  
   await this.loadFaceMatcher();
   await this.updateStudentList();
 }
@@ -263,6 +265,12 @@ async handleFirebaseMonthChange(newMonth, oldMonth) {
   
   if (newMonth !== null && newMonth !== undefined) {
     this.showToast(`📅 Month changed to: ${monthNames[newMonth]}`, 'info');
+    
+    // Reset attendance when month changes
+    if (oldMonth !== null && oldMonth !== newMonth) {
+      console.log('📅 Month changed - resetting attendance');
+      await this.handleDayChange('month-change');
+    }
   }
 }
 
@@ -276,6 +284,12 @@ async handleFirebaseYearChange(newYear, oldYear) {
   
   if (newYear) {
     this.showToast(`📅 Year changed to: ${newYear}`, 'info');
+    
+    // Reset attendance when year changes
+    if (oldYear && oldYear !== newYear) {
+      console.log('📅 Year changed - resetting attendance');
+      await this.handleDayChange('year-change');
+    }
   }
 }
 
@@ -288,48 +302,56 @@ async handleFirebaseDayChange(newDay, oldDay) {
   this.mainSystemConfig.currentDay = newDay;
   
   if (newDay && oldDay && newDay !== oldDay) {
-    // Admin manually changed the day in main system
     this.showToast(`📅 Day changed to Day ${newDay}`, 'info');
     
-    // Optional: Reset attendance when day changes
-    // await this.handleDayChange(newDay);
+    // Reset attendance when day changes
+    await this.handleDayChange(`day-${newDay}`);
   }
-}
-  /**
+} 
+
+ /**
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
    * Handle day change - reset all attendance
    */
-  async handleDayChange(newDay) {
-    try {
-      console.log(`🔄 Resetting attendance for Day ${newDay}...`);
-      
-      // Clear in-memory tracking
-      this.recognizedToday.clear();
-      this.lastAttendanceTime = {};
-      
-      // Reset all attendance in database
-      await this.storage.resetAllAttendance();
-      
-      // Save new day
-      await faceStorage.setLastKnownDay(newDay);
-      
-      // Update UI
-      await this.updateStudentList();
-      await this.updateStats();
-      
-      // Notify user
-      this.showToast(
-        `📅 Day changed to Day ${newDay}. All attendance reset to "Not Present".`,
-        'info'
-      );
-      
-      console.log(`✅ Attendance reset complete for Day ${newDay}`);
-      
-    } catch (error) {
-      console.error('Error handling day change:', error);
-      this.showToast('Failed to reset attendance for new day', 'danger');
+ async handleDayChange(newDay) {
+  try {
+    console.log(`🔄 Resetting attendance for: ${newDay}...`);
+    
+    // Clear in-memory tracking
+    this.recognizedToday.clear();
+    this.lastAttendanceTime = {};
+    
+    // Reset all attendance in database
+    await this.storage.resetAllAttendance();
+    
+    // Update UI
+    await this.updateStudentList();
+    await this.updateStats();
+    
+    // Better notifications based on reason
+    if (newDay === 'calendar-auto-reset') {
+      this.showToast('📅 New calendar day! All attendance reset.', 'info');
+    } else if (newDay === 'subject-change') {
+      this.showToast('📚 Subject changed! All attendance reset.', 'info');
+    } else if (newDay === 'month-change') {
+      this.showToast('📅 Month changed! All attendance reset.', 'info');
+    } else if (newDay === 'year-change') {
+      this.showToast('📅 Year changed! All attendance reset.', 'info');
+    } else if (newDay && newDay.toString().startsWith('day-')) {
+      this.showToast(`📅 Day changed to Day ${newDay.toString().replace('day-', '')}. Attendance reset.`, 'info');
+    } else {
+      this.showToast(`📅 Day changed to Day ${newDay}. All attendance reset.`, 'info');
     }
+    
+    console.log(`✅ Attendance reset complete`);
+    
+  } catch (error) {
+    console.error('Error handling day change:', error);
+    this.showToast('Failed to reset attendance for new day', 'danger');
   }
-  /**
+}
+ 
+ /**
    * Load face-api.js models
    */
   async loadModels() {
@@ -365,6 +387,22 @@ async handleFirebaseDayChange(newDay, oldDay) {
     }
 
     try {
+
+       // ✅ AUTO-ACTIVATE RECOGNITION MODE FOR STUDENTS
+      const userRole = window.currentUserRole || 'student';
+      
+      if (userRole === 'student') {
+        // Force recognition mode for students
+        this.currentMode = 'recognition';
+        this.activateRecognitionMode();
+        console.log('🎓 Student detected - Auto-activated Recognition Mode');
+      } else if (this.currentMode !== 'register' && this.currentMode !== 'recognition' && this.currentMode !== 'bulkImport') {
+        // For admin/teacher, default to recognition if no mode selected
+        this.currentMode = 'recognition';
+        this.activateRecognitionMode();
+        console.log('👨‍🏫 Teacher/Admin - Defaulted to Recognition Mode');
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { 
           width: { ideal: 1280 },
@@ -398,6 +436,22 @@ async handleFirebaseDayChange(newDay, oldDay) {
     } catch (error) {
       console.error('Camera error:', error);
       this.showToast('Failed to access camera: ' + error.message, 'danger');
+    }
+  }
+
+  /**
+   * Helper: Activate recognition mode UI
+   */
+  activateRecognitionMode() {
+    document.getElementById('recognitionMode').classList.add('active');
+    document.getElementById('registerMode').classList.remove('active');
+    if (document.getElementById('bulkImportMode')) {
+      document.getElementById('bulkImportMode').classList.remove('active');
+    }
+    document.getElementById('recognitionControls').style.display = 'block';
+    document.getElementById('registerControls').style.display = 'none';
+    if (document.getElementById('bulkImportControls')) {
+      document.getElementById('bulkImportControls').style.display = 'none';
     }
   }
 

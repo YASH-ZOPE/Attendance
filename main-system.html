@@ -350,20 +350,39 @@
   .go-btn:hover {
   background: #00c6ff;
   }
-  /* Role-based visibility */
-.admin-only { display: block; }
-.teacher-only { display: block; }
-.student-only { display: none; }
+/* DEFAULT: Hide everything role-specific */
+.admin-only,
+.teacher-only,
+.student-only,
+.admin-only-inline,
+.teacher-only-inline,
+.hide-for-teacher,
+.hide-for-student,
+.hide-for-teacher-inline,
+.hide-for-student-inline {
+  display: none !important;
+}
 
-.hide-for-teacher { display: none; }
-.hide-for-student { display: none; }
+/* Show elements based on body class */
+body.role-admin .admin-only { display: block !important; }
+body.role-admin .admin-only-inline { display: inline-block !important; }
+body.role-admin .teacher-only { display: block !important; }
+body.role-admin .teacher-only-inline { display: inline-block !important; }
 
-/* For buttons/inline elements */
-.admin-only-inline { display: inline-block; }
-.teacher-only-inline { display: inline-block; }
-.hide-for-teacher-inline { display: none; }
-.hide-for-student-inline { display: none; }
+body.role-teacher .teacher-only { display: block !important; }
+body.role-teacher .teacher-only-inline { display: inline-block !important; }
+body.role-teacher .hide-for-teacher { display: none !important; }
+body.role-teacher .hide-for-teacher-inline { display: none !important; }
 
+body.role-student .student-only { display: block !important; }
+body.role-student .hide-for-student { display: none !important; }
+body.role-student .hide-for-student-inline { display: none !important; }
+
+/* Fix Bootstrap grid issues */
+body.role-admin .admin-only.col-md-4,
+body.role-teacher .teacher-only.col-md-4 {
+  display: flex !important;
+}
   </style>
 </head>
 <body>
@@ -1157,6 +1176,8 @@ async function initialize() {
       await saveToStorage("attendanceData", appState.attendanceData);
       await saveToStorage("holidays", appState.holidays);
       await saveToStorage("threshold", appState.threshold);
+      const currentDate = new Date().toDateString();
+      await saveToStorage("currentDate", currentDate);
     console.log("All data saved (cloud + local)");
   } catch (error) {
     console.error("Failed to save data:", error);
