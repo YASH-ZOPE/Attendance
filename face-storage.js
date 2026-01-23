@@ -505,8 +505,7 @@ async saveBulkFaces(studentId, studentName, descriptors, sampleFile) {
     });
   }
 
-  // In face-storage.js, add these methods:
-
+ 
 /**
  * Get last known calendar date
  */
@@ -536,8 +535,7 @@ async setLastKnownDate(date) {
     transaction.oncomplete = () => resolve();
     transaction.onerror = () => resolve();
   });
-}
-  
+} 
   /**
    * Get attendance statistics
    */

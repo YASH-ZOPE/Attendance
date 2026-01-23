@@ -151,17 +151,20 @@ class FaceRecognitionSystem {
 async checkForDayChange() {
   try {
     // ✅ CHECK 1: Real Calendar Date
-    const today = new Date().toDateString(); // "Wed Jan 22 2025"
-    const lastKnownDate = await faceStorage.getLastKnownDate();
+    const today = new Date().toDateString(); // "Fri Jan 24 2025"
+    const lastKnownDate = await firebase.database()
+      .ref('systemConfig/currentDate').once('value').then(snap => snap.val());
     
+    // Check if date changed
     if (lastKnownDate && today !== lastKnownDate) {
       console.log(`📅 CALENDAR DATE CHANGED! ${lastKnownDate} → ${today}`);
       
       // Reset attendance because it's a new day
       await this.handleDayChange('calendar-auto-reset');
       
-      // Save new date
-      await faceStorage.setLastKnownDate(today);
+      // ✅ SAVE to Firebase (not faceStorage!)
+      await firebase.database()
+        .ref('systemConfig/currentDate').set(today);
       
       this.showToast(
         `🌅 New day detected! All attendance reset automatically.`,
@@ -169,10 +172,11 @@ async checkForDayChange() {
       );
     }
     
-    // Save today's date if first time
+    // ✅ Initialize in Firebase if first time
     if (!lastKnownDate) {
-      await faceStorage.setLastKnownDate(today);
-      console.log(`📅 Calendar date tracker initialized: ${today}`);
+      await firebase.database()
+        .ref('systemConfig/currentDate').set(today);
+      console.log(`📅 Date initialized in Firebase: ${today}`);
     }
     
     // ✅ CHECK 2: Main System Day Number (for manual control)
