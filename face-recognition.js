@@ -29,6 +29,14 @@ class FaceRecognitionSystem {
     
     // Main system database reference
     this.mainDB = null;
+    this.firebaseSync = null;
+    this.mainSystemConfig = {
+      currentDate: null,
+      selectedSubject: null,
+      selectedMonth: null,
+      selectedYear: null,
+      currentDay: null
+    };
   }
 
   /**
@@ -68,12 +76,29 @@ class FaceRecognitionSystem {
     }
     // ... rest of your existing init code
 
+    try {
+      this.firebaseSync = new FirebaseLiveSync();
+      await this.firebaseSync.init();
+      
+      // Setup live listeners
+      this.firebaseSync.setupLiveListeners({
+        onDateChange: (newDate, oldDate) => this.handleFirebaseDateChange(newDate, oldDate),
+        onSubjectChange: (newSubject, oldSubject) => this.handleFirebaseSubjectChange(newSubject, oldSubject),
+        onMonthChange: (newMonth, oldMonth) => this.handleFirebaseMonthChange(newMonth, oldMonth),
+        onYearChange: (newYear, oldYear) => this.handleFirebaseYearChange(newYear, oldYear),
+        onDayChange: (newDay, oldDay) => this.handleFirebaseDayChange(newDay, oldDay)
+      });
+      
+      console.log('✅ Firebase live sync enabled');
+    } catch (error) {
+      console.error('⚠️ Firebase live sync failed:', error);
+    }
+
+      
       // Show loading overlay
       this.showLoading();
       
-      // Initialize storage
       await faceStorage.init();
-      
       // Connect to main system database
       await this.connectToMainSystem();
       
@@ -148,104 +173,128 @@ class FaceRecognitionSystem {
   /**
  * Enhanced day change detection - checks BOTH calendar date AND main system day
  */
-async checkForDayChange() {
-  try {
-    // ✅ CHECK 1: Real Calendar Date
-    const today = new Date().toDateString(); // "Fri Jan 24 2025"
-    const lastKnownDate = await firebase.database()
-      .ref('systemConfig/currentDate').once('value').then(snap => snap.val());
-    
-    // Check if date changed
-    if (lastKnownDate && today !== lastKnownDate) {
-      console.log(`📅 CALENDAR DATE CHANGED! ${lastKnownDate} → ${today}`);
+  async checkForDayChange() {
+    try {
+      // Check if Firebase sync is active
+      if (!this.firebaseSync || !this.firebaseSync.isConnected) {
+        console.warn('⚠️ Firebase not connected, using local check');
+        // Fallback to local storage
+        const today = new Date().toDateString();
+        const lastKnownDate = await faceStorage.getLastKnownDate();
+        
+        if (lastKnownDate && today !== lastKnownDate) {
+          await this.handleDayChange('calendar-auto-reset');
+          await faceStorage.setLastKnownDate(today);
+        }
+        
+        if (!lastKnownDate) {
+          await faceStorage.setLastKnownDate(today);
+        }
+        return;
+      }
       
-      // Reset attendance because it's a new day
-      await this.handleDayChange('calendar-auto-reset');
+      // ✅ NEW: Use Firebase data
+      const today = new Date().toDateString();
+      const firebaseDate = this.mainSystemConfig.currentDate;
       
-      // ✅ SAVE to Firebase (not faceStorage!)
-      await firebase.database()
-        .ref('systemConfig/currentDate').set(today);
+      if (firebaseDate && today !== firebaseDate) {
+        console.log(`📅 Date mismatch detected: Firebase=${firebaseDate}, Today=${today}`);
+        // Date changed - will be handled by onDateChange callback
+        // Update Firebase with current date
+        await this.firebaseSync.updateCurrentDate(today);
+      }
       
-      this.showToast(
-        `🌅 New day detected! All attendance reset automatically.`,
-        'info'
-      );
+    } catch (error) {
+      console.error('Error checking day change:', error);
     }
+  }
+
+  /**
+ * Handle date change from Firebase
+ */
+async handleFirebaseDateChange(newDate, oldDate) {
+  console.log(`🔔 Firebase date changed: ${oldDate} → ${newDate}`);
+  
+  this.mainSystemConfig.currentDate = newDate;
+  
+  const today = new Date().toDateString();
+  
+  if (newDate !== today) {
+    // Main system date is outdated, reset attendance
+    console.log('📅 Resetting attendance due to date change');
+    await this.handleDayChange('calendar-auto-reset');
     
-    // ✅ Initialize in Firebase if first time
-    if (!lastKnownDate) {
-      await firebase.database()
-        .ref('systemConfig/currentDate').set(today);
-      console.log(`📅 Date initialized in Firebase: ${today}`);
-    }
-    
-    // ✅ CHECK 2: Main System Day Number (for manual control)
-    const currentDay = await this.getFromMainDB('currentDay');
-    
-    if (!currentDay) {
-      console.warn('⚠️ Main system not initialized - using calendar-only mode');
-      return; 
-    }
-    
-    const lastKnownDay = await faceStorage.getLastKnownDay();
-    
-    if (lastKnownDay === null) {
-      await faceStorage.setLastKnownDay(currentDay);
-      console.log(`📅 Day counter initialized: Day ${currentDay}`);
-      return;
-    }
-    
-    // Check if day counter changed in main system
-    if (currentDay !== lastKnownDay) {
-      console.log(`📅 DAY COUNTER CHANGED! ${lastKnownDay} → ${currentDay}`);
-      await this.handleDayChange(currentDay);
-      await faceStorage.setLastKnownDay(currentDay);
-    }
-    
-  } catch (error) {
-    console.error('Error checking day change:', error);
+    // Update to current date
+    await this.firebaseSync.updateCurrentDate(today);
+  }
+  
+  this.showToast(`📅 Date updated: ${newDate}`, 'info');
+}
+
+/**
+ * Handle subject change from Firebase
+ */
+async handleFirebaseSubjectChange(newSubject, oldSubject) {
+  console.log(`🔔 Firebase subject changed: ${oldSubject} → ${newSubject}`);
+  
+  this.mainSystemConfig.selectedSubject = newSubject;
+  
+  if (!newSubject) {
+    this.showToast('⚠️ No subject selected in main system', 'warning');
+  } else {
+    this.showToast(`📚 Subject changed to: ${newSubject}`, 'info');
+  }
+  
+  // Reload face matcher (might be different subject)
+  await this.loadFaceMatcher();
+  await this.updateStudentList();
+}
+
+/**
+ * Handle month change from Firebase
+ */
+async handleFirebaseMonthChange(newMonth, oldMonth) {
+  console.log(`🔔 Firebase month changed: ${oldMonth} → ${newMonth}`);
+  
+  this.mainSystemConfig.selectedMonth = newMonth;
+  
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                     'July', 'August', 'September', 'October', 'November', 'December'];
+  
+  if (newMonth !== null && newMonth !== undefined) {
+    this.showToast(`📅 Month changed to: ${monthNames[newMonth]}`, 'info');
   }
 }
 
 /**
- * Handle day change - reset all attendance
+ * Handle year change from Firebase
  */
-async handleDayChange(newDay) {
-  try {
-    console.log(`🔄 Resetting attendance for: ${newDay}...`);
-    
-    // Clear in-memory tracking
-    this.recognizedToday.clear();
-    this.lastAttendanceTime = {};
-    
-    // Reset all attendance in database
-    await this.storage.resetAllAttendance();
-    
-    // Update UI
-    await this.updateStudentList();
-    await this.updateStats();
-    
-    // Notify user
-    if (newDay === 'calendar-auto-reset') {
-      this.showToast(
-        `📅 New calendar day! All attendance reset to "Not Present".`,
-        'info'
-      );
-    } else {
-      this.showToast(
-        `📅 Day changed to Day ${newDay}. All attendance reset to "Not Present".`,
-        'info'
-      );
-    }
-    
-    console.log(`✅ Attendance reset complete`);
-    
-  } catch (error) {
-    console.error('Error handling day change:', error);
-    this.showToast('Failed to reset attendance for new day', 'danger');
+async handleFirebaseYearChange(newYear, oldYear) {
+  console.log(`🔔 Firebase year changed: ${oldYear} → ${newYear}`);
+  
+  this.mainSystemConfig.selectedYear = newYear;
+  
+  if (newYear) {
+    this.showToast(`📅 Year changed to: ${newYear}`, 'info');
   }
 }
 
+/**
+ * Handle day change from Firebase
+ */
+async handleFirebaseDayChange(newDay, oldDay) {
+  console.log(`🔔 Firebase day changed: ${oldDay} → ${newDay}`);
+  
+  this.mainSystemConfig.currentDay = newDay;
+  
+  if (newDay && oldDay && newDay !== oldDay) {
+    // Admin manually changed the day in main system
+    this.showToast(`📅 Day changed to Day ${newDay}`, 'info');
+    
+    // Optional: Reset attendance when day changes
+    // await this.handleDayChange(newDay);
+  }
+}
   /**
    * Handle day change - reset all attendance
    */
@@ -1316,12 +1365,26 @@ async syncToMainSystem() {
       this.showToast('No attendance data to sync', 'warning');
       return;
     }
-
-    // Load main system state
-    const selectedSubject = await this.getFromMainDB('selectedSubject');
-    const selectedMonth = await this.getFromMainDB('selectedMonth');
-    const selectedYear = await this.getFromMainDB('selectedYear');
-    const currentDay = await this.getFromMainDB('currentDay') || 1;
+      // ✅ CHANGE THIS - Use Firebase config instead of IndexedDB
+    let selectedSubject, selectedMonth, selectedYear, currentDay;
+    
+    if (this.firebaseSync && this.firebaseSync.isConnected) {
+      // Use live Firebase data
+      selectedSubject = this.mainSystemConfig.selectedSubject;
+      selectedMonth = this.mainSystemConfig.selectedMonth;
+      selectedYear = this.mainSystemConfig.selectedYear;
+      currentDay = this.mainSystemConfig.currentDay || 1;
+      
+      console.log('✅ Using Firebase live config for sync');
+    } else {
+      // Fallback to IndexedDB
+      selectedSubject = await this.getFromMainDB('selectedSubject');
+      selectedMonth = await this.getFromMainDB('selectedMonth');
+      selectedYear = await this.getFromMainDB('selectedYear');
+      currentDay = await this.getFromMainDB('currentDay') || 1;
+      
+      console.log('⚠️ Using IndexedDB fallback for sync');
+    }
     
     // DEBUG
     console.log('=== SYNC DEBUG ===');
@@ -1676,6 +1739,107 @@ document.getElementById('closeResultsBtn').addEventListener('click', () => {
     if (loadingText) loadingText.textContent = text;
   }
 }
+
+class FirebaseLiveSync {
+  constructor() {
+    this.firebaseDB = null;
+    this.isConnected = false;
+    this.listeners = [];
+  }
+
+  async init() {
+    try {
+      if (typeof firebase === 'undefined') {
+        throw new Error('Firebase SDK not loaded');
+      }
+      
+      this.firebaseDB = firebase.database();
+      await this.firebaseDB.ref('.info/connected').once('value');
+      
+      this.isConnected = true;
+      console.log('✅ Firebase Live Sync initialized');
+      return true;
+    } catch (error) {
+      console.error('❌ Firebase Live Sync failed:', error);
+      this.isConnected = false;
+      return false;
+    }
+  }
+
+  setupLiveListeners(callbacks) {
+    if (!this.isConnected) return;
+
+    // Listen to currentDate
+    const dateRef = this.firebaseDB.ref('mainSystem/currentDate');
+    dateRef.on('value', (snapshot) => {
+      const newDate = snapshot.val();
+      if (callbacks.onDateChange) {
+        callbacks.onDateChange(newDate, null);
+      }
+    });
+    this.listeners.push(dateRef);
+
+    // Listen to selectedSubject
+    const subjectRef = this.firebaseDB.ref('mainSystem/selectedSubject');
+    subjectRef.on('value', (snapshot) => {
+      const newSubject = snapshot.val();
+      if (callbacks.onSubjectChange) {
+        callbacks.onSubjectChange(newSubject, null);
+      }
+    });
+    this.listeners.push(subjectRef);
+
+    // Listen to selectedMonth
+    const monthRef = this.firebaseDB.ref('mainSystem/selectedMonth');
+    monthRef.on('value', (snapshot) => {
+      const newMonth = snapshot.val();
+      if (callbacks.onMonthChange) {
+        callbacks.onMonthChange(newMonth, null);
+      }
+    });
+    this.listeners.push(monthRef);
+
+    // Listen to selectedYear
+    const yearRef = this.firebaseDB.ref('mainSystem/selectedYear');
+    yearRef.on('value', (snapshot) => {
+      const newYear = snapshot.val();
+      if (callbacks.onYearChange) {
+        callbacks.onYearChange(newYear, null);
+      }
+    });
+    this.listeners.push(yearRef);
+
+    // Listen to currentDay
+    const dayRef = this.firebaseDB.ref('mainSystem/currentDay');
+    dayRef.on('value', (snapshot) => {
+      const newDay = snapshot.val();
+      if (callbacks.onDayChange) {
+        callbacks.onDayChange(newDay, null);
+      }
+    });
+    this.listeners.push(dayRef);
+
+    console.log('✅ Firebase live listeners active');
+  }
+
+  async updateCurrentDate(date) {
+    if (!this.isConnected) return;
+    
+    try {
+      await this.firebaseDB.ref('mainSystem/currentDate').set(date);
+      console.log(`✅ Updated Firebase currentDate: ${date}`);
+    } catch (error) {
+      console.error('Failed to update currentDate:', error);
+    }
+  }
+
+  detachListeners() {
+    this.listeners.forEach(ref => ref.off());
+    this.listeners = [];
+    console.log('✅ Firebase listeners detached');
+  }
+}
+
 
 // Initialize system when page loads
 let faceSystem;
