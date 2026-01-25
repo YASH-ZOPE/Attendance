@@ -102,12 +102,20 @@ class FaceRecognitionSystem {
       // Connect to main system database
       await this.connectToMainSystem();
       
+      // ✅ CHECK DATE IMMEDIATELY ON STARTUP
+      await this.checkForDayChange();
+
       // Load face-api.js models
       await this.loadModels();
       
       // Setup event listeners
       this.setupEventListeners();
       
+      // ✅ CHECK FOR DATE CHANGE EVERY 5 MINUTES (EVEN WHEN CAMERA OFF)
+      this.dateCheckInterval = setInterval(() => {
+      this.checkForDayChange();
+    }, 5 * 60 * 1000); // 5 minutes
+
       // Check for day changes
       await this.checkForDayChange();
 
@@ -324,7 +332,7 @@ async handleFirebaseDayChange(newDay, oldDay) {
     // Reset all attendance in database
     await this.storage.resetAllAttendance();
     
-    // Update UI
+    // Update UI   
     await this.updateStudentList();
     await this.updateStats();
     
