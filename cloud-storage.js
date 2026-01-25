@@ -49,6 +49,33 @@ class CloudStorage {
    * @param {Float32Array} descriptor - Face descriptor
    * @param {string} imageData - Base64 image data
    */
+
+/**
+ * Get currently stored day number
+ */
+async getCurrentDay() {
+  try {
+    const snapshot = await this.db.ref('faceRecognition/currentDay').once('value');
+    return snapshot.val();
+  } catch (error) {
+    console.error('Error getting current day:', error);
+    return null;
+  }
+}
+
+/**
+ * Set current day number
+ */
+async setCurrentDay(day) {
+  try {
+    await this.db.ref('faceRecognition/currentDay').set(day);
+    console.log(`✅ Stored current day in Firebase: ${day}`);
+  } catch (error) {
+    console.error('Error setting current day:', error);
+  }
+}
+
+
   async saveFace(studentId, studentName, descriptor, imageData) {
     if (!this.isInitialized) {
       throw new Error('Cloud storage not initialized');
@@ -164,6 +191,7 @@ class CloudStorage {
    * @param {Array<Float32Array>} newDescriptors - New descriptors
    * @param {File} sampleFile - Sample image
    */
+
   async addBulkFacesToExisting(studentId, studentName, newDescriptors, sampleFile) {
     if (!this.isInitialized) {
       throw new Error('Cloud storage not initialized');

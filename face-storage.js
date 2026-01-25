@@ -26,8 +26,18 @@ class FaceStorage {
 
       request.onsuccess = () => {
         this.db = request.result;
-        console.log('Face database initialized');
-        resolve();
+
+        // Create faces store if doesn't exist
+      if (!this.db.objectStoreNames.contains('faces')) {
+        this.db.createObjectStore('faces', { keyPath: 'id' });
+      }
+      
+      // ✅ ADD THIS: Create settings store
+      if (!this.db.objectStoreNames.contains('settings')) {
+        this.db.createObjectStore('settings', { keyPath: 'key' });
+        console.log('✅ Created settings store');
+      }
+
       };
 
       request.onupgradeneeded = (event) => {
@@ -43,6 +53,67 @@ class FaceStorage {
       };
     });
   }
+
+  //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+// ✅ CHANGE 5: ADD DAY TRACKING METHODS TO face-storage.js
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+/**
+ * Get currently stored day number
+ */
+async getCurrentDay() {
+  return new Promise((resolve) => {
+    if (!this.db) {
+      resolve(null);
+      return;
+    }
+
+    const transaction = this.db.transaction(['settings'], 'readonly');
+    const store = transaction.objectStore('settings');
+    const request = store.get('currentDay');
+
+    request.onsuccess = () => {
+      const result = request.result;
+      resolve(result ? result.value : null);
+    };
+
+    request.onerror = () => {
+      console.error('Error getting current day:', request.error);
+      resolve(null);
+    };
+  });
+}
+
+/**
+ * Set current day number
+ */
+async setCurrentDay(day) {
+  return new Promise((resolve, reject) => {
+    if (!this.db) {
+      reject(new Error('Database not initialized'));
+      return;
+    }
+
+    const transaction = this.db.transaction(['settings'], 'readwrite');
+    const store = transaction.objectStore('settings');
+    const request = store.put({
+      key: 'currentDay',
+      value: day,
+      timestamp: Date.now()
+    });
+
+    request.onsuccess = () => {
+      console.log(`✅ Stored current day: ${day}`);
+      resolve();
+    };
+
+    request.onerror = () => {
+      console.error('Error setting current day:', request.error);
+      reject(request.error);
+    };
+  });
+}
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
   /**
    * Save a face descriptor with student information

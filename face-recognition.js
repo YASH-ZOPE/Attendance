@@ -181,48 +181,45 @@ class FaceRecognitionSystem {
   /**
  * Enhanced day change detection - checks BOTH calendar date AND main system day
  */
-  async checkForDayChange() {
-    try {
-      // Check if Firebase sync is active
-      if (!this.firebaseSync || !this.firebaseSync.isConnected) {
-        console.warn('⚠️ Firebase not connected, using local check');
-        // Fallback to local storage
-        const today = new Date().toDateString();
-        const lastKnownDate = await faceStorage.getLastKnownDate();
-        
-        if (lastKnownDate && today !== lastKnownDate) {
-          await this.handleDayChange('calendar-auto-reset');
-          await faceStorage.setLastKnownDate(today);
-        }
-        
-        if (!lastKnownDate) {
-          await faceStorage.setLastKnownDate(today);
-        }
-        return;
-      }
-      
-      // ✅ NEW: Use Firebase data
-      const today = new Date().toDateString();
-      const firebaseDate = this.mainSystemConfig.currentDate;
-      
-      if (firebaseDate && today !== firebaseDate) {
-        console.log(`📅 Date mismatch detected: Firebase=${firebaseDate}, Today=${today}`);
-        // Date changed - will be handled by onDateChange callback
-        // Update Firebase with current date
-        await this.firebaseSync.updateCurrentDate(today);
-      }
-      
-    } catch (error) {
-      console.error('Error checking day change:', error);
+ async checkForDayChange() {
+  try {
+    // Only check if Firebase sync is active
+    if (!this.firebaseSync || !this.firebaseSync.isConnected) {
+      console.warn('⚠️ Firebase not connected - cannot detect day changes');
+      return;
     }
+    
+    // Get current day from Firebase
+    const firebaseDay = this.mainSystemConfig.currentDay;
+    
+    if (!firebaseDay) {
+      console.log('⚠️ No day set in main system yet');
+      return;
+    }
+    
+    // Get what we think the current day should be from local storage
+    const ourStoredDay = await this.storage.getCurrentDay();
+    
+    if (ourStoredDay !== null && ourStoredDay !== firebaseDay) {
+      console.log(`📅 Day mismatch detected: Our=${ourStoredDay}, Firebase=${firebaseDay}`);
+      // Firebase has a different day - reset to match
+      await this.handleFirebaseDayChange(firebaseDay, ourStoredDay);
+      await this.storage.setCurrentDay(firebaseDay);
+    } else if (ourStoredDay === null) {
+      // First time - store the current Firebase day
+      console.log(`📅 First run - storing current day: ${firebaseDay}`);
+      await this.storage.setCurrentDay(firebaseDay);
+    }
+    
+  } catch (error) {
+    console.error('Error checking day change:', error);
   }
-
+}
 /**
  * Handle date change from Firebase
  */
 async handleFirebaseDateChange(newDate, oldDate) {
-  console.log(`🔔 Firebase date changed: ${oldDate} → ${newDate}`);
-  
+  console.log(`🔔 Firebase date changed: ${oldDate} → ${newDate} (IGNORED)`);
   this.mainSystemConfig.currentDate = newDate;
   
   const today = new Date().toDateString();
@@ -307,16 +304,30 @@ async handleFirebaseYearChange(newYear, oldYear) {
 async handleFirebaseDayChange(newDay, oldDay) {
   console.log(`🔔 Firebase day changed: ${oldDay} → ${newDay}`);
   
+  const previousDay = this.mainSystemConfig.currentDay;
   this.mainSystemConfig.currentDay = newDay;
   
-  if (newDay && oldDay && newDay !== oldDay) {
-    this.showToast(`📅 Day changed to Day ${newDay}`, 'info');
+  // ✅ ALWAYS reset if day is different from what we have stored
+  if (newDay && newDay !== previousDay) {
+    console.log(`📅 Day changed from ${previousDay} to ${newDay} - FORCING RESET`);
     
-    // Reset attendance when day changes
+    // Clear in-memory tracking IMMEDIATELY
+    this.recognizedToday.clear();
+    this.lastAttendanceTime = {};
+    
+    // Reset database
     await this.handleDayChange(`day-${newDay}`);
+    
+    // Store new day
+    await this.storage.setCurrentDay(newDay);
+    
+    // Update UI
+    await this.updateStudentList();
+    await this.updateStats();
+    
+    this.showToast(`📅 Day changed to Day ${newDay}. Attendance cleared!`, 'info');
   }
-} 
-
+}
  /**
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
    * Handle day change - reset all attendance
@@ -395,6 +406,13 @@ async handleFirebaseDayChange(newDay, oldDay) {
     }
 
     try {
+      await this.checkForDayChange();
+    
+    // Log current day
+    if (this.firebaseSync && this.firebaseSync.isConnected) {
+      const currentDay = this.mainSystemConfig.currentDay;
+      console.log(`📅 Starting camera - Current day is: Day ${currentDay || 'NOT SET'}`);
+    }
 
        // ✅ AUTO-ACTIVATE RECOGNITION MODE FOR STUDENTS
       const userRole = window.currentUserRole || 'student';
