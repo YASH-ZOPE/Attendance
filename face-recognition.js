@@ -38,6 +38,7 @@ class FaceRecognitionSystem {
       currentDay: null
     };
        this.isHandlingDayChange = false;
+       this.userRole = null;
   }
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>         version           >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   /**
@@ -60,7 +61,11 @@ class FaceRecognitionSystem {
     
     console.log(`Logged in as: ${user.attributes.email} (${role})`);
     
-    // ✅ CONTINUE WITH EXISTING INITIALIZATION
+    this.userRole = role; // ✅ WORKS - adds property to class
+  
+   console.log(`Logged in as: ${user.attributes.email} (${role})`);
+    
+   // ✅ CONTINUE WITH EXISTING INITIALIZATION
     this.showLoading();
     // ✅ INITIALIZE CLOUD STORAGE WITH FALLBACK
     try {
@@ -262,7 +267,22 @@ async handleFirebaseDayChange(newDay, oldDay) {
       await this.updateStudentList();
       await this.updateStats();
       
+      if (this.userRole === 'student') {
+      const today = new Date().getDate();
+      
+      if (newDay !== today) {
+        this.showToast(
+          `📅 Day changed to Day ${newDay}\n\n` +
+          `⚠️ NOTE: As a student, you can VIEW this date,\n` +
+          `but face recognition ONLY works for TODAY (Day ${today})`,
+          'info'
+        );
+      } else {
+        this.showToast(`📅 Day changed to TODAY (Day ${newDay}). Attendance cleared!`, 'info');
+      }
+    } else {
       this.showToast(`📅 Day changed to Day ${newDay}. Attendance cleared!`, 'info');
+    }
       
     } catch (error) {
       console.error('Error handling day change:', error);
@@ -421,6 +441,110 @@ async handleFirebaseDateChange(newDate, oldDate) {
     }
   }
 
+
+  async validateDateForRole() {
+  const today = new Date();
+  const todayDay = today.getDate();
+  const todayMonth = today.getMonth();
+  const todayYear = today.getFullYear();
+  
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                      'July', 'August', 'September', 'October', 'November', 'December'];
+
+  if (!this.firebaseSync || !this.firebaseSync.isConnected) {
+    return {
+      valid: false,
+      message: '⚠️ Firebase not connected. Please check your connection.'
+    };
+  }
+
+  const selectedDay = this.mainSystemConfig.currentDay;
+  const selectedMonth = this.mainSystemConfig.selectedMonth;
+  const selectedYear = this.mainSystemConfig.selectedYear;
+
+  if (selectedDay === null || selectedMonth === null || selectedYear === null) {
+    return {
+      valid: false,
+      message: '⚠️ Please select a date in the main system first!'
+    };
+  }
+
+  if (this.userRole === 'student') {
+    if (selectedDay !== todayDay || 
+        selectedMonth !== todayMonth || 
+        selectedYear !== todayYear) {
+      
+      return {
+        valid: false,
+        message: `⚠️ STUDENTS CAN ONLY MARK ATTENDANCE FOR TODAY!\n\n` +
+                 `Today is: ${todayDay} ${monthNames[todayMonth]} ${todayYear}\n` +
+                 `Main system shows: ${selectedDay} ${monthNames[selectedMonth]} ${selectedYear}\n\n` +
+                 `You can view other dates in the main system, but face recognition only works for today.`
+      };
+    }
+    
+    return {
+      valid: true,
+      targetDay: todayDay,
+      targetMonth: todayMonth,
+      targetYear: todayYear,
+      message: `✅ Marking attendance for TODAY (${todayDay} ${monthNames[todayMonth]} ${todayYear})`
+    };
+    
+  } else {
+    return {
+      valid: true,
+      targetDay: selectedDay,
+      targetMonth: selectedMonth,
+      targetYear: selectedYear,
+      message: `✅ Marking attendance for: ${selectedDay} ${monthNames[selectedMonth]} ${selectedYear}`
+    };
+  }
+}
+
+
+showDateInfo(day, month, year) {
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                      'July', 'August', 'September', 'October', 'November', 'December'];
+  
+  const dateStr = `${day} ${monthNames[month]} ${year}`;
+  const today = new Date();
+  const isToday = (day === today.getDate() && 
+                   month === today.getMonth() && 
+                   year === today.getFullYear());
+  
+  const existingDateInfo = document.getElementById('attendanceDateInfo');
+  if (existingDateInfo) {
+    existingDateInfo.remove();
+  }
+  
+  const dateInfo = document.createElement('div');
+  dateInfo.id = 'attendanceDateInfo';
+  dateInfo.className = `alert ${isToday ? 'alert-success' : 'alert-warning'} mt-2`;
+  dateInfo.innerHTML = `
+    <i class="bi bi-calendar-check me-2"></i>
+    <strong>Marking Attendance For:</strong> ${dateStr}
+    ${isToday ? '<span class="badge bg-success ms-2">TODAY</span>' : 
+                `<span class="badge bg-warning ms-2">DEMO MODE (${this.userRole})</span>`}
+  `;
+  
+  const canvas = document.getElementById('canvas');
+  if (canvas && canvas.parentElement) {
+    canvas.parentElement.insertBefore(dateInfo, canvas.nextSibling);
+  } else {
+    document.body.insertBefore(dateInfo, document.body.firstChild);
+  }
+}
+
+
+getMonthName(monthIndex) {
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return monthNames[monthIndex];
+}
+
+
+
   /**
    * Start camera
    */
@@ -431,8 +555,22 @@ async handleFirebaseDateChange(newDate, oldDate) {
     }
 
     try {
+
+      const dateValidation = await this.validateDateForRole();
+    
+    if (!dateValidation.valid) {
+      this.showToast(dateValidation.message, 'warning');
+      return;
+    }
+    
+    console.log(`📅 Starting camera - Will mark attendance to: ${dateValidation.targetDay}`);
+    
+    this.showDateInfo(dateValidation.targetDay, dateValidation.targetMonth, dateValidation.targetYear);
+
       await this.checkForDayChange();
     
+
+
     // Log current day
     if (this.firebaseSync && this.firebaseSync.isConnected) {
       const currentDay = this.mainSystemConfig.currentDay;
@@ -648,37 +786,50 @@ async handleFirebaseDateChange(newDate, oldDate) {
    * Mark attendance with cooldown to prevent duplicate marking
    */
   async markAttendanceWithCooldown(studentId, studentName) {
-    const now = Date.now();
-    const lastTime = this.lastAttendanceTime[studentId] || 0;
+  const now = Date.now();
+  const lastTime = this.lastAttendanceTime[studentId] || 0;
 
-    if (now - lastTime < this.ATTENDANCE_COOLDOWN) {
-      return; // Still in cooldown
-    }
+  if (now - lastTime < this.ATTENDANCE_COOLDOWN) {
+    return;
+  }
 
-    // Mark attendance
-    const success = await this.storage.markAttendance(studentId);
+  // ✅ ADD THIS BLOCK:
+  const dateValidation = await this.validateDateForRole();
+  
+  if (!dateValidation.valid) {
+    this.showToast(
+      `⚠️ Date validation failed!\n${dateValidation.message}\n\nCamera stopped.`,
+      'danger'
+    );
+    this.stopCamera();
+    return;
+  }
+
+  const success = await this.storage.markAttendance(studentId);
+  
+  if (success) {
+    this.lastAttendanceTime[studentId] = now;
     
-    if (success) {
-      this.lastAttendanceTime[studentId] = now;
+    if (!this.recognizedToday.has(studentId)) {
+      this.recognizedToday.add(studentId);
       
-      if (!this.recognizedToday.has(studentId)) {
-        this.recognizedToday.add(studentId);
-        this.showToast(`✓ Attendance marked for ${studentName}`, 'success');
-        await this.updateStudentList();
+      // ✅ CHANGE THIS LINE:
+      const dateStr = `${dateValidation.targetDay} ${this.getMonthName(dateValidation.targetMonth)}`;
+      this.showToast(`✓ Attendance marked for ${studentName}\nDate: ${dateStr}`, 'success');
+      
+      await this.updateStudentList();
 
-         // ✅ NEW: Auto-sync to main system immediately
       try {
         const result = await this.storage.syncToMainSystem();
         console.log(`✅ Auto-synced ${studentName} to main system`);
       } catch (error) {
         console.warn('Auto-sync failed:', error);
-        // Don't show error to user - silent failure
       }
       
       await this.updateStudentList();
-      }
     }
   }
+}
 
   /**
    * Load face matcher from storage
