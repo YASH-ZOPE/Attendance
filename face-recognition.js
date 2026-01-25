@@ -99,7 +99,6 @@ class FaceRecognitionSystem {
       // Show loading overlay
       this.showLoading();
       
-      await faceStorage.init();
       // Connect to main system database
       await this.connectToMainSystem();
       
