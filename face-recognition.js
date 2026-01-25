@@ -500,7 +500,8 @@ async handleFirebaseDateChange(newDate, oldDate) {
       message: `✅ Marking attendance for: ${selectedDay} ${monthNames[selectedMonth]} ${selectedYear}`
     };
   }
-}
+};
+
 
 
 showDateInfo(day, month, year) {
