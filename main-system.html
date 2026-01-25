@@ -1560,6 +1560,22 @@ async function initialize() {
     }
 
     function selectDay(day) {
+      // Validate input
+      day = parseInt(day);
+      
+      if (isNaN(day) || day < 1 || day > appState.daysInMonth) {
+        console.error('❌ Invalid day:', day);
+        return;
+      }
+      
+      // Prevent unnecessary updates
+      if (appState.currentDay === day) {
+        console.log('Already on day', day, '- skipping update');
+        return;
+      }
+      
+      console.log(`✅ selectDay: ${appState.currentDay} → ${day}`);
+      
       appState.currentDay = day;
       isUpdatingDayDropdown = true;
       elements.dateSelect.value = day; 
@@ -2304,6 +2320,12 @@ async function initialize() {
 
     // ==================== EVENT LISTENERS ====================
     function initializeEventListeners() {
+      if (window._eventListenersInitialized) {
+    console.warn('⚠️ Event listeners already initialized! Skipping...');
+    return;
+  }
+  window._eventListenersInitialized = true;
+  console.log('✅ Initializing event listeners (first time only)');
       // Subject events
       elements.addSubjectBtn.addEventListener('click', () => {
         if (addSubject(elements.newSubjectInput.value)) {
@@ -2425,16 +2447,38 @@ async function initialize() {
         selectDay(parseInt(elements.dateSelect.value));
       });
 
+       let dayNavigationTimeout = null;
+
       elements.prevDayBtn.addEventListener('click', () => {
-        if (appState.currentDay > 1) {
-          selectDay(appState.currentDay - 1);
+        // Clear any pending navigation
+        if (dayNavigationTimeout) {
+          clearTimeout(dayNavigationTimeout);
         }
+        
+        // Debounce to prevent double-clicks
+        dayNavigationTimeout = setTimeout(() => {
+          if (appState.currentDay > 1) {
+            const newDay = appState.currentDay - 1;
+            console.log(`📅 Prev Day: ${appState.currentDay} → ${newDay}`);
+            selectDay(newDay);
+          }
+        }, 50); // 50ms debounce
       });
 
       elements.nextDayBtn.addEventListener('click', () => {
-        if (appState.currentDay < appState.daysInMonth) {
-          selectDay(appState.currentDay + 1);
+        // Clear any pending navigation
+        if (dayNavigationTimeout) {
+          clearTimeout(dayNavigationTimeout);
         }
+        
+        // Debounce to prevent double-clicks
+        dayNavigationTimeout = setTimeout(() => {
+          if (appState.currentDay < appState.daysInMonth) {
+            const newDay = appState.currentDay + 1;
+            console.log(`📅 Next Day: ${appState.currentDay} → ${newDay}`);
+            selectDay(newDay);
+          }
+        }, 50); // 50ms debounce
       });
 
       // Attendance actions
