@@ -911,7 +911,7 @@ async captureFace() {
 
     // ✅ Save based on user choice
     if (existingFace) {
-      const action = await this.showFaceExistsDialog(existingFace);
+      
       
       if (action === 'replace') {
         // Replace completely
@@ -1264,7 +1264,8 @@ async startBulkImport() {
   const results = {
     total: allStudentIds.length,
     success: [],
-    failed: []
+    failed: [],
+    skipped: []
   };
 
   // Process each student
@@ -1288,13 +1289,14 @@ async startBulkImport() {
       
       // Handle based on user's bulk action choice
       if (existing && bulkAction === 'skip') {
-        // Skip this student
-        results.failed.push({
-          id: studentId,
-          error: 'Skipped (already exists)'
-        });
-        continue; // Skip to next student
-      }
+  // Skip this student
+  results.skipped.push({  //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ✅ CORRECT ARRAY
+    id: studentId,
+    name: studentName,
+    existingFaces: existing.descriptors.length
+  });
+  continue;
+}
 
       // Process all images for this student
       const descriptors = await this.processStudentImages(studentId, files);
@@ -1404,73 +1406,99 @@ async startBulkImport() {
    * Show import results
    */
   showImportResults(results) {
-    let html = `
-      <div class="row mb-3">
-        <div class="col-md-4">
-          <div class="text-center">
-            <h2 class="text-primary">${results.total}</h2>
-            <small>Total Students</small>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="text-center">
-            <h2 class="text-success">${results.success.length}</h2>
-            <small>Successfully Imported</small>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="text-center">
-            <h2 class="text-danger">${results.failed.length}</h2>
-            <small>Failed</small>
-          </div>
+  let html = `
+    <div class="row mb-3">
+      <div class="col-md-3">
+        <div class="text-center">
+          <h2 class="text-primary">${results.total}</h2>
+          <small>Total Students</small>
         </div>
       </div>
-    `;
-    
-    // Success list
-if (results.success.length > 0) {
-  html += `
-    <h6 class="text-success">✓ Successfully Imported:</h6>
-    <div class="list-group mb-3">
+      <div class="col-md-3">
+        <div class="text-center">
+          <h2 class="text-success">${results.success.length}</h2>
+          <small>Successfully Imported</small>
+        </div>
+      </div>
+      //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ADD THIS COLUMN
+      <div class="col-md-3">
+        <div class="text-center">
+          <h2 class="text-warning">${results.skipped?.length || 0}</h2>
+          <small>Skipped</small>
+        </div>
+      </div>
+      //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> END ADD
+      <div class="col-md-3">
+        <div class="text-center">
+          <h2 class="text-danger">${results.failed.length}</h2>
+          <small>Failed</small>
+        </div>
+      </div>
+    </div>
   `;
-  results.success.forEach(item => {
+  
+  // Success list
+  if (results.success.length > 0) {
     html += `
-      <div class="list-group-item list-group-item-success">
-        <strong>${item.name}</strong> (ID: ${item.id}) - ${item.descriptorCount} faces from ${item.imageCount} images
-        <span class="badge bg-info ms-2">${item.action || 'Imported'}</span>
-      </div>
+      <h6 class="text-success">✓ Successfully Imported:</h6>
+      <div class="list-group mb-3">
     `;
-  });
-  html += `</div>`;
-    }
-    
-    // Failed list
-    if (results.failed.length > 0) {
+    results.success.forEach(item => {
       html += `
-        <h6 class="text-danger">✗ Failed to Import:</h6>
-        <div class="list-group">
+        <div class="list-group-item list-group-item-success">
+          <strong>${item.name}</strong> (ID: ${item.id}) - ${item.descriptorCount} faces from ${item.imageCount} images
+          <span class="badge bg-info ms-2">${item.action || 'Imported'}</span>
+        </div>
       `;
-      results.failed.forEach(item => {
-        html += `
-          <div class="list-group-item list-group-item-danger">
-            <strong>${item.id}</strong> - ${item.error}
-          </div>
-        `;
-      });
-      html += `</div>`;
-    }
-    
-    document.getElementById('importResultsContent').innerHTML = html;
-    document.getElementById('importResultsModal').style.display = 'block';
-    
-    // Show toast
-    if (results.success.length > 0) {
-      this.showToast(
-        `✓ Successfully imported ${results.success.length} students!`,
-        'success'
-      );
-    }
+    });
+    html += `</div>`;
   }
+  
+  //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ADD SKIPPED SECTION
+  // Skipped list
+  if (results.skipped && results.skipped.length > 0) {
+    html += `
+      <h6 class="text-warning">⊘ Skipped (Already Exist):</h6>
+      <div class="list-group mb-3">
+    `;
+    results.skipped.forEach(item => {
+      html += `
+        <div class="list-group-item list-group-item-warning">
+          <strong>${item.name}</strong> (ID: ${item.id}) - Already has ${item.existingFaces} registered faces
+        </div>
+      `;
+    });
+    html += `</div>`;
+  }
+  //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> END ADD
+  
+  // Failed list
+  if (results.failed.length > 0) {
+    html += `
+      <h6 class="text-danger">✗ Failed to Import:</h6>
+      <div class="list-group">
+    `;
+    results.failed.forEach(item => {
+      html += `
+        <div class="list-group-item list-group-item-danger">
+          <strong>${item.id}</strong> - ${item.error}
+        </div>
+      `;
+    });
+    html += `</div>`;
+  }
+  
+  document.getElementById('importResultsContent').innerHTML = html;
+  document.getElementById('importResultsModal').style.display = 'block';
+  
+  // Show toast
+  if (results.success.length > 0) {
+    this.showToast(
+      `✓ Successfully imported ${results.success.length} students!`,
+      'success'
+    );
+  }
+}
 
   /**
    * Cancel bulk import
