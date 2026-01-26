@@ -519,16 +519,7 @@ showDateInfo(day, month, year) {
     existingDateInfo.remove();
   }
   
-  const dateInfo = document.createElement('div');
-  dateInfo.id = 'attendanceDateInfo';
-  dateInfo.className = `alert ${isToday ? 'alert-success' : 'alert-warning'} mt-2`;
-  dateInfo.innerHTML = `
-    <i class="bi bi-calendar-check me-2"></i>
-    <strong>Marking Attendance For:</strong> ${dateStr}
-    ${isToday ? '<span class="badge bg-success ms-2">TODAY</span>' : 
-                `<span class="badge bg-warning ms-2">DEMO MODE (${this.userRole})</span>`}
-  `;
-  
+    
   const canvas = document.getElementById('canvas');
   if (canvas && canvas.parentElement) {
     canvas.parentElement.insertBefore(dateInfo, canvas.nextSibling);
@@ -1420,14 +1411,14 @@ async startBulkImport() {
           <small>Successfully Imported</small>
         </div>
       </div>
-      //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ADD THIS COLUMN
+      
       <div class="col-md-3">
         <div class="text-center">
           <h2 class="text-warning">${results.skipped?.length || 0}</h2>
           <small>Skipped</small>
         </div>
       </div>
-      //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> END ADD
+     
       <div class="col-md-3">
         <div class="text-center">
           <h2 class="text-danger">${results.failed.length}</h2>
