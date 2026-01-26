@@ -865,7 +865,7 @@ async captureFace() {
     
   try {
     // ✅ Check if student already exists
-    const existingFace = await faceStorage.getFace(studentId);
+    const existingFace = await this.storage.getFace(studentId);
     
     if (existingFace) {
       // Student already exists - ask what to do
@@ -1219,7 +1219,7 @@ async startBulkImport() {
   const conflicts = [];
   
   for (const studentId of studentIds) {
-    const existing = await faceStorage.getFace(studentId);
+    const existing = await this.storage.getFace(studentId);
     if (existing) {
       conflicts.push({
         id: studentId,
@@ -1284,7 +1284,7 @@ async startBulkImport() {
     
     try {
       // Check if this student exists
-      const existing = await faceStorage.getFace(studentId);
+      const existing = await this.storage.getFace(studentId);
       
       // Handle based on user's bulk action choice
       if (existing && bulkAction === 'skip') {
