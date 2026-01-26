@@ -260,8 +260,6 @@ async handleFirebaseDayChange(newDay, oldDay) {
       // Reset database
       await this.handleDayChange(`day-${newDay}`);
       
-      // ✅ CRITICAL: Store the new day so we don't reset again
-      await this.storage.setCurrentDay(newDay);
       
       // Update UI
       await this.updateStudentList();
@@ -503,32 +501,6 @@ async handleFirebaseDateChange(newDate, oldDate) {
 };
 
 
-
-showDateInfo(day, month, year) {
-  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                      'July', 'August', 'September', 'October', 'November', 'December'];
-  
-  const dateStr = `${day} ${monthNames[month]} ${year}`;
-  const today = new Date();
-  const isToday = (day === today.getDate() && 
-                   month === today.getMonth() && 
-                   year === today.getFullYear());
-  
-  const existingDateInfo = document.getElementById('attendanceDateInfo');
-  if (existingDateInfo) {
-    existingDateInfo.remove();
-  }
-  
-    
-  const canvas = document.getElementById('canvas');
-  if (canvas && canvas.parentElement) {
-    canvas.parentElement.insertBefore(dateInfo, canvas.nextSibling);
-  } else {
-    document.body.insertBefore(dateInfo, document.body.firstChild);
-  }
-}
-
-
 getMonthName(monthIndex) {
   const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -557,7 +529,7 @@ getMonthName(monthIndex) {
     
     console.log(`📅 Starting camera - Will mark attendance to: ${dateValidation.targetDay}`);
     
-    this.showDateInfo(dateValidation.targetDay, dateValidation.targetMonth, dateValidation.targetYear);
+   
 
       await this.checkForDayChange();
     
@@ -1022,7 +994,68 @@ async showFaceExistsDialog(existingFace) {
         }
       });
     });
+     await this.updateVisualAttendance();
   }
+
+  //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+// ADD THIS NEW FUNCTION AFTER updateStudentList():
+
+/**
+ * Update visual attendance blocks display
+ */
+async updateVisualAttendance() {
+  const faces = await this.storage.getAllFaces();
+  
+  // Separate present and absent students
+  const presentStudents = faces.filter(f => f.attendanceToday);
+  const absentStudents = faces.filter(f => !f.attendanceToday);
+  
+  // Update counts
+  document.getElementById('attendanceCount').textContent = 
+    `${presentStudents.length}/${faces.length}`;
+  document.getElementById('presentCount').textContent = presentStudents.length;
+  document.getElementById('absentCount').textContent = absentStudents.length;
+  
+  // Render present blocks
+  const presentContainer = document.getElementById('presentBlocks');
+  if (presentStudents.length === 0) {
+    presentContainer.innerHTML = `
+      <div class="text-center text-muted py-3">
+        <small>No students marked present</small>
+      </div>
+    `;
+  } else {
+    presentContainer.innerHTML = presentStudents.map(student => `
+      <div class="attendance-block present" data-id="${student.id}">
+        ${student.id}
+        <span class="tooltip-text">
+          ${student.name}<br>ID: ${student.id}<br>✓ Present
+        </span>
+      </div>
+    `).join('');
+  }
+  
+  // Render absent blocks
+  const absentContainer = document.getElementById('absentBlocks');
+  if (absentStudents.length === 0) {
+    absentContainer.innerHTML = `
+      <div class="text-center text-muted py-3">
+        <small>All students present!</small>
+      </div>
+    `;
+  } else {
+    absentContainer.innerHTML = absentStudents.map(student => `
+      <div class="attendance-block absent" data-id="${student.id}">
+        ${student.id}
+        <span class="tooltip-text">
+          ${student.name}<br>ID: ${student.id}<br>✗ Absent
+        </span>
+      </div>
+    `).join('');
+  }
+  
+}
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
   /**
    * Update statistics
@@ -1032,6 +1065,7 @@ async showFaceExistsDialog(existingFace) {
     document.getElementById('statRegistered').textContent = stats.total;
     document.getElementById('statRecognized').textContent = stats.presentToday;
     document.getElementById('statUnknown').textContent = this.unknownCount;
+    await this.updateVisualAttendance();
   }
 
   /**

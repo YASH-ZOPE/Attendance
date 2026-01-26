@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en"> 
+<html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +9,8 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
   <!-- AWS Cognito SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.3.7/dist/amazon-cognito-identity.min.js"></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.3.7/dist/amazon-cognito-identity.min.js"></script>
   <script src="cognito-config.js"></script>
   <script src="auth.js"></script>
 
@@ -19,39 +21,39 @@
   <!-- Firebase Config -->
   <script src="firebase-config.js"></script>
   <!-- Cloud Storage -->
-<script src="cloud-storage.js"></script>
+  <script src="cloud-storage.js"></script>
   <style>
     body {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
       padding: 20px;
     }
-    
+
     .main-card {
       background: white;
       border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
       overflow: hidden;
       max-width: 1200px;
       margin: 0 auto;
     }
-    
+
     .header {
       background: linear-gradient(135deg, #E8C4D8 0%, #DDB8CC 100%);
       padding: 30px;
       text-align: center;
       color: #6A4A5A;
     }
-    
+
     .header h1 {
       font-weight: 700;
       margin: 0;
     }
-    
+
     .content-area {
       padding: 30px;
     }
-    
+
     .video-container {
       position: relative;
       background: #1a1a1a;
@@ -59,20 +61,20 @@
       overflow: hidden;
       margin-bottom: 20px;
     }
-    
+
     #video {
       width: 100%;
       display: block;
       transform: scaleX(-1);
     }
-    
+
     #canvas {
       position: absolute;
       top: 0;
       left: 0;
       transform: scaleX(-1);
     }
-    
+
     .mode-card {
       background: #f8f9fa;
       border-radius: 15px;
@@ -82,30 +84,30 @@
       transition: all 0.3s;
       cursor: pointer;
     }
-    
+
     .mode-card:hover {
       border-color: #E8C4D8;
       transform: translateY(-5px);
-      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
     }
-    
+
     .mode-card.active {
       border-color: #E8C4D8;
       background: linear-gradient(135deg, #FBF8FA 0%, #F7F0F5 100%);
     }
-    
+
     .btn-face {
       border-radius: 25px;
       padding: 12px 30px;
       font-weight: 600;
       transition: all 0.3s;
     }
-    
+
     .btn-face:hover {
       transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     }
-    
+
     .status-badge {
       position: absolute;
       top: 20px;
@@ -113,16 +115,18 @@
       padding: 10px 20px;
       border-radius: 20px;
       font-weight: 600;
-      background: rgba(255,255,255,0.9);
+      background: rgba(255, 255, 255, 0.9);
       backdrop-filter: blur(10px);
     }
-    
+
     .student-list {
       max-height: 400px;
+      max-width: 100%;
       overflow-y: auto;
     }
-    
+
     .student-card {
+      max-width: 98%;
       background: white;
       border: 2px solid #e9ecef;
       border-radius: 10px;
@@ -133,12 +137,12 @@
       gap: 15px;
       transition: all 0.3s;
     }
-    
+
     .student-card:hover {
       border-color: #E8C4D8;
       transform: translateX(5px);
     }
-    
+
     .face-preview {
       width: 80px;
       height: 80px;
@@ -146,27 +150,27 @@
       object-fit: cover;
       border: 3px solid #E8C4D8;
     }
-    
+
     .loading-overlay {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0,0,0,0.8);
+      background: rgba(0, 0, 0, 0.8);
       display: flex;
       justify-content: center;
       align-items: center;
       z-index: 9999;
     }
-    
+
     .loading-content {
       text-align: center;
       color: white;
     }
-    
+
     .spinner {
-      border: 4px solid rgba(255,255,255,0.3);
+      border: 4px solid rgba(255, 255, 255, 0.3);
       border-radius: 50%;
       border-top: 4px solid #E8C4D8;
       width: 60px;
@@ -174,111 +178,264 @@
       animation: spin 1s linear infinite;
       margin: 0 auto 20px;
     }
-    
+
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
     }
-    
+
     .detection-box {
       position: absolute;
       border: 3px solid #00ff00;
       border-radius: 5px;
     }
-    
+
     .detection-label {
       position: absolute;
-      background: rgba(0,255,0,0.8);
+      background: rgba(0, 255, 0, 0.8);
       color: white;
       padding: 5px 10px;
       border-radius: 3px;
       font-weight: 600;
       font-size: 14px;
     }
+
     .button-grid {
-     display: grid;
-     grid-template-columns: 1fr 1fr;
-     gap: 10px;
-     }
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
 
     .button-grid button {
-    width: 100%;
+      width: 100%;
     }
+
     .button-grid button {
-    width: 100%;
-    min-height: 50px;
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+      width: 100%;
+      min-height: 50px;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     /* Role-based visibility */
-.admin-only { display: block; }
-.teacher-only { display: block; }
-.student-only { display: none; }
+    .admin-only {
+      display: block;
+    }
 
-.hide-for-teacher { display: none; }
-.hide-for-student { display: none; }
+    .teacher-only {
+      display: block;
+    }
 
-/* For buttons/inline elements */
-.admin-only-inline { display: inline-block; }
-.teacher-only-inline { display: inline-block; }
-.hide-for-teacher-inline { display: none; }
-.hide-for-student-inline { display: none; }
+    .student-only {
+      display: none;
+    }
 
-/* Responsive fixes */
-@media (max-width: 768px) {
-  .main-card {
-    margin: 10px;
-  }
-  
-  .header h1 {
-    font-size: 1.3rem;
-  }
-  
-  .mode-card {
-    padding: 15px;
-  }
-  
-  .button-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .student-card {
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .face-preview {
-    margin: 0 auto;
+    .hide-for-teacher {
+      display: none;
+    }
+
+    .hide-for-student {
+      display: none;
+    }
+
+    /* For buttons/inline elements */
+    .admin-only-inline {
+      display: inline-block;
+    }
+
+    .teacher-only-inline {
+      display: inline-block;
+    }
+
+    .hide-for-teacher-inline {
+      display: none;
+    }
+
+    .hide-for-student-inline {
+      display: none;
+    }
+
+    /* Responsive fixes */
+    @media (max-width: 768px) {
+      .main-card {
+        margin: 10px;
+      }
+
+      .header h1 {
+        font-size: 1.3rem;
+      }
+
+      .mode-card {
+        padding: 15px;
+      }
+
+      .button-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .student-card {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .face-preview {
+        margin: 0 auto;
+      }
+    }
+
+    @media (max-width: 576px) {
+      body {
+        padding: 10px;
+      }
+
+      .header {
+        padding: 15px;
+      }
+
+      .header h1 {
+        font-size: 1.1rem;
+      }
+
+      .content-area {
+        padding: 15px;
+      }
+
+      .btn-face {
+        font-size: 0.9rem;
+        padding: 10px 20px;
+      }
+    }
+
+    /* Flexbox layout for student lists */
+.student-lists-wrapper {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.student-list-col {
+  flex: 1 1 calc(50% - 7.5px);
+  min-width: 280px;
+}
+
+/* When one column is hidden, the other automatically takes full width */
+.student-lists-wrapper:has(.student-list-col:only-child) .student-list-col {
+  flex: 1 1 100%;
+}
+
+/* Adjust student list height for side-by-side */
+.student-lists-wrapper .student-list {
+  max-height: 400px;
+}
+
+/* Stack vertically on mobile */
+@media (max-width: 767px) {
+  .student-list-col {
+    flex: 1 1 100%;
+    min-width: 100%;
   }
 }
 
-@media (max-width: 576px) {
-  body {
-    padding: 10px;
+.attendance-blocks {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.attendance-block {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 16px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  min-height: 45px;
+}
+
+.attendance-block.present {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.attendance-block.absent {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.attendance-block:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Tooltip */
+.attendance-block .tooltip-text {
+  visibility: hidden;
+  background-color: rgba(0, 0, 0, 0.9);
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px 12px;
+  position: absolute;
+  z-index: 1000;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: normal;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.attendance-block .tooltip-text::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 0.9) transparent transparent transparent;
+}
+
+.attendance-block:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .attendance-blocks {
+    grid-template-columns: repeat(8, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .attendance-blocks {
+    grid-template-columns: repeat(5, 1fr);
   }
   
-  .header {
-    padding: 15px;
+  .attendance-block {
+    font-size: 14px;
+    min-height: 40px;
   }
-  
-  .header h1 {
-    font-size: 1.1rem;
-  }
-  
-  .content-area {
-    padding: 15px;
-  }
-  
-  .btn-face {
-    font-size: 0.9rem;
-    padding: 10px 20px;
-  }
- }
+}
   </style>
 </head>
+
 <body>
 
   <!-- Loading Overlay -->
@@ -289,8 +446,8 @@
       <p>Please wait, this may take a moment</p>
       <div id="loadingProgress" class="mt-3">
         <div class="progress" style="width: 300px; margin: 0 auto;">
-          <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" 
-               role="progressbar" style="width: 0%"></div>
+          <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" role="progressbar"
+            style="width: 0%"></div>
         </div>
       </div>
     </div>
@@ -348,32 +505,32 @@
           </div>
           <br>
           <button class="btn btn-primary w-100 mb-2" onclick="window.location.href='main-system.html'">
-  Main Dashboard
+            Main Dashboard
           </button>
           <br>
           <br>
 
-            <div class="button-grid">
-  <button id="testConnectionBtn" class="btn btn-outline-info w-100 mb-2 admin-only-inline">
-    <i class="bi bi-plug me-2"></i>Test Main System Connection
-  </button>
-  <button id="refreshStatusBtn" class="btn btn-outline-secondary w-100 mb-2 admin-only-inline">
-    <i class="bi bi-arrow-clockwise me-2"></i>Refresh Status
-  </button>
-  <button id="syncToMainBtn" class="btn btn-success w-100 mb-2 teacher-only-inline">
-    <i class="bi bi-arrow-right-circle me-2"></i>Sync to Main System
-  </button>
-  <button id="clearAllFacesBtn" class="btn btn-outline-danger w-100 admin-only-inline">
-    <i class="bi bi-trash me-2"></i>Clear All Faces
-  </button>
-</div>
-
+          <div class="button-grid">
+            <button id="testConnectionBtn" class="btn btn-outline-info w-100 mb-2 admin-only-inline">
+              <i class="bi bi-plug me-2"></i>Test Main System Connection
+            </button>
+            <button id="refreshStatusBtn" class="btn btn-outline-secondary w-100 mb-2 admin-only-inline">
+              <i class="bi bi-arrow-clockwise me-2"></i>Refresh Status
+            </button>
+            <button id="syncToMainBtn" class="btn btn-success w-100 mb-2 teacher-only-inline">
+              <i class="bi bi-arrow-right-circle me-2"></i>Sync to Main System
+            </button>
+            <button id="clearAllFacesBtn" class="btn btn-outline-danger w-100 admin-only-inline">
+              <i class="bi bi-trash me-2"></i>Clear All Faces
+            </button>
           </div>
+
+        </div>
         <!-- Right Column - Mode Selection & Student List -->
         <div class="col-lg-5 teacher-only">
           <!-- Mode Selection -->
           <h5 class="mb-3"><i class="bi bi-gear me-2"></i>Operation Mode</h5>
-          
+
           <div class="mode-card" id="registerMode">
             <div class="d-flex align-items-center">
               <i class="bi bi-person-plus-fill fs-1 text-primary me-3"></i>
@@ -413,37 +570,45 @@
               </button>
             </div>
           </div>
-
+        <div>
           <div class="mode-card teacher-only" id="bulkImportMode">
-  <div class="d-flex align-items-center">
-    <i class="bi bi-folder-plus fs-1 text-info me-3"></i>
-    <div>
-      <h5 class="mb-1">Bulk Import</h5>
-      <small class="text-muted">Import multiple faces from folder</small>
-    </div>
-  </div>
-  <div id="bulkImportControls" style="display: none;" class="mt-3">
-    <div class="alert alert-warning">
-      <i class="bi bi-exclamation-triangle me-2"></i>
-      <strong>Folder Structure Required:</strong><br>
-      Dataset/StudentID/image1.jpg<br>
-      Dataset/StudentID/image2.jpg
-    </div>
-    <input type="file" id="folderInput" webkitdirectory directory multiple class="form-control mb-3">
-    <div id="importPreview" style="display: none;" class="mb-3">
-      <div id="previewContent"></div>
-    </div>
-    <div class="d-grid gap-2">
-      <button id="startImportBtn" class="btn btn-primary" disabled>
-        <i class="bi bi-upload me-2"></i>Start Import
-      </button>
-      <button id="cancelImportBtn" class="btn btn-outline-secondary">
-        <i class="bi bi-x-circle me-2"></i>Cancel
-      </button>
-    </div>
-  </div>
-</div>
+            <div class="d-flex align-items-center">
+              <i class="bi bi-folder-plus fs-1 text-info me-3"></i>
+              <div>
+                <h5 class="mb-1">Bulk Import</h5>
+                <small class="text-muted">Import multiple faces from folder</small>
+              </div>
+            </div>
+            <div id="bulkImportControls" style="display: none;" class="mt-3">
+              <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <strong>Folder Structure Required:</strong><br>
+                Dataset/StudentID/image1.jpg<br>
+                Dataset/StudentID/image2.jpg
+              </div>
+              <input type="file" id="folderInput" webkitdirectory directory multiple class="form-control mb-3">
+              <div id="importPreview" style="display: none;" class="mb-3">
+                <div id="previewContent"></div>
+              </div>
+              <div class="d-grid gap-2">
+                <button id="startImportBtn" class="btn btn-primary" disabled>
+                  <i class="bi bi-upload me-2"></i>Start Import
+                </button>
+                <button id="cancelImportBtn" class="btn btn-outline-secondary">
+                  <i class="bi bi-x-circle me-2"></i>Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
+<!---------------------------------------------------------------------------------------------------------------->
+      <div class="student-lists-wrapper">
+      <div class="student-list-col teacher-only">
+
+
+       <div class="mode-card teacher-only">
           <!-- Registered Students List -->
           <h5 class="mb-3 mt-4"><i class="bi bi-people me-2"></i>Registered Students</h5>
           <div class="student-list" id="studentList">
@@ -452,169 +617,210 @@
               <p class="mt-2">No students registered yet</p>
             </div>
           </div>
-
+        </div>
+      </div>
+        
+       <div class="student-list-col teacher-only">
+        <div class="mode-card teacher-only">
+          <h5 class="mb-3 mt-4">
+            <i class="bi bi-grid-3x3 me-2"></i>Today's Attendance 
+            <span id="attendanceCount" class="badge bg-primary ms-2">0/0</span>
+          </h5>
+          
+          <!-- Present Students Blocks -->
+          <div class="mb-4">
+            <h6 class="text-success mb-2">
+              <i class="bi bi-check-circle me-1"></i>PRESENT 
+              <span id="presentCount" class="badge bg-success ms-1">0</span>
+            </h6>
+            <div id="presentBlocks" class="attendance-blocks">
+              <div class="text-center text-muted py-3">
+                <small>No students marked present</small>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Absent Students Blocks -->
+          <div>
+            <h6 class="text-danger mb-2">
+              <i class="bi bi-x-circle me-1"></i>ABSENT 
+              <span id="absentCount" class="badge bg-danger ms-1">0</span>
+            </h6>
+            <div id="absentBlocks" class="attendance-blocks">
+              <div class="text-center text-muted py-3">
+                <small>All students present</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>          
+    
           <!-- Actions -->
 
 
-  <!-- Toast Notification -->
-  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-    <div id="toastNotification" class="toast align-items-center border-0" role="alert">
-      <div class="d-flex">
-        <div class="toast-body"></div>
-        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
-      </div>
-    </div>
-  </div>
+          <!-- Toast Notification -->
+          <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+            <div id="toastNotification" class="toast align-items-center border-0" role="alert">
+              <div class="d-flex">
+                <div class="toast-body"></div>
+                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
+              </div>
+            </div>
+          </div>
 
 
-  <!-- Import Progress Modal -->
-<div id="importProgressModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center;">
-  <div style="background: white; padding: 40px; border-radius: 20px; max-width: 500px; width: 90%;">
-    <h4 class="text-center mb-4">Importing Faces...</h4>
-    <div class="progress mb-3" style="height: 30px;">
-      <div id="importProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" 
-           role="progressbar" style="width: 0%"></div>
-    </div>
-    <p id="importProgressText" class="text-center mb-2">Processing...</p>
-    <p id="importProgressDetail" class="text-center text-muted"></p>
-  </div>
-</div>
+          <!-- Import Progress Modal -->
+          <div id="importProgressModal"
+            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center;">
+            <div style="background: white; padding: 40px; border-radius: 20px; max-width: 500px; width: 90%;">
+              <h4 class="text-center mb-4">Importing Faces...</h4>
+              <div class="progress mb-3" style="height: 30px;">
+                <div id="importProgressBar" class="progress-bar progress-bar-striped progress-bar-animated"
+                  role="progressbar" style="width: 0%"></div>
+              </div>
+              <p id="importProgressText" class="text-center mb-2">Processing...</p>
+              <p id="importProgressDetail" class="text-center text-muted"></p>
+            </div>
+          </div>
 
-<!-- Import Results Modal -->
-<div id="importResultsModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center;">
-  <div style="background: white; padding: 40px; border-radius: 20px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;">
-    <h4 class="text-center mb-4">Import Results</h4>
-    <div id="importResultsContent"></div>
-    <button id="closeResultsBtn" class="btn btn-primary w-100 mt-3">Close</button>
-  </div>
-</div>
+          <!-- Import Results Modal -->
+          <div id="importResultsModal"
+            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center;">
+            <div
+              style="background: white; padding: 40px; border-radius: 20px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;">
+              <h4 class="text-center mb-4">Import Results</h4>
+              <div id="importResultsContent"></div>
+              <button id="closeResultsBtn" class="btn btn-primary w-100 mt-3">Close</button>
+            </div>
+          </div>
 
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- CORRECT ORDER -->
-<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-<script src="face-storage.js"></script>
-<script src="face-recognition.js"></script>
+          <!-- Scripts -->
+          <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+          <!-- CORRECT ORDER -->
+          <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+          <script src="face-storage.js"></script>
+          <script src="face-recognition.js"></script>
 
-<script>
-// ==================== ROLE-BASED UI HIDING ====================
-async function applyRoleBasedUIForFaceRecognition() {
-  try {
-    const role = await getUserRole();
-    console.log('Applying Face Recognition UI for role:', role);
-    
-    if (role === 'admin') {
-      // Admin sees everything - no changes needed
-      return;
-    }
-    
-    if (role === 'teacher') {
-      // Hide admin-only elements
-      hideElements('.admin-only');
-      hideElements('.admin-only-inline');
-      
-    } else if (role === 'student') {
-      // Hide admin-only AND teacher-only elements
-      hideElements('.admin-only');
-      hideElements('.admin-only-inline');
-      hideElements('.teacher-only');
-      hideElements('.teacher-only-inline');
-      
-      // Hide delete buttons in student list (will be applied when list renders)
-      hideDeleteButtonsForStudents();
-    }
-    
-  } catch (error) {
-    console.error('Error applying role-based UI:', error);
-  }
-}
+          <script>
+            // ==================== ROLE-BASED UI HIDING ====================
+            async function applyRoleBasedUIForFaceRecognition() {
+              try {
+                const role = await getUserRole();
+                console.log('Applying Face Recognition UI for role:', role);
 
-function hideElements(selector) {
-  document.querySelectorAll(selector).forEach(el => {
-    el.style.display = 'none';
-  });
-}
+                if (role === 'admin') {
+                  // Admin sees everything - no changes needed
+                  return;
+                }
 
-function hideDeleteButtonsForStudents() {
-  // Add CSS to hide delete buttons
-  const style = document.createElement('style');
-  style.id = 'student-role-style';
-  style.textContent = `
+                if (role === 'teacher') {
+                  // Hide admin-only elements
+                  hideElements('.admin-only');
+                  hideElements('.admin-only-inline');
+
+                } else if (role === 'student') {
+                  // Hide admin-only AND teacher-only elements
+                  hideElements('.admin-only');
+                  hideElements('.admin-only-inline');
+                  hideElements('.teacher-only');
+                  hideElements('.teacher-only-inline');
+
+                  // Hide delete buttons in student list (will be applied when list renders)
+                  hideDeleteButtonsForStudents();
+                }
+
+              } catch (error) {
+                console.error('Error applying role-based UI:', error);
+              }
+            }
+
+            function hideElements(selector) {
+              document.querySelectorAll(selector).forEach(el => {
+                el.style.display = 'none';
+              });
+            }
+
+            function hideDeleteButtonsForStudents() {
+              // Add CSS to hide delete buttons
+              const style = document.createElement('style');
+              style.id = 'student-role-style';
+              style.textContent = `
     .student-card .btn-danger { display: none !important; }
   `;
-  document.head.appendChild(style);
-  
-  // Also observe for dynamically added delete buttons
-  const observer = new MutationObserver(() => {
-    document.querySelectorAll('.student-card .btn-danger').forEach(btn => {
-      btn.style.display = 'none';
-    });
-  });
-  
-  const studentList = document.getElementById('studentList');
-  if (studentList) {
-    observer.observe(studentList, { childList: true, subtree: true });
-  }
-}
+              document.head.appendChild(style);
 
-// ==================== AUTHENTICATION CHECK ====================
-async function checkAuthAndInitFaceRecognition() {
-  try {
-    // Check if logged in
-    const user = await getCurrentUser();
-    
-    if (!user) {
-      // Not logged in - redirect to login
-      window.location.href = 'index.html';
-      return;
-    }
-    
-    // Get role
-    const role = await getUserRole();
-    console.log(`Face Recognition - Logged in as: ${user.attributes.email} (${role})`);
-    
-    // Apply role-based UI
-    await applyRoleBasedUIForFaceRecognition();
-    
-    console.log('Face Recognition UI initialized for role:', role);
-    
-  } catch (error) {
-    console.error('Auth check failed:', error);
-    window.location.href = 'index.html';
-  }
-}
+              // Also observe for dynamically added delete buttons
+              const observer = new MutationObserver(() => {
+                document.querySelectorAll('.student-card .btn-danger').forEach(btn => {
+                  btn.style.display = 'none';
+                });
+              });
 
-// After other button handlers, add:
-document.getElementById('syncToMainBtn').addEventListener('click', async () => {
-  try {
-    const btn = document.getElementById('syncToMainBtn');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Syncing...';
-    
-    // ✅ NEW: Use the storage instance from faceSystem
-    const result = await faceSystem.storage.syncToMainSystem();
-    
-    showToast(`✅ Force synced! ${result.studentsCount} students to ${result.subject}, Day ${result.day}`, 'success');
-    
-    btn.disabled = false;
-    btn.innerHTML = '<i class="bi bi-arrow-right-circle me-2"></i>Force Sync All Students';
-    
-  } catch (error) {
-    showToast(`❌ ${error.message}`, 'danger');
-    
-    const btn = document.getElementById('syncToMainBtn');
-    btn.disabled = false;
-    btn.innerHTML = '<i class="bi bi-arrow-right-circle me-2"></i>Force Sync All Students';
-  }
+              const studentList = document.getElementById('studentList');
+              if (studentList) {
+                observer.observe(studentList, { childList: true, subtree: true });
+              }
+            }
 
-});
+            // ==================== AUTHENTICATION CHECK ====================
+            async function checkAuthAndInitFaceRecognition() {
+              try {
+                // Check if logged in
+                const user = await getCurrentUser();
 
-// Call on page load (after models are loaded)
-window.addEventListener('DOMContentLoaded', () => {
-  // Wait a bit for face-api models to start loading
-  setTimeout(checkAuthAndInitFaceRecognition, 500);
-});
-</script>
+                if (!user) {
+                  // Not logged in - redirect to login
+                  window.location.href = 'index.html';
+                  return;
+                }
+
+                // Get role
+                const role = await getUserRole();
+                console.log(`Face Recognition - Logged in as: ${user.attributes.email} (${role})`);
+
+                // Apply role-based UI
+                await applyRoleBasedUIForFaceRecognition();
+
+                console.log('Face Recognition UI initialized for role:', role);
+
+              } catch (error) {
+                console.error('Auth check failed:', error);
+                window.location.href = 'index.html';
+              }
+            }
+
+            // After other button handlers, add:
+            document.getElementById('syncToMainBtn').addEventListener('click', async () => {
+              try {
+                const btn = document.getElementById('syncToMainBtn');
+                btn.disabled = true;
+                btn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Syncing...';
+
+                // ✅ NEW: Use the storage instance from faceSystem
+                const result = await faceSystem.storage.syncToMainSystem();
+
+                showToast(`✅ Force synced! ${result.studentsCount} students to ${result.subject}, Day ${result.day}`, 'success');
+
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-arrow-right-circle me-2"></i>Force Sync All Students';
+
+              } catch (error) {
+                showToast(`❌ ${error.message}`, 'danger');
+
+                const btn = document.getElementById('syncToMainBtn');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-arrow-right-circle me-2"></i>Force Sync All Students';
+              }
+
+            });
+
+            // Call on page load (after models are loaded)
+            window.addEventListener('DOMContentLoaded', () => {
+              // Wait a bit for face-api models to start loading
+              setTimeout(checkAuthAndInitFaceRecognition, 500);
+            });
+          </script>
 
 </body>
+
 </html>

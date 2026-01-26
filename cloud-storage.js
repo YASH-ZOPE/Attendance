@@ -55,7 +55,7 @@ class CloudStorage {
  */
 async getCurrentDay() {
   try {
-    const snapshot = await this.db.ref('faceRecognition/currentDay').once('value');
+    const snapshot = await this.db.ref('mainSystem/currentDay').once('value');
     return snapshot.val();
   } catch (error) {
     console.error('Error getting current day:', error);
@@ -68,7 +68,7 @@ async getCurrentDay() {
  */
 async setCurrentDay(day) {
   try {
-    await this.db.ref('faceRecognition/currentDay').set(day);
+    await this.db.ref('mainSystem/currentDay').set(day);
     console.log(`✅ Stored current day in Firebase: ${day}`);
   } catch (error) {
     console.error('Error setting current day:', error);
