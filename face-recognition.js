@@ -782,22 +782,16 @@ getMonthName(monthIndex) {
       this.showToast(`✓ Attendance marked for ${studentName}\nDate: ${dateStr}`, 'success');
       
       await this.updateStudentList();
-
-      try {
-        const result = await this.storage.syncToMainSystem();
-        console.log(`✅ Auto-synced ${studentName} to main system`);
-      } catch (error) {
-        console.warn('Auto-sync failed:', error);
-      }
-      
-      await this.updateStudentList();
     }
     await this.saveAttendanceToFirebase(studentId, studentName, dateValidation);
   }
 }
 
 async saveAttendanceToFirebase(studentId, studentName, dateValidation) {
-  if (!this.firebaseSync || !this.firebaseSync.isConnected) return;
+  if (!this.firebaseSync || !this.firebaseSync.isConnected) {
+    console.warn('⚠️ Firebase not connected - skipping auto-sync');
+    return;
+  }
   
   const subject = this.mainSystemConfig.selectedSubject;
   const month = this.mainSystemConfig.selectedMonth;
@@ -805,7 +799,7 @@ async saveAttendanceToFirebase(studentId, studentName, dateValidation) {
   const day = dateValidation.targetDay;
   
   if (!subject || month === null || year === null) {
-    console.warn('Cannot sync to Firebase - incomplete config');
+    console.warn('⚠️ Cannot sync to Firebase - incomplete config');
     return;
   }
   
@@ -813,16 +807,23 @@ async saveAttendanceToFirebase(studentId, studentName, dateValidation) {
   const path = `attendanceData/${monthKey}/${subject}/${studentId}`;
   
   try {
-    await this.firebaseSync.firebaseDB.ref(path).update({
+    // Add timeout to prevent hanging
+    const syncPromise = this.firebaseSync.firebaseDB.ref(path).update({
       _name: studentName,
       [day]: 'Present'
     });
+    
+    await Promise.race([
+      syncPromise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+    ]);
+    
     console.log(`✅ Auto-synced ${studentName} to Firebase`);
   } catch (error) {
-    console.error('Firebase auto-sync failed:', error);
+    console.error('⚠️ Firebase auto-sync failed:', error.message);
+    // Don't throw - just log and continue
   }
 }
-
   /**
    * Load face matcher from storage
    */
@@ -1786,7 +1787,10 @@ let allAttendanceData = snapshot.val() || {};
     });
 
     // Save back to main system
-    await this.firebaseSync.firebaseDB.ref('attendanceData').set(allAttendanceData);
+    // Save back to main system - UPDATE ONLY THE SPECIFIC MONTH/SUBJECT
+await this.firebaseSync.firebaseDB
+  .ref(`attendanceData/${monthKey}/${selectedSubject}`)
+  .set(allAttendanceData[monthKey][selectedSubject]);
 
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                         'July', 'August', 'September', 'October', 'November', 'December'];
