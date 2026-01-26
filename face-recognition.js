@@ -792,6 +792,34 @@ getMonthName(monthIndex) {
       
       await this.updateStudentList();
     }
+    await this.saveAttendanceToFirebase(studentId, studentName, dateValidation);
+  }
+}
+
+async saveAttendanceToFirebase(studentId, studentName, dateValidation) {
+  if (!this.firebaseSync || !this.firebaseSync.isConnected) return;
+  
+  const subject = this.mainSystemConfig.selectedSubject;
+  const month = this.mainSystemConfig.selectedMonth;
+  const year = this.mainSystemConfig.selectedYear;
+  const day = dateValidation.targetDay;
+  
+  if (!subject || month === null || year === null) {
+    console.warn('Cannot sync to Firebase - incomplete config');
+    return;
+  }
+  
+  const monthKey = `${year}-${String(month).padStart(2, '0')}`;
+  const path = `attendanceData/${monthKey}/${subject}/${studentId}`;
+  
+  try {
+    await this.firebaseSync.firebaseDB.ref(path).update({
+      _name: studentName,
+      [day]: 'Present'
+    });
+    console.log(`✅ Auto-synced ${studentName} to Firebase`);
+  } catch (error) {
+    console.error('Firebase auto-sync failed:', error);
   }
 }
 
@@ -952,6 +980,7 @@ async showFaceExistsDialog(existingFace) {
    */
   async updateStudentList() {
     const faces = await this.storage.getAllFaces();
+    
     const listContainer = document.getElementById('studentList');
 
     if (faces.length === 0) {
@@ -1546,11 +1575,15 @@ async startBulkImport() {
 
     // Get main system state with detailed logging
     console.log('=== READING MAIN SYSTEM DATA ===');
-    const selectedSubject = await this.getFromMainDB('selectedSubject');
-    const selectedMonth = await this.getFromMainDB('selectedMonth');
-    const selectedYear = await this.getFromMainDB('selectedYear');
-    const currentDay = await this.getFromMainDB('currentDay');
-    const subjects = await this.getFromMainDB('subjects');
+    const snapshot = await this.firebaseSync.firebaseDB.ref('mainSystem').once('value');
+const data = snapshot.val() || {};
+const selectedSubject = data.selectedSubject;
+const selectedMonth = data.selectedMonth;
+const selectedYear = data.selectedYear;
+const currentDay = data.currentDay;
+
+const subjectsSnapshot = await this.firebaseSync.firebaseDB.ref('subjects').once('value');
+const subjects = subjectsSnapshot.val();
     console.log('=== READ COMPLETE ===');
 
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
@@ -1718,7 +1751,8 @@ async syncToMainSystem() {
     }
 
     // Get existing attendance data
-    let allAttendanceData = await this.getFromMainDB('attendanceData') || {};
+    const snapshot = await this.firebaseSync.firebaseDB.ref('attendanceData').once('value');
+let allAttendanceData = snapshot.val() || {};
 
     // ⚠️ FIX: Match main system's month key format (no +1)
     // Main system uses 0-11 directly: "2026-00" for January
@@ -1752,7 +1786,7 @@ async syncToMainSystem() {
     });
 
     // Save back to main system
-    await this.saveToMainDB('attendanceData', allAttendanceData);
+    await this.firebaseSync.firebaseDB.ref('attendanceData').set(allAttendanceData);
 
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                         'July', 'August', 'September', 'October', 'November', 'December'];
