@@ -115,11 +115,18 @@ class FaceRecognitionSystem {
       
       // Setup event listeners
       this.setupEventListeners();
-      
-      // ✅ CHECK FOR DATE CHANGE EVERY 5 MINUTES (EVEN WHEN CAMERA OFF)
-      this.dateCheckInterval = setInterval(() => {
+      await this.checkForDayChange();
+    
+    // ✅ CONTINUOUS READ - Every 30 seconds
+    this.continuousReadInterval = setInterval(async () => {
+      console.log('⏰ Running continuous Firebase read...');
+      await this.forceReadFirebaseData();
+    }, 30 * 1000); // 30 seconds
+    
+    // ✅ ALSO CHECK FOR DAY CHANGE EVERY 5 MINUTES
+    this.dateCheckInterval = setInterval(() => {
       this.checkForDayChange();
-    }, 5 * 60 * 1000); // 5 minutes
+    }, 5 * 60 * 1000);
 
       // Check for day changes
       await this.checkForDayChange();
@@ -179,6 +186,64 @@ class FaceRecognitionSystem {
   });
 }
 
+/**
+ * Force read latest Firebase data (called periodically)
+ */
+async forceReadFirebaseData() {
+  if (!this.firebaseSync || !this.firebaseSync.isConnected) {
+    console.warn('⚠️ Firebase not connected, skipping force read');
+    return;
+  }
+  
+  try {
+    console.log('🔄 Force reading Firebase data...');
+    
+    const snapshot = await this.firebaseSync.firebaseDB.ref('mainSystem').once('value');
+    const data = snapshot.val() || {};
+    
+    // Check each value and trigger handlers if changed
+    const newDay = data.currentDay ?? null;
+    const newSubject = data.selectedSubject || null;
+    const newMonth = data.selectedMonth ?? null;
+    const newYear = data.selectedYear || null;
+    const newDate = data.currentDate || null;
+    
+    // Day changed?
+    if (newDay !== this.mainSystemConfig.currentDay) {
+      console.log(`📅 Force read detected day change: ${this.mainSystemConfig.currentDay} → ${newDay}`);
+      await this.handleFirebaseDayChange(newDay, this.mainSystemConfig.currentDay);
+    }
+    
+    // Subject changed?
+    if (newSubject !== this.mainSystemConfig.selectedSubject) {
+      console.log(`📚 Force read detected subject change: ${this.mainSystemConfig.selectedSubject} → ${newSubject}`);
+      await this.handleFirebaseSubjectChange(newSubject, this.mainSystemConfig.selectedSubject);
+    }
+    
+    // Month changed?
+    if (newMonth !== this.mainSystemConfig.selectedMonth) {
+      console.log(`📅 Force read detected month change: ${this.mainSystemConfig.selectedMonth} → ${newMonth}`);
+      await this.handleFirebaseMonthChange(newMonth, this.mainSystemConfig.selectedMonth);
+    }
+    
+    // Year changed?
+    if (newYear !== this.mainSystemConfig.selectedYear) {
+      console.log(`📅 Force read detected year change: ${this.mainSystemConfig.selectedYear} → ${newYear}`);
+      await this.handleFirebaseYearChange(newYear, this.mainSystemConfig.selectedYear);
+    }
+    
+    // Date changed?
+    if (newDate !== this.mainSystemConfig.currentDate) {
+      console.log(`📅 Force read detected date change: ${this.mainSystemConfig.currentDate} → ${newDate}`);
+      await this.handleFirebaseDateChange(newDate, this.mainSystemConfig.currentDate);
+    }
+    
+    console.log('✅ Force read complete');
+    
+  } catch (error) {
+    console.error('❌ Force read failed:', error);
+  }
+}
 
     /**
    * Check if day has changed and reset attendance if needed
@@ -803,8 +868,8 @@ async saveAttendanceToFirebase(studentId, studentName, dateValidation) {
     return;
   }
   
-  const monthKey = `${year}-${String(month).padStart(2, '0')}`;
-  const path = `attendanceData/${monthKey}/${subject}/${studentId}`;
+  const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+  const path = `mainSystem/attendanceData/${monthKey}/${subject}/${studentId}`;
   
   try {
     // Add timeout to prevent hanging
@@ -982,6 +1047,56 @@ async showFaceExistsDialog(existingFace) {
   async updateStudentList() {
     const faces = await this.storage.getAllFaces();
     
+     if (this.firebaseSync && this.firebaseSync.isConnected) {
+      const day = this.mainSystemConfig.currentDay;
+      const month = this.mainSystemConfig.selectedMonth;
+      const year = this.mainSystemConfig.selectedYear;
+      const subject = this.mainSystemConfig.selectedSubject;
+      
+      if (day && month !== null && month !== undefined && year && subject) {
+        // ⚠️ CRITICAL FIX: Use month directly, no +1
+        const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+        const path = `mainSystem/attendanceData/${monthKey}/${subject}`;
+        
+        try {
+          console.log(`📥 Reading Firebase attendance from: ${path} for Day ${day}`);
+          
+          const snapshot = await this.firebaseSync.firebaseDB.ref(path).once('value');
+          const firebaseData = snapshot.val() || {};
+          
+          console.log('Firebase data:', firebaseData);
+          
+          // Update each face with Firebase attendance status
+          faces.forEach(face => {
+            const studentData = firebaseData[face.id];
+            if (studentData) {
+              const dayStatus = studentData[day];
+              console.log(`${face.id}: Day ${day} = ${dayStatus} (${typeof dayStatus})`);
+              
+              // ✅ Check ALL possible formats
+              const isPresent = dayStatus === 'Present' || 
+                               dayStatus === 'present' ||
+                               dayStatus === true || 
+                               dayStatus === 1 || 
+                               dayStatus === '1';
+              
+              face.attendanceToday = isPresent;
+              
+              if (isPresent) {
+                console.log(`✅ ${face.name} - PRESENT`);
+              }
+            } else {
+              face.attendanceToday = false;
+            }
+          });
+          
+          console.log(`✅ Synced ${faces.filter(f => f.attendanceToday).length}/${faces.length} from Firebase`);
+        } catch (error) {
+          console.error('❌ Failed to read Firebase attendance:', error);
+        }
+      }
+    }
+
     const listContainer = document.getElementById('studentList');
 
     if (faces.length === 0) {
@@ -1035,6 +1150,37 @@ async showFaceExistsDialog(existingFace) {
  */
 async updateVisualAttendance() {
   const faces = await this.storage.getAllFaces();
+
+   if (this.firebaseSync && this.firebaseSync.isConnected) {
+    const day = this.mainSystemConfig.currentDay;
+    const month = this.mainSystemConfig.selectedMonth;
+    const year = this.mainSystemConfig.selectedYear;
+    const subject = this.mainSystemConfig.selectedSubject;
+    
+    if (day && month !== null && month !== undefined && year && subject) {
+      const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+      const path = `mainSystem/attendanceData/${monthKey}/${subject}`;
+      
+      try {
+        const snapshot = await this.firebaseSync.firebaseDB.ref(path).once('value');
+        const firebaseData = snapshot.val() || {};
+        
+        faces.forEach(face => {
+          const studentData = firebaseData[face.id];
+          if (studentData) {
+            const dayStatus = studentData[day];
+            const isPresent = dayStatus === 'Present' || dayStatus === 'present' || 
+                             dayStatus === true || dayStatus === 1 || dayStatus === '1';
+            face.attendanceToday = isPresent;
+          } else {
+            face.attendanceToday = false;
+          }
+        });
+      } catch (error) {
+        console.error('Failed to sync visual attendance:', error);
+      }
+    }
+  }
   
   // Separate present and absent students
   const presentStudents = faces.filter(f => f.attendanceToday);
@@ -1091,7 +1237,44 @@ async updateVisualAttendance() {
    * Update statistics
    */
   async updateStats() {
-    const stats = await this.storage.getStats();
+    let faces = await this.storage.getAllFaces();
+    
+    if (this.firebaseSync && this.firebaseSync.isConnected) {
+      const day = this.mainSystemConfig.currentDay;
+      const month = this.mainSystemConfig.selectedMonth;
+      const year = this.mainSystemConfig.selectedYear;
+      const subject = this.mainSystemConfig.selectedSubject;
+      
+      if (day && month !== null && month !== undefined && year && subject) {
+        const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+        const path = `mainSystem/attendanceData/${monthKey}/${subject}`;
+        
+        try {
+          const snapshot = await this.firebaseSync.firebaseDB.ref(path).once('value');
+          const firebaseData = snapshot.val() || {};
+          
+          faces.forEach(face => {
+            const studentData = firebaseData[face.id];
+            if (studentData) {
+              const dayStatus = studentData[day];
+              const isPresent = dayStatus === 'Present' || dayStatus === 'present' || 
+                               dayStatus === true || dayStatus === 1 || dayStatus === '1';
+              face.attendanceToday = isPresent;
+            } else {
+              face.attendanceToday = false;
+            }
+          });
+        } catch (error) {
+          console.error('Failed to sync stats:', error);
+        }
+      }
+    }
+    
+    const stats = {
+      total: faces.length,
+      presentToday: faces.filter(f => f.attendanceToday).length,
+      absentToday: faces.filter(f => !f.attendanceToday).length
+    };
     document.getElementById('statRegistered').textContent = stats.total;
     document.getElementById('statRecognized').textContent = stats.presentToday;
     document.getElementById('statUnknown').textContent = this.unknownCount;
@@ -1789,7 +1972,7 @@ let allAttendanceData = snapshot.val() || {};
     // Save back to main system
     // Save back to main system - UPDATE ONLY THE SPECIFIC MONTH/SUBJECT
 await this.firebaseSync.firebaseDB
-  .ref(`attendanceData/${monthKey}/${selectedSubject}`)
+  .ref(`mainSystem/attendanceData/${monthKey}/${selectedSubject}`)
   .set(allAttendanceData[monthKey][selectedSubject]);
 
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
@@ -1808,6 +1991,50 @@ await this.firebaseSync.firebaseDB
   } catch (error) {
     console.error('Sync error:', error);
     this.showToast('❌ Sync failed: ' + error.message, 'danger');
+  }
+}
+
+async debugFirebaseAttendance() {
+  if (!this.firebaseSync || !this.firebaseSync.isConnected) {
+    alert('❌ Firebase not connected!');
+    return;
+  }
+  
+  const day = this.mainSystemConfig.currentDay;
+  const month = this.mainSystemConfig.selectedMonth;
+  const year = this.mainSystemConfig.selectedYear;
+  const subject = this.mainSystemConfig.selectedSubject;
+  
+  const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+  const path = `mainSystem/attendanceData/${monthKey}/${subject}`;
+  
+  try {
+    const snapshot = await this.firebaseSync.firebaseDB.ref(path).once('value');
+    const data = snapshot.val();
+    
+    console.log('=== FIREBASE DEBUG ===');
+    console.log('Path:', path);
+    console.log('Day:', day);
+    console.log('Data:', data);
+    
+    if (!data) {
+      alert('❌ NO DATA at path: ' + path);
+      return;
+    }
+    
+    let report = `Path: ${path}\nDay: ${day}\n\n`;
+    
+    Object.keys(data).forEach(studentId => {
+      const studentData = data[studentId];
+      const dayStatus = studentData[day];
+      report += `${studentId}: ${studentData._name}\n`;
+      report += `  Day ${day} = ${dayStatus}\n\n`;
+    });
+    
+    console.log(report);
+    alert(report);
+  } catch (error) {
+    alert('❌ Error: ' + error.message);
   }
 }
 
@@ -2011,7 +2238,24 @@ document.getElementById('recognitionMode').addEventListener('click', () => {
     // Set default mode to recognition
     document.getElementById('recognitionMode').click();
 
-
+     const forceReadBtn = document.getElementById('forceReadBtn');
+  if (forceReadBtn) {
+    forceReadBtn.addEventListener('click', async () => {
+      forceReadBtn.disabled = true;
+      forceReadBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Reading...';
+      
+      await this.forceReadFirebaseData();
+      
+      forceReadBtn.disabled = false;
+      forceReadBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-2"></i>Force Read Firebase Now';
+      
+      this.showToast('✅ Firebase data refreshed!', 'success');
+    });
+  }
+const debugBtn = document.getElementById('debugFirebaseBtn');
+if (debugBtn) {
+  debugBtn.addEventListener('click', () => this.debugFirebaseAttendance());
+}
 
     // Bulk Import Mode
 document.getElementById('bulkImportMode').addEventListener('click', () => {
@@ -2195,4 +2439,25 @@ let faceSystem;
 window.addEventListener('DOMContentLoaded', async () => {
   faceSystem = new FaceRecognitionSystem();
   await faceSystem.init();
+});
+
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+// ✅ CLEANUP ON PAGE UNLOAD
+window.addEventListener('beforeunload', () => {
+  if (faceSystem) {
+    // Clear intervals
+    if (faceSystem.continuousReadInterval) {
+      clearInterval(faceSystem.continuousReadInterval);
+    }
+    if (faceSystem.dateCheckInterval) {
+      clearInterval(faceSystem.dateCheckInterval);
+    }
+    
+    // Detach Firebase listeners
+    if (faceSystem.firebaseSync) {
+      faceSystem.firebaseSync.detachListeners();
+    }
+    
+    console.log('✅ Cleaned up intervals and listeners');
+  }
 });
