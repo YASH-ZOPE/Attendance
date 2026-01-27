@@ -524,7 +524,7 @@
       <div class="section-card">
         <h4 class="section-title"><i class="bi bi-calendar3 me-2"></i>Month & Calendar</h4>
 
-        <div class="row g-3 align-items-end teacher-only">
+        <div class="row g-3 teacher-only">
           <div class="col-md-3">
             <label class="form-label fw-bold">Month</label>
             <select id="monthSelect" class="form-select">
@@ -543,7 +543,7 @@
             </select>
           </div>
 
-          <div class="col-md-2">
+          <div class="col-md-3">
             <label class="form-label fw-bold">Year</label>
             <select id="yearSelect" class="form-select"></select>
           </div>
@@ -554,7 +554,7 @@
             </button>
           </div>
 
-          <div class="col-md-4">
+          <div class="col-md-3">
             <div class="alert alert-success mb-0 py-2">
               <strong>Selected:</strong> <span id="currentMonthDisplay">None</span>
             </div>
@@ -750,43 +750,45 @@
           </div>
 
           <!-- Search and Filter -->
-          <div class="row g-3 mb-3 teacher-only">
-            <div class="col-md-4">
-              <div class="input-group">
-                <input type="text" id="searchInput" class="form-control" placeholder="Search by ID or Name">
-                <button id="searchBtn" class="btn btn-outline-primary">
-                  <i class="bi bi-search"></i>
-                </button>
-                <button id="resetSearchBtn" class="btn btn-outline-secondary">
-                  <i class="bi bi-x"></i>
-                </button>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <select id="sortSelect" class="form-select">
-                <option value="">Sort by...</option>
-                <option value="id-asc">ID (Low to High)</option>
-                <option value="id-desc">ID (High to Low)</option>
-                <option value="name-asc">Name (A to Z)</option>
-                <option value="name-desc">Name (Z to A)</option>
-                <option value="attendance-asc">Attendance % (Low to High)</option>
-                <option value="attendance-desc">Attendance % (High to Low)</option>
-              </select>
-            </div>
-            <div class="col-md-3">
-              <select id="filterSelect" class="form-select">
-                <option value="all">Show All</option>
-                <option value="present">Present Only</option>
-                <option value="absent">Absent Only</option>
-                <option value="defaulter">Defaulters Only</option>
-              </select>
-            </div>
-            <div class="col-md-2">
-              <button id="refreshTableBtn" class="btn btn-outline-primary w-100">
-                <i class="bi bi-arrow-clockwise me-1"></i>Refresh
-              </button>
-            </div>
-          </div>
+<div class="teacher-only">
+  <div class="row g-2 mb-3">
+    <div class="col-12 col-sm-6 col-md-3">
+      <div class="input-group input-group-sm">
+        <input type="text" id="searchInput" class="form-control" placeholder="Search ID/Name">
+        <button id="searchBtn" class="btn btn-outline-primary">
+          <i class="bi bi-search"></i>
+        </button>
+        <button id="resetSearchBtn" class="btn btn-outline-secondary">
+          <i class="bi bi-x"></i>
+        </button>
+      </div>
+    </div>
+    <div class="col-12 col-sm-6 col-md-3">
+      <select id="sortSelect" class="form-select form-select-sm">
+        <option value="">Sort by...</option>
+        <option value="id-asc">ID (Low→High)</option>
+        <option value="id-desc">ID (High→Low)</option>
+        <option value="name-asc">Name (A→Z)</option>
+        <option value="name-desc">Name (Z→A)</option>
+        <option value="attendance-asc">Attend % (Low→High)</option>
+        <option value="attendance-desc">Attend % (High→Low)</option>
+      </select>
+    </div>
+    <div class="col-12 col-sm-6 col-md-3">
+      <select id="filterSelect" class="form-select form-select-sm">
+        <option value="all">Show All</option>
+        <option value="present">Present Only</option>
+        <option value="absent">Absent Only</option>
+        <option value="defaulter">Defaulters Only</option>
+      </select>
+    </div>
+    <div class="col-12 col-sm-6 col-md-3">
+      <button id="refreshTableBtn" class="btn btn-outline-primary btn-sm w-100">
+        <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+      </button>
+    </div>
+  </div>
+</div>
 
           <!-- Table -->
           <div class="table-responsive table-container border rounded">
@@ -797,7 +799,7 @@
                   <th width="25%">Name</th>
                   <th width="15%">Today</th>
                   <th width="25%">Monthly Stats</th>
-                  <th width="25%">Actions</th>
+                  <th width="25% teacher-only">Actions</th>
                 </tr>
               </thead>
               <tbody id="attendanceTableBody">
