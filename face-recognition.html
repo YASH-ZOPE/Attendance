@@ -75,32 +75,31 @@
       transform: scaleX(-1);
     }
 
+    /* ✅ CHANGED: Reduced padding from 25px to 15px */
     .mode-card {
-      background: #f8f9fa;
-      border-radius: 15px;
-      padding: 25px;
-      margin-bottom: 20px;
-      border: 3px solid transparent;
-      transition: all 0.3s;
-      cursor: pointer;
-    }
+  background: #f8f9fa;
+  border-radius: 15px;
+  padding: 15px;
+  margin-bottom: 20px;
+  border: 3px solid transparent;
+  cursor: pointer;
+}
 
-    .mode-card:hover {
-      border-color: #E8C4D8;
-      transform: translateY(-5px);
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-    }
+.mode-card:hover {
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
 
-    .mode-card.active {
-      border-color: #E8C4D8;
-      background: linear-gradient(135deg, #FBF8FA 0%, #F7F0F5 100%);
-    }
+.mode-card.active {
+  background: linear-gradient(135deg, #FBF8FA 0%, #F7F0F5 100%);
+}
 
+    /* ✅ CHANGED: Reduced padding and added font-size */
     .btn-face {
       border-radius: 25px;
-      padding: 12px 30px;
+      padding: 8px 20px;
       font-weight: 600;
       transition: all 0.3s;
+      font-size: 0.9rem;
     }
 
     .btn-face:hover {
@@ -211,17 +210,16 @@
       gap: 10px;
     }
 
+    /* ✅ CHANGED: Reduced min-height and added padding/font-size */
     .button-grid button {
       width: 100%;
-    }
-
-    .button-grid button {
-      width: 100%;
-      min-height: 50px;
+      min-height: 40px;
       white-space: nowrap;
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 8px 15px;
+      font-size: 0.85rem;
     }
 
     /* Role-based visibility */
@@ -311,128 +309,183 @@
         font-size: 0.9rem;
         padding: 10px 20px;
       }
+
+      /* ✅ CHANGED: Mobile responsive for child containers */
+      .child-container {
+        flex: 1 1 100% !important;
+        min-width: 100%;
+      }
     }
 
-    /* Flexbox layout for student lists */
-.student-lists-wrapper {
-  display: flex;
-  gap: 15px;
-  flex-wrap: wrap;
-  margin-top: 20px;
-}
+    /* ✅ CHANGED: Flexbox layout for 60/40 split */
+    .parent-container {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
 
-.student-list-col {
-  flex: 1 1 calc(50% - 7.5px);
-  min-width: 280px;
-}
+    /* ✅ CHANGED: Removed old 50/50 layout, added specific widths */
+    .child-container {
+      min-width: 280px;
+    }
 
-/* When one column is hidden, the other automatically takes full width */
-.student-lists-wrapper:has(.student-list-col:only-child) .student-list-col {
-  flex: 1 1 100%;
-}
+    .child-container:nth-child(1) {
+      flex: 0 0 calc(60% - 7.5px);
+    }
 
-/* Adjust student list height for side-by-side */
-.student-lists-wrapper .student-list {
-  max-height: 400px;
-}
+    .child-container:nth-child(2) {
+      flex: 0 0 calc(40% - 7.5px);
+    }
 
-/* Stack vertically on mobile */
-@media (max-width: 767px) {
-  .student-list-col {
-    flex: 1 1 100%;
-    min-width: 100%;
-  }
-}
+    .child-container:nth-child(3) {
+      flex: 0 0 calc(40% - 7.5px);
+    }
 
-.attendance-blocks {
-  display: grid;
-  grid-template-columns: repeat(10, 1fr);
-  gap: 8px;
-  margin-bottom: 10px;
-}
+    .child-container:nth-child(4) {
+      flex: 0 0 calc(60% - 7.5px);
+    }
 
-.attendance-block {
-  aspect-ratio: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  font-weight: bold;
-  font-size: 16px;
-  color: white;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  position: relative;
-  min-height: 45px;
-}
+    /* ✅ NEW: Student role visibility - hide 2nd and 4th containers */
+    body.student-role .child-container:nth-child(2),
+    body.student-role .child-container:nth-child(4) {
+      display: none;
+    }
 
-.attendance-block.present {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-}
+    body.student-role .child-container:nth-child(1) {
+      flex: 0 0 calc(60% - 7.5px) !important;
+    }
 
-.attendance-block.absent {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-}
+    body.student-role .child-container:nth-child(3) {
+      flex: 0 0 calc(40% - 7.5px) !important;
+    }
 
-.attendance-block:hover {
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
+    /* ✅ NEW: Bootstrap column width fix */
+    .parent-container .child-container .col-11 {
+      width: 100% !important;
+      max-width: 100% !important;
+      flex: none !important;
+    }
 
-/* Tooltip */
-.attendance-block .tooltip-text {
-  visibility: hidden;
-  background-color: rgba(0, 0, 0, 0.9);
-  color: #fff;
-  text-align: center;
-  border-radius: 6px;
-  padding: 8px 12px;
-  position: absolute;
-  z-index: 1000;
-  bottom: 125%;
-  left: 50%;
-  transform: translateX(-50%);
-  white-space: nowrap;
-  font-size: 12px;
-  font-weight: normal;
-  opacity: 0;
-  transition: opacity 0.3s;
-}
+    /* Adjust student list height for side-by-side */
+    .parent-container .student-list {
+      max-height: 400px;
+    }
 
-.attendance-block .tooltip-text::after {
-  content: "";
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  margin-left: -5px;
-  border-width: 5px;
-  border-style: solid;
-  border-color: rgba(0, 0, 0, 0.9) transparent transparent transparent;
-}
+    /* ✅ NEW: Quick Stats height reduction */
+    .row.mt-4 {
+      margin-top: 1rem !important;
+      margin-bottom: 0rem !important;
+    }
 
-.attendance-block:hover .tooltip-text {
-  visibility: visible;
-  opacity: 1;
-}
+    .row.mt-4 .text-center {
+      padding: 10px !important;
+    }
 
-/* Responsive */
-@media (max-width: 1200px) {
-  .attendance-blocks {
-    grid-template-columns: repeat(8, 1fr);
-  }
-}
+    .row.mt-4 h3 {
+      font-size: 1.5rem !important;
+      margin-bottom: 0.25rem !important;
+    }
 
-@media (max-width: 768px) {
-  .attendance-blocks {
-    grid-template-columns: repeat(5, 1fr);
-  }
-  
-  .attendance-block {
-    font-size: 14px;
-    min-height: 40px;
-  }
-}
+    .row.mt-4 small {
+      font-size: 0.7rem;
+    }
+
+    /* ✅ NEW: Spacing above Main Dashboard button */
+    .d-flex.justify-content-center {
+      margin-top: 1.5rem;
+    }
+
+    /* Attendance blocks styling */
+    .attendance-blocks {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .attendance-block {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 16px;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      position: relative;
+      min-height: 45px;
+    }
+
+    .attendance-block.present {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    .attendance-block.absent {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+
+    .attendance-block:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Tooltip */
+    .attendance-block .tooltip-text {
+      visibility: hidden;
+      background-color: rgba(0, 0, 0, 0.9);
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 8px 12px;
+      position: absolute;
+      z-index: 1000;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      font-size: 12px;
+      font-weight: normal;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .attendance-block .tooltip-text::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      margin-left: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: rgba(0, 0, 0, 0.9) transparent transparent transparent;
+    }
+
+    .attendance-block:hover .tooltip-text {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .attendance-blocks {
+        grid-template-columns: repeat(8, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .attendance-blocks {
+        grid-template-columns: repeat(5, 1fr);
+      }
+
+      .attendance-block {
+        font-size: 14px;
+        min-height: 40px;
+      }
+    }
   </style>
 </head>
 
@@ -459,367 +512,381 @@
       <h1><i class="bi bi-camera-video me-2"></i>Face Recognition Attendance</h1>
       <p class="mb-0 mt-2">Automated attendance marking using facial recognition</p>
     </div>
-
     <div class="content-area">
-      <div class="row">
-        <!-- Left Column - Video Feed -->
-        <div class="col-lg-7">
-          <div class="video-container">
-            <video id="video" autoplay muted playsinline></video>
-            <canvas id="canvas"></canvas>
-            <div id="statusBadge" class="status-badge bg-secondary">
-              <i class="bi bi-camera-video-off me-2"></i>Camera Off
-            </div>
-          </div>
+      <div class="parent-container">
+        <div class="child-container">
+          <div class="row">
+            <div class="mode-card col-11">
+              <div class="row">
+                <!-- Left Column - Video Feed -->
+                <div class="video-container">
+                  <video id="video" autoplay muted playsinline></video>
+                  <canvas id="canvas"></canvas>
+                  <div id="statusBadge" class="status-badge bg-secondary">
+                    <i class="bi bi-camera-video-off me-2"></i>Camera Off
+                  </div>
+                </div>
 
-          <!-- Controls -->
-          <div class="d-grid gap-2">
-            <button id="startCameraBtn" class="btn btn-primary btn-face">
-              <i class="bi bi-camera-video me-2"></i>Start Camera
-            </button>
-            <button id="stopCameraBtn" class="btn btn-danger btn-face" style="display: none;">
-              <i class="bi bi-camera-video-off me-2"></i>Stop Camera
-            </button>
-          </div>
+                <!-- Controls -->
+                <div class="d-grid gap-2">
+                  <button id="startCameraBtn" class="btn btn-primary btn-face">
+                    <i class="bi bi-camera-video me-2"></i>Start Camera
+                  </button>
+                  <button id="stopCameraBtn" class="btn btn-danger btn-face" style="display: none;">
+                    <i class="bi bi-camera-video-off me-2"></i>Stop Camera
+                  </button>
+                </div>
 
-          <!-- Quick Stats -->
-          <div class="row mt-4">
-            <div class="col-4">
-              <div class="text-center p-3 bg-light rounded">
-                <h3 class="text-primary mb-0" id="statRegistered">0</h3>
-                <small class="text-muted">Registered</small>
+                <!-- Quick Stats -->
+                <div class="row mt-4">
+                  <div class="col-4">
+                    <div class="text-center p-3 bg-light rounded">
+                      <h3 class="text-primary mb-0" id="statRegistered">0</h3>
+                      <small class="text-muted">Registered</small>
+                    </div>
+                  </div>
+                  <div class="col-4">
+                    <div class="text-center p-3 bg-light rounded">
+                      <h3 class="text-success mb-0" id="statRecognized">0</h3>
+                      <small class="text-muted">Recognized</small>
+                    </div>
+                  </div>
+                  <div class="col-4">
+                    <div class="text-center p-3 bg-light rounded">
+                      <h3 class="text-warning mb-0" id="statUnknown">0</h3>
+                      <small class="text-muted">Unknown</small>
+                    </div>
+                  </div>
+                </div>
+                <div class="d-flex justify-content-center">
+                  <button class="btn btn-primary w-100 mb-2" onclick="window.location.href='main-system.html'">
+                    Main Dashboard
+                  </button>
+                  <br>
+                  <br>
+                </div>
+
+                <div class="button-grid">
+                  <button id="testConnectionBtn" class="btn btn-outline-info w-100 mb-2 admin-only-inline">
+                    <i class="bi bi-plug me-2"></i>Test Main System Connection
+                  </button>
+                  <button id="refreshStatusBtn" class="btn btn-outline-secondary w-100 mb-2 admin-only-inline">
+                    <i class="bi bi-arrow-clockwise me-2"></i>Refresh Status
+                  </button>
+                  <button id="syncToMainBtn" class="btn btn-success w-100 mb-2 teacher-only-inline">
+                    <i class="bi bi-arrow-right-circle me-2"></i>Sync to Main System
+                  </button>
+                  <button id="clearAllFacesBtn" class="btn btn-outline-danger w-100 admin-only-inline">
+                    <i class="bi bi-trash me-2"></i>Clear All Faces
+                  </button>
+                   <button id="forceReadBtn" class="btn btn-outline-info w-100 mb-2 teacher-only-inline">
+                  <i class="bi bi-arrow-clockwise me-2"></i>Force Read Firebase Now
+                </button>
+                </div>
+               
               </div>
             </div>
-            <div class="col-4">
-              <div class="text-center p-3 bg-light rounded">
-                <h3 class="text-success mb-0" id="statRecognized">0</h3>
-                <small class="text-muted">Recognized</small>
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="text-center p-3 bg-light rounded">
-                <h3 class="text-warning mb-0" id="statUnknown">0</h3>
-                <small class="text-muted">Unknown</small>
-              </div>
-            </div>
           </div>
-          <br>
-          <button class="btn btn-primary w-100 mb-2" onclick="window.location.href='main-system.html'">
-            Main Dashboard
-          </button>
-          <br>
-          <br>
-
-          <div class="button-grid">
-            <button id="testConnectionBtn" class="btn btn-outline-info w-100 mb-2 admin-only-inline">
-              <i class="bi bi-plug me-2"></i>Test Main System Connection
-            </button>
-            <button id="refreshStatusBtn" class="btn btn-outline-secondary w-100 mb-2 admin-only-inline">
-              <i class="bi bi-arrow-clockwise me-2"></i>Refresh Status
-            </button>
-            <button id="syncToMainBtn" class="btn btn-success w-100 mb-2 teacher-only-inline">
-              <i class="bi bi-arrow-right-circle me-2"></i>Sync to Main System
-            </button>
-            <button id="clearAllFacesBtn" class="btn btn-outline-danger w-100 admin-only-inline">
-              <i class="bi bi-trash me-2"></i>Clear All Faces
-            </button>
-          </div>
-
         </div>
-        <!-- Right Column - Mode Selection & Student List -->
-        <div class="col-lg-5 teacher-only">
-          <!-- Mode Selection -->
-          <h5 class="mb-3"><i class="bi bi-gear me-2"></i>Operation Mode</h5>
 
-          <div class="mode-card" id="registerMode">
-            <div class="d-flex align-items-center">
-              <i class="bi bi-person-plus-fill fs-1 text-primary me-3"></i>
-              <div>
-                <h5 class="mb-1">Register Face</h5>
-                <small class="text-muted">Capture and register student faces</small>
+
+        <div class="child-container teacher-only">
+          <!-- Right Column - Mode Selection & Student List -->
+          <div class="mode-card">
+            <!-- Mode Selection -->
+            <h5 class="mb-3"><i class="bi bi-gear me-2"></i>Operation Mode</h5>
+            <div class="mode-card" id="registerMode">
+              <div class="d-flex align-items-center">
+                <i class="bi bi-person-plus-fill fs-1 text-primary me-3"></i>
+                <div>
+                  <h5 class="mb-1">Register Face</h5>
+                  <small class="text-muted">Capture and register student faces</small>
+                </div>
+              </div>
+              <div id="registerControls" style="display: none;" class="mt-3">
+                <div class="input-group mb-2">
+                  <input type="text" id="studentIdInput" class="form-control" placeholder="Student ID">
+                </div>
+                <div class="input-group mb-2">
+                  <input type="text" id="studentNameInput" class="form-control" placeholder="Student Name">
+                </div>
+                <button id="captureBtn" class="btn btn-success w-100" disabled>
+                  <i class="bi bi-camera me-2"></i>Capture Face
+                </button>
               </div>
             </div>
-            <div id="registerControls" style="display: none;" class="mt-3">
-              <div class="input-group mb-2">
-                <input type="text" id="studentIdInput" class="form-control" placeholder="Student ID">
+
+            <div class="mode-card teacher-only" id="recognitionMode">
+              <div class="d-flex align-items-center">
+                <i class="bi bi-person-check-fill fs-1 text-success me-3"></i>
+                <div>
+                  <h5 class="mb-1">Mark Attendance</h5>
+                  <small class="text-muted">Recognize faces and mark attendance</small>
+                </div>
               </div>
-              <div class="input-group mb-2">
-                <input type="text" id="studentNameInput" class="form-control" placeholder="Student Name">
+              <div id="recognitionControls" style="display: none;" class="mt-3">
+                <div class="alert alert-info">
+                  <i class="bi bi-info-circle me-2"></i>
+                  Face detection running. Stand in front of camera to mark attendance.
+                </div>
+                <button id="clearTodayBtn" class="btn btn-outline-warning btn-sm w-100">
+                  <i class="bi bi-arrow-clockwise me-2"></i>Clear Today's Attendance
+                </button>
               </div>
-              <button id="captureBtn" class="btn btn-success w-100" disabled>
-                <i class="bi bi-camera me-2"></i>Capture Face
-              </button>
+            </div>
+            <div>
+              <div class="mode-card teacher-only" id="bulkImportMode">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-folder-plus fs-1 text-info me-3"></i>
+                  <div>
+                    <h5 class="mb-1">Bulk Import</h5>
+                    <small class="text-muted">Import multiple faces from folder</small>
+                  </div>
+                </div>
+                <div id="bulkImportControls" style="display: none;" class="mt-3">
+                  <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <strong>Folder Structure Required:</strong><br>
+                    Dataset/StudentID/image1.jpg<br>
+                    Dataset/StudentID/image2.jpg
+                  </div>
+                  <input type="file" id="folderInput" webkitdirectory directory multiple class="form-control mb-3">
+                  <div id="importPreview" style="display: none;" class="mb-3">
+                    <div id="previewContent"></div>
+                  </div>
+                  <div class="d-grid gap-2">
+                    <button id="startImportBtn" class="btn btn-primary" disabled>
+                      <i class="bi bi-upload me-2"></i>Start Import
+                    </button>
+                    <button id="cancelImportBtn" class="btn btn-outline-secondary">
+                      <i class="bi bi-x-circle me-2"></i>Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+        </div>
 
-          <div class="mode-card teacher-only" id="recognitionMode">
-            <div class="d-flex align-items-center">
-              <i class="bi bi-person-check-fill fs-1 text-success me-3"></i>
-              <div>
-                <h5 class="mb-1">Mark Attendance</h5>
-                <small class="text-muted">Recognize faces and mark attendance</small>
+
+        <!---------------------------------------------------------------------------------------------------------------->
+
+        <div class="child-container">
+          <div class="mode-card">
+            <h5 class="mb-3 mt-4">
+              <i class="bi bi-grid-3x3 me-2"></i>Today's Attendance
+              <span id="attendanceCount" class="badge bg-primary ms-2">0/0</span>
+            </h5>
+
+            <!-- Present Students Blocks -->
+            <div class="mb-4">
+              <h6 class="text-success mb-2">
+                <i class="bi bi-check-circle me-1"></i>PRESENT
+                <span id="presentCount" class="badge bg-success ms-1">0</span>
+              </h6>
+              <div id="presentBlocks" class="attendance-blocks">
+                <div class="text-center text-muted py-3">
+                  <small>No students marked present</small>
+                </div>
               </div>
             </div>
-            <div id="recognitionControls" style="display: none;" class="mt-3">
-              <div class="alert alert-info">
-                <i class="bi bi-info-circle me-2"></i>
-                Face detection running. Stand in front of camera to mark attendance.
+
+            <!-- Absent Students Blocks -->
+            <div>
+              <h6 class="text-danger mb-2">
+                <i class="bi bi-x-circle me-1"></i>ABSENT
+                <span id="absentCount" class="badge bg-danger ms-1">0</span>
+              </h6>
+              <div id="absentBlocks" class="attendance-blocks">
+                <div class="text-center text-muted py-3">
+                  <small>All students present</small>
+                </div>
               </div>
-              <button id="clearTodayBtn" class="btn btn-outline-warning btn-sm w-100">
-                <i class="bi bi-arrow-clockwise me-2"></i>Clear Today's Attendance
-              </button>
             </div>
           </div>
-        <div>
-          <div class="mode-card teacher-only" id="bulkImportMode">
-            <div class="d-flex align-items-center">
-              <i class="bi bi-folder-plus fs-1 text-info me-3"></i>
-              <div>
-                <h5 class="mb-1">Bulk Import</h5>
-                <small class="text-muted">Import multiple faces from folder</small>
-              </div>
-            </div>
-            <div id="bulkImportControls" style="display: none;" class="mt-3">
-              <div class="alert alert-warning">
-                <i class="bi bi-exclamation-triangle me-2"></i>
-                <strong>Folder Structure Required:</strong><br>
-                Dataset/StudentID/image1.jpg<br>
-                Dataset/StudentID/image2.jpg
-              </div>
-              <input type="file" id="folderInput" webkitdirectory directory multiple class="form-control mb-3">
-              <div id="importPreview" style="display: none;" class="mb-3">
-                <div id="previewContent"></div>
-              </div>
-              <div class="d-grid gap-2">
-                <button id="startImportBtn" class="btn btn-primary" disabled>
-                  <i class="bi bi-upload me-2"></i>Start Import
-                </button>
-                <button id="cancelImportBtn" class="btn btn-outline-secondary">
-                  <i class="bi bi-x-circle me-2"></i>Cancel
-                </button>
+        </div>
+
+        <div class="child-container">
+          <div class="mode-card teacher-only">
+            <!-- Registered Students List -->
+            <h5 class="mb-3 mt-4"><i class="bi bi-people me-2"></i>Registered Students</h5>
+            <div class="student-list" id="studentList">
+              <div class="text-center text-muted py-5">
+                <i class="bi bi-person-x fs-1"></i>
+                <p class="mt-2">No students registered yet</p>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-<!---------------------------------------------------------------------------------------------------------------->
-      <div class="student-lists-wrapper">
-      <div class="student-list-col">
+      <!-- Actions -->
 
 
-       <div class="mode-card teacher-only">
-          <!-- Registered Students List -->
-          <h5 class="mb-3 mt-4"><i class="bi bi-people me-2"></i>Registered Students</h5>
-          <div class="student-list" id="studentList">
-            <div class="text-center text-muted py-5">
-              <i class="bi bi-person-x fs-1"></i>
-              <p class="mt-2">No students registered yet</p>
-            </div>
+      <!-- Toast Notification -->
+      <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div id="toastNotification" class="toast align-items-center border-0" role="alert">
+          <div class="d-flex">
+            <div class="toast-body"></div>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
           </div>
         </div>
       </div>
-        
-       <div class="student-list-col">
-        <div class="mode-card teacher-only">
-          <h5 class="mb-3 mt-4">
-            <i class="bi bi-grid-3x3 me-2"></i>Today's Attendance 
-            <span id="attendanceCount" class="badge bg-primary ms-2">0/0</span>
-          </h5>
-          
-          <!-- Present Students Blocks -->
-          <div class="mb-4">
-            <h6 class="text-success mb-2">
-              <i class="bi bi-check-circle me-1"></i>PRESENT 
-              <span id="presentCount" class="badge bg-success ms-1">0</span>
-            </h6>
-            <div id="presentBlocks" class="attendance-blocks">
-              <div class="text-center text-muted py-3">
-                <small>No students marked present</small>
-              </div>
-            </div>
+
+
+      <!-- Import Progress Modal -->
+      <div id="importProgressModal"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center;">
+        <div style="background: white; padding: 40px; border-radius: 20px; max-width: 500px; width: 90%;">
+          <h4 class="text-center mb-4">Importing Faces...</h4>
+          <div class="progress mb-3" style="height: 30px;">
+            <div id="importProgressBar" class="progress-bar progress-bar-striped progress-bar-animated"
+              role="progressbar" style="width: 0%"></div>
           </div>
-          
-          <!-- Absent Students Blocks -->
-          <div>
-            <h6 class="text-danger mb-2">
-              <i class="bi bi-x-circle me-1"></i>ABSENT 
-              <span id="absentCount" class="badge bg-danger ms-1">0</span>
-            </h6>
-            <div id="absentBlocks" class="attendance-blocks">
-              <div class="text-center text-muted py-3">
-                <small>All students present</small>
-              </div>
-            </div>
-          </div>
+          <p id="importProgressText" class="text-center mb-2">Processing...</p>
+          <p id="importProgressDetail" class="text-center text-muted"></p>
         </div>
-      </div>          
-    
-          <!-- Actions -->
+      </div>
+
+      <!-- Import Results Modal -->
+      <div id="importResultsModal"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center;">
+        <div
+          style="background: white; padding: 40px; border-radius: 20px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;">
+          <h4 class="text-center mb-4">Import Results</h4>
+          <div id="importResultsContent"></div>
+          <button id="closeResultsBtn" class="btn btn-primary w-100 mt-3">Close</button>
+        </div>
 
 
-          <!-- Toast Notification -->
-          <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-            <div id="toastNotification" class="toast align-items-center border-0" role="alert">
-              <div class="d-flex">
-                <div class="toast-body"></div>
-                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
-              </div>
-            </div>
-          </div>
+        <!-- Scripts -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- CORRECT ORDER -->
+        <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+        <script src="face-storage.js"></script>
+        <script src="face-recognition.js"></script>
 
+        <script>
+          // ==================== ROLE-BASED UI HIDING ====================
+          async function applyRoleBasedUIForFaceRecognition() {
+            try {
+              const role = await getUserRole();
+              console.log('Applying Face Recognition UI for role:', role);
 
-          <!-- Import Progress Modal -->
-          <div id="importProgressModal"
-            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center;">
-            <div style="background: white; padding: 40px; border-radius: 20px; max-width: 500px; width: 90%;">
-              <h4 class="text-center mb-4">Importing Faces...</h4>
-              <div class="progress mb-3" style="height: 30px;">
-                <div id="importProgressBar" class="progress-bar progress-bar-striped progress-bar-animated"
-                  role="progressbar" style="width: 0%"></div>
-              </div>
-              <p id="importProgressText" class="text-center mb-2">Processing...</p>
-              <p id="importProgressDetail" class="text-center text-muted"></p>
-            </div>
-          </div>
-
-          <!-- Import Results Modal -->
-          <div id="importResultsModal"
-            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center;">
-            <div
-              style="background: white; padding: 40px; border-radius: 20px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;">
-              <h4 class="text-center mb-4">Import Results</h4>
-              <div id="importResultsContent"></div>
-              <button id="closeResultsBtn" class="btn btn-primary w-100 mt-3">Close</button>
-            </div>
-          </div>
-
-          <!-- Scripts -->
-          <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-          <!-- CORRECT ORDER -->
-          <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-          <script src="face-storage.js"></script>
-          <script src="face-recognition.js"></script>
-
-          <script>
-            // ==================== ROLE-BASED UI HIDING ====================
-            async function applyRoleBasedUIForFaceRecognition() {
-              try {
-                const role = await getUserRole();
-                console.log('Applying Face Recognition UI for role:', role);
-
-                if (role === 'admin') {
-                  // Admin sees everything - no changes needed
-                  return;
-                }
-
-                if (role === 'teacher') {
-                  // Hide admin-only elements
-                  hideElements('.admin-only');
-                  hideElements('.admin-only-inline');
-
-                } else if (role === 'student') {
-                  // Hide admin-only AND teacher-only elements
-                  hideElements('.admin-only');
-                  hideElements('.admin-only-inline');
-                  hideElements('.teacher-only');
-                  hideElements('.teacher-only-inline');
-
-                  // Hide delete buttons in student list (will be applied when list renders)
-                  hideDeleteButtonsForStudents();
-                }
-
-              } catch (error) {
-                console.error('Error applying role-based UI:', error);
+              if (role === 'admin') {
+                // Admin sees everything - no changes needed
+                return;
               }
-            }
 
-            function hideElements(selector) {
-              document.querySelectorAll(selector).forEach(el => {
-                el.style.display = 'none';
-              });
-            }
+              if (role === 'teacher') {
+                // Hide admin-only elements
+                hideElements('.admin-only');
+                hideElements('.admin-only-inline');
 
-            function hideDeleteButtonsForStudents() {
-              // Add CSS to hide delete buttons
-              const style = document.createElement('style');
-              style.id = 'student-role-style';
-              style.textContent = `
+              } else if (role === 'student') {
+                // Hide admin-only AND teacher-only elements
+                hideElements('.admin-only');
+                hideElements('.admin-only-inline');
+                hideElements('.teacher-only');
+                hideElements('.teacher-only-inline');
+
+                // ✅ ADD THIS LINE:
+                document.body.classList.add('student-role');
+
+                // Hide delete buttons in student list (will be applied when list renders)
+                hideDeleteButtonsForStudents();
+              }
+
+            } catch (error) {
+              console.error('Error applying role-based UI:', error);
+            }
+          }
+
+          function hideElements(selector) {
+            document.querySelectorAll(selector).forEach(el => {
+              el.style.display = 'none';
+            });
+          }
+
+          function hideDeleteButtonsForStudents() {
+            // Add CSS to hide delete buttons
+            const style = document.createElement('style');
+            style.id = 'student-role-style';
+            style.textContent = `
     .student-card .btn-danger { display: none !important; }
   `;
-              document.head.appendChild(style);
+            document.head.appendChild(style);
 
-              // Also observe for dynamically added delete buttons
-              const observer = new MutationObserver(() => {
-                document.querySelectorAll('.student-card .btn-danger').forEach(btn => {
-                  btn.style.display = 'none';
-                });
+            // Also observe for dynamically added delete buttons
+            const observer = new MutationObserver(() => {
+              document.querySelectorAll('.student-card .btn-danger').forEach(btn => {
+                btn.style.display = 'none';
               });
+            });
 
-              const studentList = document.getElementById('studentList');
-              if (studentList) {
-                observer.observe(studentList, { childList: true, subtree: true });
-              }
+            const studentList = document.getElementById('studentList');
+            if (studentList) {
+              observer.observe(studentList, { childList: true, subtree: true });
             }
+          }
 
-            // ==================== AUTHENTICATION CHECK ====================
-            async function checkAuthAndInitFaceRecognition() {
-              try {
-                // Check if logged in
-                const user = await getCurrentUser();
+          // ==================== AUTHENTICATION CHECK ====================
+          async function checkAuthAndInitFaceRecognition() {
+            try {
+              // Check if logged in
+              const user = await getCurrentUser();
 
-                if (!user) {
-                  // Not logged in - redirect to login
-                  window.location.href = 'index.html';
-                  return;
-                }
-
-                // Get role
-                const role = await getUserRole();
-                console.log(`Face Recognition - Logged in as: ${user.attributes.email} (${role})`);
-
-                // Apply role-based UI
-                await applyRoleBasedUIForFaceRecognition();
-
-                console.log('Face Recognition UI initialized for role:', role);
-
-              } catch (error) {
-                console.error('Auth check failed:', error);
+              if (!user) {
+                // Not logged in - redirect to login
                 window.location.href = 'index.html';
+                return;
               }
+
+              // Get role
+              const role = await getUserRole();
+              console.log(`Face Recognition - Logged in as: ${user.attributes.email} (${role})`);
+
+              // Apply role-based UI
+              await applyRoleBasedUIForFaceRecognition();
+
+              console.log('Face Recognition UI initialized for role:', role);
+
+            } catch (error) {
+              console.error('Auth check failed:', error);
+              window.location.href = 'index.html';
+            }
+          }
+
+          // After other button handlers, add:
+          document.getElementById('syncToMainBtn').addEventListener('click', async () => {
+            try {
+              const btn = document.getElementById('syncToMainBtn');
+              btn.disabled = true;
+              btn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Syncing...';
+
+              // ✅ NEW: Use the storage instance from faceSystem
+              const result = await faceSystem.storage.syncToMainSystem();
+
+              showToast(`✅ Force synced! ${result.studentsCount} students to ${result.subject}, Day ${result.day}`, 'success');
+
+              btn.disabled = false;
+              btn.innerHTML = '<i class="bi bi-arrow-right-circle me-2"></i>Force Sync All Students';
+
+            } catch (error) {
+              showToast(`❌ ${error.message}`, 'danger');
+
+              const btn = document.getElementById('syncToMainBtn');
+              btn.disabled = false;
+              btn.innerHTML = '<i class="bi bi-arrow-right-circle me-2"></i>Force Sync All Students';
             }
 
-            // After other button handlers, add:
-            document.getElementById('syncToMainBtn').addEventListener('click', async () => {
-              try {
-                const btn = document.getElementById('syncToMainBtn');
-                btn.disabled = true;
-                btn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Syncing...';
+          });
 
-                // ✅ NEW: Use the storage instance from faceSystem
-                const result = await faceSystem.storage.syncToMainSystem();
-
-                showToast(`✅ Force synced! ${result.studentsCount} students to ${result.subject}, Day ${result.day}`, 'success');
-
-                btn.disabled = false;
-                btn.innerHTML = '<i class="bi bi-arrow-right-circle me-2"></i>Force Sync All Students';
-
-              } catch (error) {
-                showToast(`❌ ${error.message}`, 'danger');
-
-                const btn = document.getElementById('syncToMainBtn');
-                btn.disabled = false;
-                btn.innerHTML = '<i class="bi bi-arrow-right-circle me-2"></i>Force Sync All Students';
-              }
-
-            });
-
-            // Call on page load (after models are loaded)
-            window.addEventListener('DOMContentLoaded', () => {
-              // Wait a bit for face-api models to start loading
-              setTimeout(checkAuthAndInitFaceRecognition, 500);
-            });
-          </script>
+          // Call on page load (after models are loaded)
+          window.addEventListener('DOMContentLoaded', () => {
+            // Wait a bit for face-api models to start loading
+            setTimeout(checkAuthAndInitFaceRecognition, 500);
+          });
+        </script>
 
 </body>
 
