@@ -35,7 +35,11 @@ class FaceRecognitionSystem {
       selectedSubject: null,
       selectedMonth: null,
       selectedYear: null,
-      currentDay: null
+      currentDay: null,
+       selectedDepartment: null,    // ✅ ADD
+  selectedCourse: null,         // ✅ ADD
+  selectedAcademicYear: null,   // ✅ ADD
+  selectedDivision: null
     };
        this.isHandlingDayChange = false;
        this.userRole = null;
@@ -87,13 +91,24 @@ class FaceRecognitionSystem {
       await this.firebaseSync.init();
       
       // Setup live listeners
-      this.firebaseSync.setupLiveListeners({
-        onDateChange: (newDate, oldDate) => this.handleFirebaseDateChange(newDate, oldDate),
-        onSubjectChange: (newSubject, oldSubject) => this.handleFirebaseSubjectChange(newSubject, oldSubject),
-        onMonthChange: (newMonth, oldMonth) => this.handleFirebaseMonthChange(newMonth, oldMonth),
-        onYearChange: (newYear, oldYear) => this.handleFirebaseYearChange(newYear, oldYear),
-        onDayChange: (newDay, oldDay) => this.handleFirebaseDayChange(newDay, oldDay)
-      });
+      // Setup live listeners (only if division config exists)
+      const savedConfig = localStorage.getItem('faceRecDivisionConfig');
+      if (savedConfig) {
+        const config = JSON.parse(savedConfig);
+        this.firebaseSync.setupLiveListeners({
+          department: config.department,
+          course: config.course,
+          academicYear: config.academicYear,
+          division: config.division,
+          year: config.year,
+          onSubjectChange: (newSubject, oldSubject) => this.handleFirebaseSubjectChange(newSubject, oldSubject),
+          onMonthChange: (newMonth, oldMonth) => this.handleFirebaseMonthChange(newMonth, oldMonth),
+          onYearChange: (newYear, oldYear) => this.handleFirebaseYearChange(newYear, oldYear),
+          onDayChange: (newDay, oldDay) => this.handleFirebaseDayChange(newDay, oldDay)
+        });
+      } else {
+        console.log('⚠️ No QR config - listeners will be set after scanning');
+      }
       
       console.log('✅ Firebase live sync enabled');
     } catch (error) {
@@ -106,6 +121,20 @@ class FaceRecognitionSystem {
       
       // Connect to main system database
       await this.connectToMainSystem();
+      // ✅ Load saved QR config from localStorage
+      const savedConfig = localStorage.getItem('faceRecDivisionConfig');
+      if (savedConfig) {
+        const config = JSON.parse(savedConfig);
+        this.mainSystemConfig.selectedDepartment = config.department;
+        this.mainSystemConfig.selectedCourse = config.course;
+        this.mainSystemConfig.selectedAcademicYear = config.academicYear;
+        this.mainSystemConfig.selectedDivision = config.division;
+        this.mainSystemConfig.selectedSubject = config.subject;
+        this.mainSystemConfig.selectedMonth = config.month;
+        this.mainSystemConfig.selectedYear = config.year;
+        this.mainSystemConfig.currentDay = config.day;
+        console.log('✅ Loaded saved QR config:', config);
+      }
       
       // ✅ CHECK DATE IMMEDIATELY ON STARTUP
       await this.checkForDayChange();
@@ -146,6 +175,48 @@ class FaceRecognitionSystem {
     }
   }
 
+async handleQRScan(qrDataString) {
+  try {
+    const qrData = JSON.parse(qrDataString);
+    
+    this.mainSystemConfig.selectedDepartment = qrData.department;
+    this.mainSystemConfig.selectedCourse = qrData.course;
+    this.mainSystemConfig.selectedAcademicYear = qrData.academicYear;
+    this.mainSystemConfig.selectedDivision = qrData.division;
+    this.mainSystemConfig.selectedSubject = qrData.subject;
+    this.mainSystemConfig.selectedMonth = qrData.month;
+    this.mainSystemConfig.selectedYear = qrData.year;
+    this.mainSystemConfig.currentDay = qrData.day;
+    
+    localStorage.setItem('faceRecDivisionConfig', qrDataString);
+    
+    // ✅ Re-setup Firebase live listeners with the new division config
+    if (this.firebaseSync && this.firebaseSync.isConnected) {
+      this.firebaseSync.detachListeners(); // detach old listeners first
+      this.firebaseSync.setupLiveListeners({
+        department:   qrData.department,
+        course:       qrData.course,
+        academicYear: qrData.academicYear,
+        division:     qrData.division,
+        year:         qrData.year,
+        onSubjectChange: (newSubject, oldSubject) => this.handleFirebaseSubjectChange(newSubject, oldSubject),
+        onMonthChange:   (newMonth, oldMonth)     => this.handleFirebaseMonthChange(newMonth, oldMonth),
+        onYearChange:    (newYear, oldYear)       => this.handleFirebaseYearChange(newYear, oldYear),
+        onDayChange:     (newDay, oldDay)         => this.handleFirebaseDayChange(newDay, oldDay)
+      });
+      console.log('✅ Live listeners re-attached for new division');
+    }
+    
+    this.showToast(`✅ Configured for ${qrData.division}`, 'success');
+    
+    await this.loadFaceMatcher();
+    await this.updateStudentList();
+    await this.updateStats();
+  } catch (error) {
+    this.showToast('Invalid QR code', 'danger');
+    console.error('QR scan error:', error);
+  }
+}
   /**
    * Connect to main attendance system database
    */
@@ -198,7 +269,19 @@ async forceReadFirebaseData() {
   try {
     console.log('🔄 Force reading Firebase data...');
     
-    const snapshot = await this.firebaseSync.firebaseDB.ref('mainSystem').once('value');
+    const year = this.mainSystemConfig.selectedYear;
+    const dept = this.mainSystemConfig.selectedDepartment;
+    const course = this.mainSystemConfig.selectedCourse;
+    const academicYear = this.mainSystemConfig.selectedAcademicYear;
+    const division = this.mainSystemConfig.selectedDivision;
+
+    if (!dept || !course || !academicYear || !division) {
+      console.warn('⚠️ Division not configured yet');
+      return;
+    }
+
+    const basePath = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}`;
+    const snapshot = await this.firebaseSync.firebaseDB.ref(basePath).once('value');
     const data = snapshot.val() || {};
     
     // Check each value and trigger handlers if changed
@@ -207,6 +290,8 @@ async forceReadFirebaseData() {
     const newMonth = data.selectedMonth ?? null;
     const newYear = data.selectedYear || null;
     const newDate = data.currentDate || null;
+     // ✅ ADD: Track division components
+    
     
     // Day changed?
     if (newDay !== this.mainSystemConfig.currentDay) {
@@ -237,9 +322,8 @@ async forceReadFirebaseData() {
       console.log(`📅 Force read detected date change: ${this.mainSystemConfig.currentDate} → ${newDate}`);
       await this.handleFirebaseDateChange(newDate, this.mainSystemConfig.currentDate);
     }
-    
+       
     console.log('✅ Force read complete');
-    
   } catch (error) {
     console.error('❌ Force read failed:', error);
   }
@@ -868,8 +952,21 @@ async saveAttendanceToFirebase(studentId, studentName, dateValidation) {
     return;
   }
   
-  const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
-  const path = `mainSystem/attendanceData/${monthKey}/${subject}/${studentId}`;
+  // ✅ GET FULL PATH COMPONENTS
+const dept = this.mainSystemConfig.selectedDepartment;
+const course = this.mainSystemConfig.selectedCourse;
+const academicYear = this.mainSystemConfig.selectedAcademicYear;
+const division = this.mainSystemConfig.selectedDivision;
+
+if (!dept || !course || !academicYear || !division) {
+  console.warn('⚠️ Cannot sync - missing department/course/academic year/division');
+  return;
+}
+
+const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+
+// ✅ USE 8-LEVEL PATH
+const path = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}/months/${monthKey}/subjects/${subject}/attendance/${studentId}`;
   
   try {
     // Add timeout to prevent hanging
@@ -893,20 +990,47 @@ async saveAttendanceToFirebase(studentId, studentName, dateValidation) {
    * Load face matcher from storage
    */
   async loadFaceMatcher() {
-    const labeledDescriptors = await this.storage.getLabeledDescriptors();
-    
-    if (labeledDescriptors.length === 0) {
-      this.faceMatcher = null;
-      return;
-    }
-
-    const labeledFaceDescriptors = labeledDescriptors.map(
-      item => new faceapi.LabeledFaceDescriptors(item.label, item.descriptors)
+  // ✅ Get ALL faces first
+  const allFaces = await this.storage.getAllFaces();
+  
+  // ✅ Filter by current division
+  const dept = this.mainSystemConfig.selectedDepartment;
+  const course = this.mainSystemConfig.selectedCourse;
+  const academicYear = this.mainSystemConfig.selectedAcademicYear;
+  const division = this.mainSystemConfig.selectedDivision;
+  
+  let labeledDescriptors;
+  
+  if (dept && course && academicYear && division) {
+    // Filter faces that belong to current division
+    const divisionFaces = allFaces.filter(face => 
+      face.department === dept &&
+      face.course === course &&
+      face.academicYear === academicYear &&
+      face.division === division
     );
-
-    this.faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, this.MATCH_THRESHOLD);
-    console.log(`Face matcher loaded with ${labeledDescriptors.length} faces`);
+    
+    console.log(`✅ Filtered ${divisionFaces.length}/${allFaces.length} faces for division: ${dept}/${course}/${academicYear}/${division}`);
+    
+    labeledDescriptors = await this.storage.getLabeledDescriptors(divisionFaces);
+  } else {
+    // No division selected - use all faces (fallback)
+    console.warn('⚠️ No division selected - loading all faces');
+    labeledDescriptors = await this.storage.getLabeledDescriptors(allFaces);
   }
+  
+  if (labeledDescriptors.length === 0) {
+    this.faceMatcher = null;
+    return;
+  }
+
+  const labeledFaceDescriptors = labeledDescriptors.map(
+    item => new faceapi.LabeledFaceDescriptors(item.label, item.descriptors)
+  );
+
+  this.faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, this.MATCH_THRESHOLD);
+  console.log(`Face matcher loaded with ${labeledDescriptors.length} faces`);
+}
 
   /**
  * Capture and register a face
@@ -919,7 +1043,19 @@ async captureFace() {
     this.showToast('Please enter both Student ID and Name', 'warning');
     return;
   }
-    
+    // ✅ ADD: Check division is selected
+  const dept = this.mainSystemConfig.selectedDepartment;
+  const course = this.mainSystemConfig.selectedCourse;
+  const academicYear = this.mainSystemConfig.selectedAcademicYear;
+  const division = this.mainSystemConfig.selectedDivision;
+  
+  if (!dept || !course || !academicYear || !division) {
+    this.showToast(
+      '⚠️ Please select Department, Course, Academic Year, and Division in the main system first!',
+      'warning'
+    );
+    return;
+  }
   try {
     // ✅ Check if student already exists
     const existingFace = await this.storage.getFace(studentId);
@@ -1055,8 +1191,18 @@ async showFaceExistsDialog(existingFace) {
       
       if (day && month !== null && month !== undefined && year && subject) {
         // ⚠️ CRITICAL FIX: Use month directly, no +1
-        const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
-        const path = `mainSystem/attendanceData/${monthKey}/${subject}`;
+        const dept = this.mainSystemConfig.selectedDepartment;
+const course = this.mainSystemConfig.selectedCourse;
+const academicYear = this.mainSystemConfig.selectedAcademicYear;
+const division = this.mainSystemConfig.selectedDivision;
+
+if (!dept || !course || !academicYear || !division) {
+  console.warn('⚠️ Cannot read attendance - missing config');
+  return;
+}
+
+const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+const path = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}/months/${monthKey}/subjects/${subject}/attendance`;
         
         try {
           console.log(`📥 Reading Firebase attendance from: ${path} for Day ${day}`);
@@ -1158,8 +1304,17 @@ async updateVisualAttendance() {
     const subject = this.mainSystemConfig.selectedSubject;
     
     if (day && month !== null && month !== undefined && year && subject) {
-      const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
-      const path = `mainSystem/attendanceData/${monthKey}/${subject}`;
+      const dept = this.mainSystemConfig.selectedDepartment;
+const course = this.mainSystemConfig.selectedCourse;
+const academicYear = this.mainSystemConfig.selectedAcademicYear;
+const division = this.mainSystemConfig.selectedDivision;
+
+if (!dept || !course || !academicYear || !division) {
+  return;
+}
+
+const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+const path = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}/months/${monthKey}/subjects/${subject}/attendance`;
       
       try {
         const snapshot = await this.firebaseSync.firebaseDB.ref(path).once('value');
@@ -1246,8 +1401,18 @@ async updateVisualAttendance() {
       const subject = this.mainSystemConfig.selectedSubject;
       
       if (day && month !== null && month !== undefined && year && subject) {
-        const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
-        const path = `mainSystem/attendanceData/${monthKey}/${subject}`;
+        const dept = this.mainSystemConfig.selectedDepartment;
+const course = this.mainSystemConfig.selectedCourse;
+const academicYear = this.mainSystemConfig.selectedAcademicYear;
+const division = this.mainSystemConfig.selectedDivision;
+
+if (!dept || !course || !academicYear || !division) {
+  console.warn('⚠️ Cannot read stats - missing config');
+  return;
+}
+
+const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+const path = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}/months/${monthKey}/subjects/${subject}/attendance`;
         
         try {
           const snapshot = await this.firebaseSync.firebaseDB.ref(path).once('value');
@@ -1452,6 +1617,44 @@ async startBulkImport() {
     return;
   }
 
+  // ✅ VALIDATE DIVISION IS SELECTED
+  const dept = this.mainSystemConfig.selectedDepartment;
+  const course = this.mainSystemConfig.selectedCourse;
+  const academicYear = this.mainSystemConfig.selectedAcademicYear;
+  const division = this.mainSystemConfig.selectedDivision;
+  
+  if (!dept || !course || !academicYear || !division) {
+    this.showToast(
+      '❌ DIVISION NOT SELECTED!\n\n' +
+      'Please select Department, Course, Academic Year, and Division in the main system before importing faces.',
+      'danger'
+    );
+    return;
+  }
+
+  // ✅ SHOW CONFIRMATION WITH DIVISION INFO
+  const studentCount = Object.keys(this.selectedFiles).length;
+  const totalImages = Object.values(this.selectedFiles).reduce((sum, data) => sum + data.files.length, 0);
+  
+  const confirmed = confirm(
+    `📋 BULK IMPORT CONFIRMATION\n\n` +
+    `Import Target:\n` +
+    `├─ Department: ${dept}\n` +
+    `├─ Course: ${course}\n` +
+    `├─ Academic Year: ${academicYear}\n` +
+    `└─ Division: ${division}\n\n` +
+    `Import Data:\n` +
+    `├─ Students: ${studentCount}\n` +
+    `└─ Total Images: ${totalImages}\n\n` +
+    `⚠️ All faces will be registered to this division only.\n\n` +
+    `Continue with import?`
+  );
+  
+  if (!confirmed) {
+    this.showToast('Import cancelled', 'info');
+    return;
+  }
+
   // ✅ Check for existing students
   const studentIds = Object.keys(this.selectedFiles);
   const conflicts = [];
@@ -1527,14 +1730,14 @@ async startBulkImport() {
       
       // Handle based on user's bulk action choice
       if (existing && bulkAction === 'skip') {
-  // Skip this student
-  results.skipped.push({  //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ✅ CORRECT ARRAY
-    id: studentId,
-    name: studentName,
-    existingFaces: existing.descriptors.length
-  });
-  continue;
-}
+        // Skip this student
+        results.skipped.push({
+          id: studentId,
+          name: studentName,
+          existingFaces: existing.descriptors.length
+        });
+        continue;
+      }
 
       // Process all images for this student
       const descriptors = await this.processStudentImages(studentId, files);
@@ -1543,7 +1746,7 @@ async startBulkImport() {
         throw new Error('No faces detected in any image');
       }
 
-      // Save based on action
+      // ✅ Save based on action (saveBulkFaces will use mainSystemConfig for division)
       if (existing && bulkAction === 'add') {
         // Add to existing record
         await this.storage.addBulkFacesToExisting(studentId, studentName, descriptors, files[0]);
@@ -1557,19 +1760,21 @@ async startBulkImport() {
         name: studentName,
         imageCount: files.length,
         descriptorCount: descriptors.length,
-        action: existing ? (bulkAction === 'add' ? 'Added to existing' : 'Replaced') : 'New'
+        action: existing ? (bulkAction === 'add' ? 'Added to existing' : 'Replaced') : 'New',
+        division: `${dept}/${course}/${academicYear}/${division}` // ✅ Track division in results
       });
       
     } catch (error) {
       console.error(`Failed to process ${studentId}:`, error);
       results.failed.push({
         id: studentId,
+        name: studentName, // ✅ Add name to failed results
         error: error.message
       });
     }
   }
 
-  // Reload face matcher
+  // Reload face matcher with division filter
   await this.loadFaceMatcher();
   
   // Update UI
@@ -1581,6 +1786,16 @@ async startBulkImport() {
   
   // Show results
   this.showImportResults(results);
+  
+  // ✅ Show final summary with division
+  if (results.success.length > 0) {
+    this.showToast(
+      `✅ IMPORT COMPLETE!\n\n` +
+      `Imported ${results.success.length} students to:\n` +
+      `${dept} > ${course} > ${academicYear} > ${division}`,
+      'success'
+    );
+  }
 }
   /**
    * Process all images for one student
@@ -1756,6 +1971,7 @@ async startBulkImport() {
   try {
     // Reconnect
     await this.connectToMainSystem();
+
 
     // Get main system state with detailed logging
     console.log('=== READING MAIN SYSTEM DATA ===');
@@ -1940,40 +2156,58 @@ let allAttendanceData = snapshot.val() || {};
 
     // ⚠️ FIX: Match main system's month key format (no +1)
     // Main system uses 0-11 directly: "2026-00" for January
-    const monthKey = `${selectedYear}-${String(selectedMonth + 1).padStart(2, '0')}`;
-    
-    console.log('Month Key:', monthKey); // Should show "2026-00" for January
+    const dept = this.mainSystemConfig.selectedDepartment;
+const course = this.mainSystemConfig.selectedCourse;
+const academicYear = this.mainSystemConfig.selectedAcademicYear;
+const division = this.mainSystemConfig.selectedDivision;
 
-    // Initialize structure
-    if (!allAttendanceData[monthKey]) {
-      allAttendanceData[monthKey] = {};
-    }
-    if (!allAttendanceData[monthKey][selectedSubject]) {
-      allAttendanceData[monthKey][selectedSubject] = {};
-    }
+if (!dept || !course || !academicYear || !division) {
+  this.showToast('❌ Missing department/course/academic year/division config!', 'danger');
+  return;
+}
+
+const monthKey = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}`;
+
+// ✅ CREATE 8-LEVEL STRUCTURE
+if (!allAttendanceData[selectedYear]) allAttendanceData[selectedYear] = {};
+if (!allAttendanceData[selectedYear][dept]) allAttendanceData[selectedYear][dept] = {};
+if (!allAttendanceData[selectedYear][dept][course]) allAttendanceData[selectedYear][dept][course] = {};
+if (!allAttendanceData[selectedYear][dept][course][academicYear]) allAttendanceData[selectedYear][dept][course][academicYear] = {};
+if (!allAttendanceData[selectedYear][dept][course][academicYear][division]) {
+  allAttendanceData[selectedYear][dept][course][academicYear][division] = { months: {} };
+}
+if (!allAttendanceData[selectedYear][dept][course][academicYear][division].months[monthKey]) {
+  allAttendanceData[selectedYear][dept][course][academicYear][division].months[monthKey] = { subjects: {} };
+}
+if (!allAttendanceData[selectedYear][dept][course][academicYear][division].months[monthKey].subjects[selectedSubject]) {
+  allAttendanceData[selectedYear][dept][course][academicYear][division].months[monthKey].subjects[selectedSubject] = { attendance: {} };
+}
 
     // Update attendance
     let syncedCount = 0;
+    const attendanceTarget = allAttendanceData[selectedYear][dept][course][academicYear][division].months[monthKey].subjects[selectedSubject].attendance;
+
     attendanceData.forEach(student => {
-      // Initialize student if doesn't exist
-      if (!allAttendanceData[monthKey][selectedSubject][student.id]) {
-        allAttendanceData[monthKey][selectedSubject][student.id] = {
+      if (!attendanceTarget[student.id]) {
+        attendanceTarget[student.id] = {
           _name: student.name
         };
       }
       
-      // Mark attendance for current day
-      allAttendanceData[monthKey][selectedSubject][student.id][currentDay] = student.status;
+      attendanceTarget[student.id][currentDay] = student.status;
       syncedCount++;
-      
-      console.log(`Synced: ${student.id} - ${student.name} - ${student.status} for Day ${currentDay}`);
     });
 
     // Save back to main system
     // Save back to main system - UPDATE ONLY THE SPECIFIC MONTH/SUBJECT
+// ✅ SAVE TO 8-LEVEL PATH
+const savePath = `mainSystem/attendanceData/${selectedYear}/${dept}/${course}/${academicYear}/${division}/months/${monthKey}/subjects/${selectedSubject}/attendance`;
+
 await this.firebaseSync.firebaseDB
-  .ref(`mainSystem/attendanceData/${monthKey}/${selectedSubject}`)
-  .set(allAttendanceData[monthKey][selectedSubject]);
+  .ref(savePath)
+  .set(allAttendanceData[selectedYear][dept][course][academicYear][division].months[monthKey].subjects[selectedSubject].attendance);
+
+console.log(`✅ Saved to Firebase: ${savePath}`);
 
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                         'July', 'August', 'September', 'October', 'November', 'December'];
@@ -2005,8 +2239,18 @@ async debugFirebaseAttendance() {
   const year = this.mainSystemConfig.selectedYear;
   const subject = this.mainSystemConfig.selectedSubject;
   
-  const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
-  const path = `mainSystem/attendanceData/${monthKey}/${subject}`;
+  const dept = this.mainSystemConfig.selectedDepartment;
+const course = this.mainSystemConfig.selectedCourse;
+const academicYear = this.mainSystemConfig.selectedAcademicYear;
+const division = this.mainSystemConfig.selectedDivision;
+
+if (!dept || !course || !academicYear || !division) {
+  alert('❌ Missing department/course/academic year/division config!');
+  return;
+}
+
+const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+const path = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}/months/${monthKey}/subjects/${subject}/attendance`;
   
   try {
     const snapshot = await this.firebaseSync.firebaseDB.ref(path).once('value');
@@ -2358,21 +2602,25 @@ class FirebaseLiveSync {
     }
   }
 
-  setupLiveListeners(callbacks) {
+ setupLiveListeners(callbacks) {
     if (!this.isConnected) return;
 
-    // Listen to currentDate
-    const dateRef = this.firebaseDB.ref('mainSystem/currentDate');
-    dateRef.on('value', (snapshot) => {
-      const newDate = snapshot.val();
-      if (callbacks.onDateChange) {
-        callbacks.onDateChange(newDate, null);
-      }
-    });
-    this.listeners.push(dateRef);
+    // ✅ Get division path from mainSystemConfig
+    const year = callbacks.year || new Date().getFullYear();
+    const dept = callbacks.department;
+    const course = callbacks.course;
+    const academicYear = callbacks.academicYear;
+    const division = callbacks.division;
+
+    if (!dept || !course || !academicYear || !division) {
+      console.warn('⚠️ Division not configured - cannot setup listeners');
+      return;
+    }
+
+    const basePath = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}`;
 
     // Listen to selectedSubject
-    const subjectRef = this.firebaseDB.ref('mainSystem/selectedSubject');
+    const subjectRef = this.firebaseDB.ref(`${basePath}/selectedSubject`);
     subjectRef.on('value', (snapshot) => {
       const newSubject = snapshot.val();
       if (callbacks.onSubjectChange) {
@@ -2382,7 +2630,7 @@ class FirebaseLiveSync {
     this.listeners.push(subjectRef);
 
     // Listen to selectedMonth
-    const monthRef = this.firebaseDB.ref('mainSystem/selectedMonth');
+    const monthRef = this.firebaseDB.ref(`${basePath}/selectedMonth`);
     monthRef.on('value', (snapshot) => {
       const newMonth = snapshot.val();
       if (callbacks.onMonthChange) {
@@ -2392,7 +2640,7 @@ class FirebaseLiveSync {
     this.listeners.push(monthRef);
 
     // Listen to selectedYear
-    const yearRef = this.firebaseDB.ref('mainSystem/selectedYear');
+    const yearRef = this.firebaseDB.ref(`${basePath}/selectedYear`);
     yearRef.on('value', (snapshot) => {
       const newYear = snapshot.val();
       if (callbacks.onYearChange) {
@@ -2402,7 +2650,7 @@ class FirebaseLiveSync {
     this.listeners.push(yearRef);
 
     // Listen to currentDay
-    const dayRef = this.firebaseDB.ref('mainSystem/currentDay');
+    const dayRef = this.firebaseDB.ref(`${basePath}/currentDay`);
     dayRef.on('value', (snapshot) => {
       const newDay = snapshot.val();
       if (callbacks.onDayChange) {
@@ -2410,8 +2658,8 @@ class FirebaseLiveSync {
       }
     });
     this.listeners.push(dayRef);
-
-    console.log('✅ Firebase live listeners active');
+    
+    console.log(`✅ Firebase live listeners active for: ${basePath}`);
   }
 
   async updateCurrentDate(date) {
@@ -2437,8 +2685,8 @@ class FirebaseLiveSync {
 let faceSystem;
 
 window.addEventListener('DOMContentLoaded', async () => {
-  faceSystem = new FaceRecognitionSystem();
-  await faceSystem.init();
+  window.faceSystem = new FaceRecognitionSystem(); // ✅ Make it global
+  await window.faceSystem.init();
 });
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

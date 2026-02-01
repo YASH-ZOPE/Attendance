@@ -2,12 +2,12 @@
  * Cloud Storage Module - Firebase Implementation
  * Handles face data and attendance storage in Firebase Realtime Database
  * Compatible with existing face-storage.js interface for easy switching
+ * ✅ NOW USES DIVISION-BASED PATHS
  */
 
 class CloudStorage {
   constructor() {
     this.db = null;
-    this.facesRef = null;
     this.attendanceRef = null;
     this.isInitialized = false;
   }
@@ -25,8 +25,7 @@ class CloudStorage {
       // Get database reference
       this.db = firebase.database();
       
-      // Create references to database paths
-      this.facesRef = this.db.ref('faces');
+      // ✅ REMOVED: this.facesRef (now using dynamic paths)
       this.attendanceRef = this.db.ref('attendance');
       
       // Test connection
@@ -43,59 +42,92 @@ class CloudStorage {
   }
 
   /**
-   * Save a face to Firebase
-   * @param {string} studentId - Student ID
-   * @param {string} studentName - Student name
-   * @param {Float32Array} descriptor - Face descriptor
-   * @param {string} imageData - Base64 image data
+   * ✅ NEW: Get division-specific Firebase path for faces
+   * @returns {string|null} Path like "faces/dept/course/year/division"
    */
-
-/**
- * Get currently stored day number
- */
-async getCurrentDay() {
-  try {
-    const snapshot = await this.db.ref('mainSystem/currentDay').once('value');
-    return snapshot.val();
-  } catch (error) {
-    console.error('Error getting current day:', error);
-    return null;
+  getDivisionPath() {
+    const config = window.faceSystem?.mainSystemConfig || {};
+    const dept = config.selectedDepartment;
+    const course = config.selectedCourse;
+    const academicYear = config.selectedAcademicYear;
+    const division = config.selectedDivision;
+    
+    if (!dept || !course || !academicYear || !division) {
+      console.warn('⚠️ Missing division context for face storage');
+      return null;
+    }
+    
+    return `faces/${dept}/${course}/${academicYear}/${division}`;
   }
-}
 
-/**
- * Set current day number
- */
-async setCurrentDay(day) {
-  try {
-    await this.db.ref('mainSystem/currentDay').set(day);
-    console.log(`✅ Stored current day in Firebase: ${day}`);
-  } catch (error) {
-    console.error('Error setting current day:', error);
+  /**
+   * ✅ NEW: Get Firebase reference for current division
+   * @returns {firebase.database.Reference|null}
+   */
+  getFacesRef() {
+    const path = this.getDivisionPath();
+    if (!path) return null;
+    return this.db.ref(path);
   }
-}
 
+  /**
+   * Get currently stored day number
+   */
+  async getCurrentDay() {
+    try {
+      const snapshot = await this.db.ref('mainSystem/currentDay').once('value');
+      return snapshot.val();
+    } catch (error) {
+      console.error('Error getting current day:', error);
+      return null;
+    }
+  }
 
+  /**
+   * Set current day number
+   */
+  async setCurrentDay(day) {
+    try {
+      await this.db.ref('mainSystem/currentDay').set(day);
+      console.log(`✅ Stored current day in Firebase: ${day}`);
+    } catch (error) {
+      console.error('Error setting current day:', error);
+    }
+  }
+
+  /**
+   * Save a face to Firebase
+   * ✅ UPDATED: Now uses division-specific path
+   */
   async saveFace(studentId, studentName, descriptor, imageData) {
     if (!this.isInitialized) {
       throw new Error('Cloud storage not initialized');
     }
 
+    const facesRef = this.getFacesRef();
+    if (!facesRef) {
+      throw new Error('Please select Department, Course, Academic Year, and Division first');
+    }
+
     try {
+      const config = window.faceSystem?.mainSystemConfig || {};
       const faceData = {
         id: studentId,
         name: studentName,
-        descriptors: [Array.from(descriptor)], // Convert Float32Array to regular array
+        descriptors: [Array.from(descriptor)],
         imageData: imageData,
         timestamp: Date.now(),
         attendanceToday: false,
-        lastSeen: null
+        lastSeen: null,
+        department: config.selectedDepartment,
+        course: config.selectedCourse,
+        academicYear: config.selectedAcademicYear,
+        division: config.selectedDivision
       };
 
-      // Save to Firebase
-      await this.facesRef.child(studentId).set(faceData);
+      await facesRef.child(studentId).set(faceData);
       
-      console.log(`✅ Face saved to cloud: ${studentName} (${studentId})`);
+      console.log(`✅ Face saved to cloud: ${this.getDivisionPath()}/${studentId}`);
       return faceData;
     } catch (error) {
       console.error('❌ Failed to save face to cloud:', error);
@@ -105,27 +137,26 @@ async setCurrentDay(day) {
 
   /**
    * Add a new face descriptor to existing student record
-   * @param {string} studentId - Student ID
-   * @param {string} studentName - Student name
-   * @param {Float32Array} newDescriptor - New face descriptor
-   * @param {string} newImageData - New image data
+   * ✅ UPDATED: Now uses division-specific path
    */
   async addFaceToExisting(studentId, studentName, newDescriptor, newImageData) {
     if (!this.isInitialized) {
       throw new Error('Cloud storage not initialized');
     }
 
+    const facesRef = this.getFacesRef();
+    if (!facesRef) {
+      throw new Error('Please select Department, Course, Academic Year, and Division first');
+    }
+
     try {
-      // Get existing face data
-      const snapshot = await this.facesRef.child(studentId).once('value');
+      const snapshot = await facesRef.child(studentId).once('value');
       const existingFace = snapshot.val();
 
       if (!existingFace) {
-        // Student doesn't exist, save as new
         return this.saveFace(studentId, studentName, newDescriptor, newImageData);
       }
 
-      // Add new descriptor to existing array
       const updatedDescriptors = [
         ...existingFace.descriptors,
         Array.from(newDescriptor)
@@ -133,12 +164,12 @@ async setCurrentDay(day) {
 
       const updatedData = {
         ...existingFace,
-        name: studentName, // Update name if changed
+        name: studentName,
         descriptors: updatedDescriptors,
-        imageData: newImageData // Use latest image
+        imageData: newImageData
       };
 
-      await this.facesRef.child(studentId).set(updatedData);
+      await facesRef.child(studentId).set(updatedData);
 
       console.log(`✅ Added face to existing record: ${studentName} (${studentId}). Total faces: ${updatedDescriptors.length}`);
       return updatedData;
@@ -150,33 +181,39 @@ async setCurrentDay(day) {
 
   /**
    * Save multiple face descriptors for one student (bulk import)
-   * @param {string} studentId - Student ID
-   * @param {string} studentName - Student name
-   * @param {Array<Float32Array>} descriptors - Array of face descriptors
-   * @param {File} sampleFile - Sample image file
+   * ✅ UPDATED: Now uses division-specific path
    */
   async saveBulkFaces(studentId, studentName, descriptors, sampleFile) {
     if (!this.isInitialized) {
       throw new Error('Cloud storage not initialized');
     }
 
+    const facesRef = this.getFacesRef();
+    if (!facesRef) {
+      throw new Error('Please select Department, Course, Academic Year, and Division first');
+    }
+
     try {
-      // Convert file to base64
       const imageData = await this._fileToBase64(sampleFile);
+      const config = window.faceSystem?.mainSystemConfig || {};
 
       const faceData = {
         id: studentId,
         name: studentName,
-        descriptors: descriptors.map(d => Array.from(d)), // Convert all to arrays
+        descriptors: descriptors.map(d => Array.from(d)),
         imageData: imageData,
         timestamp: Date.now(),
         attendanceToday: false,
-        lastSeen: null
+        lastSeen: null,
+        department: config.selectedDepartment,
+        course: config.selectedCourse,
+        academicYear: config.selectedAcademicYear,
+        division: config.selectedDivision
       };
 
-      await this.facesRef.child(studentId).set(faceData);
+      await facesRef.child(studentId).set(faceData);
 
-      console.log(`✅ Bulk saved ${descriptors.length} faces for ${studentName} (${studentId})`);
+      console.log(`✅ Bulk saved ${descriptors.length} faces for ${studentName} at ${this.getDivisionPath()}/${studentId}`);
       return faceData;
     } catch (error) {
       console.error('❌ Failed to bulk save faces:', error);
@@ -186,19 +223,20 @@ async setCurrentDay(day) {
 
   /**
    * Add multiple face descriptors to existing student (bulk)
-   * @param {string} studentId - Student ID
-   * @param {string} studentName - Student name
-   * @param {Array<Float32Array>} newDescriptors - New descriptors
-   * @param {File} sampleFile - Sample image
+   * ✅ UPDATED: Now uses division-specific path
    */
-
   async addBulkFacesToExisting(studentId, studentName, newDescriptors, sampleFile) {
     if (!this.isInitialized) {
       throw new Error('Cloud storage not initialized');
     }
 
+    const facesRef = this.getFacesRef();
+    if (!facesRef) {
+      throw new Error('Please select Department, Course, Academic Year, and Division first');
+    }
+
     try {
-      const snapshot = await this.facesRef.child(studentId).once('value');
+      const snapshot = await facesRef.child(studentId).once('value');
       const existingFace = snapshot.val();
 
       if (!existingFace) {
@@ -219,7 +257,7 @@ async setCurrentDay(day) {
         imageData: imageData
       };
 
-      await this.facesRef.child(studentId).set(updatedData);
+      await facesRef.child(studentId).set(updatedData);
 
       console.log(`✅ Added ${newDescriptors.length} faces to existing. Total: ${allDescriptors.length} for ${studentName}`);
       return updatedData;
@@ -231,28 +269,33 @@ async setCurrentDay(day) {
 
   /**
    * Get all registered faces from Firebase
-   * @returns {Array} Array of face objects
+   * ✅ UPDATED: Now uses division-specific path
    */
   async getAllFaces() {
     if (!this.isInitialized) {
       throw new Error('Cloud storage not initialized');
     }
 
+    const facesRef = this.getFacesRef();
+    if (!facesRef) {
+      console.warn('⚠️ No division selected, returning empty faces list');
+      return [];
+    }
+
     try {
-      const snapshot = await this.facesRef.once('value');
+      const snapshot = await facesRef.once('value');
       const facesData = snapshot.val();
 
       if (!facesData) {
         return [];
       }
 
-      // Convert object to array and restore Float32Array descriptors
       const faces = Object.values(facesData).map(face => ({
         ...face,
         descriptors: face.descriptors.map(d => new Float32Array(d))
       }));
 
-      console.log(`✅ Loaded ${faces.length} faces from cloud`);
+      console.log(`✅ Loaded ${faces.length} faces from ${this.getDivisionPath()}`);
       return faces;
     } catch (error) {
       console.error('❌ Failed to get faces from cloud:', error);
@@ -262,23 +305,26 @@ async setCurrentDay(day) {
 
   /**
    * Get a single face by student ID
-   * @param {string} studentId - Student ID
-   * @returns {Object|null} Face object or null
+   * ✅ UPDATED: Now uses division-specific path
    */
   async getFace(studentId) {
     if (!this.isInitialized) {
       throw new Error('Cloud storage not initialized');
     }
 
+    const facesRef = this.getFacesRef();
+    if (!facesRef) {
+      return null;
+    }
+
     try {
-      const snapshot = await this.facesRef.child(studentId).once('value');
+      const snapshot = await facesRef.child(studentId).once('value');
       const face = snapshot.val();
 
       if (!face) {
         return null;
       }
 
-      // Restore Float32Array descriptors
       return {
         ...face,
         descriptors: face.descriptors.map(d => new Float32Array(d))
@@ -291,15 +337,20 @@ async setCurrentDay(day) {
 
   /**
    * Delete a face from Firebase
-   * @param {string} studentId - Student ID
+   * ✅ UPDATED: Now uses division-specific path
    */
   async deleteFace(studentId) {
     if (!this.isInitialized) {
       throw new Error('Cloud storage not initialized');
     }
 
+    const facesRef = this.getFacesRef();
+    if (!facesRef) {
+      throw new Error('Please select Department, Course, Academic Year, and Division first');
+    }
+
     try {
-      await this.facesRef.child(studentId).remove();
+      await facesRef.child(studentId).remove();
       console.log(`✅ Face deleted from cloud: ${studentId}`);
     } catch (error) {
       console.error('❌ Failed to delete face from cloud:', error);
@@ -309,15 +360,21 @@ async setCurrentDay(day) {
 
   /**
    * Clear all faces from Firebase
+   * ✅ UPDATED: Now uses division-specific path (only clears current division)
    */
   async clearAllFaces() {
     if (!this.isInitialized) {
       throw new Error('Cloud storage not initialized');
     }
 
+    const facesRef = this.getFacesRef();
+    if (!facesRef) {
+      throw new Error('Please select Department, Course, Academic Year, and Division first');
+    }
+
     try {
-      await this.facesRef.remove();
-      console.log('✅ All faces cleared from cloud');
+      await facesRef.remove();
+      console.log(`✅ All faces cleared from ${this.getDivisionPath()}`);
     } catch (error) {
       console.error('❌ Failed to clear faces from cloud:', error);
       throw error;
@@ -326,24 +383,27 @@ async setCurrentDay(day) {
 
   /**
    * Mark attendance for a student
-   * @param {string} studentId - Student ID
-   * @returns {boolean} Success status
+   * ✅ UPDATED: Now uses division-specific path
    */
   async markAttendance(studentId) {
     if (!this.isInitialized) {
       throw new Error('Cloud storage not initialized');
     }
 
+    const facesRef = this.getFacesRef();
+    if (!facesRef) {
+      return false;
+    }
+
     try {
-      const snapshot = await this.facesRef.child(studentId).once('value');
+      const snapshot = await facesRef.child(studentId).once('value');
       const face = snapshot.val();
 
       if (!face) {
         return false;
       }
 
-      // Update attendance flags
-      await this.facesRef.child(studentId).update({
+      await facesRef.child(studentId).update({
         attendanceToday: true,
         lastSeen: Date.now()
       });
@@ -358,28 +418,33 @@ async setCurrentDay(day) {
 
   /**
    * Reset all attendance to "Not Present"
+   * ✅ UPDATED: Now uses division-specific path
    */
   async resetAllAttendance() {
     if (!this.isInitialized) {
       throw new Error('Cloud storage not initialized');
     }
 
+    const facesRef = this.getFacesRef();
+    if (!facesRef) {
+      return;
+    }
+
     try {
-      const snapshot = await this.facesRef.once('value');
+      const snapshot = await facesRef.once('value');
       const facesData = snapshot.val();
 
       if (!facesData) {
         return;
       }
 
-      // Create batch update
       const updates = {};
       for (const studentId in facesData) {
         updates[`${studentId}/attendanceToday`] = false;
         updates[`${studentId}/lastSeen`] = null;
       }
 
-      await this.facesRef.update(updates);
+      await facesRef.update(updates);
 
       console.log('✅ All attendance reset in cloud');
     } catch (error) {
@@ -415,15 +480,20 @@ async setCurrentDay(day) {
 
   /**
    * Get attendance statistics
-   * @returns {Object} Stats object with total, presentToday, absentToday
+   * ✅ UPDATED: Now uses division-specific path
    */
   async getStats() {
     if (!this.isInitialized) {
       throw new Error('Cloud storage not initialized');
     }
 
+    const facesRef = this.getFacesRef();
+    if (!facesRef) {
+      return { total: 0, presentToday: 0, absentToday: 0 };
+    }
+
     try {
-      const snapshot = await this.facesRef.once('value');
+      const snapshot = await facesRef.once('value');
       const facesData = snapshot.val();
 
       if (!facesData) {
@@ -445,15 +515,20 @@ async setCurrentDay(day) {
 
   /**
    * Export attendance data for main system sync
-   * @returns {Array} Array of attendance records
+   * ✅ UPDATED: Now uses division-specific path
    */
   async exportAttendanceData() {
     if (!this.isInitialized) {
       throw new Error('Cloud storage not initialized');
     }
 
+    const facesRef = this.getFacesRef();
+    if (!facesRef) {
+      return [];
+    }
+
     try {
-      const snapshot = await this.facesRef.once('value');
+      const snapshot = await facesRef.once('value');
       const facesData = snapshot.val();
 
       if (!facesData) {
@@ -474,80 +549,81 @@ async setCurrentDay(day) {
     }
   }
 
-
   /**
- * Sync face-recognition attendance to main system database
- * Reads current subject/month/day from main system settings
- * Writes attendance in main system's expected format
- */
-async syncToMainSystem() {
-  if (!this.isInitialized) {
-    throw new Error('Cloud storage not initialized');
-  }
+   * Sync face-recognition attendance to main system database
+   * ✅ UPDATED: Now uses division-specific path
+   */
+  async syncToMainSystem() {
+    if (!this.isInitialized) {
+      throw new Error('Cloud storage not initialized');
+    }
 
-  try {
-    // 1. Get main system settings
-    const settingsSnapshot = await this.db.ref('mainSystem').once('value');
-    const settings = settingsSnapshot.val();
-    
-    if (!settings || !settings.selectedSubject || settings.selectedMonth === null) {
-      throw new Error('Main system not configured. Please select subject and month in main system first.');
+    const facesRef = this.getFacesRef();
+    if (!facesRef) {
+      throw new Error('Please select Department, Course, Academic Year, and Division first');
     }
-    
-    const subject = settings.selectedSubject;
-    const month = settings.selectedMonth;
-    const year = settings.selectedYear;
-    const day = settings.currentDay;
-    
-    // Create month key (format: "2025-01")
-    const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
-    
-    // 2. Get all faces with attendance status
-    const facesSnapshot = await this.facesRef.once('value');
-    const facesData = facesSnapshot.val();
-    
-    if (!facesData) {
-      throw new Error('No students registered in face recognition system');
-    }
-    
-    // 3. Prepare updates for main system
-    const mainSystemPath = `mainSystem/attendanceData/${monthKey}/${subject}`;
-    const updates = {};
-    
-    for (const studentId in facesData) {
-      const face = facesData[studentId];
+
+    try {
+      // 1. Get main system settings
+      const settingsSnapshot = await this.db.ref('mainSystem').once('value');
+      const settings = settingsSnapshot.val();
       
-      // Set student name
-      updates[`${studentId}/_name`] = face.name;
+      if (!settings || !settings.selectedSubject || settings.selectedMonth === null) {
+        throw new Error('Main system not configured. Please select subject and month in main system first.');
+      }
       
-      // Set attendance for current day
-      const status = face.attendanceToday ? 'Present' : 'Absent';
-      updates[`${studentId}/${day}`] = status;
+      const subject = settings.selectedSubject;
+      const month = settings.selectedMonth;
+      const year = settings.selectedYear;
+      const day = settings.currentDay;
+      
+      const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+      
+      // 2. Get all faces from current division
+      const facesSnapshot = await facesRef.once('value');
+      const facesData = facesSnapshot.val();
+      
+      if (!facesData) {
+        throw new Error('No students registered in face recognition system for this division');
+      }
+      
+      // 3. Prepare updates for main system
+      const mainSystemPath = `mainSystem/attendanceData/${monthKey}/${subject}`;
+      const updates = {};
+      
+      for (const studentId in facesData) {
+        const face = facesData[studentId];
+        
+        updates[`${studentId}/_name`] = face.name;
+        
+        const status = face.attendanceToday ? 'Present' : 'Absent';
+        updates[`${studentId}/${day}`] = status;
+      }
+      
+      // 4. Write to main system's Firebase path
+      await this.db.ref(mainSystemPath).update(updates);
+      
+      console.log(`✅ Synced to main system: ${subject} / ${monthKey} / Day ${day}`);
+      console.log(`   Students synced: ${Object.keys(facesData).length}`);
+      console.log(`   From division: ${this.getDivisionPath()}`);
+      
+      return {
+        success: true,
+        subject: subject,
+        month: monthKey,
+        day: day,
+        studentsCount: Object.keys(facesData).length
+      };
+      
+    } catch (error) {
+      console.error('❌ Failed to sync to main system:', error);
+      throw error;
     }
-    
-    // 4. Write to main system's Firebase path
-    await this.db.ref(mainSystemPath).update(updates);
-    
-    console.log(`✅ Synced to main system: ${subject} / ${monthKey} / Day ${day}`);
-    console.log(`   Students synced: ${Object.keys(facesData).length}`);
-    
-    return {
-      success: true,
-      subject: subject,
-      month: monthKey,
-      day: day,
-      studentsCount: Object.keys(facesData).length
-    };
-    
-  } catch (error) {
-    console.error('❌ Failed to sync to main system:', error);
-    throw error;
   }
-}
 
   /**
    * Get labeled face descriptors for face-api.js
-   * @returns {Array} Array of labeled descriptor objects
+   * ✅ UPDATED: Now uses division-specific path
    */
   async getLabeledDescriptors() {
     if (!this.isInitialized) {
@@ -559,7 +635,7 @@ async syncToMainSystem() {
 
       return faces.map(face => ({
         label: `${face.id}|${face.name}`,
-        descriptors: face.descriptors // Already Float32Array from getAllFaces
+        descriptors: face.descriptors
       }));
     } catch (error) {
       console.error('❌ Failed to get labeled descriptors from cloud:', error);
@@ -589,14 +665,20 @@ async syncToMainSystem() {
 
   /**
    * Setup real-time listener for attendance changes
-   * @param {Function} callback - Called when data changes
+   * ✅ UPDATED: Now uses division-specific path
    */
   setupRealTimeSync(callback) {
     if (!this.isInitialized) {
       throw new Error('Cloud storage not initialized');
     }
 
-    this.facesRef.on('value', (snapshot) => {
+    const facesRef = this.getFacesRef();
+    if (!facesRef) {
+      console.warn('⚠️ Cannot setup real-time sync: no division selected');
+      return;
+    }
+
+    facesRef.on('value', (snapshot) => {
       console.log('📡 Cloud data updated (real-time sync)');
       if (callback) {
         callback(snapshot.val());
@@ -606,10 +688,12 @@ async syncToMainSystem() {
 
   /**
    * Remove real-time listener
+   * ✅ UPDATED: Now uses division-specific path
    */
   removeRealTimeSync() {
-    if (this.facesRef) {
-      this.facesRef.off();
+    const facesRef = this.getFacesRef();
+    if (facesRef) {
+      facesRef.off();
       console.log('📡 Real-time sync disabled');
     }
   }

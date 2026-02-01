@@ -122,6 +122,7 @@ async setCurrentDay(day) {
     return new Promise((resolve, reject) => {
       const transaction = this.db.transaction([this.storeName], 'readwrite');
       const store = transaction.objectStore(this.storeName);
+      const config = window.faceSystem?.mainSystemConfig || {};
 
       const faceData = {
         id: studentId,
@@ -130,7 +131,11 @@ async setCurrentDay(day) {
         imageData: imageData,
         timestamp: Date.now(),
         attendanceToday: false,
-        lastSeen: null
+        lastSeen: null,
+        department: config.selectedDepartment || null,
+      course: config.selectedCourse || null,
+      academicYear: config.selectedAcademicYear || null,
+      division: config.selectedDivision || null
       };
 
       const request = store.put(faceData);
@@ -170,6 +175,8 @@ async addFaceToExisting(studentId, studentName, newDescriptor, newImageData) {
         Array.from(newDescriptor)
       ];
 
+      const config = window.faceSystem?.mainSystemConfig || {};
+
       const faceData = {
         id: studentId,
         name: studentName, // Update name in case it changed
@@ -177,7 +184,11 @@ async addFaceToExisting(studentId, studentName, newDescriptor, newImageData) {
         imageData: newImageData, // Use latest image as preview
         timestamp: existingFace.timestamp, // Keep original registration time
         attendanceToday: existingFace.attendanceToday,
-        lastSeen: existingFace.lastSeen
+        lastSeen: existingFace.lastSeen,
+         department: config.selectedDepartment || null,
+        course: config.selectedCourse || null,
+        academicYear: config.selectedAcademicYear || null,
+        division: config.selectedDivision || null
       };
 
       const request = store.put(faceData);
@@ -222,7 +233,7 @@ async addBulkFacesToExisting(studentId, studentName, newDescriptors, sampleFile)
           ...existingFace.descriptors.map(d => Array.from(d)),
           ...newDescriptors.map(d => Array.from(d))
         ];
-        
+         const config = window.faceSystem?.mainSystemConfig || {};
         const faceData = {
           id: studentId,
           name: studentName,
@@ -230,7 +241,11 @@ async addBulkFacesToExisting(studentId, studentName, newDescriptors, sampleFile)
           imageData: e.target.result, // Use latest image
           timestamp: existingFace.timestamp,
           attendanceToday: existingFace.attendanceToday,
-          lastSeen: existingFace.lastSeen
+          lastSeen: existingFace.lastSeen,
+            department: config.selectedDepartment || null,
+          course: config.selectedCourse || null,
+          academicYear: config.selectedAcademicYear || null,
+          division: config.selectedDivision || null
         };
 
         const request = store.put(faceData);
@@ -266,7 +281,7 @@ async saveBulkFaces(studentId, studentName, descriptors, sampleFile) {
     reader.onload = (e) => {
       const transaction = this.db.transaction([this.storeName], 'readwrite');
       const store = transaction.objectStore(this.storeName);
-      
+       const config = window.faceSystem?.mainSystemConfig || {};
       const faceData = {
         id: studentId,
         name: studentName, // ✅ Now uses the parsed name!
@@ -274,7 +289,11 @@ async saveBulkFaces(studentId, studentName, descriptors, sampleFile) {
         imageData: e.target.result,
         timestamp: Date.now(),
         attendanceToday: false,
-        lastSeen: null
+        lastSeen: null,
+        department: config.selectedDepartment || null,
+        course: config.selectedCourse || null,
+        academicYear: config.selectedAcademicYear || null,
+        division: config.selectedDivision || null
       };
 
       const request = store.put(faceData);

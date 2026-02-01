@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-
+     
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -24,6 +24,7 @@
 
   <!-- Firebase Config (reuse same file) -->
   <script src="firebase-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 
   <style>
     :root {
@@ -409,7 +410,7 @@
 
 <body>
 
-  <!-- Navigation Bar -->
+  <!-- Navigation Bar (Update links) -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top shadow">
     <div class="container">
       <a class="navbar-brand" href="#">
@@ -421,16 +422,22 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav me-auto">
           <li class="nav-item">
+            <a class="nav-link" href="#department-section"><i class="bi bi-building me-1"></i>Departments</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#course-section"><i class="bi bi-journal-bookmark me-1"></i>Courses</a>
+          </li>
+          <li class="nav-item">
             <a class="nav-link" href="#subject-section"><i class="bi bi-book me-1"></i>Subjects</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#month-section"><i class="bi bi-calendar3 me-1"></i>Month</a>
+            <a class="nav-link" href="#selection-section"><i class="bi bi-check-square me-1"></i>Selection</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#month-section"><i class="bi bi-calendar3 me-1"></i>Academic Year</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#upload-section"><i class="bi bi-upload me-1"></i>Upload</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#camera-section"><i class="bi bi-camera me-1"></i>Camera</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#attendance-section"><i class="bi bi-table me-1"></i>Attendance</a>
@@ -440,64 +447,72 @@
           </li>
         </ul>
         <div class="d-flex align-items-center">
-          <span class="badge bg-light text-dark me-2" id="navSubjectBadge">No Subject</span>
-          <span class="badge bg-warning text-dark" id="navMonthBadge">No Month</span>
-        </div>
+  <span class="badge bg-light text-dark me-2" id="navSubjectBadge">No Subject</span>
+  <span class="badge bg-warning text-dark" id="navMonthBadge">No Month</span>
+</div>
       </div>
     </div>
   </nav>
 
+
   <!-- Quick Navigation (Right Side) -->
   <div class="quick-nav d-none d-lg-block">
+    <a href="#department-section"><i class="bi bi-building"></i></a>
+    <a href="#course-section"><i class="bi bi-journal-bookmark"></i></a>
     <a href="#subject-section"><i class="bi bi-book"></i></a>
+    <a href="#selection-section"><i class="bi bi-check-square"></i></a>
     <a href="#month-section"><i class="bi bi-calendar3"></i></a>
     <a href="#upload-section"><i class="bi bi-upload"></i></a>
-    <a href="#camera-section"><i class="bi bi-camera"></i></a>
     <a href="#attendance-section"><i class="bi bi-table"></i></a>
     <a href="#defaulter-section"><i class="bi bi-exclamation-triangle"></i></a>
   </div>
 
   <div class="container py-4">
 
+
     <!-- Info Box -->
     <div class="alert info-alert mb-4">
       <h5><i class="bi bi-info-circle me-2"></i>How to Use</h5>
       <ol class="mb-0">
-        <li><strong>Add Subject</strong> - Create subjects like Math, Science, etc.</li>
-        <li><strong>Select Month</strong> - Choose the month and year</li>
-        <li><strong>Upload CSV</strong> - Upload attendance file (ID, Name, Day1, Day2...Day31)</li>
+        <li><strong>Add Department</strong> - Create departments like Computer Science, Mechanical, etc.</li>
+        <li><strong>Add Course</strong> - Select department and add courses like BTech, MTech, etc.</li>
+        <li><strong>Add Subject</strong> - Select course and add subjects for that course</li>
+        <li><strong>Select All</strong> - Choose Department, Course, Subject</li>
+        <li><strong>Select Month & Academic Year</strong> - Choose academic year (FY/SY/TY), year, division, month</li>
+        <li><strong>Upload CSV</strong> - Upload attendance file</li>
         <li><strong>Manage Attendance</strong> - View, edit, mark holidays, check defaulters</li>
       </ol>
     </div>
 
-    <!-- Subject Section -->
-    <section id="subject-section" class="nav-section">
+
+    <!-- SECTION 1: Department Management -->
+    <section id="department-section" class="nav-section">
       <div class="section-card">
-        <h4 class="section-title"><i class="bi bi-book me-2"></i>Subject Management</h4>
+        <h4 class="section-title"><i class="bi bi-building me-2"></i>Department Management</h4>
 
         <div class="teacher-only">
           <div class="row g-3">
             <div class="col-md-4">
-              <label class="form-label fw-bold">Add New Subject</label>
+              <label class="form-label fw-bold">Add New Department</label>
               <div class="input-group">
-                <input type="text" id="newSubjectInput" class="form-control" placeholder="Enter subject name">
-                <button id="addSubjectBtn" class="btn btn-primary">
+                <input type="text" id="newDepartmentInput" class="form-control" placeholder="Enter department name">
+                <button id="addDepartmentBtn" class="btn btn-primary">
                   <i class="bi bi-plus-lg me-1"></i>Add
                 </button>
               </div>
             </div>
 
             <div class="col-md-4">
-              <label class="form-label fw-bold">Select Subject</label>
-              <select id="subjectSelect" class="form-select">
-                <option value="">-- Choose Subject --</option>
+              <label class="form-label fw-bold">Select Department</label>
+              <select id="departmentSelect" class="form-select">
+                <option value="">-- Choose Department --</option>
               </select>
             </div>
 
             <div class="col-md-4 admin-only">
               <label class="form-label fw-bold">Actions</label>
               <div>
-                <button id="deleteSubjectBtn" class="btn btn-outline-danger">
+                <button id="deleteDepartmentBtn" class="btn btn-outline-danger">
                   <i class="bi bi-trash me-1"></i>Delete Selected
                 </button>
               </div>
@@ -505,9 +520,121 @@
           </div>
 
           <div class="mt-3">
-            <label class="form-label fw-bold">Available Subjects:</label>
+            <label class="form-label fw-bold">Available Departments:</label>
+            <div id="departmentTags">
+              <span class="text-muted">No departments added yet. Add your first department above.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert alert-info mt-3 mb-0" id="departmentStatus">
+          <i class="bi bi-info-circle me-2"></i>
+          <strong>Current Department:</strong> <span id="currentDepartmentDisplay">None selected</span>
+        </div>
+      </div>
+    </section>
+
+
+
+    <!-- SECTION 2: Course Management -->
+    <section id="course-section" class="nav-section">
+      <div class="section-card">
+        <h4 class="section-title"><i class="bi bi-journal-bookmark me-2"></i>Course Management</h4>
+
+        <div class="alert alert-warning mb-3">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          <strong>Note:</strong> Please select a department first before adding courses.
+        </div>
+
+        <div class="teacher-only">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label fw-bold">Add New Course</label>
+              <div class="input-group">
+                <input type="text" id="newCourseInput" class="form-control" placeholder="Enter course name" disabled>
+                <button id="addCourseBtn" class="btn btn-primary" disabled>
+                  <i class="bi bi-plus-lg me-1"></i>Add
+                </button>
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label fw-bold">Select Course</label>
+              <select id="courseSelect" class="form-select" disabled>
+                <option value="">-- Choose Course --</option>
+              </select>
+            </div>
+
+            <div class="col-md-4 admin-only">
+              <label class="form-label fw-bold">Actions</label>
+              <div>
+                <button id="deleteCourseBtn" class="btn btn-outline-danger" disabled>
+                  <i class="bi bi-trash me-1"></i>Delete Selected
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-3">
+            <label class="form-label fw-bold">Available Courses for <span id="coursesDepartmentName">--</span>:</label>
+            <div id="courseTags">
+              <span class="text-muted">Select a department first.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert alert-info mt-3 mb-0" id="courseStatus">
+          <i class="bi bi-info-circle me-2"></i>
+          <strong>Current Course:</strong> <span id="currentCourseDisplay">None selected</span>
+        </div>
+      </div>
+    </section>
+
+
+
+    <!-- SECTION 3: Subject Management -->
+    <section id="subject-section" class="nav-section">
+      <div class="section-card">
+        <h4 class="section-title"><i class="bi bi-book me-2"></i>Subject Management</h4>
+
+        <div class="alert alert-warning mb-3">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          <strong>Note:</strong> Please select a course first before adding subjects.
+        </div>
+
+        <div class="teacher-only">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label fw-bold">Add New Subject</label>
+              <div class="input-group">
+                <input type="text" id="newSubjectInput" class="form-control" placeholder="Enter subject name" disabled>
+                <button id="addSubjectBtn" class="btn btn-primary" disabled>
+                  <i class="bi bi-plus-lg me-1"></i>Add
+                </button>
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label fw-bold">Select Subject</label>
+              <select id="subjectSelect" class="form-select" disabled>
+                <option value="">-- Choose Subject --</option>
+              </select>
+            </div>
+
+            <div class="col-md-4 admin-only">
+              <label class="form-label fw-bold">Actions</label>
+              <div>
+                <button id="deleteSubjectBtn" class="btn btn-outline-danger" disabled>
+                  <i class="bi bi-trash me-1"></i>Delete Selected
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-3">
+            <label class="form-label fw-bold">Available Subjects for <span id="subjectsCourseName">--</span>:</label>
             <div id="subjectTags">
-              <span class="text-muted">No subjects added yet. Add your first subject above.</span>
+              <span class="text-muted">Select a course first.</span>
             </div>
           </div>
         </div>
@@ -519,49 +646,131 @@
       </div>
     </section>
 
-    <!-- Month Section -->
-    <section id="month-section" class="nav-section">
-      <div class="section-card">
-        <h4 class="section-title"><i class="bi bi-calendar3 me-2"></i>Month & Calendar</h4>
 
-        <div class="row g-3 teacher-only">
-          <div class="col-md-3">
-            <label class="form-label fw-bold">Month</label>
-            <select id="monthSelect" class="form-select">
-              <option value="0">January</option>
-              <option value="1">February</option>
-              <option value="2">March</option>
-              <option value="3">April</option>
-              <option value="4">May</option>
-              <option value="5">June</option>
-              <option value="6">July</option>
-              <option value="7">August</option>
-              <option value="8">September</option>
-              <option value="9">October</option>
-              <option value="10">November</option>
-              <option value="11">December</option>
+
+    <!-- SECTION 4: Final Selection -->
+    <section id="selection-section" class="nav-section">
+      <div class="section-card">
+        <h4 class="section-title"><i class="bi bi-check-square me-2"></i>Final Selection</h4>
+
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Department</label>
+            <select id="finalDepartmentSelect" class="form-select">
+              <option value="">-- Choose Department --</option>
             </select>
           </div>
 
-          <div class="col-md-3">
-            <label class="form-label fw-bold">Year</label>
-            <select id="yearSelect" class="form-select"></select>
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Course</label>
+            <select id="finalCourseSelect" class="form-select" disabled>
+              <option value="">-- Choose Course --</option>
+            </select>
           </div>
 
-          <div class="col-md-3">
-            <button id="applyMonthBtn" class="btn btn-success btn-action w-100">
-              <i class="bi bi-check-lg me-1"></i>Apply Month
-            </button>
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Subject</label>
+            <select id="finalSubjectSelect" class="form-select" disabled>
+              <option value="">-- Choose Subject --</option>
+            </select>
           </div>
+        </div>
 
-          <div class="col-md-3">
-            <div class="alert alert-success mb-0 py-2">
-              <strong>Selected:</strong> <span id="currentMonthDisplay">None</span>
+        <div class="alert alert-success mt-3 mb-0">
+          <strong><i class="bi bi-check-circle me-2"></i>Selected Path:</strong>
+          <div class="mt-2">
+            <span class="badge bg-primary me-2" id="selectedPathDept">No Department</span>
+            <i class="bi bi-arrow-right me-2"></i>
+            <span class="badge bg-primary me-2" id="selectedPathCourse">No Course</span>
+            <i class="bi bi-arrow-right me-2"></i>
+            <span class="badge bg-primary" id="selectedPathSubject">No Subject</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+
+    <!-- SECTION 5: Month & Calendar (Modified) -->
+    <section id="month-section" class="nav-section">
+      <div class="section-card">
+        <h4 class="section-title"><i class="bi bi-calendar3 me-2"></i>Academic Year & Calendar</h4>
+
+        <div class="teacher-only">
+          <div class="row g-2">
+            <div class="col-2">
+              <label class="form-label fw-bold small">Academic Year</label>
+              <select id="academicYearLevelSelect" class="form-select form-select-sm">
+                <option value="">-- Select --</option>
+                <option value="FY">FY</option>
+                <option value="SY">SY</option>
+                <option value="TY">TY</option>
+              </select>
+            </div>
+
+
+            <div class="col-2">
+              <label class="form-label fw-bold small">Division</label>
+              <select id="divisionSelect" class="form-select form-select-sm">
+                <option value="">-- Select --</option>
+                <option value="Division A">Div A</option>
+                <option value="Division B">Div B</option>
+                <option value="Division C">Div C</option>
+              </select>
+            </div>
+
+            <div class="col-2">
+              <label class="form-label fw-bold small">Month</label>
+              <select id="monthSelect" class="form-select form-select-sm">
+                <option value="0">Jan</option>
+                <option value="1">Feb</option>
+                <option value="2">Mar</option>
+                <option value="3">Apr</option>
+                <option value="4">May</option>
+                <option value="5">Jun</option>
+                <option value="6">Jul</option>
+                <option value="7">Aug</option>
+                <option value="8">Sep</option>
+                <option value="9">Oct</option>
+                <option value="10">Nov</option>
+                <option value="11">Dec</option>
+              </select>
+            </div>
+
+            <div class="col-2">
+              <label class="form-label fw-bold small">Year Number</label>
+              <select id="yearSelect" class="form-select form-select-sm"></select>
+            </div>
+
+            <div class="col-2">
+              <label class="form-label fw-bold small">&nbsp;</label>
+              <button id="applyMonthBtn" class="btn btn-success btn-sm w-100">
+                <i class="bi bi-check-lg me-1"></i>Apply
+              </button>
             </div>
           </div>
         </div>
 
-        <!-- Calendar Grid -->
+        <div class="row mt-2">
+  <div class="col-12">
+    <div class="alert alert-success mb-0 py-2">
+      <strong>Selected:</strong>
+      <span id="currentAcademicDisplay">None</span>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-2">
+  <div class="col-12">
+    <div class="alert alert-info mb-0 py-2">
+      <strong>Month:</strong>
+      <span id="currentMonthDisplay">None</span>
+    </div>
+  </div>
+</div>
+
+
+        <!-- Calendar Grid (Same as before) -->
         <div id="calendarContainer" class="mt-4" style="display: none;">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="mb-0"><i class="bi bi-calendar-week me-2"></i>Select Day</h5>
@@ -604,6 +813,7 @@
         </div>
       </div>
     </section>
+
 
     <!-- Statistics Section -->
     <section id="stats-section" class="nav-section">
@@ -707,6 +917,9 @@
           <button id="debugSaveBtn" class="btn btn-warning btn-action ms-2 admin-only-inline">
             <i class="bi bi-bug me-1"></i>DEBUG: Check Saved Data
           </button>
+          <button id="generateQRBtn" class="btn btn-info btn-action ms-2 admin-only-inline">
+            <i class="bi bi-qr-code me-1"></i>Generate QR
+          </button>
         </div>
       </div>
     </section>
@@ -749,47 +962,45 @@
             </div>
           </div>
 
-          <!-- Search and Filter -->
-<div class="teacher-only">
-  <div class="row g-2 mb-3">
-    <div class="col-12 col-sm-6 col-md-3">
-      <div class="input-group input-group-sm">
-        <input type="text" id="searchInput" class="form-control" placeholder="Search ID/Name">
-        <button id="searchBtn" class="btn btn-outline-primary">
-          <i class="bi bi-search"></i>
-        </button>
-        <button id="resetSearchBtn" class="btn btn-outline-secondary">
-          <i class="bi bi-x"></i>
-        </button>
-      </div>
-    </div>
-    <div class="col-12 col-sm-6 col-md-3">
-      <select id="sortSelect" class="form-select form-select-sm">
-        <option value="">Sort by...</option>
-        <option value="id-asc">ID (Low→High)</option>
-        <option value="id-desc">ID (High→Low)</option>
-        <option value="name-asc">Name (A→Z)</option>
-        <option value="name-desc">Name (Z→A)</option>
-        <option value="attendance-asc">Attend % (Low→High)</option>
-        <option value="attendance-desc">Attend % (High→Low)</option>
-      </select>
-    </div>
-    <div class="col-12 col-sm-6 col-md-3">
-      <select id="filterSelect" class="form-select form-select-sm">
-        <option value="all">Show All</option>
-        <option value="present">Present Only</option>
-        <option value="absent">Absent Only</option>
-        <option value="defaulter">Defaulters Only</option>
-      </select>
-    </div>
-    <div class="col-12 col-sm-6 col-md-3">
-      <button id="refreshTableBtn" class="btn btn-outline-primary btn-sm w-100">
-        <i class="bi bi-arrow-clockwise me-1"></i>Refresh
-      </button>
-    </div>
-  </div>
-</div>
-
+          <div class="teacher-only">
+            <div class="row g-2 mb-3">
+              <div class="col-12 col-sm-6 col-md-3">
+                <div class="input-group input-group-sm">
+                  <input type="text" id="searchInput" class="form-control" placeholder="Search ID/Name">
+                  <button id="searchBtn" class="btn btn-outline-primary">
+                    <i class="bi bi-search"></i>
+                  </button>
+                  <button id="resetSearchBtn" class="btn btn-outline-secondary">
+                    <i class="bi bi-x"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="col-12 col-sm-6 col-md-3">
+                <select id="sortSelect" class="form-select form-select-sm">
+                  <option value="">Sort by...</option>
+                  <option value="id-asc">ID (Low→High)</option>
+                  <option value="id-desc">ID (High→Low)</option>
+                  <option value="name-asc">Name (A→Z)</option>
+                  <option value="name-desc">Name (Z→A)</option>
+                  <option value="attendance-asc">Attend % (Low→High)</option>
+                  <option value="attendance-desc">Attend % (High→Low)</option>
+                </select>
+              </div>
+              <div class="col-12 col-sm-6 col-md-3">
+                <select id="filterSelect" class="form-select form-select-sm">
+                  <option value="all">Show All</option>
+                  <option value="present">Present Only</option>
+                  <option value="absent">Absent Only</option>
+                  <option value="defaulter">Defaulters Only</option>
+                </select>
+              </div>
+              <div class="col-12 col-sm-6 col-md-3">
+                <button id="refreshTableBtn" class="btn btn-outline-primary btn-sm w-100">
+                  <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+                </button>
+              </div>
+            </div>
+          </div>
           <!-- Table -->
           <div class="table-responsive table-container border rounded">
             <table id="attendanceTable" class="table table-hover mb-0">
@@ -799,7 +1010,7 @@
                   <th width="25%">Name</th>
                   <th width="15%">Today</th>
                   <th width="25%">Monthly Stats</th>
-                  <th width="25% teacher-only">Actions</th>
+                  <th width="25%">Actions</th>
                 </tr>
               </thead>
               <tbody id="attendanceTableBody">
@@ -935,6 +1146,50 @@
     </div>
   </div>
 
+  <!-- QR Code Modal -->
+  <div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+      <div class="modal-content">
+        <div class="modal-header" style="background: linear-gradient(135deg, #D4E8F5 0%, #C4DFF0 100%); color: #3A6A8A;">
+          <h5 class="modal-title" id="qrModalLabel"><i class="bi bi-qr-code me-2"></i>QR Code – Attendance</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-center p-4">
+
+          <!-- Validation warning (shown when fields missing) -->
+          <div id="qrValidationAlert" class="alert alert-warning mb-3" style="display:none; font-size:0.85rem;">
+            <i class="bi bi-exclamation-triangle me-1"></i>
+            <span id="qrValidationMsg"></span>
+          </div>
+
+          <!-- QR image container -->
+          <div id="qrCodeContainer" class="d-flex justify-content-center mb-3"></div>
+
+          <!-- Path badges showing what's encoded -->
+          <div id="qrPathBadges" class="mb-2">
+            <span class="badge bg-primary me-1" id="qrBadgeDept">—</span>
+            <i class="bi bi-chevron-right text-muted" style="font-size:0.7rem;"></i>
+            <span class="badge bg-primary me-1" id="qrBadgeCourse">—</span>
+            <i class="bi bi-chevron-right text-muted" style="font-size:0.7rem;"></i>
+            <span class="badge bg-success me-1" id="qrBadgeSubject">—</span>
+          </div>
+          <div class="mb-3">
+            <span class="badge bg-secondary me-1" id="qrBadgeAcYear">—</span>
+            <span class="badge bg-secondary me-1" id="qrBadgeDiv">—</span>
+            <span class="badge bg-warning text-dark me-1" id="qrBadgeMonth">—</span>
+            <span class="badge bg-warning text-dark" id="qrBadgeDay">—</span>
+          </div>
+
+          <small class="text-muted">Scan this on the Face Recognition page to set the division and mark attendance.</small>
+        </div>
+        <div class="modal-footer justify-content-center">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+            <i class="bi bi-x me-1"></i>Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
 
@@ -964,44 +1219,256 @@
         return false;
       }
     }
+function encodeFirebaseKey(key) {
+  if (!key) return key;
+  return String(key).replace(/\//g, '__');
+}
 
+function encodeNestedObject(obj) {
+  if (!obj || typeof obj !== 'object') return obj;
+  
+  const encoded = {};
+  for (const key in obj) {
+    const encodedKey = encodeFirebaseKey(key);
+    const value = obj[key];
+    
+    // If value is an object, encode it recursively
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      encoded[encodedKey] = encodeNestedObject(value);
+    } else {
+      encoded[encodedKey] = value;
+    }
+  }
+  return encoded;
+}
+
+function decodeNestedObject(obj) {
+  if (!obj || typeof obj !== 'object') return obj;
+  
+  const decoded = {};
+  for (const key in obj) {
+    const decodedKey = decodeFirebaseKey(key);
+    const value = obj[key];
+    
+    // If value is an object, decode it recursively
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      decoded[decodedKey] = decodeNestedObject(value);
+    } else {
+      decoded[decodedKey] = value;
+    }
+  }
+  return decoded;
+}
+function decodeFirebaseKey(key) {
+  if (!key) return key;
+  return String(key).replace(/__/g, '/');
+}
     // Save data (cloud + local hybrid)
-    async function saveToStorage(key, data) {
-      // Save to IndexedDB (always, as backup)
+    // Save data (FIREBASE FIRST, IndexedDB as backup)
+async function saveToStorage(key, data) {
+  let firebaseSaved = false;
+  let path;
+  
+  // ✅ GLOBAL KEYS (shared by all)
+  const globalKeys = ['departments', 'courses', 'subjects', 'threshold'];
+  
+  // ✅ ENCODE DATA FOR FIREBASE (fix "/" in keys)
+  let firebaseData = data;
+  if (key === 'subjects' || key === 'courses') {
+    firebaseData = encodeNestedObject(data);
+  }
+
+  // ✅ DIVISION-SPECIFIC KEYS (stored in division path)
+  const divisionSpecificKeys = [
+    'selectedDepartment',
+    'selectedCourse', 
+    'selectedSubject', 
+    'selectedMonth', 
+    'selectedYear', 
+    'currentDay',
+    'selectedAcademicYear',  // Store in division path
+    'selectedDivision'       // Store in division path
+  ];
+  
+  if (globalKeys.includes(key)) {
+    // Save to global path
+    path = `mainSystem/${key}`;
+  } 
+  else if (divisionSpecificKeys.includes(key)) {
+    // Save to division-specific path
+    const year = appState.selectedYear || new Date().getFullYear();
+    const dept = appState.selectedDepartment;
+    const course = appState.selectedCourse;
+    const academicYear = appState.selectedAcademicYear;
+    const division = appState.selectedDivision;
+    
+    if (!dept || !course || !academicYear || !division) {
+      console.warn(`⚠️ Cannot save ${key}: division path incomplete. Saving to IndexedDB only.`);
+      // Save to IndexedDB as fallback
+      try {
+        await saveToDatabase(key, data);
+      } catch (error) {
+        console.warn(`⚠️ IndexedDB save failed for ${key}:`, error);
+      }
+      return;
+    }
+    
+    path = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}/${key}`;
+  }
+  else if (key === 'attendanceData') {
+    // Full attendance data structure saves to root
+    path = `mainSystem/attendanceData`;
+  }
+  else if (key === 'holidays') {
+    // Holidays save to current month path (shared by all divisions)
+    const year = appState.selectedYear || new Date().getFullYear();
+    const dept = appState.selectedDepartment;
+    const course = appState.selectedCourse;
+    const academicYear = appState.selectedAcademicYear;
+    const division = appState.selectedDivision;
+    const monthKey = getMonthKey();
+    
+    if (!dept || !course || !academicYear || !division || !monthKey) {
+      console.warn(`⚠️ Cannot save holidays: path incomplete`);
       await saveToDatabase(key, data);
-
-      // Also save to Firebase if connected
-      if (useCloud && firebaseDB) {
-        try {
-          await firebaseDB.ref(`mainSystem/${key}`).set(data);
-          console.log(`✅ Saved to cloud: ${key}`);
-        } catch (error) {
-          console.warn(`⚠️ Cloud save failed for ${key}:`, error);
-        }
-      }
+      return;
     }
-
+    
+    path = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}/months/${monthKey}/holidays`;
+  }
+  else {
+    // Default to global
+    path = `mainSystem/${key}`;
+  }
+  
+  // Try Firebase FIRST
+  if (useCloud && firebaseDB) {
+    try {
+      await firebaseDB.ref(path).set(firebaseData);  // ✅ Use encoded data
+      console.log(`✅ Saved to Firebase: ${path}`);
+      firebaseSaved = true;
+    } catch (error) {
+      console.error(`❌ Firebase save failed for ${key}:`, error);
+    }
+  }
+  
+  // Backup to IndexedDB
+  try {
+    await saveToDatabase(key, data);
+    console.log(`📂 Backup to IndexedDB: ${key}`);
+  } catch (error) {
+    console.warn(`⚠️ IndexedDB backup failed for ${key}:`, error);
+  }
+  
+  if (!firebaseSaved && !useCloud) {
+    console.warn(`⚠️ Firebase not connected, using IndexedDB only`);
+  }
+}
     // Load data (try cloud first, fallback to local)
-    async function loadFromStorage(key) {
-      if (useCloud && firebaseDB) {
-        try {
-          const snapshot = await firebaseDB.ref(`mainSystem/${key}`).once('value');
-          const cloudData = snapshot.val();
-
-          if (cloudData !== null) {
-            console.log(`✅ Loaded from cloud: ${key}`);
-            return cloudData;
-          }
-        } catch (error) {
-          console.warn(`⚠️ Cloud load failed for ${key}:`, error);
+    // Load data (FIREBASE FIRST, fallback to IndexedDB)
+async function loadFromStorage(key) {
+  let path;
+  
+  // ✅ GLOBAL KEYS
+  const globalKeys = ['departments', 'courses', 'subjects', 'threshold'];
+  
+  // ✅ DIVISION-SPECIFIC KEYS
+  const divisionSpecificKeys = [
+    'selectedDepartment',
+    'selectedCourse',
+    'selectedSubject', 
+    'selectedMonth', 
+    'selectedYear', 
+    'currentDay',
+    'selectedAcademicYear',
+    'selectedDivision'
+  ];
+  
+  if (globalKeys.includes(key)) {
+    path = `mainSystem/${key}`;
+  }
+  else if (divisionSpecificKeys.includes(key)) {
+    const year = appState.selectedYear || new Date().getFullYear();
+    const dept = appState.selectedDepartment;
+    const course = appState.selectedCourse;
+    const academicYear = appState.selectedAcademicYear;
+    const division = appState.selectedDivision;
+    
+    if (!dept || !course || !academicYear || !division) {
+      console.warn(`⚠️ Cannot load ${key}: division path incomplete. Loading from IndexedDB.`);
+      // Load from IndexedDB as fallback
+      try {
+        const localData = await loadFromDatabase(key);
+        if (localData !== null) {
+          console.log(`📂 Loaded from IndexedDB: ${key}`);
+          return localData;
         }
+      } catch (error) {
+        console.error(`❌ IndexedDB load failed for ${key}:`, error);
       }
-
-      // Fallback to IndexedDB
-      console.log(`📂 Loading from local: ${key}`);
-      return await loadFromDatabase(key);
+      return null;
     }
+    
+    path = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}/${key}`;
+  }
+  else if (key === 'attendanceData') {
+    path = `mainSystem/attendanceData`;
+  }
+  else if (key === 'holidays') {
+    const year = appState.selectedYear || new Date().getFullYear();
+    const dept = appState.selectedDepartment;
+    const course = appState.selectedCourse;
+    const academicYear = appState.selectedAcademicYear;
+    const division = appState.selectedDivision;
+    const monthKey = getMonthKey();
+    
+    if (!dept || !course || !academicYear || !division || !monthKey) {
+      console.warn(`⚠️ Cannot load holidays: path incomplete`);
+      const localData = await loadFromDatabase(key);
+      return localData;
+    }
+    
+    path = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}/months/${monthKey}/holidays`;
+  }
+  else {
+    path = `mainSystem/${key}`;
+  }
+  
+  // Try Firebase first
+  if (useCloud && firebaseDB) {
+    try {
+      const snapshot = await firebaseDB.ref(path).once('value');
+      let cloudData = snapshot.val();
 
+      if (cloudData !== null) {
+        // ✅ DECODE DATA FROM FIREBASE
+        if (key === 'subjects' || key === 'courses') {
+          cloudData = decodeNestedObject(cloudData);
+        }
+        console.log(`✅ Loaded from Firebase: ${path}`);
+        return cloudData;
+      } else {
+        console.log(`📂 No Firebase data for ${path}, trying IndexedDB...`);
+      }
+    } catch (error) {
+      console.error(`❌ Firebase load failed for ${key}:`, error);
+    }
+  }
+
+  // Fallback to IndexedDB
+  try {
+    const localData = await loadFromDatabase(key);
+    if (localData !== null) {
+      console.log(`📂 Loaded from IndexedDB: ${key}`);
+      return localData;
+    }
+  } catch (error) {
+    console.error(`❌ IndexedDB load failed for ${key}:`, error);
+  }
+  
+  console.log(`⚠️ No data found for ${key}`);
+  return null;
+}
     // ==================== END FIREBASE FUNCTIONS ====================
 
     // ==================== AUTHENTICATION CHECK ====================
@@ -1192,6 +1659,10 @@
 
     async function saveAllData() {
       try {
+          if (appState.selectedYear === null && elements.yearSelect.value) {
+      appState.selectedYear = parseInt(elements.yearSelect.value);
+    }
+  
         await saveToStorage("subjects", appState.subjects);
         await saveToStorage("selectedSubject", appState.selectedSubject);
         await saveToStorage("selectedMonth", appState.selectedMonth);
@@ -1200,6 +1671,12 @@
         await saveToStorage("attendanceData", appState.attendanceData);
         await saveToStorage("holidays", appState.holidays);
         await saveToStorage("threshold", appState.threshold);
+         await saveToStorage("departments", appState.departments);
+    await saveToStorage("selectedDepartment", appState.selectedDepartment);
+    await saveToStorage("courses", appState.courses);
+    await saveToStorage("selectedCourse", appState.selectedCourse);
+    await saveToStorage("selectedAcademicYear", appState.selectedAcademicYear);
+    await saveToStorage("selectedDivision", appState.selectedDivision);
         const currentDate = new Date().toDateString();
         await saveToStorage("currentDate", currentDate);
         console.log("All data saved (cloud + local)");
@@ -1208,37 +1685,57 @@
       }
     }
 
-    async function loadAllData() {
-      try {
-        const subjects = await loadFromStorage("subjects");
-        const selectedSubject = await loadFromStorage("selectedSubject");
-        const selectedMonth = await loadFromStorage("selectedMonth");
-        const selectedYear = await loadFromStorage("selectedYear");
-        const currentDay = await loadFromStorage("currentDay");
-        const attendanceData = await loadFromStorage("attendanceData");
-        const holidays = await loadFromStorage("holidays");
-        const threshold = await loadFromStorage("threshold");
+   async function loadAllData() {
+  try {
+    // ✅ STEP 1: Load GLOBAL data first
+    const departments = await loadFromStorage("departments");
+    const courses = await loadFromStorage("courses");
+    const subjects = await loadFromStorage("subjects");
+    const threshold = await loadFromStorage("threshold");
+    
+    if (departments) appState.departments = departments;
+    if (courses) appState.courses = courses;
+    if (subjects) appState.subjects = subjects;
+    if (threshold !== null) appState.threshold = threshold;
+    
+    // ✅ STEP 2: Load Academic Year & Division from IndexedDB (user's last choice)
+    // These determine which division path to load from
+    const selectedAcademicYear = await loadFromDatabase("selectedAcademicYear");
+    const selectedDivision = await loadFromDatabase("selectedDivision");
+    
+    if (selectedAcademicYear) appState.selectedAcademicYear = selectedAcademicYear;
+    if (selectedDivision) appState.selectedDivision = selectedDivision;
+    
+    // ✅ STEP 3: Now we can load division-specific data
+    // (These will use the academic year & division set above)
+    const selectedDepartment = await loadFromStorage("selectedDepartment");
+    const selectedCourse = await loadFromStorage("selectedCourse");
+    const selectedSubject = await loadFromStorage("selectedSubject");
+    const selectedMonth = await loadFromStorage("selectedMonth");
+    const selectedYear = await loadFromStorage("selectedYear");
+    const currentDay = await loadFromStorage("currentDay");
+    const attendanceData = await loadFromStorage("attendanceData");
+    const holidays = await loadFromStorage("holidays");
+    
+    if (selectedDepartment) appState.selectedDepartment = selectedDepartment;
+    if (selectedCourse) appState.selectedCourse = selectedCourse;
+    if (selectedSubject) appState.selectedSubject = selectedSubject;
+    if (selectedMonth !== null) appState.selectedMonth = selectedMonth;
+    if (selectedYear !== null) appState.selectedYear = selectedYear;
+    if (currentDay !== null) appState.currentDay = currentDay;
+    if (attendanceData) appState.attendanceData = attendanceData;
+    if (holidays) appState.holidays = holidays;
 
-        appState.subjects = Array.isArray(subjects) ? subjects : [];
-        if (selectedSubject) appState.selectedSubject = selectedSubject;
-        if (selectedMonth !== null) appState.selectedMonth = selectedMonth;
-        if (selectedYear !== null) appState.selectedYear = selectedYear;
-        if (currentDay !== null) appState.currentDay = currentDay;
-        if (attendanceData) appState.attendanceData = attendanceData;
-        if (holidays) appState.holidays = holidays;
-        if (threshold !== null) appState.threshold = threshold;
-
-        console.log("All data loaded");
-        return true;
-      } catch (error) {
-        console.error("Failed to load data:", error);
-        return false;
-      }
-    }
-
+    console.log("All data loaded");
+    return true;
+  } catch (error) {
+    console.error("Failed to load data:", error);
+    return false;
+  }
+}
     // ==================== APPLICATION STATE ====================
     const appState = {
-      subjects: [],
+      subjects: {},
       selectedSubject: null,
       selectedMonth: null,
       selectedYear: null,
@@ -1247,9 +1744,28 @@
       attendanceData: {},  // { "2025-01": { "Math": { "1": { _name: "YASH", 1: "Present", 2: "Absent" } } } }
       holidays: {},        // { "2025-01": [1, 15, 26] }
       threshold: 75,
-      studentList: []      // For current display
+      studentList: [],      // For current display
+      departments: [],              // NEW
+      selectedDepartment: null,     // NEW
+      courses: {},                  // NEW: { "computer": ["bca", "btech"], "mechanical": [...] }
+      selectedCourse: null,         // NEW
+      selectedAcademicYear: null,   // NEW: "fy", "sy", or "ty"
+      selectedDivision: null        // NEW: "A", "B", or "C"
     };
+    
 
+function getCurrentSubjects() {
+  const dept = appState.selectedDepartment;
+  const course = appState.selectedCourse;
+  
+  if (!dept || !course) return [];
+  
+  // ✅ Access nested structure: subjects[dept][course]
+  if (!appState.subjects[dept]) return [];
+  if (!appState.subjects[dept][course]) return [];
+  
+  return appState.subjects[dept][course];
+}
     let isUpdatingSubjectDropdown = false;
     let isUpdatingDayDropdown = false;
 
@@ -1258,12 +1774,43 @@
 
     // ==================== DOM ELEMENTS ====================
     const elements = {
+       // Department elements
+  newDepartmentInput: document.getElementById('newDepartmentInput'),
+  addDepartmentBtn: document.getElementById('addDepartmentBtn'),
+  departmentSelect: document.getElementById('departmentSelect'),
+  deleteDepartmentBtn: document.getElementById('deleteDepartmentBtn'),
+  departmentTags: document.getElementById('departmentTags'),
+  currentDepartmentDisplay: document.getElementById('currentDepartmentDisplay'),
+  
+  // Course elements
+  newCourseInput: document.getElementById('newCourseInput'),
+  addCourseBtn: document.getElementById('addCourseBtn'),
+  courseSelect: document.getElementById('courseSelect'),
+  deleteCourseBtn: document.getElementById('deleteCourseBtn'),
+  courseTags: document.getElementById('courseTags'),
+  coursesDepartmentName: document.getElementById('coursesDepartmentName'),
+  currentCourseDisplay: document.getElementById('currentCourseDisplay'),
+  
+  // Final Selection elements
+  finalDepartmentSelect: document.getElementById('finalDepartmentSelect'),
+  finalCourseSelect: document.getElementById('finalCourseSelect'),
+  finalSubjectSelect: document.getElementById('finalSubjectSelect'),
+  selectedPathDept: document.getElementById('selectedPathDept'),
+  selectedPathCourse: document.getElementById('selectedPathCourse'),
+  selectedPathSubject: document.getElementById('selectedPathSubject'),
+  
+  // Academic Year & Division elements
+  academicYearLevelSelect: document.getElementById('academicYearLevelSelect'),
+  divisionSelect: document.getElementById('divisionSelect'),
+  currentAcademicDisplay: document.getElementById('currentAcademicDisplay'),
+
       // Subject elements
       newSubjectInput: document.getElementById('newSubjectInput'),
       addSubjectBtn: document.getElementById('addSubjectBtn'),
       subjectSelect: document.getElementById('subjectSelect'),
       deleteSubjectBtn: document.getElementById('deleteSubjectBtn'),
       subjectTags: document.getElementById('subjectTags'),
+      subjectsCourseName: document.getElementById('subjectsCourseName'),
       currentSubjectDisplay: document.getElementById('currentSubjectDisplay'),
 
       // Month elements
@@ -1378,113 +1925,143 @@
     }
 
     // ==================== SUBJECT FUNCTIONS ====================
-    function populateSubjectDropdown() {
-      elements.subjectSelect.innerHTML = '<option value="">-- Choose Subject --</option>';
-
-      appState.subjects.forEach(subject => {
-        const option = document.createElement('option');
-        option.value = subject;
-        option.textContent = subject;
-        if (subject === appState.selectedSubject) {
-          option.selected = true;
-        }
-        elements.subjectSelect.appendChild(option);
-      });
+   function populateSubjectDropdown() {
+  elements.subjectSelect.innerHTML = '<option value="">-- Choose Subject --</option>';
+  elements.finalSubjectSelect.innerHTML = '<option value="">-- Choose Subject --</option>';
+  
+  elements.selectedPathDept.textContent = appState.selectedDepartment || 'No Department';
+  elements.selectedPathCourse.textContent = appState.selectedCourse || 'No Course';
+  elements.selectedPathSubject.textContent = appState.selectedSubject || 'No Subject';
+  
+  if (!appState.selectedCourse) {
+    elements.subjectSelect.disabled = true;
+    elements.finalSubjectSelect.disabled = true;
+    return;
+  }
+  
+  elements.subjectSelect.disabled = false;
+  elements.finalSubjectSelect.disabled = false;
+  
+  // ✅ Get subjects for current course
+  const subjectList = getCurrentSubjects();
+  
+  subjectList.forEach(subject => {
+    const option1 = document.createElement('option');
+    option1.value = subject;
+    option1.textContent = subject;
+    if (subject === appState.selectedSubject) {
+      option1.selected = true;
     }
-
-    function renderSubjectTags() {
-      if (appState.subjects.length === 0) {
-        elements.subjectTags.innerHTML = '<span class="text-muted">No subjects added yet. Add your first subject above.</span>';
-        return;
+    elements.subjectSelect.appendChild(option1);
+    
+    const option2 = document.createElement('option');
+    option2.value = subject;
+    option2.textContent = subject;
+    if (subject === appState.selectedSubject) {
+      option2.selected = true;  // ✅ FIX: Set selected on BOTH dropdowns
+    }
+    elements.finalSubjectSelect.appendChild(option2);
+  });
+}
+  function renderSubjectTags() {
+  if (!appState.selectedCourse) {
+    elements.subjectTags.innerHTML = '<span class="text-muted">Select a course first.</span>';
+    if (elements.subjectsCourseName) {
+      elements.subjectsCourseName.textContent = '--';
+    }
+    return;
+  }
+  
+  if (elements.subjectsCourseName) {
+    elements.subjectsCourseName.textContent = appState.selectedCourse;
+  }
+  
+  // ✅ Use helper function instead
+  const subjectList = getCurrentSubjects();
+  
+  if (subjectList.length === 0) {
+    elements.subjectTags.innerHTML = '<span class="text-muted">No subjects added yet. Add your first subject above.</span>';
+    return;
+  }
+  
+  elements.subjectTags.innerHTML = '';
+  subjectList.forEach(subject => {
+    const tag = document.createElement('span');
+    tag.className = `subject-tag ${subject === appState.selectedSubject ? 'active' : ''}`;
+    tag.innerHTML = `
+      ${escapeHtml(subject)}
+      <span class="delete-btn" data-subject="${escapeHtml(subject)}">&times;</span>
+    `;
+    
+    tag.addEventListener('click', (e) => {
+      if (!e.target.classList.contains('delete-btn')) {
+        selectSubject(subject);
       }
-
-      elements.subjectTags.innerHTML = '';
-      appState.subjects.forEach(subject => {
-        const tag = document.createElement('span');
-        tag.className = `subject-tag ${subject === appState.selectedSubject ? 'active' : ''}`;
-        tag.innerHTML = `
-          ${escapeHtml(subject)}
-          <span class="delete-btn" data-subject="${escapeHtml(subject)}">&times;</span>
-        `;
-
-        tag.addEventListener('click', (e) => {
-          if (!e.target.classList.contains('delete-btn')) {
-            selectSubject(subject);
-          }
-        });
-
-        elements.subjectTags.appendChild(tag);
-      });
-
-      // Add delete event listeners
-      document.querySelectorAll('.subject-tag .delete-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const subject = e.target.getAttribute('data-subject');
-          deleteSubject(subject);
-        });
-      });
-    }
+    });
+    
+    elements.subjectTags.appendChild(tag);
+  });
+  
+  // Add delete event listeners
+  document.querySelectorAll('.subject-tag .delete-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const subject = e.target.getAttribute('data-subject');
+      deleteSubject(subject);
+    });
+  });
+}
 
     function addSubject(name) {
-      name = String(name).trim();
+  name = String(name).trim();
 
-      if (!name) {
-        showAlert('Please enter a subject name!', 'warning');
-        return false;
-      }
+  if (!name) {
+    showAlert('Please enter a subject name!', 'warning');
+    return false;
+  }
 
-      if (appState.subjects.includes(name)) {
-        showAlert('Subject already exists!', 'warning');
-        return false;
-      }
+  const dept = appState.selectedDepartment;
+  const course = appState.selectedCourse;
+  
+  if (!dept || !course) {
+    showAlert('Please select department and course first!', 'warning');
+    return false;
+  }
+  
+  // ✅ Create nested structure
+  if (!appState.subjects[dept]) {
+    appState.subjects[dept] = {};
+  }
+  if (!appState.subjects[dept][course]) {
+    appState.subjects[dept][course] = [];
+  }
+  
+  if (appState.subjects[dept][course].includes(name)) {
+    showAlert('Subject already exists!', 'warning');
+    return false;
+  }
 
-      appState.subjects.push(name);
-      populateSubjectDropdown();
-      renderSubjectTags();
-      saveAllData();
+  appState.subjects[dept][course].push(name);
+  
+  populateSubjectDropdown();
+  renderSubjectTags();
+  saveAllData();
 
-      showAlert(`Subject "${name}" added successfully!`, 'success');
-      return true;
-    }
-
-    function deleteSubject(name) {
-      if (!confirm(`Delete subject "${name}"?\n\nThis will also delete all attendance data for this subject!`)) {
-        return;
-      }
-
-      appState.subjects = appState.subjects.filter(s => s !== name);
-
-      // Remove attendance data for this subject
-      for (const monthKey in appState.attendanceData) {
-        if (appState.attendanceData[monthKey] && appState.attendanceData[monthKey][name]) {
-          delete appState.attendanceData[monthKey][name];
-        }
-      }
-
-      if (appState.selectedSubject === name) {
-        appState.selectedSubject = null;
-        updateSubjectDisplay();
-      }
-
-      populateSubjectDropdown();
-      renderSubjectTags();
-      refreshAttendanceTable();
-      saveAllData();
-
-      showAlert(`Subject "${name}" deleted!`, 'info');
-    }
-
+  showAlert(`Subject "${name}" added successfully!`, 'success');
+  return true;
+}
     function selectSubject(name) {
-      appState.selectedSubject = name;
-      isUpdatingSubjectDropdown = true;
-      elements.subjectSelect.value = name;
-      isUpdatingSubjectDropdown = false;
-      updateSubjectDisplay();
-      renderSubjectTags();
-      refreshAttendanceTable();
-      saveAllData();
-    }
+  appState.selectedSubject = name;
+  isUpdatingSubjectDropdown = true;
+  elements.subjectSelect.value = name;
+  elements.finalSubjectSelect.value = name;  // ✅ UPDATE FINAL SELECTION DROPDOWN
+  isUpdatingSubjectDropdown = false;
+  updateSubjectDisplay();
+  renderSubjectTags();
+  updateFinalSelectionBadges();  // ✅ UPDATE VISUAL BADGES
+  refreshAttendanceTable();
+  saveAllData();
+}
 
     function updateSubjectDisplay() {
       const subject = appState.selectedSubject || 'None selected';
@@ -1723,9 +2300,37 @@
     }
 
     function getWorkingDays() {
-      const holidays = getHolidaysForMonth();
-      return appState.daysInMonth - holidays.length;
+  const subjectData = getSubjectData();
+  
+  if (!subjectData) return 0;
+  
+  const holidays = getHolidaysForMonth();
+  const lectureDays = new Set();
+  
+  // ✅ CHECK ALL STUDENTS to find all lecture days
+  for (const studentId in subjectData) {
+    if (studentId.startsWith('_')) continue;
+    
+    const studentAttendance = subjectData[studentId];
+    
+    for (let day = 1; day <= appState.daysInMonth; day++) {
+      // If ANY student has attendance data for this day, it's a lecture day
+      if (studentAttendance[day] !== undefined) {
+        lectureDays.add(day);
+      }
     }
+  }
+  
+  // Count lecture days that are NOT holidays
+  let workingDays = 0;
+  lectureDays.forEach(day => {
+    if (!holidays.includes(day)) {
+      workingDays++;
+    }
+  });
+  
+  return workingDays;
+}
 
     // ==================== FILE HANDLING ====================
     function parseCSV(text) {
@@ -1759,58 +2364,136 @@
       return rows;
     }
 
-    function processCSVData(text) {
-      if (!appState.selectedSubject) {
-        throw new Error('Please select a subject first!');
-      }
+ function processCSVData(text) {
+  if (!appState.selectedSubject) {
+    throw new Error('Please select a subject first!');
+  }
 
-      if (appState.selectedMonth === null) {
-        throw new Error('Please select a month first!');
-      }
+  if (appState.selectedMonth === null) {
+    throw new Error('Please select a month first!');
+  }
 
-      const rows = parseCSV(text);
+  // ✅ VALIDATE ALL REQUIRED FIELDS FOR 8-LEVEL STRUCTURE
+  if (!appState.selectedDepartment) {
+    throw new Error('Please select a department first!');
+  }
 
-      if (rows.length < 2) {
-        throw new Error('CSV must have at least a header row and one data row');
-      }
+  if (!appState.selectedCourse) {
+    throw new Error('Please select a course first!');
+  }
 
-      const monthKey = getMonthKey();
-      const subject = appState.selectedSubject;
+  if (!appState.selectedAcademicYear) {
+    throw new Error('Please select an academic year (FY/SY/TY) first!');
+  }
 
-      if (!appState.attendanceData[monthKey]) {
-        appState.attendanceData[monthKey] = {};
-      }
-      if (!appState.attendanceData[monthKey][subject]) {
-        appState.attendanceData[monthKey][subject] = {};
-      }
+  if (!appState.selectedDivision) {
+    throw new Error('Please select a division first!');
+  }
 
-      let studentCount = 0;
+  const rows = parseCSV(text);
 
-      // Skip header row, process data rows
-      for (let i = 1; i < rows.length; i++) {
-        const row = rows[i];
-        if (row.length < 2) continue;
+  if (rows.length < 2) {
+    throw new Error('CSV must have at least a header row and one data row');
+  }
 
-        const id = String(row[0]).trim();
-        const name = String(row[1]).trim();
+  const year = appState.selectedYear;
+  const dept = appState.selectedDepartment;
+  const course = appState.selectedCourse;
+  const academicYear = appState.selectedAcademicYear;
+  const division = appState.selectedDivision;
+  const monthKey = getMonthKey();
+  const subject = appState.selectedSubject;
 
-        if (!id || !name) continue;
+  // ✅ CREATE 8-LEVEL NESTED STRUCTURE WITH PROPER NULL CHECKS
+  if (!appState.attendanceData[year]) {
+    appState.attendanceData[year] = {};
+  }
+  if (!appState.attendanceData[year][dept]) {
+    appState.attendanceData[year][dept] = {};
+  }
+  if (!appState.attendanceData[year][dept][course]) {
+    appState.attendanceData[year][dept][course] = {};
+  }
+  if (!appState.attendanceData[year][dept][course][academicYear]) {
+    appState.attendanceData[year][dept][course][academicYear] = {};
+  }
+  if (!appState.attendanceData[year][dept][course][academicYear][division]) {
+    appState.attendanceData[year][dept][course][academicYear][division] = { months: {} };
+  }
+  
+  // ✅ FIX: Check if months exists before accessing it
+  if (!appState.attendanceData[year][dept][course][academicYear][division].months) {
+    appState.attendanceData[year][dept][course][academicYear][division].months = {};
+  }
+  
+  if (!appState.attendanceData[year][dept][course][academicYear][division].months[monthKey]) {
+    appState.attendanceData[year][dept][course][academicYear][division].months[monthKey] = { subjects: {} };
+  }
+  
+  // ✅ FIX: Check if subjects exists
+  if (!appState.attendanceData[year][dept][course][academicYear][division].months[monthKey].subjects) {
+    appState.attendanceData[year][dept][course][academicYear][division].months[monthKey].subjects = {};
+  }
+  
+  if (!appState.attendanceData[year][dept][course][academicYear][division].months[monthKey].subjects[subject]) {
+    appState.attendanceData[year][dept][course][academicYear][division].months[monthKey].subjects[subject] = { attendance: {} };
+  }
+  
+  // ✅ FIX: Check if attendance exists
+  if (!appState.attendanceData[year][dept][course][academicYear][division].months[monthKey].subjects[subject].attendance) {
+    appState.attendanceData[year][dept][course][academicYear][division].months[monthKey].subjects[subject].attendance = {};
+  }
 
-        appState.attendanceData[monthKey][subject][id] = { _name: name };
+  // ✅ NOW SAFE to get reference
+  // ✅ NOW SAFE to get reference
+  const attendanceRef = appState.attendanceData[year][dept][course][academicYear][division].months[monthKey].subjects[subject].attendance;
 
-        // Parse daily attendance (columns 2 onwards)
-        for (let day = 1; day <= appState.daysInMonth; day++) {
-          const colIndex = day + 1; // Column index for this day
-          const status = row[colIndex] !== undefined ? normalizeStatus(row[colIndex]) : 'Absent';
-          appState.attendanceData[monthKey][subject][id][day] = status;
-        }
+  // ✅ GET OR CREATE MASTER STUDENT LIST at division level
+  if (!appState.attendanceData[year][dept][course][academicYear][division].students) {
+    appState.attendanceData[year][dept][course][academicYear][division].students = {};
+  }
+  const masterStudents = appState.attendanceData[year][dept][course][academicYear][division].students;
 
-        studentCount++;
-      }
+  let studentCount = 0;
 
-      return studentCount;
+  // Skip header row, process data rows
+  for (let i = 1; i < rows.length; i++) {
+    const row = rows[i];
+    if (row.length < 2) continue;
+
+    const id = String(row[0]).trim();
+    const name = String(row[1]).trim();
+
+    if (!id || !name) continue;
+
+    // ✅ STORE IN MASTER STUDENT LIST (division level)
+    if (!masterStudents[id]) {
+      masterStudents[id] = { name: name };
     }
 
+    attendanceRef[id] = { _name: name };
+
+// Parse daily attendance (columns 2 onwards)
+// ✅ ONLY store days that actually have data in CSV
+for (let day = 1; day <= appState.daysInMonth; day++) {
+  const colIndex = day + 1;
+  
+  // ✅ Check if CSV has data for this day
+  if (row[colIndex] !== undefined && row[colIndex].trim() !== '') {
+    const status = normalizeStatus(row[colIndex]);
+    attendanceRef[id][day] = status;
+  }
+  // ✅ Don't store anything if column is empty/missing
+}
+
+    studentCount++;
+  }
+
+  console.log(`✅ Saved ${studentCount} students to division master list`);
+  console.log(`✅ Saved attendance to: ${year}/${dept}/${course}/${academicYear}/${division}/months/${monthKey}/subjects/${subject}`);
+  
+  return studentCount;
+}
     function handleFileUpload(file) {
       if (!file) return;
 
@@ -1846,8 +2529,15 @@
           updateStats();
           saveAllData();
 
+          // ✅ RESET FILE INPUT AFTER SUCCESSFUL UPLOAD
+          elements.fileInput.value = '';
+          console.log('✅ File input reset after successful upload');
+
           showAlert(`Successfully uploaded ${studentCount} students!`, 'success');
         } catch (error) {
+          // ✅ ALSO RESET ON ERROR
+          elements.fileInput.value = '';
+          console.log('⚠️ File input reset after error');
           console.error('File processing error:', error);
           showAlert('Error: ' + error.message, 'danger');
         }
@@ -1861,77 +2551,173 @@
     }
 
     function downloadTemplate() {
-      if (appState.selectedMonth === null) {
-        showAlert('Please select a month first!', 'warning');
-        return;
-      }
+  if (appState.selectedMonth === null) {
+    showAlert('Please select a month first!', 'warning');
+    return;
+  }
+  
+  // ✅ ADD VALIDATION for context
+  if (!appState.selectedDepartment || !appState.selectedCourse || 
+      !appState.selectedAcademicYear || !appState.selectedDivision) {
+    showAlert('Please select Department, Course, Academic Year, and Division first!', 'warning');
+    return;
+  }
 
-      const headers = ['ID', 'Name'];
-      for (let day = 1; day <= appState.daysInMonth; day++) {
-        headers.push(`Day${day}`);
-      }
+  const headers = ['ID', 'Name'];
+  for (let day = 1; day <= appState.daysInMonth; day++) {
+    headers.push(`Day${day}`);
+  }
 
-      const sampleData = [
-        headers,
-        ['1', 'Student One', ...Array(appState.daysInMonth).fill('Present')],
-        ['2', 'Student Two', ...Array(appState.daysInMonth).fill('Absent')],
-        ['3', 'Student Three', ...Array(appState.daysInMonth).fill('Present')]
-      ];
+  const sampleData = [
+    headers,
+    ['1', 'Student One', ...Array(appState.daysInMonth).fill('Present')],
+    ['2', 'Student Two', ...Array(appState.daysInMonth).fill('Absent')],
+    ['3', 'Student Three', ...Array(appState.daysInMonth).fill('Present')]
+  ];
 
-      const csv = sampleData.map(row => row.map(cell => `"${cell}"`).join(',')).join('\r\n');
-      downloadFile(csv, `attendance_template_${monthNames[appState.selectedMonth]}_${appState.selectedYear}.csv`);
-    }
+  const csv = sampleData.map(row => row.map(cell => `"${cell}"`).join(',')).join('\r\n');
+  
+  // ✅ BETTER FILENAME with full context
+  const filename = `template_${appState.selectedDepartment}_${appState.selectedCourse}_${appState.selectedAcademicYear}_${appState.selectedDivision}_${monthNames[appState.selectedMonth]}_${appState.selectedYear}.csv`;
+  
+  downloadFile(csv, filename);
+}
 
     function downloadReport() {
-      if (!appState.selectedSubject) {
-        showAlert('Please select a subject first!', 'warning');
-        return;
+  if (!appState.selectedSubject) {
+    showAlert('Please select a subject first!', 'warning');
+    return;
+  }
+
+  if (appState.selectedMonth === null) {
+    showAlert('Please select a month first!', 'warning');
+    return;
+  }
+
+  // ✅ VALIDATE ALL FIELDS FOR 8-LEVEL STRUCTURE
+  if (!appState.selectedDepartment) {
+    showAlert('Please select a department first!', 'warning');
+    return;
+  }
+
+  if (!appState.selectedCourse) {
+    showAlert('Please select a course first!', 'warning');
+    return;
+  }
+
+  if (!appState.selectedAcademicYear) {
+    showAlert('Please select academic year first!', 'warning');
+    return;
+  }
+
+  if (!appState.selectedDivision) {
+    showAlert('Please select division first!', 'warning');
+    return;
+  }
+
+  // ✅ GET MASTER STUDENT LIST from division level
+  const year = appState.selectedYear;
+  const dept = appState.selectedDepartment;
+  const course = appState.selectedCourse;
+  const academicYear = appState.selectedAcademicYear;
+  const division = appState.selectedDivision;
+  
+  const divisionData = appState.attendanceData
+    ?.[year]
+    ?.[dept]
+    ?.[course]
+    ?.[academicYear]
+    ?.[division];
+  
+  const masterStudents = divisionData?.students || {};
+  
+  if (Object.keys(masterStudents).length === 0) {
+    showAlert('No students found in this division! Please upload attendance data first.', 'warning');
+    return;
+  }
+  
+  const subjectData = getSubjectData() || {};
+  const holidays = getHolidaysForMonth();
+  
+  // ✅ FIND WHICH DAYS HAVE ACTUAL LECTURE DATA
+  const daysWithLectures = new Set();
+  
+  for (const studentId in subjectData) {
+    if (studentId.startsWith('_')) continue;
+    
+    const studentAttendance = subjectData[studentId];
+    
+    for (let day = 1; day <= appState.daysInMonth; day++) {
+      // If this day has attendance data (not undefined), it's a lecture day
+      if (studentAttendance[day] !== undefined) {
+        daysWithLectures.add(day);
       }
-
-      if (appState.selectedMonth === null) {
-        showAlert('Please select a month first!', 'warning');
-        return;
-      }
-
-      const subjectData = getSubjectData();
-      if (!subjectData || Object.keys(subjectData).length === 0) {
-        showAlert('No data to download!', 'warning');
-        return;
-      }
-
-      const holidays = getHolidaysForMonth();
-      const headers = ['ID', 'Name'];
-
-      for (let day = 1; day <= appState.daysInMonth; day++) {
-        headers.push(`Day ${day}${holidays.includes(day) ? ' (H)' : ''}`);
-      }
-      headers.push('Present', 'Absent', 'Working Days', 'Percentage');
-
-      const rows = [headers];
-
-      for (const studentId in subjectData) {
-        if (studentId.startsWith('_')) continue;
-
-        const student = subjectData[studentId];
-        const stats = getStudentStats(studentId);
-        const row = [studentId, student._name || studentId];
-
-        for (let day = 1; day <= appState.daysInMonth; day++) {
-          if (holidays.includes(day)) {
-            row.push('Holiday');
-          } else {
-            row.push(student[day] || 'Absent');
-          }
-        }
-
-        row.push(stats.present, stats.absent, stats.workingDays, `${stats.percentage}%`);
-        rows.push(row);
-      }
-
-      const csv = rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\r\n');
-      downloadFile(csv, `attendance_${appState.selectedSubject}_${monthNames[appState.selectedMonth]}_${appState.selectedYear}.csv`);
     }
+  }
+  
+  // Convert to sorted array
+  const lectureDays = Array.from(daysWithLectures).sort((a, b) => a - b);
+  
+  if (lectureDays.length === 0) {
+    showAlert('No lecture data found for this subject in this month!', 'warning');
+    return;
+  }
+  
+  // ✅ CREATE HEADERS - Only for days with lectures
+  const headers = ['ID', 'Name'];
+  
+  lectureDays.forEach(day => {
+    const isHoliday = holidays.includes(day);
+    headers.push(`Day ${day}${isHoliday ? ' (H)' : ''}`);
+  });
+  
+  headers.push('Present', 'Absent', 'Total Lectures', 'Percentage');
 
+  const rows = [headers];
+
+  // ✅ LOOP THROUGH MASTER STUDENT LIST
+  for (const studentId in masterStudents) {
+    const studentName = masterStudents[studentId].name;
+    const studentAttendance = subjectData[studentId] || {};
+    
+    const row = [studentId, studentName];
+
+    let present = 0;
+    let absent = 0;
+
+    // ✅ Only include days with lectures
+    lectureDays.forEach(day => {
+      if (holidays.includes(day)) {
+        row.push('Holiday');
+      } else {
+        const status = studentAttendance[day] || 'Absent';
+        row.push(status);
+        
+        if (status === 'Present') {
+          present++;
+        } else {
+          absent++;
+        }
+      }
+    });
+
+    const totalLectures = present + absent;
+    const percentage = totalLectures > 0 ? Math.round((present / totalLectures) * 100) : 0;
+    
+    row.push(present, absent, totalLectures, `${percentage}%`);
+    rows.push(row);
+  }
+
+  const csv = rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+  
+  // ✅ BETTER FILENAME with full context
+  const filename = `report_${dept}_${course}_${academicYear}_${division}_${appState.selectedSubject}_${monthNames[appState.selectedMonth]}_${appState.selectedYear}.csv`;
+  
+  downloadFile(csv, filename);
+  
+  // ✅ SHOW INFO ABOUT EXPORT
+  showAlert(`Report exported with ${lectureDays.length} lecture days: ${lectureDays.join(', ')}`, 'success');
+}
     function downloadFile(content, filename) {
       const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
@@ -1949,7 +2735,7 @@
         return;
       }
 
-      appState.subjects = [];
+      appState.subjects = {};
       appState.selectedSubject = null;
       appState.selectedMonth = null;
       appState.selectedYear = null;
@@ -1979,38 +2765,76 @@
 
     // ==================== ATTENDANCE TABLE FUNCTIONS ====================
     function getSubjectData() {
-      const monthKey = getMonthKey();
-      if (!monthKey || !appState.selectedSubject) return null;
-
-      return appState.attendanceData[monthKey]?.[appState.selectedSubject] || null;
-    }
+  const monthKey = getMonthKey();
+  const year = appState.selectedYear;
+  const dept = appState.selectedDepartment;
+  const course = appState.selectedCourse;
+  const academicYear = appState.selectedAcademicYear;
+  const division = appState.selectedDivision;
+  
+  // Validate all required fields
+  if (!monthKey || !year || !dept || !course || !academicYear || !division || !appState.selectedSubject) {
+    return null;
+  }
+  
+  return appState.attendanceData
+    ?.[year]
+    ?.[dept]
+    ?.[course]
+    ?.[academicYear]
+    ?.[division]
+    ?.months
+    ?.[monthKey]
+    ?.subjects
+    ?.[appState.selectedSubject]
+    ?.attendance || null;
+}
 
     function getStudentStats(studentId) {
-      const subjectData = getSubjectData();
-      if (!subjectData || !subjectData[studentId]) {
-        return { present: 0, absent: 0, workingDays: 0, percentage: 0 };
+  const subjectData = getSubjectData();
+  if (!subjectData || !subjectData[studentId]) {
+    return { present: 0, absent: 0, workingDays: 0, percentage: 0 };
+  }
+
+  const student = subjectData[studentId];
+  const holidays = getHolidaysForMonth();
+  
+  // ✅ FIND ALL LECTURE DAYS (from all students)
+  const allLectureDays = new Set();
+  for (const sid in subjectData) {
+    if (sid.startsWith('_')) continue;
+    const attendance = subjectData[sid];
+    for (let day = 1; day <= appState.daysInMonth; day++) {
+      if (attendance[day] !== undefined) {
+        allLectureDays.add(day);
       }
-
-      const student = subjectData[studentId];
-      const holidays = getHolidaysForMonth();
-      let present = 0;
-      let absent = 0;
-
-      for (let day = 1; day <= appState.daysInMonth; day++) {
-        if (holidays.includes(day)) continue;
-        if (student[day] === 'Present') {
-          present++;
-        } else {
-          absent++;
-        }
-      }
-
-      const workingDays = present + absent;
-      const percentage = workingDays > 0 ? Math.round((present / workingDays) * 100) : 0;
-
-      return { present, absent, workingDays, percentage };
     }
+  }
+  
+  let present = 0;
+  let absent = 0;
 
+  // ✅ COUNT THIS STUDENT'S ATTENDANCE FOR ALL LECTURE DAYS
+  allLectureDays.forEach(day => {
+    // Skip holidays
+    if (holidays.includes(day)) return;
+    
+    // Check this student's status
+    if (student[day] === 'Present') {
+      present++;
+    } else if (student[day] === 'Absent') {
+      absent++;
+    } else {
+      // ✅ Day has no data for this student → count as absent
+      absent++;
+    }
+  });
+
+  const workingDays = present + absent;
+  const percentage = workingDays > 0 ? Math.round((present / workingDays) * 100) : 0;
+
+  return { present, absent, workingDays, percentage };
+}
     function loadStudentList() {
       appState.studentList = [];
       const subjectData = getSubjectData();
@@ -2159,26 +2983,55 @@
     }
 
     function markAttendance(studentId, status) {
-      const monthKey = getMonthKey();
-      if (!monthKey || !appState.selectedSubject) return;
+  const monthKey = getMonthKey();
+  const year = appState.selectedYear;
+  const dept = appState.selectedDepartment;
+  const course = appState.selectedCourse;
+  const academicYear = appState.selectedAcademicYear;
+  const division = appState.selectedDivision;
+  const subject = appState.selectedSubject;
+  
+  if (!monthKey || !year || !dept || !course || !academicYear || !division || !subject) {
+    console.error('❌ Missing required fields for marking attendance');
+    return;
+  }
 
-      if (!appState.attendanceData[monthKey]) {
-        appState.attendanceData[monthKey] = {};
-      }
-      if (!appState.attendanceData[monthKey][appState.selectedSubject]) {
-        appState.attendanceData[monthKey][appState.selectedSubject] = {};
-      }
-      if (!appState.attendanceData[monthKey][appState.selectedSubject][studentId]) {
-        return;
-      }
+  // ✅ CREATE PATH IF DOESN'T EXIST
+  if (!appState.attendanceData[year]) {
+    appState.attendanceData[year] = {};
+  }
+  if (!appState.attendanceData[year][dept]) {
+    appState.attendanceData[year][dept] = {};
+  }
+  if (!appState.attendanceData[year][dept][course]) {
+    appState.attendanceData[year][dept][course] = {};
+  }
+  if (!appState.attendanceData[year][dept][course][academicYear]) {
+    appState.attendanceData[year][dept][course][academicYear] = {};
+  }
+  if (!appState.attendanceData[year][dept][course][academicYear][division]) {
+    appState.attendanceData[year][dept][course][academicYear][division] = { months: {} };
+  }
+  if (!appState.attendanceData[year][dept][course][academicYear][division].months[monthKey]) {
+    appState.attendanceData[year][dept][course][academicYear][division].months[monthKey] = { subjects: {} };
+  }
+  if (!appState.attendanceData[year][dept][course][academicYear][division].months[monthKey].subjects[subject]) {
+    appState.attendanceData[year][dept][course][academicYear][division].months[monthKey].subjects[subject] = { attendance: {} };
+  }
 
-      appState.attendanceData[monthKey][appState.selectedSubject][studentId][appState.currentDay] = status;
+  const attendanceRef = appState.attendanceData[year][dept][course][academicYear][division].months[monthKey].subjects[subject].attendance;
 
-      refreshAttendanceTable();
-      renderCalendarGrid();
-      saveAllData();
-    }
+  if (!attendanceRef[studentId]) {
+    console.error('❌ Student not found:', studentId);
+    return;
+  }
 
+  attendanceRef[studentId][appState.currentDay] = status;
+
+  refreshAttendanceTable();
+  renderCalendarGrid();
+  saveAllData();
+}
     function markAllAttendance(status) {
       if (isHoliday(appState.currentDay)) {
         showAlert('Cannot mark attendance on a holiday!', 'warning');
@@ -2361,6 +3214,379 @@
       downloadFile(csv, `defaulters_${appState.selectedSubject}_${monthNames[appState.selectedMonth]}_${appState.selectedYear}.csv`);
     }
 
+// ==================== DEPARTMENT FUNCTIONS ====================
+function addDepartment(name) {
+  name = String(name).trim();
+  
+  if (!name) {
+    showAlert('Please enter a department name!', 'warning');
+    return false;
+  }
+  
+  if (appState.departments.includes(name)) {
+    showAlert('Department already exists!', 'warning');
+    return false;
+  }
+  
+  console.log(`🔧 Adding department: "${name}"`);
+  
+  appState.departments.push(name);
+  appState.courses[name] = [];
+  
+  populateDepartmentDropdown();
+  renderDepartmentTags();
+  
+  console.log(`🔧 Calling saveAllData()...`);
+  saveAllData();
+  
+  showAlert(`Department "${name}" added successfully!`, 'success');
+  return true;
+}
+
+function deleteDepartment(name) {
+  if (!confirm(`⚠️ DELETE DEPARTMENT "${name}"?...`)) {
+    return;
+  }
+  
+  // ✅ DELETE ALL SUBJECTS for all courses in this department
+   if (appState.subjects[name]) {
+    delete appState.subjects[name];
+  }
+  
+  // Remove from departments array
+  appState.departments = appState.departments.filter(d => d !== name);
+  
+  // Delete all courses
+  delete appState.courses[name];
+  
+  // Delete attendance data for ALL YEARS
+  for (const year in appState.attendanceData) {
+    if (appState.attendanceData[year]?.[name]) {
+      delete appState.attendanceData[year][name];
+    }
+  }
+  
+  // Reset selection if needed
+  if (appState.selectedDepartment === name) {
+    appState.selectedDepartment = null;
+    appState.selectedCourse = null;
+    appState.selectedSubject = null;
+    
+    // Disable inputs
+    elements.newCourseInput.disabled = true;
+    elements.addCourseBtn.disabled = true;
+    elements.courseSelect.disabled = true;
+    elements.newSubjectInput.disabled = true;
+    elements.addSubjectBtn.disabled = true;
+    elements.subjectSelect.disabled = true;
+    
+    updateDepartmentDisplay();
+    updateCourseDisplay();
+    updateSubjectDisplay();
+  }
+  
+  // Update UI
+  populateDepartmentDropdown();
+  renderDepartmentTags();
+  populateCourseDropdown();
+  renderCourseTags();
+  populateSubjectDropdown();
+  renderSubjectTags();
+  updateFinalSelectionDropdowns();
+  refreshAttendanceTable();
+  
+  saveAllData();
+  showAlert(`Department "${name}" and all related data deleted!`, 'info');
+}
+
+function selectDepartment(name) {
+  appState.selectedDepartment = name;
+  appState.selectedCourse = null; // Reset course when department changes
+  
+  elements.departmentSelect.value = name;
+   elements.finalDepartmentSelect.value = name;
+  
+  // Enable course input
+  elements.newCourseInput.disabled = false;
+  elements.addCourseBtn.disabled = false;
+  elements.courseSelect.disabled = false;
+  updateDepartmentDisplay();
+  updateFinalSelectionBadges();
+  populateCourseDropdown();
+  renderCourseTags();
+  updateFinalSelectionDropdowns();
+  saveAllData();
+}
+
+function populateDepartmentDropdown() {
+  // Update both dropdowns
+  const dropdowns = [elements.departmentSelect, elements.finalDepartmentSelect];
+  
+  dropdowns.forEach(dropdown => {
+    dropdown.innerHTML = '<option value="">-- Choose Department --</option>';
+    
+    appState.departments.forEach(dept => {
+      const option = document.createElement('option');
+      option.value = dept;
+      option.textContent = dept;
+      if (dept === appState.selectedDepartment) {
+        option.selected = true;
+      }
+      dropdown.appendChild(option);
+    });
+  });
+}
+
+function renderDepartmentTags() {
+  if (appState.departments.length === 0) {
+    elements.departmentTags.innerHTML = '<span class="text-muted">No departments added yet.</span>';
+    return;
+  }
+  
+  elements.departmentTags.innerHTML = '';
+  appState.departments.forEach(dept => {
+    const tag = document.createElement('span');
+    tag.className = `subject-tag ${dept === appState.selectedDepartment ? 'active' : ''}`;
+    tag.innerHTML = `
+      ${escapeHtml(dept)}
+      <span class="delete-btn" data-dept="${escapeHtml(dept)}">&times;</span>
+    `;
+    
+    tag.addEventListener('click', (e) => {
+      if (!e.target.classList.contains('delete-btn')) {
+        selectDepartment(dept);
+      }
+    });
+    
+    elements.departmentTags.appendChild(tag);
+  });
+  
+  // Add delete listeners
+  document.querySelectorAll('#departmentTags .delete-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      deleteDepartment(e.target.getAttribute('data-dept'));
+    });
+  });
+}
+
+function updateDepartmentDisplay() {
+  const dept = appState.selectedDepartment || 'None selected';
+  elements.currentDepartmentDisplay.textContent = dept;
+  elements.selectedPathDept.textContent = appState.selectedDepartment || 'No Department';
+}
+
+// ==================== COURSE FUNCTIONS ====================
+function addCourse(name) {
+  if (!appState.selectedDepartment) {
+    showAlert('Please select a department first!', 'warning');
+    return false;
+  }
+  
+  name = String(name).trim();
+  
+  if (!name) {
+    showAlert('Please enter a course name!', 'warning');
+    return false;
+  }
+  
+  if (appState.courses[appState.selectedDepartment].includes(name)) {
+    showAlert('Course already exists in this department!', 'warning');
+    return false;
+  }
+  
+  appState.courses[appState.selectedDepartment].push(name);
+  
+  populateCourseDropdown();
+  renderCourseTags();
+  saveAllData();
+  
+  showAlert(`Course "${name}" added successfully!`, 'success');
+  return true;
+}
+
+function deleteCourse(name) {
+  if (!appState.selectedDepartment) {
+    showAlert('Please select a department first!', 'warning');
+    return;
+  }
+  
+  if (!confirm(`⚠️ DELETE COURSE "${name}"?...`)) {
+    return;
+  }
+  
+  const dept = appState.selectedDepartment;
+  
+  // ✅ DELETE SUBJECTS for this course
+  if (appState.subjects[dept] && appState.subjects[dept][name]) {
+    delete appState.subjects[dept][name];
+  }
+  
+  // Remove from courses array
+  appState.courses[dept] = appState.courses[dept].filter(c => c !== name);
+  
+  // Delete attendance data for ALL YEARS
+  for (const year in appState.attendanceData) {
+    if (appState.attendanceData[year]?.[dept]?.[name]) {
+      delete appState.attendanceData[year][dept][name];
+    }
+  }
+  
+  // Reset selection if needed
+  if (appState.selectedCourse === name) {
+    appState.selectedCourse = null;
+    appState.selectedSubject = null;
+    
+    // Disable subject inputs
+    elements.newSubjectInput.disabled = true;
+    elements.addSubjectBtn.disabled = true;
+    elements.subjectSelect.disabled = true;
+    
+    updateCourseDisplay();
+    updateSubjectDisplay();
+  }
+  
+  // Update UI
+  populateCourseDropdown();
+  renderCourseTags();
+  populateSubjectDropdown();
+  renderSubjectTags();
+  updateFinalSelectionDropdowns();
+  refreshAttendanceTable();
+  
+  saveAllData();
+  showAlert(`Course "${name}" and all related data deleted!`, 'info');
+}
+
+function selectCourse(name) {
+  appState.selectedCourse = name;
+  appState.selectedSubject = null; // ✅ RESET subject when course changes
+  
+  elements.courseSelect.value = name;
+  elements.finalCourseSelect.value = name;
+  
+  // Enable subject input
+  elements.newSubjectInput.disabled = false;
+  elements.addSubjectBtn.disabled = false;
+  elements.subjectSelect.disabled = false;
+  
+  updateCourseDisplay();
+  updateFinalSelectionBadges();
+  populateSubjectDropdown(); // ✅ Repopulate with course-specific subjects
+  renderSubjectTags(); // ✅ Show course-specific subjects
+  updateFinalSelectionDropdowns();
+  saveAllData();
+}
+
+function populateCourseDropdown() {
+  const dropdowns = [elements.courseSelect, elements.finalCourseSelect];
+  
+  dropdowns.forEach(dropdown => {
+    dropdown.innerHTML = '<option value="">-- Choose Course --</option>';
+    
+    if (!appState.selectedDepartment) {
+      dropdown.disabled = true;
+      return;
+    }
+    
+    dropdown.disabled = false;
+    
+    const courses = appState.courses[appState.selectedDepartment] || [];
+    courses.forEach(course => {
+      const option = document.createElement('option');
+      option.value = course;
+      option.textContent = course;
+      if (course === appState.selectedCourse) {
+        option.selected = true;
+      }
+      dropdown.appendChild(option);
+    });
+  });
+}
+
+function renderCourseTags() {
+  if (!appState.selectedDepartment) {
+    elements.courseTags.innerHTML = '<span class="text-muted">Select a department first.</span>';
+    elements.coursesDepartmentName.textContent = '--';
+    return;
+  }
+  
+  elements.coursesDepartmentName.textContent = appState.selectedDepartment;
+  
+  const courses = appState.courses[appState.selectedDepartment] || [];
+  
+  if (courses.length === 0) {
+    elements.courseTags.innerHTML = '<span class="text-muted">No courses added yet.</span>';
+    return;
+  }
+  
+  elements.courseTags.innerHTML = '';
+  courses.forEach(course => {
+    const tag = document.createElement('span');
+    tag.className = `subject-tag ${course === appState.selectedCourse ? 'active' : ''}`;
+    tag.innerHTML = `
+      ${escapeHtml(course)}
+      <span class="delete-btn" data-course="${escapeHtml(course)}">&times;</span>
+    `;
+    
+    tag.addEventListener('click', (e) => {
+      if (!e.target.classList.contains('delete-btn')) {
+        selectCourse(course);
+      }
+    });
+    
+    elements.courseTags.appendChild(tag);
+  });
+  
+  document.querySelectorAll('#courseTags .delete-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      deleteCourse(e.target.getAttribute('data-course'));
+    });
+  });
+}
+
+function updateCourseDisplay() {
+  const course = appState.selectedCourse || 'None selected';
+  elements.currentCourseDisplay.textContent = course;
+  elements.selectedPathCourse.textContent = appState.selectedCourse || 'No Course';
+}
+
+// ==================== FINAL SELECTION & ACADEMIC YEAR ====================
+function updateFinalSelectionDropdowns() {
+  // ✅ Populate all three dropdowns (these handle their own null checks)
+  populateDepartmentDropdown();
+  populateCourseDropdown();
+  populateSubjectDropdown();
+  
+  // ✅ Update path badges
+  elements.selectedPathDept.textContent = appState.selectedDepartment || 'No Department';
+  elements.selectedPathCourse.textContent = appState.selectedCourse || 'No Course';
+  elements.selectedPathSubject.textContent = appState.selectedSubject || 'No Subject';
+}
+function updateFinalSelectionBadges() {
+  elements.selectedPathDept.textContent = appState.selectedDepartment || 'No Department';
+  elements.selectedPathCourse.textContent = appState.selectedCourse || 'No Course';
+  elements.selectedPathSubject.textContent = appState.selectedSubject || 'No Subject';
+}
+function updateAcademicYearDisplay() {
+  const parts = [];
+  
+  if (appState.selectedAcademicYear) {
+    parts.push(`Academic Year: ${appState.selectedAcademicYear}`);
+  }
+  
+  if (appState.selectedDivision) {
+    parts.push(`Division: ${appState.selectedDivision}`);
+  }
+  
+  if (parts.length === 0) {
+    elements.currentAcademicDisplay.textContent = 'None';
+  } else {
+    elements.currentAcademicDisplay.textContent = parts.join(' | ');
+  }
+}
+
     // ==================== EVENT LISTENERS ====================
     function initializeEventListeners() {
       if (window._eventListenersInitialized) {
@@ -2369,6 +3595,120 @@
       }
       window._eventListenersInitialized = true;
       console.log('✅ Initializing event listeners (first time only)');
+
+      // ==================== DEPARTMENT EVENTS ====================
+// Add Department
+elements.addDepartmentBtn.addEventListener('click', () => {
+  const name = elements.newDepartmentInput.value.trim();
+  if (addDepartment(name)) {
+    elements.newDepartmentInput.value = '';
+  }
+});
+
+elements.newDepartmentInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    const name = elements.newDepartmentInput.value.trim();
+    if (addDepartment(name)) {
+      elements.newDepartmentInput.value = '';
+    }
+  }
+});
+
+// Select Department
+elements.departmentSelect.addEventListener('change', () => {
+  const dept = elements.departmentSelect.value;
+  if (dept) {
+    selectDepartment(dept);
+  }
+});
+
+// Delete Department
+elements.deleteDepartmentBtn.addEventListener('click', () => {
+  if (!appState.selectedDepartment) {
+    showAlert('Please select a department first!', 'warning');
+    return;
+  }
+  deleteDepartment(appState.selectedDepartment);
+});
+
+// ==================== COURSE EVENTS ====================
+// Add Course
+elements.addCourseBtn.addEventListener('click', () => {
+  const name = elements.newCourseInput.value.trim();
+  if (addCourse(name)) {
+    elements.newCourseInput.value = '';
+  }
+});
+
+elements.newCourseInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    const name = elements.newCourseInput.value.trim();
+    if (addCourse(name)) {
+      elements.newCourseInput.value = '';
+    }
+  }
+});
+
+// Select Course
+elements.courseSelect.addEventListener('change', () => {
+  const course = elements.courseSelect.value;
+  if (course) {
+    selectCourse(course);
+  }
+});
+
+// Delete Course
+elements.deleteCourseBtn.addEventListener('click', () => {
+  if (!appState.selectedCourse) {
+    showAlert('Please select a course first!', 'warning');
+    return;
+  }
+  deleteCourse(appState.selectedCourse);
+});
+
+// ==================== FINAL SELECTION EVENTS ====================
+// Final Department Select
+elements.finalDepartmentSelect.addEventListener('change', () => {
+  const dept = elements.finalDepartmentSelect.value;
+  if (dept) {
+    selectDepartment(dept);
+    updateFinalSelectionDropdowns();
+  }
+});
+
+// Final Course Select
+elements.finalCourseSelect.addEventListener('change', () => {
+  const course = elements.finalCourseSelect.value;
+  if (course) {
+    selectCourse(course);
+    updateFinalSelectionDropdowns();
+  }
+});
+
+// Final Subject Select
+elements.finalSubjectSelect.addEventListener('change', () => {
+  const subject = elements.finalSubjectSelect.value;
+  if (subject) {
+    selectSubject(subject);
+    updateFinalSelectionDropdowns();
+  }
+});
+
+// ==================== ACADEMIC YEAR & DIVISION EVENTS ====================
+// Academic Year Select
+elements.academicYearLevelSelect.addEventListener('change', () => {
+  appState.selectedAcademicYear = elements.academicYearLevelSelect.value;
+  updateAcademicYearDisplay();
+  saveAllData();
+});
+
+// Division Select
+elements.divisionSelect.addEventListener('change', () => {
+  appState.selectedDivision = elements.divisionSelect.value;
+  updateAcademicYearDisplay();
+  saveAllData();
+});
+
       // Subject events
       elements.addSubjectBtn.addEventListener('click', () => {
         if (addSubject(elements.newSubjectInput.value)) {
@@ -2414,11 +3754,11 @@
       });
 
       elements.fileInput.addEventListener('change', (e) => {
-        if (e.target.files && e.target.files[0]) {
-          handleFileUpload(e.target.files[0]);
-          e.target.value = ''; // Reset for same file upload
-        }
-      });
+  if (e.target.files && e.target.files[0]) {
+    handleFileUpload(e.target.files[0]);
+    // Don't reset here - will reset after successful upload
+  }
+});
 
       elements.fileDrop.addEventListener('dragover', (e) => {
         e.preventDefault();
@@ -2483,7 +3823,58 @@
         alert(message);
       });
 
+// Generate QR button
+      document.getElementById('generateQRBtn').addEventListener('click', () => {
+        const missing = [];
+        if (!appState.selectedDepartment)    missing.push('Department');
+        if (!appState.selectedCourse)        missing.push('Course');
+        if (!appState.selectedSubject)       missing.push('Subject');
+        if (!appState.selectedAcademicYear)  missing.push('Academic Year');
+        if (!appState.selectedDivision)      missing.push('Division');
+        if (appState.selectedMonth === null) missing.push('Month');
+        if (appState.selectedYear === null)  missing.push('Year');
 
+        const validationAlert = document.getElementById('qrValidationAlert');
+        const qrContainer     = document.getElementById('qrCodeContainer');
+
+        if (missing.length > 0) {
+          document.getElementById('qrValidationMsg').textContent = 'Missing: ' + missing.join(', ');
+          validationAlert.style.display = 'block';
+          qrContainer.innerHTML = '';
+        } else {
+          validationAlert.style.display = 'none';
+
+          const payload = JSON.stringify({
+            department:    appState.selectedDepartment,
+            course:        appState.selectedCourse,
+            academicYear:  appState.selectedAcademicYear,
+            division:      appState.selectedDivision,
+            subject:       appState.selectedSubject,
+            month:         appState.selectedMonth,   // 0-indexed, pass as-is
+            year:          appState.selectedYear,
+            day:           appState.currentDay
+          });
+
+          // Generate QR using qrcode-generator
+          const qr = qrcode(0, 'M');
+          qr.addData(payload);
+          qr.make();
+          qrContainer.innerHTML = qr.createSvgTag(6, 0);
+
+          // Update path badges
+          document.getElementById('qrBadgeDept').textContent    = appState.selectedDepartment;
+          document.getElementById('qrBadgeCourse').textContent  = appState.selectedCourse;
+          document.getElementById('qrBadgeSubject').textContent = appState.selectedSubject;
+          document.getElementById('qrBadgeAcYear').textContent  = appState.selectedAcademicYear;
+          document.getElementById('qrBadgeDiv').textContent     = appState.selectedDivision;
+          document.getElementById('qrBadgeMonth').textContent   = monthNames[appState.selectedMonth];
+          document.getElementById('qrBadgeDay').textContent     = 'Day ' + appState.currentDay;
+        }
+
+        // Open modal
+        const modal = new bootstrap.Modal(document.getElementById('qrModal'));
+        modal.show();
+      });
       // Day navigation events
       elements.dateSelect.addEventListener('change', () => {
         if (isUpdatingDayDropdown) return;
@@ -2593,6 +3984,23 @@
         // Populate year dropdown
         populateYearDropdown();
 
+        populateDepartmentDropdown();
+renderDepartmentTags();
+if (appState.selectedDepartment) {
+    populateCourseDropdown();
+    renderCourseTags();
+  }
+  
+  // ✅ Populate subjects BEFORE calling updateFinalSelectionDropdowns
+  populateSubjectDropdown();
+  renderSubjectTags();
+  
+  updateDepartmentDisplay();
+  updateCourseDisplay();
+  updateAcademicYearDisplay();
+  updateSubjectDisplay();
+  updateFinalSelectionDropdowns();
+
         // Set current month/year as default
         const now = new Date();
         if (appState.selectedMonth === null) {
@@ -2658,8 +4066,8 @@
         if (cloudData && JSON.stringify(cloudData) !== JSON.stringify(appState.attendanceData)) {
           console.log('📡 Attendance data updated from cloud');
           appState.attendanceData = cloudData;
-          refreshAttendanceTable();
-          updateStats();
+         // refreshAttendanceTable();
+         // updateStats();
 
           // Show notification
           const notification = document.createElement('div');
