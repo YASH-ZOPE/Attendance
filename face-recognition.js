@@ -1940,7 +1940,7 @@ let allAttendanceData = snapshot.val() || {};
 
     // ⚠️ FIX: Match main system's month key format (no +1)
     // Main system uses 0-11 directly: "2026-00" for January
-    const monthKey = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}`;
+    const monthKey = `${selectedYear}-${String(selectedMonth + 1).padStart(2, '0')}`;
     
     console.log('Month Key:', monthKey); // Should show "2026-00" for January
 
