@@ -326,9 +326,10 @@
       }
 
       .go-btn {
-        width: 100%;
+        width: 100vw;
         height: auto;
         padding: 15px;
+        margin-bottom: 20px;
         font-size: 1rem;
       }
     }
@@ -908,27 +909,36 @@
 
 
         <div class="mt-3">
-          <button id="downloadReportBtn" class="btn btn-success btn-action me-2 teacher-only-inline">
-            <i class="bi bi-file-earmark-arrow-down me-1"></i>Download Report
-          </button>
-          <button id="clearAllBtn" class="btn btn-outline-danger btn-action admin-only-inline">
-            <i class="bi bi-trash me-1"></i>Clear All Data
-          </button>
-          <button id="debugSaveBtn" class="btn btn-warning btn-action ms-2 admin-only-inline">
-            <i class="bi bi-bug me-1"></i>DEBUG: Check Saved Data
-          </button>
-          <button id="generateQRBtn" class="btn btn-info btn-action ms-2 admin-only-inline">
-            <i class="bi bi-qr-code me-1"></i>Generate QR
-          </button>
-        </div>
+  <div class="row g-2">
+    <div class="col-12 col-md-3">
+      <button id="downloadReportBtn" class="btn btn-success btn-action w-100 teacher-only-inline">
+        <i class="bi bi-file-earmark-arrow-down me-1"></i>Download Report
+      </button>
+    </div>
+    <div class="col-12 col-md-3">
+      <button id="clearAllBtn" class="btn btn-outline-danger btn-action w-100 admin-only-inline">
+        <i class="bi bi-trash me-1"></i>Clear All Data
+      </button>
+    </div>
+    <div class="col-12 col-md-3">
+      <button id="debugSaveBtn" class="btn btn-warning btn-action w-100 admin-only-inline">
+        <i class="bi bi-bug me-1"></i>DEBUG: Check Saved Data
+      </button>
+    </div>
+    <div class="col-12 col-md-3">
+      <button id="generateQRBtn" class="btn btn-info btn-action w-100 teacher-only-inline">
+        <i class="bi bi-qr-code me-1"></i>Generate QR
+      </button>
+    </div>
+  </div>
+</div>
       </div>
     </section>
     <section id="camera-section" class="nav-section">
       <button class="go-btn" onclick="window.location.href='face-recognition.html'">
         Attendance Section
       </button>
-      <br>
-      <br>
+    </section>
       <!-- Attendance Section -->
       <section id="attendance-section" class="nav-section">
         <div class="section-card">
@@ -1039,7 +1049,7 @@
       </section>
 
       <!-- Defaulter Section -->
-      <section id="defaulter-section" class="nav-section">
+      <section id="defaulter-section" class="nav-section teacher-only">
         <div class="section-card">
           <h4 class="section-title"><i class="bi bi-exclamation-triangle me-2"></i>Defaulter Management</h4>
 
@@ -2551,7 +2561,17 @@
 
       reader.readAsText(file);
     }
-
+function downloadFile(content, filename) {
+  const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
     function downloadTemplate() {
       if (appState.selectedMonth === null) {
         showAlert('Please select a month first!', 'warning');
