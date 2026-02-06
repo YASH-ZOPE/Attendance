@@ -26,7 +26,9 @@ class FaceRecognitionSystem {
     
     // Bulk import properties
     this.selectedFiles = null;
-    
+
+    this.currentQRId = null;
+    this.qrExpirationListener = null;
     // Main system database reference
     this.mainDB = null;
     this.firebaseSync = null;
@@ -40,6 +42,7 @@ class FaceRecognitionSystem {
   selectedCourse: null,         // ✅ ADD
   selectedAcademicYear: null,   // ✅ ADD
   selectedDivision: null
+  
     };
        this.isHandlingDayChange = false;
        this.userRole = null;
@@ -163,7 +166,7 @@ class FaceRecognitionSystem {
       // Load and display registered students
       await this.updateStudentList();
       await this.updateStats();
-      
+      this.updateConfigDisplay();
       // Hide loading overlay
       this.hideLoading();
       
@@ -175,10 +178,93 @@ class FaceRecognitionSystem {
     }
   }
 
+async validateQRSession(qrId) {
+  if (!this.firebaseSync || !this.firebaseSync.isConnected) {
+    console.warn('⚠️ Cannot validate - Firebase offline');
+    return true; // ✅ Allow offline mode
+  }
+  
+  try {
+    const snapshot = await this.firebaseSync.firebaseDB
+      .ref(`mainSystem/activeQRs/${qrId}`).once('value');
+    const qrData = snapshot.val();
+    
+    if (!qrData) {
+      console.warn('⚠️ QR not found in Firebase');
+      return false;
+    }
+    
+    const now = Date.now();
+    if (now > qrData.expiresAt) {
+      console.warn('⚠️ QR expired');
+      return false;
+    }
+    
+    console.log('✅ QR is valid');
+    return true;
+    
+  } catch (error) {
+    console.error('❌ Validation error:', error);
+    return true; // ✅ On error, allow (fail open)
+  }
+}
+
+/**
+ * Handle QR code scan - STRICT MODE (requires valid QR ID)
+ */
 async handleQRScan(qrDataString) {
   try {
+    console.log('═══════════════════════════════════');
+    console.log('RAW QR DATA:', qrDataString);
+    console.log('═══════════════════════════════════');
     const qrData = JSON.parse(qrDataString);
+     console.log('PARSED QR DATA:', qrData);
+    console.log('Has qrId?', !!qrData.qrId);
+    console.log('qrId value:', qrData.qrId);
+    console.log('═══════════════════════════════════');
+    // ✅ STRICT: Require QR ID
+    if (!qrData.qrId) {
+      this.showToast(
+        '❌ INVALID QR CODE!\n\n' +
+        'This QR code is outdated or missing required data.\n\n' +
+        'Please generate a NEW QR code from the main system.',
+        'danger'
+      );
+      console.error('❌ QR rejected - missing qrId');
+      return; // ❌ STOP - don't process further
+    }
     
+    // ✅ Validate QR ID in Firebase
+    console.log(`🔍 Validating QR ID: ${qrData.qrId}...`);
+    
+    if (!this.firebaseSync || !this.firebaseSync.isConnected) {
+      this.showToast(
+        '⚠️ Firebase Not Connected!\n\n' +
+        'Cannot validate QR code without Firebase.\n' +
+        'Please check your internet connection.',
+        'danger'
+      );
+      return; // ❌ STOP if Firebase is down
+    }
+    
+    const isValid = await this.validateQRSession(qrData.qrId);
+    
+    if (!isValid) {
+      this.showToast(
+        '⚠️ QR CODE EXPIRED OR INVALID!\n\n' +
+        'This QR code has expired or been replaced.\n\n' +
+        'Please scan a NEW QR code.',
+        'danger'
+      );
+      return; // ❌ STOP - invalid QR
+    }
+    
+    // ✅ QR is valid - setup expiration watcher
+    this.currentQRId = qrData.qrId;
+    this.watchQRExpiration(qrData.qrId);
+    console.log(`✅ QR validated successfully - ID: ${qrData.qrId}`);
+    
+    // ✅ Update config
     this.mainSystemConfig.selectedDepartment = qrData.department;
     this.mainSystemConfig.selectedCourse = qrData.course;
     this.mainSystemConfig.selectedAcademicYear = qrData.academicYear;
@@ -188,32 +274,72 @@ async handleQRScan(qrDataString) {
     this.mainSystemConfig.selectedYear = qrData.year;
     this.mainSystemConfig.currentDay = qrData.day;
     
-    localStorage.setItem('faceRecDivisionConfig', qrDataString);
+    // ✅ Save to localStorage
+    const configToSave = {
+      qrId: qrData.qrId,
+      department: qrData.department,
+      course: qrData.course,
+      academicYear: qrData.academicYear,
+      division: qrData.division,
+      subject: qrData.subject,
+      month: qrData.month,
+      year: qrData.year,
+      day: qrData.day,
+      scannedAt: Date.now()
+    };
     
-    // ✅ Re-setup Firebase live listeners with the new division config
-    if (this.firebaseSync && this.firebaseSync.isConnected) {
-      this.firebaseSync.detachListeners(); // detach old listeners first
-      this.firebaseSync.setupLiveListeners({
-        department:   qrData.department,
-        course:       qrData.course,
-        academicYear: qrData.academicYear,
-        division:     qrData.division,
-        year:         qrData.year,
-        onSubjectChange: (newSubject, oldSubject) => this.handleFirebaseSubjectChange(newSubject, oldSubject),
-        onMonthChange:   (newMonth, oldMonth)     => this.handleFirebaseMonthChange(newMonth, oldMonth),
-        onYearChange:    (newYear, oldYear)       => this.handleFirebaseYearChange(newYear, oldYear),
-        onDayChange:     (newDay, oldDay)         => this.handleFirebaseDayChange(newDay, oldDay)
-      });
-      console.log('✅ Live listeners re-attached for new division');
+    localStorage.setItem('faceRecDivisionConfig', JSON.stringify(configToSave));
+    
+    // ✅ Re-setup Firebase live listeners
+    this.firebaseSync.detachListeners();
+    this.firebaseSync.setupLiveListeners({
+      department:   qrData.department,
+      course:       qrData.course,
+      academicYear: qrData.academicYear,
+      division:     qrData.division,
+      year:         qrData.year,
+      onSubjectChange: (newSubject, oldSubject) => this.handleFirebaseSubjectChange(newSubject, oldSubject),
+      onMonthChange:   (newMonth, oldMonth)     => this.handleFirebaseMonthChange(newMonth, oldMonth),
+      onYearChange:    (newYear, oldYear)       => this.handleFirebaseYearChange(newYear, oldYear),
+      onDayChange:     (newDay, oldDay)         => this.handleFirebaseDayChange(newDay, oldDay)
+    });
+    console.log('✅ Live listeners attached for new division');
+    
+    // ✅ Update UI
+    this.updateConfigDisplay();
+    if (this.userRole === 'student') {
+      // Lock camera button
+      this.disableCameraButton();
+      
+      // Show security code input
+      document.getElementById('securityCodeSection').style.display = 'block';
+      
+      this.showToast(
+        `✅ QR CODE SCANNED!\n\n` +
+        `Now enter the 4-digit security code from the teacher's screen.`,
+        'info'
+      );
+    } else {
+      // Admin/Teacher - no code needed
+      this.enableCameraButton();
     }
     
-    this.showToast(`✅ Configured for ${qrData.division}`, 'success');
+    const divisionName = `${qrData.department}/${qrData.course}/${qrData.academicYear}/${qrData.division}`;
+    this.showToast(
+      `✅ QR CODE ACCEPTED!\n\n` +
+      `Division: ${divisionName}\n` +
+      `Subject: ${qrData.subject}\n` +
+      `QR ID: ${qrData.qrId.substring(0, 8)}...`,
+      'success'
+    );
     
+    // ✅ Load face data
     await this.loadFaceMatcher();
     await this.updateStudentList();
     await this.updateStats();
+    
   } catch (error) {
-    this.showToast('Invalid QR code', 'danger');
+    this.showToast('❌ Invalid QR code format', 'danger');
     console.error('QR scan error:', error);
   }
 }
@@ -394,6 +520,7 @@ async handleFirebaseDayChange(newDay, oldDay) {
   
   const previousDay = this.mainSystemConfig.currentDay;
   this.mainSystemConfig.currentDay = newDay;
+  this.updateConfigDisplay();
   
   // ✅ Handle day 0 properly and check for actual change
   if (newDay !== null && newDay !== undefined && newDay !== previousDay) {
@@ -447,6 +574,7 @@ async handleFirebaseSubjectChange(newSubject, oldSubject) {
   console.log(`🔔 Firebase subject changed: ${oldSubject} → ${newSubject}`);
   
   this.mainSystemConfig.selectedSubject = newSubject;
+   this.updateConfigDisplay();
   
   if (!newSubject) {
     this.showToast('⚠️ No subject selected in main system', 'warning');
@@ -471,6 +599,7 @@ async handleFirebaseMonthChange(newMonth, oldMonth) {
   console.log(`🔔 Firebase month changed: ${oldMonth} → ${newMonth}`);
   
   this.mainSystemConfig.selectedMonth = newMonth;
+   this.updateConfigDisplay();
   
   const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                      'July', 'August', 'September', 'October', 'November', 'December'];
@@ -493,6 +622,7 @@ async handleFirebaseYearChange(newYear, oldYear) {
   console.log(`🔔 Firebase year changed: ${oldYear} → ${newYear}`);
   
   this.mainSystemConfig.selectedYear = newYear;
+   this.updateConfigDisplay();
   
   if (newYear) {
     this.showToast(`📅 Year changed to: ${newYear}`, 'info');
@@ -1287,9 +1417,53 @@ const path = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear
     });
      await this.updateVisualAttendance();
   }
+updateConfigDisplay() {
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                      'July', 'August', 'September', 'October', 'November', 'December'];
+  
+  const elements = {
+    department: document.getElementById('displayDepartment'),
+    course: document.getElementById('displayCourse'),
+    academicYear: document.getElementById('displayAcademicYear'),
+    division: document.getElementById('displayDivision'),
+    subject: document.getElementById('displaySubject'),
+    month: document.getElementById('displayMonth'),
+    year: document.getElementById('displayYear'),
+    day: document.getElementById('displayDay')
+  };
+  
+  const config = this.mainSystemConfig;
+  
+  this.setConfigValue(elements.department, config.selectedDepartment);
+  this.setConfigValue(elements.course, config.selectedCourse);
+  this.setConfigValue(elements.academicYear, config.selectedAcademicYear);
+  this.setConfigValue(elements.division, config.selectedDivision);
+  this.setConfigValue(elements.subject, config.selectedSubject);
+  this.setConfigValue(elements.month, 
+    config.selectedMonth !== null && config.selectedMonth !== undefined 
+      ? monthNames[config.selectedMonth] 
+      : null
+  );
+  this.setConfigValue(elements.year, config.selectedYear);
+  this.setConfigValue(elements.day, 
+    config.currentDay !== null && config.currentDay !== undefined 
+      ? `Day ${config.currentDay}` 
+      : null
+  );
+}
 
-  //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-// ADD THIS NEW FUNCTION AFTER updateStudentList():
+setConfigValue(element, value) {
+  if (!element) return;
+  
+  if (value === null || value === undefined || value === '') {
+    element.textContent = 'Not Set';
+    element.classList.add('not-set');
+  } else {
+    element.textContent = value;
+    element.classList.remove('not-set');
+  }
+}
+
 
 /**
  * Update visual attendance blocks display
@@ -2376,7 +2550,61 @@ async triggerMainSystemRefresh() {
       }
     });
   }
+// Method 1: Validate QR
+async validateQRSession(qrId) {
+  const snapshot = await this.firebaseSync.firebaseDB
+    .ref(`mainSystem/activeQRs/${qrId}`).once('value');
+  const qrData = snapshot.val();
+  
+  if (!qrData || Date.now() > qrData.expiresAt) return false;
+  return true;
+}
 
+// Method 2: Watch for expiration
+watchQRExpiration(qrId) {
+  if (!this.firebaseSync || !this.firebaseSync.isConnected) return;
+  
+  // ✅ Remove old listener if exists
+  if (this.qrExpirationListener) {
+    this.qrExpirationListener.off();
+  }
+  
+  const qrRef = this.firebaseSync.firebaseDB.ref(`mainSystem/activeQRs/${qrId}`);
+  
+  const handler = (snapshot) => {
+    const qrData = snapshot.val();
+    
+    if (!qrData) {
+      console.warn('⚠️ QR removed from Firebase');
+      this.handleQRExpiration('removed');
+      qrRef.off('value', handler);
+      return;
+    }
+    
+    if (Date.now() > qrData.expiresAt) {
+      console.warn('⚠️ QR expired');
+      this.handleQRExpiration('expired');
+      qrRef.off('value', handler);
+    }
+  };
+  
+  qrRef.on('value', handler);
+  this.qrExpirationListener = qrRef; // ✅ Store reference
+  console.log(`👁️ Watching QR: ${qrId}`);
+}
+// Method 3: Handle expiration
+handleQRExpiration(reason) {
+  if (this.isCameraRunning) this.stopCamera();
+  
+  this.showToast(
+    reason === 'expired' 
+      ? '⏰ QR Code Expired! Scan new QR.' 
+      : '🔄 QR Replaced! Scan new QR.',
+    'warning'
+  );
+  
+  this.currentQRId = null;
+}
   /**
    * Show detailed sync help
    */
@@ -2537,6 +2765,49 @@ document.getElementById('cancelImportBtn').addEventListener('click', () => {
 document.getElementById('closeResultsBtn').addEventListener('click', () => {
   document.getElementById('importResultsModal').style.display = 'none';
 });
+
+ const verifyBtn = document.getElementById('verifyCodeBtn');
+  if (verifyBtn) {
+    verifyBtn.addEventListener('click', async () => {
+      const enteredCode = document.getElementById('securityCodeInput').value.trim();
+      
+      if (enteredCode.length !== 4) {
+        this.showCodeError('Please enter a 4-digit code');
+        return;
+      }
+      
+      // Disable button during verification
+      verifyBtn.disabled = true;
+      verifyBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Verifying...';
+      
+      // Verify code from Firebase
+      const verification = await this.verifyDynamicCode(enteredCode);
+      
+      if (verification.valid) {
+        // ✅ Code is valid - Enable camera button
+        this.showCodeSuccess('✅ Code verified! You can now start the camera.');
+        this.enableCameraButton();
+        
+        // Clear input
+        document.getElementById('securityCodeInput').value = '';
+        
+      } else {
+        // ❌ Code is invalid
+        this.showCodeError(verification.reason);
+        
+        // Re-enable verify button
+        verifyBtn.disabled = false;
+        verifyBtn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Verify Code';
+      }
+    });
+    
+    // ✅ Also allow Enter key
+    document.getElementById('securityCodeInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        verifyBtn.click();
+      }
+    });
+  }
   }
 
   /**
@@ -2574,6 +2845,90 @@ document.getElementById('closeResultsBtn').addEventListener('click', () => {
     if (progressBar) progressBar.style.width = `${percent}%`;
     if (loadingText) loadingText.textContent = text;
   }
+
+  //>>>>>>>>>>> NEW: Verify dynamic code from Firebase
+async verifyDynamicCode(userEnteredCode) {
+  if (!this.firebaseSync || !this.firebaseSync.isConnected) {
+    console.warn('⚠️ Firebase not connected, allowing offline mode');
+    return { valid: true }; // Allow if offline
+  }
+
+  try {
+    const snapshot = await this.firebaseSync.firebaseDB
+      .ref('mainSystem/dynamicCode').once('value');
+    const data = snapshot.val();
+    
+    if (!data) {
+      return { 
+        valid: false, 
+        reason: 'No active code found. Ask teacher to generate a new QR code.' 
+      };
+    }
+    
+    const now = Date.now();
+    
+    // Check if expired
+    if (now > data.expiresAt) {
+      return { 
+        valid: false, 
+        reason: 'Code expired. Get the new code from the teacher\'s screen.' 
+      };
+    }
+    
+    // Check if code matches
+    if (data.code !== userEnteredCode) {
+      return { 
+        valid: false, 
+        reason: 'Wrong code. Check the number on the teacher\'s screen.' 
+      };
+    }
+    
+    return { valid: true };
+  } catch (error) {
+    console.error('Error verifying code:', error);
+    return { 
+      valid: false, 
+      reason: 'Connection error. Please try again.' 
+    };
+  }
+}
+
+//>>>>>>>>>>> Helper: Show code error message
+showCodeError(message) {
+  const msgDiv = document.getElementById('codeValidationMsg');
+  msgDiv.className = 'alert alert-danger';
+  msgDiv.textContent = message;
+  msgDiv.style.display = 'block';
+}
+
+//>>>>>>>>>>> Helper: Show code success message
+showCodeSuccess(message) {
+  const msgDiv = document.getElementById('codeValidationMsg');
+  msgDiv.className = 'alert alert-success';
+  msgDiv.textContent = message;
+  msgDiv.style.display = 'block';
+}
+
+//>>>>>>>>>>> NEW: Enable camera button after code verification
+enableCameraButton() {
+  const btn = document.getElementById('startCameraBtn');
+  btn.disabled = false;
+  btn.classList.remove('btn-secondary');
+  btn.classList.add('btn-primary');
+  btn.innerHTML = '<i class="bi bi-camera-video me-2"></i>Start Camera';
+  
+  // Hide security section
+  document.getElementById('securityCodeSection').style.display = 'none';
+}
+
+//>>>>>>>>>>> NEW: Disable camera button (lock it)
+disableCameraButton() {
+  const btn = document.getElementById('startCameraBtn');
+  btn.disabled = true;
+  btn.classList.remove('btn-primary');
+  btn.classList.add('btn-secondary');
+  btn.innerHTML = '<i class="bi bi-lock me-2"></i>Locked - Verify Code First';
+}
 }
 
 class FirebaseLiveSync {
@@ -2678,6 +3033,7 @@ class FirebaseLiveSync {
     this.listeners = [];
     console.log('✅ Firebase listeners detached');
   }
+
 }
 
 

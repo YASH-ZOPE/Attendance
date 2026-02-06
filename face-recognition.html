@@ -76,7 +76,6 @@
       transform: scaleX(-1);
     }
 
-    /* ✅ CHANGED: Reduced padding from 25px to 15px */
     .mode-card {
       background: #f8f9fa;
       border-radius: 15px;
@@ -94,7 +93,6 @@
       background: linear-gradient(135deg, #FBF8FA 0%, #F7F0F5 100%);
     }
 
-    /* ✅ CHANGED: Reduced padding and added font-size */
     .btn-face {
       border-radius: 25px;
       padding: 8px 20px;
@@ -211,7 +209,6 @@
       gap: 10px;
     }
 
-    /* ✅ CHANGED: Reduced min-height and added padding/font-size */
     .button-grid button {
       width: 100%;
       min-height: 40px;
@@ -223,11 +220,8 @@
       font-size: 0.85rem;
     }
 
-    /* Role-based visibility */
-    .admin-only {
-      display: block;
-    }
-
+    /* ✅ FIXED: Role-based visibility with proper specificity */
+    .admin-only,
     .teacher-only {
       display: block;
     }
@@ -236,29 +230,10 @@
       display: none;
     }
 
-    .hide-for-teacher {
-      display: none;
-    }
-
-    .hide-for-student {
-      display: none;
-    }
-
-    /* For buttons/inline elements */
-    .admin-only-inline {
-      display: inline-block;
-    }
-
+    /* For inline elements */
+    .admin-only-inline,
     .teacher-only-inline {
       display: inline-block;
-    }
-
-    .hide-for-teacher-inline {
-      display: none;
-    }
-
-    .hide-for-student-inline {
-      display: none;
     }
 
     /* Responsive fixes */
@@ -311,14 +286,13 @@
         padding: 10px 20px;
       }
 
-      /* ✅ CHANGED: Mobile responsive for child containers */
       .child-container {
         flex: 1 1 100% !important;
         min-width: 100%;
       }
     }
 
-    /* ✅ CHANGED: Flexbox layout for 60/40 split */
+    /* ✅ FIXED: Proper flexbox layout with role support */
     .parent-container {
       display: flex;
       gap: 15px;
@@ -326,42 +300,59 @@
       margin-top: 20px;
     }
 
-    /* ✅ CHANGED: Removed old 50/50 layout, added specific widths */
+    /* Default layout (Admin/Teacher) - 60/40 split */
     .child-container {
       min-width: 280px;
+      flex: 1 1 calc(40% - 7.5px); /* Default to smaller size */
     }
 
+    /* First container (video) - 60% width */
     .child-container:nth-child(1) {
-      flex: 0 0 calc(60% - 7.5px);
+      flex: 1 1 calc(60% - 7.5px);
     }
 
-    .child-container:nth-child(2) {
-      flex: 0 0 calc(40% - 7.5px);
-    }
-
+    /* Third container (attendance) - 40% width */
     .child-container:nth-child(3) {
-      flex: 0 0 calc(40% - 7.5px);
+      flex: 1 1 calc(40% - 7.5px);
     }
 
-    .child-container:nth-child(4) {
-      flex: 0 0 calc(60% - 7.5px);
+    /* ✅ FIXED: Student role - proper layout with higher specificity */
+    body.student-role .parent-container {
+      /* Force 60/40 layout for only 2 containers */
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
     }
 
-    /* ✅ NEW: Student role visibility - hide 2nd and 4th containers */
+    /* Hide teacher-only containers completely */
     body.student-role .child-container:nth-child(2),
     body.student-role .child-container:nth-child(4) {
-      display: none;
+      display: none !important;
     }
 
+    /* Make remaining containers fill properly */
     body.student-role .child-container:nth-child(1) {
-      flex: 0 0 calc(60% - 7.5px) !important;
+      flex: 1 1 calc(60% - 7.5px) !important;
+      max-width: calc(60% - 7.5px);
     }
 
     body.student-role .child-container:nth-child(3) {
-      flex: 0 0 calc(40% - 7.5px) !important;
+      flex: 1 1 calc(40% - 7.5px) !important;
+      max-width: calc(40% - 7.5px);
     }
 
-    /* ✅ NEW: Bootstrap column width fix */
+    /* ✅ FIXED: Hide teacher/admin elements in student role */
+    body.student-role .admin-only,
+    body.student-role .teacher-only {
+      display: none !important;
+    }
+
+    body.student-role .admin-only-inline,
+    body.student-role .teacher-only-inline {
+      display: none !important;
+    }
+
+    /* Bootstrap column width fix */
     .parent-container .child-container .col-11 {
       width: 100% !important;
       max-width: 100% !important;
@@ -373,7 +364,7 @@
       max-height: 400px;
     }
 
-    /* ✅ NEW: Quick Stats height reduction */
+    /* Quick Stats height reduction */
     .row.mt-4 {
       margin-top: 1rem !important;
       margin-bottom: 0rem !important;
@@ -392,7 +383,7 @@
       font-size: 0.7rem;
     }
 
-    /* ✅ NEW: Spacing above Main Dashboard button */
+    /* Spacing above Main Dashboard button */
     .d-flex.justify-content-center {
       margin-top: 1.5rem;
     }
@@ -486,6 +477,13 @@
         font-size: 14px;
         min-height: 40px;
       }
+
+      /* ✅ FIXED: Student role stacks vertically on mobile */
+      body.student-role .child-container:nth-child(1),
+      body.student-role .child-container:nth-child(3) {
+        flex: 1 1 100% !important;
+        max-width: 100% !important;
+      }
     }
 
     /* QR Scanner Overlay */
@@ -547,6 +545,169 @@
       font-weight: 600;
       font-size: 0.9rem;
     }
+ /* ===============================
+   CONFIG DISPLAY CONTAINER
+   =============================== */
+
+.config-display-container {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 15px 30px;
+  border-bottom: 2px solid #dee2e6;
+}
+
+/* ===============================
+   CONFIG CARD (FULL CLICKABLE)
+   =============================== */
+
+.config-card {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* Hover Effect */
+.config-card:hover {
+  box-shadow: 0 6px 25px rgba(102, 126, 234, 0.25);
+  transform: translateY(-2px);
+  border: 2px solid #667eea;
+}
+
+/* Click Ripple Effect */
+@keyframes ripple {
+  0% {
+    box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4);
+  }
+  100% {
+    box-shadow: 0 0 0 20px rgba(102, 126, 234, 0);
+  }
+}
+
+.config-card:active {
+  animation: ripple 0.5s ease-out;
+}
+
+/* ===============================
+   TITLE
+   =============================== */
+
+.config-title {
+  color: #6A4A5A;
+  font-weight: 600;
+  margin-bottom: 15px;
+  font-size: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ===============================
+   GRID LAYOUT
+   =============================== */
+
+.config-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+/* ===============================
+   GRID ITEMS
+   =============================== */
+
+.config-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  transition: 0.2s ease;
+}
+
+.config-item:hover {
+  background: #eef1ff;
+}
+
+.config-item i {
+  color: #667eea;
+  font-size: 1rem;
+  margin-right: 6px;
+}
+
+.config-label {
+  color: #6c757d;
+  font-weight: 500;
+  margin-right: 5px;
+}
+
+.config-value {
+  color: #212529;
+  font-weight: 600;
+  margin-left: auto;
+}
+
+.config-value.not-set {
+  color: #dc3545;
+  font-style: italic;
+}
+
+/* ===============================
+   TABLET RESPONSIVE
+   =============================== */
+
+@media (max-width: 992px) {
+  .config-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ===============================
+   MOBILE RESPONSIVE (COMPACT)
+   =============================== */
+
+@media (max-width: 576px) {
+
+  .config-display-container {
+    padding: 10px 15px;
+  }
+
+  .config-card {
+    padding: 14px;
+    border-radius: 12px;
+  }
+
+  .config-title {
+    font-size: 0.9rem;
+  }
+
+  .config-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .config-item {
+    font-size: 0.75rem;
+    padding: 6px 8px;
+  }
+
+  .config-item i {
+    font-size: 0.9rem;
+  }
+  /* ADD TO YOUR <style> SECTION */
+.section-card {
+  background: #FFFEF9;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+}
+
   </style>
 </head>
 
@@ -573,13 +734,103 @@
       <h1><i class="bi bi-camera-video me-2"></i>Face Recognition Attendance</h1>
       <p class="mb-0 mt-2">Automated attendance marking using facial recognition</p>
     </div>
+
+    <div class="main-card">
+  <div class="config-display-container">
+  <div class="config-card" id="configCard">
+    <h6 class="config-title">
+      <span>
+        <i class="bi bi-gear-fill me-2"></i>Current Configuration
+      </span>
+      <span style="font-size: 0.75rem; color: #667eea; font-weight: 400;">
+        <i class="bi bi-qr-code-scan me-1"></i>Click to Scan QR
+      </span>
+    </h6>
+    <div class="config-grid">
+      <div class="config-item">
+        <i class="bi bi-building me-1"></i>
+        <span class="config-label">Department:</span>
+        <span class="config-value" id="displayDepartment">Not Set</span>
+      </div>
+      <div class="config-item">
+        <i class="bi bi-journal-code me-1"></i>
+        <span class="config-label">Course:</span>
+        <span class="config-value" id="displayCourse">Not Set</span>
+      </div>
+      <div class="config-item">
+        <i class="bi bi-calendar-event me-1"></i>
+        <span class="config-label">Academic Year:</span>
+        <span class="config-value" id="displayAcademicYear">Not Set</span>
+      </div>
+      <div class="config-item">
+        <i class="bi bi-people-fill me-1"></i>
+        <span class="config-label">Division:</span>
+        <span class="config-value" id="displayDivision">Not Set</span>
+      </div>
+      <div class="config-item">
+        <i class="bi bi-book me-1"></i>
+        <span class="config-label">Subject:</span>
+        <span class="config-value" id="displaySubject">Not Set</span>
+      </div>
+      <div class="config-item">
+        <i class="bi bi-calendar3 me-1"></i>
+        <span class="config-label">Month:</span>
+        <span class="config-value" id="displayMonth">Not Set</span>
+      </div>
+      <div class="config-item">
+        <i class="bi bi-calendar-check me-1"></i>
+        <span class="config-label">Year:</span>
+        <span class="config-value" id="displayYear">Not Set</span>
+      </div>
+      <div class="config-item">
+        <i class="bi bi-calendar-day me-1"></i>
+        <span class="config-label">Day:</span>
+        <span class="config-value" id="displayDay">Not Set</span>
+      </div>
+    </div>
+  </div>
+</div>
+
     <div class="content-area">
+      <!-- Security Code Verification Section -->
+  <div id="securityCodeSection" class="section-card mb-4">
+    <div class="card">
+      <div class="card-header bg-warning text-dark">
+        <h6 class="mb-0">
+          <i class="bi bi-shield-lock me-2"></i>Security Verification Required
+        </h6>
+      </div>
+      <div class="card-body">
+        <p class="text-muted mb-3">
+          Enter the 4-digit security code displayed on the teacher's QR screen to unlock the camera.
+        </p>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="input-group">
+              <input type="text" 
+                     id="securityCodeInput" 
+                     class="form-control form-control-lg text-center" 
+                     placeholder="Enter 4-digit code" 
+                     maxlength="4"
+                     pattern="[0-9]{4}"
+                     style="font-size: 1.5rem; letter-spacing: 0.5rem;">
+              <button id="verifyCodeBtn" class="btn btn-primary btn-lg">
+                <i class="bi bi-check-circle me-2"></i>Verify Code
+              </button>
+            </div>
+            <div id="codeValidationMsg" class="mt-2" style="display: none;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
       <div class="parent-container">
+        <!-- Container 1: Video Feed (60% - Always visible) -->
         <div class="child-container">
           <div class="row">
             <div class="mode-card col-11">
               <div class="row">
-                <!-- Left Column - Video Feed -->
+                <!-- Video Feed -->
                 <div class="video-container">
                   <video id="video" autoplay muted playsinline></video>
                   <canvas id="canvas"></canvas>
@@ -623,12 +874,8 @@
                   <button class="btn btn-primary w-100 mb-2" onclick="window.location.href='main-system.html'">
                     Main Dashboard
                   </button>
-                  <br>
-                  <button id="scanQRBtn" class="btn btn-outline-primary w-100 mb-2 teacher-only-inline">
-                    <i class="bi bi-qr-code-scanning me-2"></i>Scan QR Code
-                  </button>
+                  <br><br>
                   
-                  <br>
                 </div>
 
                 <div class="button-grid">
@@ -649,15 +896,16 @@
                   </button>
                   
                 </div>
-                
+                <div><button id="scanQRBtn" class="btn btn-outline-primary w-100 mb-2">
+                    <i class="bi bi-qr-code-scanning me-2"></i>Scan QR Code
+                  </button></div>
               </div>
             </div>
           </div>
         </div>
 
-
+        <!-- Container 2: Mode Selection (40% - Teacher/Admin only) -->
         <div class="child-container teacher-only">
-          <!-- Right Column - Mode Selection & Student List -->
           <div class="mode-card">
             <!-- Mode Selection -->
             <h5 class="mb-3"><i class="bi bi-gear me-2"></i>Operation Mode</h5>
@@ -682,7 +930,7 @@
               </div>
             </div>
 
-            <div class="mode-card teacher-only" id="recognitionMode">
+            <div class="mode-card" id="recognitionMode">
               <div class="d-flex align-items-center">
                 <i class="bi bi-person-check-fill fs-1 text-success me-3"></i>
                 <div>
@@ -701,7 +949,7 @@
               </div>
             </div>
             <div>
-              <div class="mode-card teacher-only" id="bulkImportMode">
+              <div class="mode-card" id="bulkImportMode">
                 <div class="d-flex align-items-center">
                   <i class="bi bi-folder-plus fs-1 text-info me-3"></i>
                   <div>
@@ -734,9 +982,7 @@
           </div>
         </div>
 
-
-        <!---------------------------------------------------------------------------------------------------------------->
-
+        <!-- Container 3: Today's Attendance (40% - Always visible) -->
         <div class="child-container">
           <div class="mode-card">
             <h5 class="mb-3 mt-4">
@@ -772,8 +1018,9 @@
           </div>
         </div>
 
-        <div class="child-container">
-          <div class="mode-card teacher-only">
+        <!-- Container 4: Registered Students (60% - Teacher/Admin only) -->
+        <div class="child-container teacher-only">
+          <div class="mode-card">
             <!-- Registered Students List -->
             <h5 class="mb-3 mt-4"><i class="bi bi-people me-2"></i>Registered Students</h5>
             <div class="student-list" id="studentList">
@@ -785,8 +1032,6 @@
           </div>
         </div>
       </div>
-      <!-- Actions -->
-
 
       <!-- Toast Notification -->
       <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
@@ -797,7 +1042,6 @@
           </div>
         </div>
       </div>
-
 
       <!-- Import Progress Modal -->
       <div id="importProgressModal"
@@ -822,288 +1066,288 @@
           <div id="importResultsContent"></div>
           <button id="closeResultsBtn" class="btn btn-primary w-100 mt-3">Close</button>
         </div>
+      </div>
 
-
-        <!-- Scripts -->
-         <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-        <!-- CORRECT ORDER -->
-        <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-        <script src="face-storage.js"></script>
-        <script src="face-recognition.js"></script>
+      <!-- Scripts -->
+      <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+      <script src="face-storage.js"></script>
+      <script src="face-recognition.js"></script>
         
-        <script>
-          // ==================== ROLE-BASED UI HIDING ====================
-          async function applyRoleBasedUIForFaceRecognition() {
-            try {
-              const role = await getUserRole();
-              console.log('Applying Face Recognition UI for role:', role);
+      <script>
+        // ==================== ROLE-BASED UI HIDING ====================
+        async function applyRoleBasedUIForFaceRecognition() {
+          try {
+            const role = await getUserRole();
+            console.log('Applying Face Recognition UI for role:', role);
 
-              if (role === 'admin') {
-                // Admin sees everything - no changes needed
-                return;
-              }
-
-              if (role === 'teacher') {
-                // Hide admin-only elements
-                hideElements('.admin-only');
-                hideElements('.admin-only-inline');
-
-              } else if (role === 'student') {
-                // Hide admin-only AND teacher-only elements
-                hideElements('.admin-only');
-                hideElements('.admin-only-inline');
-                hideElements('.teacher-only');
-                hideElements('.teacher-only-inline');
-
-                // ✅ ADD THIS LINE:
-                document.body.classList.add('student-role');
-
-                // Hide delete buttons in student list (will be applied when list renders)
-                hideDeleteButtonsForStudents();
-              }
-
-            } catch (error) {
-              console.error('Error applying role-based UI:', error);
+            if (role === 'admin') {
+              // Admin sees everything - no changes needed
+              return;
             }
-          }
 
-          function hideElements(selector) {
-            document.querySelectorAll(selector).forEach(el => {
-              el.style.display = 'none';
-            });
-          }
+            if (role === 'teacher') {
+              // Hide admin-only elements
+              hideElements('.admin-only');
+              hideElements('.admin-only-inline');
 
-          function hideDeleteButtonsForStudents() {
-            // Add CSS to hide delete buttons
-            const style = document.createElement('style');
-            style.id = 'student-role-style';
-            style.textContent = `
-    .student-card .btn-danger { display: none !important; }
-  `;
-            document.head.appendChild(style);
+            } else if (role === 'student') {
+              // ✅ FIXED: Add student-role class to body FIRST
+              document.body.classList.add('student-role');
+              
+              // Then hide elements (CSS will handle the layout)
+              hideElements('.admin-only');
+              hideElements('.admin-only-inline');
+              hideElements('.teacher-only');
+              hideElements('.teacher-only-inline');
 
-            // Also observe for dynamically added delete buttons
-            const observer = new MutationObserver(() => {
-              document.querySelectorAll('.student-card .btn-danger').forEach(btn => {
-                btn.style.display = 'none';
-              });
-            });
-
-            const studentList = document.getElementById('studentList');
-            if (studentList) {
-              observer.observe(studentList, { childList: true, subtree: true });
+              // Hide delete buttons in student list
+              hideDeleteButtonsForStudents();
             }
+
+          } catch (error) {
+            console.error('Error applying role-based UI:', error);
           }
+        }
 
-          // ==================== AUTHENTICATION CHECK ====================
-          async function checkAuthAndInitFaceRecognition() {
-            try {
-              // Check if logged in
-              const user = await getCurrentUser();
+        function hideElements(selector) {
+          document.querySelectorAll(selector).forEach(el => {
+            el.style.display = 'none';
+          });
+        }
 
-              if (!user) {
-                // Not logged in - redirect to login
-                window.location.href = 'index.html';
-                return;
-              }
+        function hideDeleteButtonsForStudents() {
+          // Add CSS to hide delete buttons
+          const style = document.createElement('style');
+          style.id = 'student-role-style';
+          style.textContent = `
+            .student-card .btn-danger { display: none !important; }
+          `;
+          document.head.appendChild(style);
 
-              // Get role
-              const role = await getUserRole();
-              console.log(`Face Recognition - Logged in as: ${user.attributes.email} (${role})`);
+          // Also observe for dynamically added delete buttons
+          const observer = new MutationObserver(() => {
+            document.querySelectorAll('.student-card .btn-danger').forEach(btn => {
+              btn.style.display = 'none';
+            });
+          });
 
-              // Apply role-based UI
-              await applyRoleBasedUIForFaceRecognition();
+          const studentList = document.getElementById('studentList');
+          if (studentList) {
+            observer.observe(studentList, { childList: true, subtree: true });
+          }
+        }
 
-              console.log('Face Recognition UI initialized for role:', role);
+        // ==================== AUTHENTICATION CHECK ====================
+        async function checkAuthAndInitFaceRecognition() {
+          try {
+            // Check if logged in
+            const user = await getCurrentUser();
 
-            } catch (error) {
-              console.error('Auth check failed:', error);
+            if (!user) {
+              // Not logged in - redirect to login
               window.location.href = 'index.html';
+              return;
             }
+
+            // Get role
+            const role = await getUserRole();
+            console.log(`Face Recognition - Logged in as: ${user.attributes.email} (${role})`);
+
+            // Apply role-based UI
+            await applyRoleBasedUIForFaceRecognition();
+
+            console.log('Face Recognition UI initialized for role:', role);
+
+          } catch (error) {
+            console.error('Auth check failed:', error);
+            window.location.href = 'index.html';
           }
+        }
 
-          // After other button handlers, add:
-          document.getElementById('syncToMainBtn').addEventListener('click', async () => {
-            try {
-              const btn = document.getElementById('syncToMainBtn');
-              btn.disabled = true;
-              btn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Syncing...';
+        // Sync button handler
+        document.getElementById('syncToMainBtn').addEventListener('click', async () => {
+          try {
+            const btn = document.getElementById('syncToMainBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Syncing...';
 
-              // ✅ NEW: Use the storage instance from faceSystem
-             await faceSystem.syncToMainSystem();
+            await faceSystem.syncToMainSystem();
 
-              btn.disabled = false;
-              btn.innerHTML = '<i class="bi bi-arrow-right-circle me-2"></i>Force Sync All Students';
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-arrow-right-circle me-2"></i>Force Sync All Students';
 
-            } catch (error) {
+          } catch (error) {
             faceSystem.showToast(`❌ ${error.message}`, 'danger');
 
-              const btn = document.getElementById('syncToMainBtn');
-              btn.disabled = false;
-              btn.innerHTML = '<i class="bi bi-arrow-right-circle me-2"></i>Force Sync All Students';
-            }
+            const btn = document.getElementById('syncToMainBtn');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-arrow-right-circle me-2"></i>Force Sync All Students';
+          }
+        });
 
-          });
+        // Call on page load (after models are loaded)
+        window.addEventListener('DOMContentLoaded', () => {
+          // Wait a bit for face-api models to start loading
+          setTimeout(checkAuthAndInitFaceRecognition, 500);
+        });
 
-          // Call on page load (after models are loaded)
-          window.addEventListener('DOMContentLoaded', () => {
-            // Wait a bit for face-api models to start loading
-            setTimeout(checkAuthAndInitFaceRecognition, 500);
-          });
-          // ==================== QR SCANNER ====================
-          let qrVideo = null;
-          let qrStream = null;
-          let qrAnimationFrame = null;
-          let qrCanvas = null;
-          let qrCtx = null;
+        // ==================== QR SCANNER ====================
+        let qrVideo = null;
+        let qrStream = null;
+        let qrAnimationFrame = null;
+        let qrCanvas = null;
+        let qrCtx = null;
 
-         document.getElementById('scanQRBtn').addEventListener('click', async () => {
-            if (!document.getElementById('qrScannerOverlay')) {
-              const overlay = document.createElement('div');
-              overlay.id = 'qrScannerOverlay';
-              overlay.className = 'qr-scanner-overlay';
-              overlay.innerHTML = `
-                <div class="qr-scanner-box">
-                  <h5><i class="bi bi-qr-code-scanning me-2"></i>Scan QR Code</h5>
-                  <p class="text-muted" style="font-size: 0.85rem;">Point camera at the QR code generated from the Main Dashboard</p>
-                  <div id="qr-video-container">
-                    <video id="qrVideo" autoplay muted playsinline></video>
-                  </div>
-                  <div id="qrStatus">Initializing camera...</div>
-                  <button id="closeQRBtn" class="btn btn-outline-danger btn-close-qr w-100">
-                    <i class="bi bi-x-circle me-2"></i>Close
-                  </button>
+        document.getElementById('scanQRBtn').addEventListener('click', async () => {
+          if (!document.getElementById('qrScannerOverlay')) {
+            const overlay = document.createElement('div');
+            overlay.id = 'qrScannerOverlay';
+            overlay.className = 'qr-scanner-overlay';
+            overlay.innerHTML = `
+              <div class="qr-scanner-box">
+                <h5><i class="bi bi-qr-code-scanning me-2"></i>Scan QR Code</h5>
+                <p class="text-muted" style="font-size: 0.85rem;">Point camera at the QR code generated from the Main Dashboard</p>
+                <div id="qr-video-container">
+                  <video id="qrVideo" autoplay muted playsinline></video>
                 </div>
-              `;
-              document.body.appendChild(overlay);
+                <div id="qrStatus">Initializing camera...</div>
+                <button id="closeQRBtn" class="btn btn-outline-danger btn-close-qr w-100">
+                  <i class="bi bi-x-circle me-2"></i>Close
+                </button>
+              </div>
+            `;
+            document.body.appendChild(overlay);
 
-              document.getElementById('closeQRBtn').addEventListener('click', () => {
-                closeQRScanner();
-              });
-            }
-            openQRScanner();
-          });
+            document.getElementById('closeQRBtn').addEventListener('click', () => {
+              closeQRScanner();
+            });
+          }
+          openQRScanner();
+        });
 
+        async function openQRScanner() {
+          const overlay = document.getElementById('qrScannerOverlay');
+          overlay.classList.add('active');
 
-          async function openQRScanner() {
-            const overlay = document.getElementById('qrScannerOverlay');
-            overlay.classList.add('active');
+          qrVideo = document.getElementById('qrVideo');
+          setQRStatus('Starting camera...');
 
-            qrVideo = document.getElementById('qrVideo');
-            setQRStatus('Starting camera...');
+          qrCanvas = document.createElement('canvas');
+          qrCtx = qrCanvas.getContext('2d', { willReadFrequently: true });
 
-            // Create hidden canvas for scanning
-            qrCanvas = document.createElement('canvas');
-            qrCtx = qrCanvas.getContext('2d', { willReadFrequently: true });
+          try {
+            qrStream = await navigator.mediaDevices.getUserMedia({
+              video: { facingMode: 'environment' }
+            });
+            qrVideo.srcObject = qrStream;
+            qrVideo.setAttribute('playsinline', true);
+            await qrVideo.play();
 
+            setQRStatus('Scanning for QR code...');
+            scanLoop();
+          } catch (error) {
             try {
-              qrStream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'environment' }
-              });
+              qrStream = await navigator.mediaDevices.getUserMedia({ video: true });
               qrVideo.srcObject = qrStream;
               qrVideo.setAttribute('playsinline', true);
               await qrVideo.play();
 
               setQRStatus('Scanning for QR code...');
               scanLoop();
-            } catch (error) {
-              // Fallback: try without facingMode constraint (desktop)
-              try {
-                qrStream = await navigator.mediaDevices.getUserMedia({ video: true });
-                qrVideo.srcObject = qrStream;
-                qrVideo.setAttribute('playsinline', true);
-                await qrVideo.play();
+            } catch (err) {
+              setQRStatus('❌ Camera access denied. Please allow camera.');
+              console.error('QR camera error:', err);
+            }
+          }
+        }
 
-                setQRStatus('Scanning for QR code...');
-                scanLoop();
-              } catch (err) {
-                setQRStatus('❌ Camera access denied. Please allow camera.');
-                console.error('QR camera error:', err);
+        function closeQRScanner() {
+          if (qrStream) {
+            qrStream.getTracks().forEach(track => track.stop());
+            qrStream = null;
+          }
+
+          if (qrAnimationFrame) {
+            cancelAnimationFrame(qrAnimationFrame);
+            qrAnimationFrame = null;
+          }
+
+          const overlay = document.getElementById('qrScannerOverlay');
+          overlay.classList.remove('active');
+
+          if (qrVideo) {
+            qrVideo.srcObject = null;
+          }
+
+          setQRStatus('Initializing camera...');
+        }
+
+        async function scanLoop() {
+          if (!qrVideo || qrVideo.readyState < 3) {
+            qrAnimationFrame = requestAnimationFrame(scanLoop);
+            return;
+          }
+
+          qrCanvas.width = qrVideo.videoWidth;
+          qrCanvas.height = qrVideo.videoHeight;
+          qrCtx.drawImage(qrVideo, 0, 0, qrCanvas.width, qrCanvas.height);
+
+          try {
+            const imageData = qrCtx.getImageData(0, 0, qrCanvas.width, qrCanvas.height);
+            const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+            if (code) {
+              setQRStatus('✅ QR Code detected! Processing...');
+
+              if (qrAnimationFrame) {
+                cancelAnimationFrame(qrAnimationFrame);
+                qrAnimationFrame = null;
               }
-            }
-          }
 
-          function closeQRScanner() {
-            // Stop camera
-            if (qrStream) {
-              qrStream.getTracks().forEach(track => track.stop());
-              qrStream = null;
-            }
-
-            // Stop scan loop
-            if (qrAnimationFrame) {
-              cancelAnimationFrame(qrAnimationFrame);
-              qrAnimationFrame = null;
-            }
-
-            // Hide overlay
-            const overlay = document.getElementById('qrScannerOverlay');
-            overlay.classList.remove('active');
-
-            // Reset video
-            if (qrVideo) {
-              qrVideo.srcObject = null;
-            }
-
-            setQRStatus('Initializing camera...');
-          }
-
-          async function scanLoop() {
-           if (!qrVideo || qrVideo.readyState < 3) {
-              qrAnimationFrame = requestAnimationFrame(scanLoop);
-              return;
-            }
-
-            // Match canvas to video size
-            qrCanvas.width = qrVideo.videoWidth;
-            qrCanvas.height = qrVideo.videoHeight;
-            qrCtx.drawImage(qrVideo, 0, 0, qrCanvas.width, qrCanvas.height);
-
-            try {
-              // Use QuaggaJS or jsQR — using jsQR here (lighter, no extra setup)
-              const imageData = qrCtx.getImageData(0, 0, qrCanvas.width, qrCanvas.height);
-              const code = jsQR(imageData.data, imageData.width, imageData.height);
-
-              if (code) {
-                setQRStatus('✅ QR Code detected! Processing...');
-
-                // Stop scanning immediately
-                if (qrAnimationFrame) {
-                  cancelAnimationFrame(qrAnimationFrame);
-                  qrAnimationFrame = null;
-                }
-
-                // Pass to face system
-               if (window.faceSystem) {
-    await window.faceSystem.handleQRScan(code.data);
-  } else {
-    console.error('❌ Face system not initialized yet');
-    setQRStatus('❌ System not ready. Please refresh and try again.');
-    setTimeout(() => {
-      closeQRScanner();
-    }, 2000);
-    return;
-  }
-
-                // Close scanner after short delay so user sees success message
+              if (window.faceSystem) {
+                await window.faceSystem.handleQRScan(code.data);
+              } else {
+                console.error('❌ Face system not initialized yet');
+                setQRStatus('❌ System not ready. Please refresh and try again.');
                 setTimeout(() => {
                   closeQRScanner();
-                }, 1500);
+                }, 2000);
                 return;
               }
-            } catch (e) {
-               console.error('jsQR scan error:', e);
+
+              setTimeout(() => {
+                closeQRScanner();
+              }, 1500);
+              return;
             }
-
-            // Continue scanning
-            qrAnimationFrame = requestAnimationFrame(scanLoop);
+          } catch (e) {
+            console.error('jsQR scan error:', e);
           }
 
-          function setQRStatus(message) {
-            document.getElementById('qrStatus').textContent = message;
-          }
-        </script>
+          qrAnimationFrame = requestAnimationFrame(scanLoop);
+        }
+
+        function setQRStatus(message) {
+          document.getElementById('qrStatus').textContent = message;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+  const configCard = document.getElementById('configCard');
+  
+  if (configCard) {
+    configCard.addEventListener('click', () => {
+      console.log('Config card clicked - opening QR scanner');
+      document.getElementById('scanQRBtn').click();
+    });
+    
+    console.log('✅ Config card click handler attached');
+  } else {
+    console.warn('⚠️ Config card not found');
+  }
+});
+      </script>
         
 </body>
 
