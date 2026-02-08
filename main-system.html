@@ -340,12 +340,53 @@
       }
     }
 
-    .info-alert {
-      background: linear-gradient(135deg, #E8E4F0 0%, #DDD8E8 100%);
-      border: none;
-      border-left: 4px solid #C8B8D8;
-      color: #6A5A7A;
-    }
+    /* Collapsible Info Box */
+.info-alert {
+  background: linear-gradient(135deg, #E8E4F0 0%, #DDD8E8 100%);
+  border: none;
+  border-left: 4px solid #C8B8D8;
+  color: #6A5A7A;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+  overflow: hidden;
+  cursor: pointer;
+  max-height: 60px; /* Collapsed state */
+  padding: 15px 20px;
+}
+
+.info-alert.collapsed {
+  max-height: 60px;
+}
+
+.info-alert.collapsed .info-content {
+  display: none;
+}
+
+.info-alert.collapsed h5::after {
+  content: " (Click to expand)";
+  font-size: 0.8rem;
+  font-weight: normal;
+  opacity: 0.7;
+}
+
+.info-alert:hover,
+.info-alert.expanded {
+  max-height: 500px; /* Expanded state */
+  padding: 20px;
+}
+
+.info-alert:hover .info-content,
+.info-alert.expanded .info-content {
+  display: block;
+}
+
+.info-alert h5 {
+  margin-bottom: 10px;
+  transition: margin 0.3s ease;
+}
+
+.info-alert.collapsed h5 {
+  margin-bottom: 0;
+}
 
     .modal-header-custom {
       background: linear-gradient(135deg, #F5D6D6 0%, #EDCACA 100%);
@@ -407,6 +448,228 @@
     .hide-for-student-inline {
       display: none;
     }
+
+
+
+/* Fix Academic Year section spacing */
+#month-section .row.g-2 {
+  gap: 10px !important;
+  margin-bottom: 15px;
+}
+
+/* Better dropdown sizing */
+#month-section .col-2 {
+  min-width: 150px; /* Prevent squeezing */
+}
+
+/* Academic Year dropdowns - more space */
+#academicYearLevelSelect,
+#divisionSelect {
+  min-width: 120px;
+}
+
+/* Apply button - better alignment */
+#applyMonthBtn {
+  margin-top: 0;
+  height: 38px; /* Match dropdown height */
+}
+
+/* Alert boxes - prevent text cutoff */
+#currentAcademicDisplay,
+#currentMonthDisplay {
+  word-wrap: break-word;
+  white-space: normal;
+  line-height: 1.4;
+}
+
+.alert.mb-0.py-2 {
+  padding: 10px 15px !important;
+  min-height: 45px;
+}
+
+/* Better label spacing */
+#month-section .form-label.fw-bold.small {
+  margin-bottom: 5px;
+  font-size: 0.85rem;
+}
+
+/* ==================== ATTENDANCE SECTION BUTTON FIX ==================== */
+
+/* Fix camera/attendance section */
+#camera-section {
+  margin: 30px 0; /* Space from navbar and other sections */
+  padding: 0 15px;
+  position: relative;
+  z-index: 1; /* Below navbar */
+}
+
+/* Attendance button - cleaner design */
+.go-btn {
+  width: 100%; /* Full width on mobile, container width on desktop */
+  max-width: 1050px; /* Limit max width */
+  height: auto;
+  min-height: 80px;
+  padding: 20px 30px;
+  margin: 0 auto 30px; /* Center horizontally */
+  display: block;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #4facfe 0%, #00c6ff 100%);
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.go-btn:hover {
+  background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+}
+
+.go-btn:active {
+  transform: translateY(-1px);
+}
+/* ==================== RESPONSIVE FIXES ==================== */
+
+/* Desktop view */
+@media (min-width: 992px) {
+  #month-section .row.g-2 {
+    gap: 15px !important;
+  }
+  
+  #month-section .col-2 {
+    flex: 0 0 auto;
+    width: auto;
+  }
+  
+  .go-btn {
+    width: 7000px;
+    min-height: 100px;
+    font-size: 1.3rem;
+  }
+}
+
+/* Tablet view */
+@media (max-width: 991px) and (min-width: 577px) {
+  #month-section .col-2 {
+    width: 48%;
+    margin-bottom: 10px;
+  }
+  
+  .go-btn {
+    width: 90%;
+    min-height: 90px;
+  }
+}
+
+/* Mobile view */
+@media (max-width: 576px) {
+  /* Stack Academic Year dropdowns */
+  #month-section .col-2 {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  
+  #month-section .row.g-2 {
+    gap: 0 !important;
+  }
+  
+  /* Full width button on mobile */
+  .go-btn {
+    width: 100%;
+    min-height: 70px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+    border-radius: 12px;
+  }
+  
+  /* Smaller alert text on mobile */
+  .alert.mb-0.py-2 {
+    font-size: 0.85rem;
+    padding: 8px 12px !important;
+  }
+  
+  /* Fix navbar overlap */
+  body {
+    padding-top: 65px; /* Slightly more space */
+  }
+  
+  #camera-section {
+    margin-top: 15px;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 400px) {
+  .go-btn {
+    font-size: 1rem;
+    min-height: 60px;
+    padding: 12px 15px;
+  }
+  
+  .go-btn::before {
+    font-size: 1.1rem;
+  }
+}
+
+/* ==================== NAVBAR Z-INDEX FIX ==================== */
+
+/* Ensure navbar stays on top */
+.navbar.fixed-top {
+  z-index: 1030; /* Bootstrap default, but explicitly set */
+}
+
+/* All content below navbar */
+.container.py-4 {
+  position: relative;
+  z-index: 1;
+}
+
+/* ==================== ALIGNMENT & SPACING IMPROVEMENTS ==================== */
+
+/* Better section spacing */
+.nav-section {
+  margin-bottom: 25px;
+  scroll-margin-top: 90px; /* Account for fixed navbar */
+}
+
+/* Section cards - consistent padding */
+.section-card {
+  padding: 25px;
+}
+
+@media (max-width: 576px) {
+  .section-card {
+    padding: 15px;
+  }
+}
+
+/* Calendar container spacing */
+#calendarContainer {
+  margin-top: 25px !important;
+  padding: 20px;
+  background: #fafafa;
+  border-radius: 10px;
+}
+
+/* Better form control heights */
+.form-select,
+.form-control {
+  height: 38px;
+  padding: 6px 12px;
+}
+
+.form-select-sm {
+  height: 32px;
+  padding: 4px 10px;
+  font-size: 0.875rem;
+}
   </style>
 </head>
 
@@ -423,28 +686,28 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav me-auto">
-          <li class="nav-item">
+          <li class="nav-item teacher-only">
             <a class="nav-link" href="#department-section"><i class="bi bi-building me-1"></i>Departments</a>
           </li>
-          <li class="nav-item">
+          <li class="nav-item teacher-only">
             <a class="nav-link" href="#course-section"><i class="bi bi-journal-bookmark me-1"></i>Courses</a>
           </li>
-          <li class="nav-item">
+          <li class="nav-item teacher-only">
             <a class="nav-link" href="#subject-section"><i class="bi bi-book me-1"></i>Subjects</a>
           </li>
-          <li class="nav-item">
+          <li class="nav-item teacher-only">
             <a class="nav-link" href="#selection-section"><i class="bi bi-check-square me-1"></i>Selection</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#month-section"><i class="bi bi-calendar3 me-1"></i>Academic Year</a>
           </li>
-          <li class="nav-item">
+          <li class="nav-item teacher-only">
             <a class="nav-link" href="#upload-section"><i class="bi bi-upload me-1"></i>Upload</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#attendance-section"><i class="bi bi-table me-1"></i>Attendance</a>
           </li>
-          <li class="nav-item">
+          <li class="nav-item teacher-only">
             <a class="nav-link" href="#defaulter-section"><i class="bi bi-exclamation-triangle me-1"></i>Defaulters</a>
           </li>
         </ul>
@@ -459,32 +722,32 @@
 
   <!-- Quick Navigation (Right Side) -->
   <div class="quick-nav d-none d-lg-block">
-    <a href="#department-section"><i class="bi bi-building"></i></a>
-    <a href="#course-section"><i class="bi bi-journal-bookmark"></i></a>
-    <a href="#subject-section"><i class="bi bi-book"></i></a>
-    <a href="#selection-section"><i class="bi bi-check-square"></i></a>
+    <a href="#department-section" class="teacher-only"><i class="bi bi-building"></i></a>
+    <a href="#course-section" class="teacher-only"><i class="bi bi-journal-bookmark"></i></a>
+    <a href="#subject-section" class="teacher-only"><i class="bi bi-book"></i></a>
+    <a href="#selection-section" class="teacher-only"><i class="bi bi-check-square"></i></a>
     <a href="#month-section"><i class="bi bi-calendar3"></i></a>
-    <a href="#upload-section"><i class="bi bi-upload"></i></a>
+    <a href="#upload-section" class="teacher-only"><i class="bi bi-upload"></i></a>
     <a href="#attendance-section"><i class="bi bi-table"></i></a>
-    <a href="#defaulter-section"><i class="bi bi-exclamation-triangle"></i></a>
+    <a href="#defaulter-section" class="teacher-only"><i class="bi bi-exclamation-triangle"></i></a>
   </div>
 
   <div class="container py-4">
 
 
     <!-- Info Box -->
-    <div class="alert info-alert mb-4">
-      <h5><i class="bi bi-info-circle me-2"></i>How to Use</h5>
-      <ol class="mb-0">
-        <li><strong>Add Department</strong> - Create departments like Computer Science, Mechanical, etc.</li>
-        <li><strong>Add Course</strong> - Select department and add courses like BTech, MTech, etc.</li>
-        <li><strong>Add Subject</strong> - Select course and add subjects for that course</li>
-        <li><strong>Select All</strong> - Choose Department, Course, Subject</li>
-        <li><strong>Select Month & Academic Year</strong> - Choose academic year (FY/SY/TY), year, division, month</li>
-        <li><strong>Upload CSV</strong> - Upload attendance file</li>
-        <li><strong>Manage Attendance</strong> - View, edit, mark holidays, check defaulters</li>
-      </ol>
-    </div>
+<div class="alert info-alert collapsed mb-4" id="infoBox">
+  <h5><i class="bi bi-info-circle me-2"></i>How to Use</h5>
+  <ol class="mb-0 info-content">
+    <li><strong>Add Department</strong> - Create departments like Computer Science, Mechanical, etc.</li>
+    <li><strong>Add Course</strong> - Select department and add courses like BTech, MTech, etc.</li>
+    <li><strong>Add Subject</strong> - Select course and add subjects for that course</li>
+    <li><strong>Select All</strong> - Choose Department, Course, Subject</li>
+    <li><strong>Select Month & Academic Year</strong> - Choose academic year (FY/SY/TY), year, division, month</li>
+    <li><strong>Upload CSV</strong> - Upload attendance file</li>
+    <li><strong>Manage Attendance</strong> - View, edit, mark holidays, check defaulters</li>
+  </ol>
+</div>
 
 
     <!-- SECTION 1: Department Management -->
@@ -817,7 +1080,7 @@
     </section>
 
 
-    <!-- Statistics Section -->
+    <!-- Statistics Section --> 
     <section id="stats-section" class="nav-section">
       <div class="row g-3 mb-4">
         <div class="col-md-3 teacher-only">
@@ -853,7 +1116,8 @@
             </div>
           </div>
         </div>
-        <div class="col-md-3">
+        
+        <div class="col-md-3 teacher-only">
           <div class="stats-card warning">
             <div class="d-flex justify-content-between align-items-center">
               <div>
@@ -1713,6 +1977,11 @@ async function initializeMainSystemForStudent() {
     // ==================== YOUR EXISTING CODE BELOW ====================
     async function initialize() {
       // Your existing initialization code...
+      // Collapsible info box - click to toggle
+document.getElementById('infoBox').addEventListener('click', function() {
+  this.classList.toggle('collapsed');
+  this.classList.toggle('expanded');
+});
       await openDatabase();
       // ... rest of code
     }
@@ -4245,11 +4514,23 @@ elements.finalDepartmentSelect.addEventListener('change', () => {
         if (modal) modal.hide();
       });
       // When QR modal closes, stop dynamic code rotation
-      const qrModal = document.getElementById('qrModal');
+     const qrModal = document.getElementById('qrModal');
 
 qrModal.addEventListener('hidden.bs.modal', () => {
   console.log('🔒 QR Modal closed - stopping code rotation');
   stopDynamicCodeRotation();
+  // ✅ DON'T stop the countdown timer - QR is still valid in Firebase
+  // Timer continues running in background to show accurate time remaining
+});
+
+// ✅ When modal opens, sync the timer display
+qrModal.addEventListener('shown.bs.modal', () => {
+  console.log('🔓 QR Modal opened');
+  // ✅ If we have an active QR, sync the timer display
+  if (qrExpiryTimestamp) {
+    updateQRTimer();
+    console.log('✅ QR timer synced with actual expiry time');
+  }
 });
       // Smooth scroll for navigation
       document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -4380,105 +4661,152 @@ qrModal.addEventListener('hidden.bs.modal', () => {
 
     // Start the application
     initialize();
-    let qrTimerInterval = null; // Store timer reference
+    //start>>>>>>>>>>
+let qrTimerInterval = null;
+let qrExpiryTimestamp = null; // ✅ Track actual expiry time instead of countdown
 
-    function startQRCountdown(seconds) {
-      // Clear previous timer if exists
-      if (qrTimerInterval) {
-        clearInterval(qrTimerInterval);
-      }
+function startQRCountdown(seconds) {
+  // Clear previous timer
+  if (qrTimerInterval) {
+    clearInterval(qrTimerInterval);
+    qrTimerInterval = null;
+  }
 
-      let remaining = seconds;
-      qrTimerInterval = setInterval(() => {
-        remaining--;
-        const mins = Math.floor(remaining / 60);
-        const secs = remaining % 60;
-        document.getElementById('qrTimer').textContent =
-          `${mins}:${secs.toString().padStart(2, '0')}`;
+  // ✅ Store the actual expiry timestamp (absolute time)
+  qrExpiryTimestamp = Date.now() + (seconds * 1000);
+  
+  // Update immediately
+  updateQRTimer();
+  
+  // ✅ Update every second based on actual time remaining
+  qrTimerInterval = setInterval(() => {
+    updateQRTimer();
+  }, 1000);
+}
 
-        if (remaining <= 0) {
-          clearInterval(qrTimerInterval);
-          qrTimerInterval = null;
-          const status = document.getElementById('qrStatus');
-          status.className = 'alert alert-danger mb-3';
-          status.innerHTML = '⚠️ EXPIRED - Click Generate QR again';
-          document.getElementById('qrCodeContainer').style.opacity = '0.3';
-        }
-      }, 1000);
+function updateQRTimer() {
+  // ✅ Calculate remaining time from actual expiry timestamp
+  const remaining = Math.max(0, Math.floor((qrExpiryTimestamp - Date.now()) / 1000));
+  
+  const mins = Math.floor(remaining / 60);
+  const secs = remaining % 60;
+  
+  const timerElement = document.getElementById('qrTimer');
+  if (timerElement) {
+    timerElement.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+  }
+  
+  const statusElement = document.getElementById('qrStatus');
+  const qrContainer = document.getElementById('qrCodeContainer');
+  
+  if (remaining <= 0) {
+    // ✅ Actually expired
+    clearInterval(qrTimerInterval);
+    qrTimerInterval = null;
+    qrExpiryTimestamp = null;
+    
+    if (statusElement) {
+      statusElement.className = 'alert alert-danger mb-3';
+      statusElement.innerHTML = '⚠️ EXPIRED - Click Generate QR again';
     }
-
-    let dynamicCodeInterval = null;
-
-    function generateDynamicCode() {
-      const array = new Uint32Array(1);
-      window.crypto.getRandomValues(array);
-      return (array[0] % 10000).toString().padStart(4, '0');
+    
+    if (qrContainer) {
+      qrContainer.style.opacity = '0.3';
     }
-
-    function getRemainingSeconds() {
-      const currentTime = Date.now();
-      const remaining = 8 - Math.floor((currentTime % 8000) / 1000);
-      return remaining;
+    
+    // ✅ Stop dynamic code rotation when expired
+    stopDynamicCodeRotation();
+  } else {
+    // ✅ Still valid - ensure proper styling
+    if (statusElement) {
+      statusElement.className = 'alert alert-success mb-3';
     }
-
-    function startDynamicCodeRotation() {
-      if (dynamicCodeInterval) {
-        clearInterval(dynamicCodeInterval);
-      }
-
-      const codeElement = document.getElementById('qrDynamicCode');
-      const countdownElement = document.getElementById('qrCountdown');
-
-      function update() {
-        const now = Date.now();
-
-        // Update code every 8 sec
-        if (codeElement) {
-          const windowIndex = Math.floor(now / 8000);
-          if (!codeElement.dataset.window || codeElement.dataset.window != windowIndex) {
-            codeElement.dataset.window = windowIndex;
-            //>>>>>>>>>>> CHANGE 1: Store code and save to Firebase
-            const newCode = generateDynamicCode();
-            codeElement.textContent = newCode;
-
-            //>>>>>>>>>>> Save to Firebase
-            if (useCloud && firebaseDB) {
-              firebaseDB.ref('mainSystem/dynamicCode').set({
-                code: newCode,
-                timestamp: Date.now(),
-                expiresAt: Date.now() + 8000
-              });
-            }
-          }
-        }
-
-        // Update countdown every second
-        if (countdownElement) {
-          const remaining = 8 - Math.floor((now % 8000) / 1000);
-          countdownElement.textContent = remaining + "s";
-        }
-      }
-
-      update();
-      dynamicCodeInterval = setInterval(update, 1000);
+    
+    if (qrContainer) {
+      qrContainer.style.opacity = '1';
     }
+  }
+}
 
+function stopQRCountdown() {
+  if (qrTimerInterval) {
+    clearInterval(qrTimerInterval);
+    qrTimerInterval = null;
+  }
+  qrExpiryTimestamp = null;
+}
+//end>>>>>>>>>>
 
-    function stopDynamicCodeRotation() {
-      if (dynamicCodeInterval) {
-        clearInterval(dynamicCodeInterval);
-        dynamicCodeInterval = null;
-      }
-      if (useCloud && firebaseDB) {
-        firebaseDB.ref('mainSystem/dynamicCode').remove()
-          .then(() => {
-            console.log('✅ Dynamic code cleared from Firebase');
-          })
-          .catch((error) => {
-            console.error('❌ Failed to clear dynamic code:', error);
+let dynamicCodeInterval = null;
+
+function generateDynamicCode() {
+  const array = new Uint32Array(1);
+  window.crypto.getRandomValues(array);
+  return (array[0] % 10000).toString().padStart(4, '0');
+}
+
+function getRemainingSeconds() {
+  const currentTime = Date.now();
+  const remaining = 8 - Math.floor((currentTime % 8000) / 1000);
+  return remaining;
+}
+
+function startDynamicCodeRotation() {
+  if (dynamicCodeInterval) {
+    clearInterval(dynamicCodeInterval);
+  }
+
+  const codeElement = document.getElementById('qrDynamicCode');
+  const countdownElement = document.getElementById('qrCountdown');
+
+  function update() {
+    const now = Date.now();
+
+    // Update code every 8 sec
+    if (codeElement) {
+      const windowIndex = Math.floor(now / 8000);
+      if (!codeElement.dataset.window || codeElement.dataset.window != windowIndex) {
+        codeElement.dataset.window = windowIndex;
+        const newCode = generateDynamicCode();
+        codeElement.textContent = newCode;
+
+        // Save to Firebase
+        if (useCloud && firebaseDB) {
+          firebaseDB.ref('mainSystem/dynamicCode').set({
+            code: newCode,
+            timestamp: Date.now(),
+            expiresAt: Date.now() + 8000
           });
+        }
       }
     }
+
+    // Update countdown every second
+    if (countdownElement) {
+      const remaining = 8 - Math.floor((now % 8000) / 1000);
+      countdownElement.textContent = remaining + "s";
+    }
+  }
+
+  update();
+  dynamicCodeInterval = setInterval(update, 1000);
+}
+
+function stopDynamicCodeRotation() {
+  if (dynamicCodeInterval) {
+    clearInterval(dynamicCodeInterval);
+    dynamicCodeInterval = null;
+  }
+  if (useCloud && firebaseDB) {
+    firebaseDB.ref('mainSystem/dynamicCode').remove()
+      .then(() => {
+        console.log('✅ Dynamic code cleared from Firebase');
+      })
+      .catch((error) => {
+        console.error('❌ Failed to clear dynamic code:', error);
+      });
+  }
+}
 
     // Listen for refresh requests from face recognition system
     setupRefreshListener();
