@@ -8,7 +8,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
-  
+
   <!-- AWS Cognito SDK -->
   <script
     src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.3.7/dist/amazon-cognito-identity.min.js"></script>
@@ -40,16 +40,17 @@
     }
 
     .header {
-      background: linear-gradient(135deg, #E8C4D8 0%, #DDB8CC 100%);
-      padding: 30px;
-      text-align: center;
-      color: #6A4A5A;
-    }
+  background: linear-gradient(135deg, #E8C4D8 0%, #DDB8CC 100%);
+  padding: 25px 30px;
+  text-align: center;
+  color: #6A4A5A;
+}
 
-    .header h1 {
-      font-weight: 700;
-      margin: 0;
-    }
+.header h1 {
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
 
     .content-area {
       padding: 30px;
@@ -303,7 +304,8 @@
     /* Default layout (Admin/Teacher) - 60/40 split */
     .child-container {
       min-width: 280px;
-      flex: 1 1 calc(40% - 7.5px); /* Default to smaller size */
+      flex: 1 1 calc(40% - 7.5px);
+      /* Default to smaller size */
     }
 
     /* First container (video) - 60% width */
@@ -545,169 +547,171 @@
       font-weight: 600;
       font-size: 0.9rem;
     }
- /* ===============================
+
+    /* ===============================
    CONFIG DISPLAY CONTAINER
    =============================== */
 
-.config-display-container {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  padding: 15px 30px;
-  border-bottom: 2px solid #dee2e6;
-}
+    .config-display-container {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      padding: 15px 30px;
+      border-bottom: 2px solid #dee2e6;
+    }
 
-/* ===============================
+    /* ===============================
    CONFIG CARD (FULL CLICKABLE)
    =============================== */
 
-.config-card {
-  max-width: 1200px;
-  margin: 0 auto;
-  background: #ffffff;
-  padding: 20px;
-  border-radius: 15px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
+    .config-card {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
 
-/* Hover Effect */
-.config-card:hover {
-  box-shadow: 0 6px 25px rgba(102, 126, 234, 0.25);
-  transform: translateY(-2px);
-  border: 2px solid #667eea;
-}
+    /* Hover Effect */
+    .config-card:hover {
+      box-shadow: 0 6px 25px rgba(102, 126, 234, 0.25);
+      transform: translateY(-2px);
+      border: 2px solid #667eea;
+    }
 
-/* Click Ripple Effect */
-@keyframes ripple {
-  0% {
-    box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4);
-  }
-  100% {
-    box-shadow: 0 0 0 20px rgba(102, 126, 234, 0);
-  }
-}
+    /* Click Ripple Effect */
+    @keyframes ripple {
+      0% {
+        box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4);
+      }
 
-.config-card:active {
-  animation: ripple 0.5s ease-out;
-}
+      100% {
+        box-shadow: 0 0 0 20px rgba(102, 126, 234, 0);
+      }
+    }
 
-/* ===============================
+    .config-card:active {
+      animation: ripple 0.5s ease-out;
+    }
+
+    /* ===============================
    TITLE
    =============================== */
 
-.config-title {
-  color: #6A4A5A;
-  font-weight: 600;
-  margin-bottom: 15px;
-  font-size: 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+    .config-title {
+      color: #6A4A5A;
+      font-weight: 600;
+      margin-bottom: 15px;
+      font-size: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-/* ===============================
+    /* ===============================
    GRID LAYOUT
    =============================== */
 
-.config-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 12px;
-}
+    .config-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
 
-/* ===============================
+    /* ===============================
    GRID ITEMS
    =============================== */
 
-.config-item {
-  display: flex;
-  align-items: center;
-  padding: 8px 12px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  transition: 0.2s ease;
-}
+    .config-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      transition: 0.2s ease;
+    }
 
-.config-item:hover {
-  background: #eef1ff;
-}
+    .config-item:hover {
+      background: #eef1ff;
+    }
 
-.config-item i {
-  color: #667eea;
-  font-size: 1rem;
-  margin-right: 6px;
-}
+    .config-item i {
+      color: #667eea;
+      font-size: 1rem;
+      margin-right: 6px;
+    }
 
-.config-label {
-  color: #6c757d;
-  font-weight: 500;
-  margin-right: 5px;
-}
+    .config-label {
+      color: #6c757d;
+      font-weight: 500;
+      margin-right: 5px;
+    }
 
-.config-value {
-  color: #212529;
-  font-weight: 600;
-  margin-left: auto;
-}
+    .config-value {
+      color: #212529;
+      font-weight: 600;
+      margin-left: auto;
+    }
 
-.config-value.not-set {
-  color: #dc3545;
-  font-style: italic;
-}
+    .config-value.not-set {
+      color: #dc3545;
+      font-style: italic;
+    }
 
-/* ===============================
+    /* ===============================
    TABLET RESPONSIVE
    =============================== */
 
-@media (max-width: 992px) {
-  .config-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
+    @media (max-width: 992px) {
+      .config-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
 
-/* ===============================
+    /* ===============================
    MOBILE RESPONSIVE (COMPACT)
    =============================== */
 
-@media (max-width: 576px) {
+    @media (max-width: 576px) {
 
-  .config-display-container {
-    padding: 10px 15px;
-  }
+      .config-display-container {
+        padding: 10px 15px;
+      }
 
-  .config-card {
-    padding: 14px;
-    border-radius: 12px;
-  }
+      .config-card {
+        padding: 14px;
+        border-radius: 12px;
+      }
 
-  .config-title {
-    font-size: 0.9rem;
-  }
+      .config-title {
+        font-size: 0.9rem;
+      }
 
-  .config-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-  }
+      .config-grid {
+        grid-template-columns: repeat(1, 1fr);
+        gap: 8px;
+      }
 
-  .config-item {
-    font-size: 0.75rem;
-    padding: 6px 8px;
-  }
+      .config-item {
+        font-size: 0.75rem;
+        padding: 6px 8px;
+      }
 
-  .config-item i {
-    font-size: 0.9rem;
-  }
-  /* ADD TO YOUR <style> SECTION */
-.section-card {
-  background: #FFFEF9;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
-  padding: 20px;
-  margin-bottom: 20px;
-}
-}
+      .config-item i {
+        font-size: 0.9rem;
+      }
 
+      /* ADD TO YOUR <style> SECTION */
+      .section-card {
+        background: #FFFEF9;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+    }
   </style>
 </head>
 
@@ -731,12 +735,19 @@
   <div class="main-card">
     <!-- Header -->
     <div class="header">
-      <h1><i class="bi bi-camera-video me-2"></i>Face Recognition Attendance</h1>
-      <p class="mb-0 mt-2">Automated attendance marking using facial recognition</p>
+  <div style="max-width: 600px; margin: 0 auto;">
+    <div style="display: inline-flex; align-items: center; gap: 12px; background: rgba(255, 255, 255, 0.2); padding: 8px 20px; border-radius: 50px; margin-bottom: 10px;">
+      <i class="bi bi-camera-video-fill" style="font-size: 1.5rem;"></i>
+      <h1 style="margin: 0; font-size: 1.5rem;">Face Recognition</h1>
     </div>
+    <p class="mb-0" style="font-size: 0.85rem; opacity: 0.9;">
+      Automated attendance tracking
+    </p>
+  </div>
+</div>
 
     <div class="main-card">
-  <div class="config-display-container">
+      <div class="config-display-container">
   <div class="config-card" id="configCard">
     <h6 class="config-title">
       <span>
@@ -747,465 +758,490 @@
       </span>
     </h6>
     <div class="config-grid">
+      <!-- Field 1: Department - Academic year - Course - Div. -->
       <div class="config-item">
         <i class="bi bi-building me-1"></i>
-        <span class="config-label">Department:</span>
-        <span class="config-value" id="displayDepartment">Not Set</span>
+        <span class="config-value" id="displayClassInfo">Not Set</span>
       </div>
-      <div class="config-item">
-        <i class="bi bi-journal-code me-1"></i>
-        <span class="config-label">Course:</span>
-        <span class="config-value" id="displayCourse">Not Set</span>
-      </div>
+      
+      <!-- Field 2: Date: day - month - year -->
       <div class="config-item">
         <i class="bi bi-calendar-event me-1"></i>
-        <span class="config-label">Academic Year:</span>
-        <span class="config-value" id="displayAcademicYear">Not Set</span>
+        <span class="config-label">Date:</span>
+        <span class="config-value" id="displayDate">Not Set</span>
       </div>
-      <div class="config-item">
-        <i class="bi bi-people-fill me-1"></i>
-        <span class="config-label">Division:</span>
-        <span class="config-value" id="displayDivision">Not Set</span>
-      </div>
+      
+      <!-- Field 3: Subject -->
       <div class="config-item">
         <i class="bi bi-book me-1"></i>
         <span class="config-label">Subject:</span>
         <span class="config-value" id="displaySubject">Not Set</span>
       </div>
-      <div class="config-item">
-        <i class="bi bi-calendar3 me-1"></i>
-        <span class="config-label">Month:</span>
-        <span class="config-value" id="displayMonth">Not Set</span>
-      </div>
-      <div class="config-item">
-        <i class="bi bi-calendar-check me-1"></i>
-        <span class="config-label">Year:</span>
-        <span class="config-value" id="displayYear">Not Set</span>
-      </div>
-      <div class="config-item">
-        <i class="bi bi-calendar-day me-1"></i>
-        <span class="config-label">Day:</span>
-        <span class="config-value" id="displayDay">Not Set</span>
-      </div>
     </div>
   </div>
 </div>
 
-    <div class="content-area">
-      <!-- Security Code Verification Section -->
-  <div id="securityCodeSection" class="section-card mb-4">
-    <div class="card">
-      <div class="card-header bg-warning text-dark">
-        <h6 class="mb-0">
-          <i class="bi bi-shield-lock me-2"></i>Security Verification Required
-        </h6>
-      </div>
-      <div class="card-body">
-        <p class="text-muted mb-3">
-          Enter the 4-digit security code displayed on the teacher's QR screen to unlock the camera.
-        </p>
-        <div class="row">
-          <div class="col-md-6">
-            <div class="input-group">
-              <input type="text" 
-                     id="securityCodeInput" 
-                     class="form-control form-control-lg text-center" 
-                     placeholder="Enter 4-digit code" 
-                     maxlength="4"
-                     pattern="[0-9]{4}"
-                     style="font-size: 1.5rem; letter-spacing: 0.5rem;">
-              <button id="verifyCodeBtn" class="btn btn-primary btn-lg">
-                <i class="bi bi-check-circle me-2"></i>Verify Code
-              </button>
+      <div class="content-area">
+       <div id="securityCodeSection" class="section-card mb-4" style="display: none;">
+  <div class="card">
+    <div class="card-header bg-warning text-dark">
+      <h6 class="mb-0">
+        <i class="bi bi-shield-lock me-2"></i>Security Verification Required
+      </h6>
+    </div>
+    <div class="card-body">
+      <p class="text-muted mb-3">
+        Enter the 4-digit security code displayed on the teacher's screen to unlock the camera.
+      </p>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="position-relative">
+            <input type="text" 
+                   id="securityCodeInput" 
+                   class="form-control form-control-lg text-center" 
+                   placeholder="Enter 4-digit code" 
+                   maxlength="4"
+                   pattern="[0-9]{4}"
+                   autocomplete="off"
+                   style="font-size: 1.5rem; letter-spacing: 0.5rem; padding-right: 50px;">
+            
+            <!-- Loading spinner -->
+            <div id="codeLoadingSpinner" style="display: none; position: absolute; right: 15px; top: 50%; transform: translateY(-50%);">
+              <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">Verifying...</span>
+              </div>
             </div>
-            <div id="codeValidationMsg" class="mt-2" style="display: none;"></div>
+            
+            <!-- Success checkmark -->
+            <div id="codeSuccessIcon" style="display: none; position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #28a745; font-size: 1.5rem;">
+              <i class="bi bi-check-circle-fill"></i>
+            </div>
+            
+            <!-- Hidden button (functional but invisible) -->
+            <button id="verifyCodeBtn" style="display: none;">Verify</button>
           </div>
+          <small class="text-muted d-block mt-2">
+            <i class="bi bi-info-circle me-1"></i>Code auto-verifies when you enter 4 digits
+          </small>
+          <div id="codeValidationMsg" class="mt-2" style="display: none;"></div>
         </div>
       </div>
     </div>
   </div>
-      <div class="parent-container">
-        <!-- Container 1: Video Feed (60% - Always visible) -->
-        <div class="child-container">
-          <div class="row">
-            <div class="mode-card col-11">
-              <div class="row">
-                <!-- Video Feed -->
-                <div class="video-container">
-                  <video id="video" autoplay muted playsinline></video>
-                  <canvas id="canvas"></canvas>
-                  <div id="statusBadge" class="status-badge bg-secondary">
-                    <i class="bi bi-camera-video-off me-2"></i>Camera Off
-                  </div>
-                </div>
-
-                <!-- Controls -->
-                <div class="d-grid gap-2">
-                  <button id="startCameraBtn" class="btn btn-primary btn-face">
-                    <i class="bi bi-camera-video me-2"></i>Start Camera
-                  </button>
-                  <button id="stopCameraBtn" class="btn btn-danger btn-face" style="display: none;">
-                    <i class="bi bi-camera-video-off me-2"></i>Stop Camera
-                  </button>
-                </div>
-
-                <!-- Quick Stats -->
-                <div class="row mt-4">
-                  <div class="col-4">
-                    <div class="text-center p-3 bg-light rounded">
-                      <h3 class="text-primary mb-0" id="statRegistered">0</h3>
-                      <small class="text-muted">Registered</small>
+</div>
+        <div class="parent-container">
+          <!-- Container 1: Video Feed (60% - Always visible) -->
+          <div class="child-container">
+            <div class="row">
+              <div class="mode-card col-11">
+                <div class="row">
+                  <!-- Video Feed -->
+                  <div class="video-container">
+                    <video id="video" autoplay muted playsinline></video>
+                    <canvas id="canvas"></canvas>
+                    <div id="statusBadge" class="status-badge bg-secondary">
+                      <i class="bi bi-camera-video-off me-2"></i>Camera Off
                     </div>
                   </div>
-                  <div class="col-4">
-                    <div class="text-center p-3 bg-light rounded">
-                      <h3 class="text-success mb-0" id="statRecognized">0</h3>
-                      <small class="text-muted">Recognized</small>
-                    </div>
-                  </div>
-                  <div class="col-4">
-                    <div class="text-center p-3 bg-light rounded">
-                      <h3 class="text-warning mb-0" id="statUnknown">0</h3>
-                      <small class="text-muted">Unknown</small>
-                    </div>
-                  </div>
-                </div>
-                <div class="d-flex justify-content-center">
-                  <button class="btn btn-primary w-100 mb-2" onclick="window.location.href='main-system.html'">
-                    Main Dashboard
-                  </button>
-                  <br><br>
-                  
-                </div>
 
-                <div class="button-grid">
-                  <button id="testConnectionBtn" class="btn btn-outline-info w-100 mb-2 admin-only-inline">
-                    <i class="bi bi-plug me-2"></i>Test Main System Connection
-                  </button>
-                  <button id="refreshStatusBtn" class="btn btn-outline-secondary w-100 mb-2 admin-only-inline">
-                    <i class="bi bi-arrow-clockwise me-2"></i>Refresh Status
-                  </button>
-                  <button id="syncToMainBtn" class="btn btn-success w-100 mb-2 teacher-only-inline">
-                    <i class="bi bi-arrow-right-circle me-2"></i>Sync to Main System
-                  </button>
-                  <button id="clearAllFacesBtn" class="btn btn-outline-danger w-100 admin-only-inline">
-                    <i class="bi bi-trash me-2"></i>Clear All Faces
-                  </button>
-                  <button id="forceReadBtn" class="btn btn-outline-info w-100 mb-2 teacher-only-inline">
-                    <i class="bi bi-arrow-clockwise me-2"></i>Force Read Firebase Now
-                  </button>
-                  
-                </div>
-                <div><button id="scanQRBtn" class="btn btn-outline-primary w-100 mb-2">
-                    <i class="bi bi-qr-code-scanning me-2"></i>Scan QR Code
-                  </button></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Container 2: Mode Selection (40% - Teacher/Admin only) -->
-        <div class="child-container teacher-only">
-          <div class="mode-card">
-            <!-- Mode Selection -->
-            <h5 class="mb-3"><i class="bi bi-gear me-2"></i>Operation Mode</h5>
-            <div class="mode-card" id="registerMode">
-              <div class="d-flex align-items-center">
-                <i class="bi bi-person-plus-fill fs-1 text-primary me-3"></i>
-                <div>
-                  <h5 class="mb-1">Register Face</h5>
-                  <small class="text-muted">Capture and register student faces</small>
-                </div>
-              </div>
-              <div id="registerControls" style="display: none;" class="mt-3">
-                <div class="input-group mb-2">
-                  <input type="text" id="studentIdInput" class="form-control" placeholder="Student ID">
-                </div>
-                <div class="input-group mb-2">
-                  <input type="text" id="studentNameInput" class="form-control" placeholder="Student Name">
-                </div>
-                <button id="captureBtn" class="btn btn-success w-100" disabled>
-                  <i class="bi bi-camera me-2"></i>Capture Face
-                </button>
-              </div>
-            </div>
-
-            <div class="mode-card" id="recognitionMode">
-              <div class="d-flex align-items-center">
-                <i class="bi bi-person-check-fill fs-1 text-success me-3"></i>
-                <div>
-                  <h5 class="mb-1">Mark Attendance</h5>
-                  <small class="text-muted">Recognize faces and mark attendance</small>
-                </div>
-              </div>
-              <div id="recognitionControls" style="display: none;" class="mt-3">
-                <div class="alert alert-info">
-                  <i class="bi bi-info-circle me-2"></i>
-                  Face detection running. Stand in front of camera to mark attendance.
-                </div>
-                <button id="clearTodayBtn" class="btn btn-outline-warning btn-sm w-100">
-                  <i class="bi bi-arrow-clockwise me-2"></i>Clear Today's Attendance
-                </button>
-              </div>
-            </div>
-            <div>
-              <div class="mode-card" id="bulkImportMode">
-                <div class="d-flex align-items-center">
-                  <i class="bi bi-folder-plus fs-1 text-info me-3"></i>
-                  <div>
-                    <h5 class="mb-1">Bulk Import</h5>
-                    <small class="text-muted">Import multiple faces from folder</small>
-                  </div>
-                </div>
-                <div id="bulkImportControls" style="display: none;" class="mt-3">
-                  <div class="alert alert-warning">
-                    <i class="bi bi-exclamation-triangle me-2"></i>
-                    <strong>Folder Structure Required:</strong><br>
-                    Dataset/StudentID/image1.jpg<br>
-                    Dataset/StudentID/image2.jpg
-                  </div>
-                  <input type="file" id="folderInput" webkitdirectory directory multiple class="form-control mb-3">
-                  <div id="importPreview" style="display: none;" class="mb-3">
-                    <div id="previewContent"></div>
-                  </div>
+                  <!-- Controls -->
                   <div class="d-grid gap-2">
-                    <button id="startImportBtn" class="btn btn-primary" disabled>
-                      <i class="bi bi-upload me-2"></i>Start Import
+                    <button id="startCameraBtn" class="btn btn-primary btn-face" disabled>
+                      <i class="bi bi-camera-video me-2"></i>Start Camera
                     </button>
-                    <button id="cancelImportBtn" class="btn btn-outline-secondary">
-                      <i class="bi bi-x-circle me-2"></i>Cancel
+                    <button id="stopCameraBtn" class="btn btn-danger btn-face" style="display: none;">
+                      <i class="bi bi-camera-video-off me-2"></i>Stop Camera
                     </button>
+                  </div>
+
+                  <!-- Quick Stats -->
+                  <div class="row mt-4">
+                    <div class="col-4">
+                      <div class="text-center p-3 bg-light rounded">
+                        <h3 class="text-primary mb-0" id="statRegistered">0</h3>
+                        <small class="text-muted">Registered</small>
+                      </div>
+                    </div>
+                    <div class="col-4">
+                      <div class="text-center p-3 bg-light rounded">
+                        <h3 class="text-success mb-0" id="statRecognized">0</h3>
+                        <small class="text-muted">Recognized</small>
+                      </div>
+                    </div>
+                    <div class="col-4">
+                      <div class="text-center p-3 bg-light rounded">
+                        <h3 class="text-warning mb-0" id="statUnknown">0</h3>
+                        <small class="text-muted">Unknown</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="d-flex justify-content-center">
+                    <button class="btn btn-primary w-100 mb-2" onclick="window.location.href='main-system.html'">
+                      Main Dashboard
+                    </button>
+                    <br><br>
+
+                  </div>
+
+                  <div class="button-grid">
+                    <button id="testConnectionBtn" class="btn btn-outline-info w-100 mb-2 admin-only-inline">
+                      <i class="bi bi-plug me-2"></i>Test Main System Connection
+                    </button>
+                    <button id="refreshStatusBtn" class="btn btn-outline-secondary w-100 mb-2 admin-only-inline">
+                      <i class="bi bi-arrow-clockwise me-2"></i>Refresh Status
+                    </button>
+                    <button id="syncToMainBtn" class="btn btn-success w-100 mb-2 teacher-only-inline">
+                      <i class="bi bi-arrow-right-circle me-2"></i>Sync to Main System
+                    </button>
+                    <button id="clearAllFacesBtn" class="btn btn-outline-danger w-100 admin-only-inline">
+                      <i class="bi bi-trash me-2"></i>Clear All Faces
+                    </button>
+                    <button id="forceReadBtn" class="btn btn-outline-info w-100 mb-2 teacher-only-inline">
+                      <i class="bi bi-arrow-clockwise me-2"></i>Force Read Firebase Now
+                    </button>
+
+                  </div>
+                  <div><button id="scanQRBtn" class="btn btn-outline-primary w-100 mb-2">
+                      <i class="bi bi-qr-code-scanning me-2"></i>Scan QR Code
+                    </button></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Container 2: Mode Selection (40% - Teacher/Admin only) -->
+          <div class="child-container teacher-only">
+            <div class="mode-card">
+              <!-- Mode Selection -->
+              <h5 class="mb-3"><i class="bi bi-gear me-2"></i>Operation Mode</h5>
+              <div class="mode-card" id="registerMode">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-person-plus-fill fs-1 text-primary me-3"></i>
+                  <div>
+                    <h5 class="mb-1">Register Face</h5>
+                    <small class="text-muted">Capture and register student faces</small>
+                  </div>
+                </div>
+                <div id="registerControls" style="display: none;" class="mt-3">
+                  <div class="input-group mb-2">
+                    <input type="text" id="studentIdInput" class="form-control" placeholder="Student ID">
+                  </div>
+                  <div class="input-group mb-2">
+                    <input type="text" id="studentNameInput" class="form-control" placeholder="Student Name">
+                  </div>
+                  <button id="captureBtn" class="btn btn-success w-100" disabled>
+                    <i class="bi bi-camera me-2"></i>Capture Face
+                  </button>
+                </div>
+              </div>
+
+              <div class="mode-card" id="recognitionMode">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-person-check-fill fs-1 text-success me-3"></i>
+                  <div>
+                    <h5 class="mb-1">Mark Attendance</h5>
+                    <small class="text-muted">Recognize faces and mark attendance</small>
+                  </div>
+                </div>
+                <div id="recognitionControls" style="display: none;" class="mt-3">
+                  <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Face detection running. Stand in front of camera to mark attendance.
+                  </div>
+                  <button id="clearTodayBtn" class="btn btn-outline-warning btn-sm w-100">
+                    <i class="bi bi-arrow-clockwise me-2"></i>Clear Today's Attendance
+                  </button>
+                </div>
+              </div>
+              <div>
+                <div class="mode-card" id="bulkImportMode">
+                  <div class="d-flex align-items-center">
+                    <i class="bi bi-folder-plus fs-1 text-info me-3"></i>
+                    <div>
+                      <h5 class="mb-1">Bulk Import</h5>
+                      <small class="text-muted">Import multiple faces from folder</small>
+                    </div>
+                  </div>
+                  <div id="bulkImportControls" style="display: none;" class="mt-3">
+                    <div class="alert alert-warning">
+                      <i class="bi bi-exclamation-triangle me-2"></i>
+                      <strong>Folder Structure Required:</strong><br>
+                      Dataset/StudentID/image1.jpg<br>
+                      Dataset/StudentID/image2.jpg
+                    </div>
+                    <input type="file" id="folderInput" webkitdirectory directory multiple class="form-control mb-3">
+                    <div id="importPreview" style="display: none;" class="mb-3">
+                      <div id="previewContent"></div>
+                    </div>
+                    <div class="d-grid gap-2">
+                      <button id="startImportBtn" class="btn btn-primary" disabled>
+                        <i class="bi bi-upload me-2"></i>Start Import
+                      </button>
+                      <button id="cancelImportBtn" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle me-2"></i>Cancel
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Container 3: Today's Attendance (40% - Always visible) -->
-        <div class="child-container">
-          <div class="mode-card">
-            <h5 class="mb-3 mt-4">
-              <i class="bi bi-grid-3x3 me-2"></i>Today's Attendance
-              <span id="attendanceCount" class="badge bg-primary ms-2">0/0</span>
-            </h5>
+          <!-- Container 3: Today's Attendance (40% - Always visible) -->
+          <div class="child-container">
+            <div class="mode-card">
+              <h5 class="mb-3 mt-4">
+                <i class="bi bi-grid-3x3 me-2"></i>Today's Attendance
+                <span id="attendanceCount" class="badge bg-primary ms-2">0/0</span>
+              </h5>
 
-            <!-- Present Students Blocks -->
-            <div class="mb-4">
-              <h6 class="text-success mb-2">
-                <i class="bi bi-check-circle me-1"></i>PRESENT
-                <span id="presentCount" class="badge bg-success ms-1">0</span>
-              </h6>
-              <div id="presentBlocks" class="attendance-blocks">
-                <div class="text-center text-muted py-3">
-                  <small>No students marked present</small>
+              <!-- Present Students Blocks -->
+              <div class="mb-4">
+                <h6 class="text-success mb-2">
+                  <i class="bi bi-check-circle me-1"></i>PRESENT
+                  <span id="presentCount" class="badge bg-success ms-1">0</span>
+                </h6>
+                <div id="presentBlocks" class="attendance-blocks">
+                  <div class="text-center text-muted py-3">
+                    <small>No students marked present</small>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Absent Students Blocks -->
+              <div>
+                <h6 class="text-danger mb-2">
+                  <i class="bi bi-x-circle me-1"></i>ABSENT
+                  <span id="absentCount" class="badge bg-danger ms-1">0</span>
+                </h6>
+                <div id="absentBlocks" class="attendance-blocks">
+                  <div class="text-center text-muted py-3">
+                    <small>All students present</small>
+                  </div>
                 </div>
               </div>
             </div>
+          </div>
 
-            <!-- Absent Students Blocks -->
-            <div>
-              <h6 class="text-danger mb-2">
-                <i class="bi bi-x-circle me-1"></i>ABSENT
-                <span id="absentCount" class="badge bg-danger ms-1">0</span>
-              </h6>
-              <div id="absentBlocks" class="attendance-blocks">
-                <div class="text-center text-muted py-3">
-                  <small>All students present</small>
+          <!-- Container 4: Registered Students (60% - Teacher/Admin only) -->
+          <div class="child-container teacher-only">
+            <div class="mode-card">
+              <!-- Registered Students List -->
+              <h5 class="mb-3 mt-4"><i class="bi bi-people me-2"></i>Registered Students</h5>
+              <div class="student-list" id="studentList">
+                <div class="text-center text-muted py-5">
+                  <i class="bi bi-person-x fs-1"></i>
+                  <p class="mt-2">No students registered yet</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Container 4: Registered Students (60% - Teacher/Admin only) -->
-        <div class="child-container teacher-only">
-          <div class="mode-card">
-            <!-- Registered Students List -->
-            <h5 class="mb-3 mt-4"><i class="bi bi-people me-2"></i>Registered Students</h5>
-            <div class="student-list" id="studentList">
-              <div class="text-center text-muted py-5">
-                <i class="bi bi-person-x fs-1"></i>
-                <p class="mt-2">No students registered yet</p>
-              </div>
+        <!-- Toast Notification -->
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+          <div id="toastNotification" class="toast align-items-center border-0" role="alert">
+            <div class="d-flex">
+              <div class="toast-body"></div>
+              <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Toast Notification -->
-      <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-        <div id="toastNotification" class="toast align-items-center border-0" role="alert">
-          <div class="d-flex">
-            <div class="toast-body"></div>
-            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
+        <!-- Import Progress Modal -->
+        <div id="importProgressModal"
+          style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center;">
+          <div style="background: white; padding: 40px; border-radius: 20px; max-width: 500px; width: 90%;">
+            <h4 class="text-center mb-4">Importing Faces...</h4>
+            <div class="progress mb-3" style="height: 30px;">
+              <div id="importProgressBar" class="progress-bar progress-bar-striped progress-bar-animated"
+                role="progressbar" style="width: 0%"></div>
+            </div>
+            <p id="importProgressText" class="text-center mb-2">Processing...</p>
+            <p id="importProgressDetail" class="text-center text-muted"></p>
           </div>
         </div>
-      </div>
 
-      <!-- Import Progress Modal -->
-      <div id="importProgressModal"
-        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center;">
-        <div style="background: white; padding: 40px; border-radius: 20px; max-width: 500px; width: 90%;">
-          <h4 class="text-center mb-4">Importing Faces...</h4>
-          <div class="progress mb-3" style="height: 30px;">
-            <div id="importProgressBar" class="progress-bar progress-bar-striped progress-bar-animated"
-              role="progressbar" style="width: 0%"></div>
+        <!-- Import Results Modal -->
+        <div id="importResultsModal"
+          style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center;">
+          <div
+            style="background: white; padding: 40px; border-radius: 20px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;">
+            <h4 class="text-center mb-4">Import Results</h4>
+            <div id="importResultsContent"></div>
+            <button id="closeResultsBtn" class="btn btn-primary w-100 mt-3">Close</button>
           </div>
-          <p id="importProgressText" class="text-center mb-2">Processing...</p>
-          <p id="importProgressDetail" class="text-center text-muted"></p>
         </div>
-      </div>
 
-      <!-- Import Results Modal -->
-      <div id="importResultsModal"
-        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center;">
-        <div
-          style="background: white; padding: 40px; border-radius: 20px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;">
-          <h4 class="text-center mb-4">Import Results</h4>
-          <div id="importResultsContent"></div>
-          <button id="closeResultsBtn" class="btn btn-primary w-100 mt-3">Close</button>
-        </div>
-      </div>
+        <!-- Scripts -->
+        <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+        <script src="face-storage.js"></script>
+        <script src="face-recognition.js"></script>
 
-      <!-- Scripts -->
-      <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-      <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-      <script src="face-storage.js"></script>
-      <script src="face-recognition.js"></script>
-        
-      <script>
-        // ==================== ROLE-BASED UI HIDING ====================
-        async function applyRoleBasedUIForFaceRecognition() {
-          try {
-            const role = await getUserRole();
-            console.log('Applying Face Recognition UI for role:', role);
+        <script>
+          // ==================== ROLE-BASED UI HIDING ====================
+          async function applyRoleBasedUIForFaceRecognition() {
+            try {
+              const role = await getUserRole();
+              console.log('Applying Face Recognition UI for role:', role);
 
-            if (role === 'admin') {
-              // Admin sees everything - no changes needed
-              return;
+              if (role === 'admin') {
+                // Admin sees everything - no changes needed
+                return;
+              }
+
+              if (role === 'teacher') {
+                // Hide admin-only elements
+                hideElements('.admin-only');
+                hideElements('.admin-only-inline');
+
+              } else if (role === 'student') {
+                // ✅ FIXED: Add student-role class to body FIRST
+                document.body.classList.add('student-role');
+
+                // Then hide elements (CSS will handle the layout)
+                hideElements('.admin-only');
+                hideElements('.admin-only-inline');
+                hideElements('.teacher-only');
+                hideElements('.teacher-only-inline');
+
+                // Hide delete buttons in student list
+                hideDeleteButtonsForStudents();
+              }
+
+            } catch (error) {
+              console.error('Error applying role-based UI:', error);
             }
-
-            if (role === 'teacher') {
-              // Hide admin-only elements
-              hideElements('.admin-only');
-              hideElements('.admin-only-inline');
-
-            } else if (role === 'student') {
-              // ✅ FIXED: Add student-role class to body FIRST
-              document.body.classList.add('student-role');
-              
-              // Then hide elements (CSS will handle the layout)
-              hideElements('.admin-only');
-              hideElements('.admin-only-inline');
-              hideElements('.teacher-only');
-              hideElements('.teacher-only-inline');
-
-              // Hide delete buttons in student list
-              hideDeleteButtonsForStudents();
-            }
-
-          } catch (error) {
-            console.error('Error applying role-based UI:', error);
           }
-        }
 
-        function hideElements(selector) {
-          document.querySelectorAll(selector).forEach(el => {
-            el.style.display = 'none';
-          });
-        }
+          function hideElements(selector) {
+            document.querySelectorAll(selector).forEach(el => {
+              el.style.display = 'none';
+            });
+          }
 
-        function hideDeleteButtonsForStudents() {
-          // Add CSS to hide delete buttons
-          const style = document.createElement('style');
-          style.id = 'student-role-style';
-          style.textContent = `
+          function hideDeleteButtonsForStudents() {
+            // Add CSS to hide delete buttons
+            const style = document.createElement('style');
+            style.id = 'student-role-style';
+            style.textContent = `
             .student-card .btn-danger { display: none !important; }
           `;
-          document.head.appendChild(style);
+            document.head.appendChild(style);
 
-          // Also observe for dynamically added delete buttons
-          const observer = new MutationObserver(() => {
-            document.querySelectorAll('.student-card .btn-danger').forEach(btn => {
-              btn.style.display = 'none';
+            // Also observe for dynamically added delete buttons
+            const observer = new MutationObserver(() => {
+              document.querySelectorAll('.student-card .btn-danger').forEach(btn => {
+                btn.style.display = 'none';
+              });
             });
+
+            const studentList = document.getElementById('studentList');
+            if (studentList) {
+              observer.observe(studentList, { childList: true, subtree: true });
+            }
+          }
+
+          // Add this function to update the simplified display
+function updateConfigDisplay() {
+  const config = JSON.parse(localStorage.getItem('attendanceConfig') || '{}');
+  
+  // Field 1: Department - Academic year - Course - Div.
+  const classInfo = [
+    config.department,
+    config.academicYear,
+    config.course,
+    config.division
+  ].filter(Boolean).join(' - ') || 'Not Set';
+  
+  document.getElementById('displayClassInfo').textContent = classInfo;
+  document.getElementById('displayClassInfo').classList.toggle('not-set', classInfo === 'Not Set');
+  
+  // Field 2: Date (day - month - year)
+  let dateStr = 'Not Set';
+  if (config.day && config.month && config.year) {
+    const shortYear = config.year.toString().slice(-2);
+    dateStr = `${config.day} - ${config.month} - ${shortYear}`;
+  }
+  
+  document.getElementById('displayDate').textContent = dateStr;
+  document.getElementById('displayDate').classList.toggle('not-set', dateStr === 'Not Set');
+  
+  // Field 3: Subject (keeping original behavior)
+  const subject = config.subject || 'Not Set';
+  document.getElementById('displaySubject').textContent = subject;
+  document.getElementById('displaySubject').classList.toggle('not-set', subject === 'Not Set');
+}
+
+          // ==================== AUTHENTICATION CHECK ====================
+          async function checkAuthAndInitFaceRecognition() {
+            try {
+              // Check if logged in
+              const user = await getCurrentUser();
+
+              if (!user) {
+                // Not logged in - redirect to login
+                window.location.href = 'index.html';
+                return;
+              }
+
+              // Get role
+              const role = await getUserRole();
+              console.log(`Face Recognition - Logged in as: ${user.attributes.email} (${role})`);
+
+              // Apply role-based UI
+              await applyRoleBasedUIForFaceRecognition();
+
+              console.log('Face Recognition UI initialized for role:', role);
+
+            } catch (error) {
+              console.error('Auth check failed:', error);
+              window.location.href = 'index.html';
+            }
+          }
+
+          // Sync button handler
+          document.getElementById('syncToMainBtn').addEventListener('click', async () => {
+            try {
+              const btn = document.getElementById('syncToMainBtn');
+              btn.disabled = true;
+              btn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Syncing...';
+
+              await faceSystem.syncToMainSystem();
+
+              btn.disabled = false;
+              btn.innerHTML = '<i class="bi bi-arrow-right-circle me-2"></i>Force Sync All Students';
+
+            } catch (error) {
+              faceSystem.showToast(`❌ ${error.message}`, 'danger');
+
+              const btn = document.getElementById('syncToMainBtn');
+              btn.disabled = false;
+              btn.innerHTML = '<i class="bi bi-arrow-right-circle me-2"></i>Force Sync All Students';
+            }
           });
 
-          const studentList = document.getElementById('studentList');
-          if (studentList) {
-            observer.observe(studentList, { childList: true, subtree: true });
-          }
-        }
+          // Call on page load (after models are loaded)
+          window.addEventListener('DOMContentLoaded', () => {
+            // Wait a bit for face-api models to start loading
+            setTimeout(checkAuthAndInitFaceRecognition, 500);
+          });
 
-        // ==================== AUTHENTICATION CHECK ====================
-        async function checkAuthAndInitFaceRecognition() {
-          try {
-            // Check if logged in
-            const user = await getCurrentUser();
+          // ==================== QR SCANNER ====================
+          let qrVideo = null;
+          let qrStream = null;
+          let qrAnimationFrame = null;
+          let qrCanvas = null;
+          let qrCtx = null;
 
-            if (!user) {
-              // Not logged in - redirect to login
-              window.location.href = 'index.html';
-              return;
-            }
-
-            // Get role
-            const role = await getUserRole();
-            console.log(`Face Recognition - Logged in as: ${user.attributes.email} (${role})`);
-
-            // Apply role-based UI
-            await applyRoleBasedUIForFaceRecognition();
-
-            console.log('Face Recognition UI initialized for role:', role);
-
-          } catch (error) {
-            console.error('Auth check failed:', error);
-            window.location.href = 'index.html';
-          }
-        }
-
-        // Sync button handler
-        document.getElementById('syncToMainBtn').addEventListener('click', async () => {
-          try {
-            const btn = document.getElementById('syncToMainBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Syncing...';
-
-            await faceSystem.syncToMainSystem();
-
-            btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-arrow-right-circle me-2"></i>Force Sync All Students';
-
-          } catch (error) {
-            faceSystem.showToast(`❌ ${error.message}`, 'danger');
-
-            const btn = document.getElementById('syncToMainBtn');
-            btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-arrow-right-circle me-2"></i>Force Sync All Students';
-          }
-        });
-
-        // Call on page load (after models are loaded)
-        window.addEventListener('DOMContentLoaded', () => {
-          // Wait a bit for face-api models to start loading
-          setTimeout(checkAuthAndInitFaceRecognition, 500);
-        });
-
-        // ==================== QR SCANNER ====================
-        let qrVideo = null;
-        let qrStream = null;
-        let qrAnimationFrame = null;
-        let qrCanvas = null;
-        let qrCtx = null;
-
-        document.getElementById('scanQRBtn').addEventListener('click', async () => {
-          if (!document.getElementById('qrScannerOverlay')) {
-            const overlay = document.createElement('div');
-            overlay.id = 'qrScannerOverlay';
-            overlay.className = 'qr-scanner-overlay';
-            overlay.innerHTML = `
+          document.getElementById('scanQRBtn').addEventListener('click', async () => {
+            if (!document.getElementById('qrScannerOverlay')) {
+              const overlay = document.createElement('div');
+              overlay.id = 'qrScannerOverlay';
+              overlay.className = 'qr-scanner-overlay';
+              overlay.innerHTML = `
               <div class="qr-scanner-box">
                 <h5><i class="bi bi-qr-code-scanning me-2"></i>Scan QR Code</h5>
                 <p class="text-muted" style="font-size: 0.85rem;">Point camera at the QR code generated from the Main Dashboard</p>
@@ -1218,137 +1254,133 @@
                 </button>
               </div>
             `;
-            document.body.appendChild(overlay);
+              document.body.appendChild(overlay);
 
-            document.getElementById('closeQRBtn').addEventListener('click', () => {
-              closeQRScanner();
-            });
-          }
-          openQRScanner();
-        });
+              document.getElementById('closeQRBtn').addEventListener('click', () => {
+                closeQRScanner();
+              });
+            }
+            openQRScanner();
+          });
 
-        async function openQRScanner() {
-          const overlay = document.getElementById('qrScannerOverlay');
-          overlay.classList.add('active');
+          async function openQRScanner() {
+            const overlay = document.getElementById('qrScannerOverlay');
+            overlay.classList.add('active');
 
-          qrVideo = document.getElementById('qrVideo');
-          setQRStatus('Starting camera...');
+            qrVideo = document.getElementById('qrVideo');
+            setQRStatus('Starting camera...');
 
-          qrCanvas = document.createElement('canvas');
-          qrCtx = qrCanvas.getContext('2d', { willReadFrequently: true });
+            qrCanvas = document.createElement('canvas');
+            qrCtx = qrCanvas.getContext('2d', { willReadFrequently: true });
 
-          try {
-            qrStream = await navigator.mediaDevices.getUserMedia({
-              video: { facingMode: 'environment' }
-            });
-            qrVideo.srcObject = qrStream;
-            qrVideo.setAttribute('playsinline', true);
-            await qrVideo.play();
-
-            setQRStatus('Scanning for QR code...');
-            scanLoop();
-          } catch (error) {
             try {
-              qrStream = await navigator.mediaDevices.getUserMedia({ video: true });
+              qrStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'environment' }
+              });
               qrVideo.srcObject = qrStream;
               qrVideo.setAttribute('playsinline', true);
               await qrVideo.play();
 
               setQRStatus('Scanning for QR code...');
               scanLoop();
-            } catch (err) {
-              setQRStatus('❌ Camera access denied. Please allow camera.');
-              console.error('QR camera error:', err);
+            } catch (error) {
+              try {
+                qrStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                qrVideo.srcObject = qrStream;
+                qrVideo.setAttribute('playsinline', true);
+                await qrVideo.play();
+
+                setQRStatus('Scanning for QR code...');
+                scanLoop();
+              } catch (err) {
+                setQRStatus('❌ Camera access denied. Please allow camera.');
+                console.error('QR camera error:', err);
+              }
             }
           }
-        }
 
-        function closeQRScanner() {
-          if (qrStream) {
-            qrStream.getTracks().forEach(track => track.stop());
-            qrStream = null;
+          function closeQRScanner() {
+            if (qrStream) {
+              qrStream.getTracks().forEach(track => track.stop());
+              qrStream = null;
+            }
+
+            if (qrAnimationFrame) {
+              cancelAnimationFrame(qrAnimationFrame);
+              qrAnimationFrame = null;
+            }
+
+            const overlay = document.getElementById('qrScannerOverlay');
+            overlay.classList.remove('active');
+
+            if (qrVideo) {
+              qrVideo.srcObject = null;
+            }
+
+            setQRStatus('Initializing camera...');
           }
 
-          if (qrAnimationFrame) {
-            cancelAnimationFrame(qrAnimationFrame);
-            qrAnimationFrame = null;
-          }
-
-          const overlay = document.getElementById('qrScannerOverlay');
-          overlay.classList.remove('active');
-
-          if (qrVideo) {
-            qrVideo.srcObject = null;
-          }
-
-          setQRStatus('Initializing camera...');
-        }
-
-        async function scanLoop() {
-          if (!qrVideo || qrVideo.readyState < 3) {
-            qrAnimationFrame = requestAnimationFrame(scanLoop);
-            return;
-          }
-
-          qrCanvas.width = qrVideo.videoWidth;
-          qrCanvas.height = qrVideo.videoHeight;
-          qrCtx.drawImage(qrVideo, 0, 0, qrCanvas.width, qrCanvas.height);
-
-          try {
-            const imageData = qrCtx.getImageData(0, 0, qrCanvas.width, qrCanvas.height);
-            const code = jsQR(imageData.data, imageData.width, imageData.height);
-
-            if (code) {
-              setQRStatus('✅ QR Code detected! Processing...');
-
-              if (qrAnimationFrame) {
-                cancelAnimationFrame(qrAnimationFrame);
-                qrAnimationFrame = null;
-              }
-
-              if (window.faceSystem) {
-                await window.faceSystem.handleQRScan(code.data);
-              } else {
-                console.error('❌ Face system not initialized yet');
-                setQRStatus('❌ System not ready. Please refresh and try again.');
-                setTimeout(() => {
-                  closeQRScanner();
-                }, 2000);
-                return;
-              }
-
-              setTimeout(() => {
-                closeQRScanner();
-              }, 1500);
+          async function scanLoop() {
+            if (!qrVideo || qrVideo.readyState < 3) {
+              qrAnimationFrame = requestAnimationFrame(scanLoop);
               return;
             }
-          } catch (e) {
-            console.error('jsQR scan error:', e);
+
+            qrCanvas.width = qrVideo.videoWidth;
+            qrCanvas.height = qrVideo.videoHeight;
+            qrCtx.drawImage(qrVideo, 0, 0, qrCanvas.width, qrCanvas.height);
+
+            try {
+              const imageData = qrCtx.getImageData(0, 0, qrCanvas.width, qrCanvas.height);
+              const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+              if (code) {
+                // Stop scanning immediately
+                if (qrAnimationFrame) {
+                  cancelAnimationFrame(qrAnimationFrame);
+                  qrAnimationFrame = null;
+                }
+
+                // Close scanner first
+                closeQRScanner();
+
+                // Then process the QR code
+                if (window.faceSystem) {
+                  await window.faceSystem.handleQRScan(code.data);
+                } else {
+                  console.error('❌ Face system not initialized yet');
+                  alert('System not ready. Please refresh and try again.');
+                }
+
+                return;
+              }
+            } catch (e) {
+              console.error('jsQR scan error:', e);
+            }
+
+            qrAnimationFrame = requestAnimationFrame(scanLoop);
           }
 
-          qrAnimationFrame = requestAnimationFrame(scanLoop);
-        }
+          function setQRStatus(message) {
+            document.getElementById('qrStatus').textContent = message;
+          }
 
-        function setQRStatus(message) {
-          document.getElementById('qrStatus').textContent = message;
-        }
+          document.addEventListener('DOMContentLoaded', () => {
+            const configCard = document.getElementById('configCard');
 
-        document.addEventListener('DOMContentLoaded', () => {
-  const configCard = document.getElementById('configCard');
-  
-  if (configCard) {
-    configCard.addEventListener('click', () => {
-      console.log('Config card clicked - opening QR scanner');
-      document.getElementById('scanQRBtn').click();
-    });
-    
-    console.log('✅ Config card click handler attached');
-  } else {
-    console.warn('⚠️ Config card not found');
-  }
-});
-      </script>
-        
+            if (configCard) {
+              configCard.addEventListener('click', () => {
+                console.log('Config card clicked - opening QR scanner');
+                document.getElementById('scanQRBtn').click();
+              });
+
+              console.log('✅ Config card click handler attached');
+            } else {
+              console.warn('⚠️ Config card not found');
+            }
+          });
+        </script>
+
 </body>
 
 </html>

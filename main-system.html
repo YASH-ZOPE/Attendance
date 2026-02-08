@@ -1518,14 +1518,32 @@
         // Show user info
         console.log(`Logged in as: ${user.attributes.email} (${role})`);
 
-        // Continue with normal initialization
-        initialize();
-
-      } catch (error) {
-        console.error('Auth check failed:', error);
-        window.location.href = 'index.html';
-      }
+         if (role === 'teacher') {
+      console.log('🔄 Teacher login - Clearing session selections');
+      
+      // Clear from appState
+      appState.selectedDepartment = null;
+      appState.selectedCourse = null;
+      appState.selectedSubject = null;
+      appState.selectedAcademicYear = null;
+      appState.selectedDivision = null;
+      
+      // Clear from storage
+      await saveToStorage('selectedDepartment', null);
+      await saveToStorage('selectedCourse', null);
+      await saveToStorage('selectedSubject', null);
+      await saveToStorage('selectedAcademicYear', null);
+      await saveToStorage('selectedDivision', null);
     }
+    
+    // Continue with normal initialization
+    initialize();
+    
+  } catch (error) {
+    console.error('Auth check failed:', error);
+    window.location.href = 'index.html';
+  }
+}
 
     // ==================== ROLE-BASED UI HIDING ====================
     async function applyRoleBasedUI() {
@@ -3634,12 +3652,42 @@
       });
 
       // Select Department
-      elements.departmentSelect.addEventListener('change', () => {
-        const dept = elements.departmentSelect.value;
-        if (dept) {
-          selectDepartment(dept);
-        }
-      });
+elements.departmentSelect.addEventListener('change', () => {
+  const dept = elements.departmentSelect.value;
+  
+  // ✅ FIX: Handle empty selection
+  if (!dept || dept === '') {
+    // Reset department and all dependent selections
+    appState.selectedDepartment = null;
+    appState.selectedCourse = null;
+    appState.selectedSubject = null;
+    
+    // Disable dependent inputs
+    elements.newCourseInput.disabled = true;
+    elements.addCourseBtn.disabled = true;
+    elements.courseSelect.disabled = true;
+    elements.newSubjectInput.disabled = true;
+    elements.addSubjectBtn.disabled = true;
+    elements.subjectSelect.disabled = true;
+    
+    // Update displays
+    updateDepartmentDisplay();
+    updateCourseDisplay();
+    updateSubjectDisplay();
+    updateFinalSelectionBadges();
+    
+    // Clear dropdowns
+    populateCourseDropdown();
+    populateSubjectDropdown();
+    renderCourseTags();
+    renderSubjectTags();
+    
+    saveAllData();
+    return;
+  }
+  
+  selectDepartment(dept);
+});
 
       // Delete Department
       elements.deleteDepartmentBtn.addEventListener('click', () => {
@@ -3669,12 +3717,55 @@
       });
 
       // Select Course
-      elements.courseSelect.addEventListener('change', () => {
-        const course = elements.courseSelect.value;
-        if (course) {
-          selectCourse(course);
-        }
-      });
+elements.courseSelect.addEventListener('change', () => {
+  const course = elements.courseSelect.value;
+  
+  if (!course || course === '') {
+    appState.selectedCourse = null;
+    appState.selectedSubject = null;
+    
+    elements.newSubjectInput.disabled = true;
+    elements.addSubjectBtn.disabled = true;
+    elements.subjectSelect.disabled = true;
+    
+    updateCourseDisplay();
+    updateSubjectDisplay();
+    updateFinalSelectionBadges();
+    
+    populateSubjectDropdown();
+    renderSubjectTags();
+    
+    saveAllData();
+    return;
+  }
+  
+  selectCourse(course);
+});
+
+// Final Course Select
+elements.finalCourseSelect.addEventListener('change', () => {
+  const course = elements.finalCourseSelect.value;
+  
+  if (!course || course === '') {
+    appState.selectedCourse = null;
+    appState.selectedSubject = null;
+    
+    elements.courseSelect.value = '';
+    elements.finalSubjectSelect.value = '';
+    
+    updateCourseDisplay();
+    updateSubjectDisplay();
+    updateFinalSelectionBadges();
+    
+    populateSubjectDropdown();
+    
+    saveAllData();
+    return;
+  }
+  
+  selectCourse(course);
+  updateFinalSelectionDropdowns();
+});
 
       // Delete Course
       elements.deleteCourseBtn.addEventListener('click', () => {
@@ -3687,13 +3778,34 @@
 
       // ==================== FINAL SELECTION EVENTS ====================
       // Final Department Select
-      elements.finalDepartmentSelect.addEventListener('change', () => {
-        const dept = elements.finalDepartmentSelect.value;
-        if (dept) {
-          selectDepartment(dept);
-          updateFinalSelectionDropdowns();
-        }
-      });
+elements.finalDepartmentSelect.addEventListener('change', () => {
+  const dept = elements.finalDepartmentSelect.value;
+  
+  // ✅ FIX: Handle empty selection
+  if (!dept || dept === '') {
+    appState.selectedDepartment = null;
+    appState.selectedCourse = null;
+    appState.selectedSubject = null;
+    
+    elements.departmentSelect.value = '';
+    elements.finalCourseSelect.value = '';
+    elements.finalSubjectSelect.value = '';
+    
+    updateDepartmentDisplay();
+    updateCourseDisplay();
+    updateSubjectDisplay();
+    updateFinalSelectionBadges();
+    
+    populateCourseDropdown();
+    populateSubjectDropdown();
+    
+    saveAllData();
+    return;
+  }
+  
+  selectDepartment(dept);
+  updateFinalSelectionDropdowns();
+});
 
       // Final Course Select
       elements.finalCourseSelect.addEventListener('change', () => {

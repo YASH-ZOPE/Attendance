@@ -72,7 +72,42 @@ class FaceRecognitionSystem {
   
    console.log(`Logged in as: ${user.attributes.email} (${role})`);
     
-   // ✅ CONTINUE WITH EXISTING INITIALIZATION
+   
+if (role === 'student') {
+      console.log('🔄 Student login - Clearing saved session');
+      localStorage.removeItem('faceRecDivisionConfig');
+      
+      // Lock camera button
+      this.disableCameraButton();
+      
+      // ✅ Reset code verification UI
+      const codeSection = document.getElementById('securityCodeSection');
+      const codeInput = document.getElementById('securityCodeInput');
+      const successIcon = document.getElementById('codeSuccessIcon');
+      const loadingSpinner = document.getElementById('codeLoadingSpinner');
+      const validationMsg = document.getElementById('codeValidationMsg');
+      
+      if (codeSection) codeSection.style.display = 'none';
+      if (codeInput) {
+        codeInput.value = '';
+        codeInput.disabled = false;
+      }
+      if (successIcon) successIcon.style.display = 'none';
+      if (loadingSpinner) loadingSpinner.style.display = 'none';
+      if (validationMsg) validationMsg.style.display = 'none';
+      
+      // Show welcome message
+      this.showToast(
+        '👋 Welcome Student!\n\n' +
+        '📱 Please scan the QR code from your teacher to begin.\n' +
+        '🔒 Camera is locked until QR + code verified.',
+        'info'
+      );
+    } else {
+      // For admin/teacher, enable camera immediately
+      this.enableCameraButton();
+    }
+       // ✅ CONTINUE WITH EXISTING INITIALIZATION
     this.showLoading();
     // ✅ INITIALIZE CLOUD STORAGE WITH FALLBACK
     try {
@@ -93,26 +128,36 @@ class FaceRecognitionSystem {
       this.firebaseSync = new FirebaseLiveSync();
       await this.firebaseSync.init();
       
-      // Setup live listeners
-      // Setup live listeners (only if division config exists)
+      // ✅ FIX 3: Only setup listeners for admin/teacher with saved config
       const savedConfig = localStorage.getItem('faceRecDivisionConfig');
-      if (savedConfig) {
+      if (savedConfig && this.userRole !== 'student') {
         const config = JSON.parse(savedConfig);
-        this.firebaseSync.setupLiveListeners({
-          department: config.department,
-          course: config.course,
-          academicYear: config.academicYear,
-          division: config.division,
-          year: config.year,
-          onSubjectChange: (newSubject, oldSubject) => this.handleFirebaseSubjectChange(newSubject, oldSubject),
-          onMonthChange: (newMonth, oldMonth) => this.handleFirebaseMonthChange(newMonth, oldMonth),
-          onYearChange: (newYear, oldYear) => this.handleFirebaseYearChange(newYear, oldYear),
-          onDayChange: (newDay, oldDay) => this.handleFirebaseDayChange(newDay, oldDay)
-        });
+        
+        // ✅ FIX 5: Check config age (optional - 24 hours expiry)
+        const configAge = Date.now() - config.scannedAt;
+        const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+        
+        if (configAge < maxAge) {
+          this.firebaseSync.setupLiveListeners({
+            department: config.department,
+            course: config.course,
+            academicYear: config.academicYear,
+            division: config.division,
+            year: config.year,
+            onSubjectChange: (newSubject, oldSubject) => this.handleFirebaseSubjectChange(newSubject, oldSubject),
+            onMonthChange: (newMonth, oldMonth) => this.handleFirebaseMonthChange(newMonth, oldMonth),
+            onYearChange: (newYear, oldYear) => this.handleFirebaseYearChange(newYear, oldYear),
+            onDayChange: (newDay, oldDay) => this.handleFirebaseDayChange(newDay, oldDay)
+          });
+          console.log('✅ Firebase listeners attached from saved config');
+        } else {
+          console.log('⚠️ Saved config too old - cleared');
+          localStorage.removeItem('faceRecDivisionConfig');
+        }
       } else {
-        console.log('⚠️ No QR config - listeners will be set after scanning');
+        console.log('⚠️ No saved config or student mode - listeners will be set after QR scan');
       }
-      
+
       console.log('✅ Firebase live sync enabled');
     } catch (error) {
       console.error('⚠️ Firebase live sync failed:', error);
@@ -124,10 +169,16 @@ class FaceRecognitionSystem {
       
       // Connect to main system database
       await this.connectToMainSystem();
-      // ✅ Load saved QR config from localStorage
-      const savedConfig = localStorage.getItem('faceRecDivisionConfig');
-      if (savedConfig) {
-        const config = JSON.parse(savedConfig);
+      // ✅ FIX 2: Only load saved config for admin/teacher
+    const savedConfig = localStorage.getItem('faceRecDivisionConfig');
+    if (savedConfig && this.userRole !== 'student') {
+      const config = JSON.parse(savedConfig);
+      
+      // ✅ FIX 5: Check if config is not too old
+      const configAge = Date.now() - config.scannedAt;
+      const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+      
+      if (configAge < maxAge) {
         this.mainSystemConfig.selectedDepartment = config.department;
         this.mainSystemConfig.selectedCourse = config.course;
         this.mainSystemConfig.selectedAcademicYear = config.academicYear;
@@ -136,10 +187,14 @@ class FaceRecognitionSystem {
         this.mainSystemConfig.selectedMonth = config.month;
         this.mainSystemConfig.selectedYear = config.year;
         this.mainSystemConfig.currentDay = config.day;
-        console.log('✅ Loaded saved QR config:', config);
+        console.log('✅ Loaded saved QR config for admin/teacher:', config);
+      } else {
+        console.log('⚠️ Saved config expired - cleared');
+        localStorage.removeItem('faceRecDivisionConfig');
       }
-      
-      // ✅ CHECK DATE IMMEDIATELY ON STARTUP
+    } else if (this.userRole === 'student') {
+      console.log('⏳ Student mode - Waiting for QR scan');
+    }
       await this.checkForDayChange();
 
       // Load face-api.js models
@@ -181,7 +236,7 @@ class FaceRecognitionSystem {
 async validateQRSession(qrId) {
   if (!this.firebaseSync || !this.firebaseSync.isConnected) {
     console.warn('⚠️ Cannot validate - Firebase offline');
-    return true; // ✅ Allow offline mode
+    return false; // ✅ Allow offline mode
   }
   
   try {
@@ -306,23 +361,53 @@ async handleQRScan(qrDataString) {
     console.log('✅ Live listeners attached for new division');
     
     // ✅ Update UI
-    this.updateConfigDisplay();
-    if (this.userRole === 'student') {
-      // Lock camera button
-      this.disableCameraButton();
-      
-      // Show security code input
-      document.getElementById('securityCodeSection').style.display = 'block';
-      
-      this.showToast(
-        `✅ QR CODE SCANNED!\n\n` +
-        `Now enter the 4-digit security code from the teacher's screen.`,
-        'info'
-      );
-    } else {
-      // Admin/Teacher - no code needed
-      this.enableCameraButton();
-    }
+this.updateConfigDisplay();
+
+// ✅ ALWAYS require code for students
+if (this.userRole === 'student') {
+  // Lock camera button
+  this.disableCameraButton();
+  
+  // ✅ CRITICAL: Clear any previous code entry state
+  const codeInput = document.getElementById('securityCodeInput');
+  const successIcon = document.getElementById('codeSuccessIcon');
+  const loadingSpinner = document.getElementById('codeLoadingSpinner');
+  
+  if (codeInput) {
+    codeInput.value = '';
+    codeInput.disabled = false;
+  }
+  if (successIcon) successIcon.style.display = 'none';
+  if (loadingSpinner) loadingSpinner.style.display = 'none';
+  
+  // ✅ Show security code input section
+  const codeSection = document.getElementById('securityCodeSection');
+  codeSection.style.display = 'block';
+  
+  // ✅ Auto-focus on code input
+  setTimeout(() => {
+    if (codeInput) codeInput.focus();
+  }, 300);
+  
+  this.showToast(
+    `✅ QR CODE SCANNED!\n\n` +
+    `Now enter the 4-digit security code from the teacher's screen.`,
+    'info'
+  );
+  
+  // ✅ IMPORTANT: Don't load face data until code is verified
+  console.log('⏳ Waiting for security code verification...');
+  return; // ❌ STOP - don't load faces yet
+  
+} else {
+  // Admin/Teacher - no code needed
+  this.enableCameraButton();
+  
+  // ✅ Load face data immediately for admin/teacher
+  await this.loadFaceMatcher();
+  await this.updateStudentList();
+  await this.updateStats();
+}
     
     const divisionName = `${qrData.department}/${qrData.course}/${qrData.academicYear}/${qrData.division}`;
     this.showToast(
@@ -1421,49 +1506,43 @@ updateConfigDisplay() {
   const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                       'July', 'August', 'September', 'October', 'November', 'December'];
   
-  const elements = {
-    department: document.getElementById('displayDepartment'),
-    course: document.getElementById('displayCourse'),
-    academicYear: document.getElementById('displayAcademicYear'),
-    division: document.getElementById('displayDivision'),
-    subject: document.getElementById('displaySubject'),
-    month: document.getElementById('displayMonth'),
-    year: document.getElementById('displayYear'),
-    day: document.getElementById('displayDay')
-  };
-  
   const config = this.mainSystemConfig;
   
-  this.setConfigValue(elements.department, config.selectedDepartment);
-  this.setConfigValue(elements.course, config.selectedCourse);
-  this.setConfigValue(elements.academicYear, config.selectedAcademicYear);
-  this.setConfigValue(elements.division, config.selectedDivision);
-  this.setConfigValue(elements.subject, config.selectedSubject);
-  this.setConfigValue(elements.month, 
-    config.selectedMonth !== null && config.selectedMonth !== undefined 
-      ? monthNames[config.selectedMonth] 
-      : null
-  );
-  this.setConfigValue(elements.year, config.selectedYear);
-  this.setConfigValue(elements.day, 
-    config.currentDay !== null && config.currentDay !== undefined 
-      ? `Day ${config.currentDay}` 
-      : null
-  );
-}
-
-setConfigValue(element, value) {
-  if (!element) return;
+  // Field 1: Department - Academic year - Course - Div.
+  const classInfo = [
+    config.selectedDepartment,
+    config.selectedAcademicYear,
+    config.selectedCourse,
+    config.selectedDivision
+  ].filter(Boolean).join(' - ') || 'Not Set';
   
-  if (value === null || value === undefined || value === '') {
-    element.textContent = 'Not Set';
-    element.classList.add('not-set');
-  } else {
-    element.textContent = value;
-    element.classList.remove('not-set');
+  const classInfoEl = document.getElementById('displayClassInfo');
+  if (classInfoEl) {
+    classInfoEl.textContent = classInfo;
+    classInfoEl.classList.toggle('not-set', classInfo === 'Not Set');
+  }
+  
+  // Field 2: Date (day - month - year)
+  let dateStr = 'Not Set';
+  if (config.currentDay && config.selectedMonth !== null && config.selectedYear) {
+    const shortYear = config.selectedYear.toString().slice(-2);
+    dateStr = `${config.currentDay} - ${monthNames[config.selectedMonth]} - ${shortYear}`;
+  }
+  
+  const dateEl = document.getElementById('displayDate');
+  if (dateEl) {
+    dateEl.textContent = dateStr;
+    dateEl.classList.toggle('not-set', dateStr === 'Not Set');
+  }
+  
+  // Field 3: Subject
+  const subject = config.selectedSubject || 'Not Set';
+  const subjectEl = document.getElementById('displaySubject');
+  if (subjectEl) {
+    subjectEl.textContent = subject;
+    subjectEl.classList.toggle('not-set', subject === 'Not Set');
   }
 }
-
 
 /**
  * Update visual attendance blocks display
@@ -2709,6 +2788,9 @@ document.getElementById('recognitionMode').addEventListener('click', () => {
 
     // Set default mode to recognition
     document.getElementById('recognitionMode').click();
+    if (this.userRole === 'student') {
+    this.disableCameraButton();
+  }
 
      const forceReadBtn = document.getElementById('forceReadBtn');
   if (forceReadBtn) {
@@ -2767,47 +2849,134 @@ document.getElementById('closeResultsBtn').addEventListener('click', () => {
 });
 
  const verifyBtn = document.getElementById('verifyCodeBtn');
-  if (verifyBtn) {
-    verifyBtn.addEventListener('click', async () => {
-      const enteredCode = document.getElementById('securityCodeInput').value.trim();
+const codeInput = document.getElementById('securityCodeInput');
+const loadingSpinner = document.getElementById('codeLoadingSpinner'); // ✅ NEW
+const successIcon = document.getElementById('codeSuccessIcon'); // ✅ NEW
+
+if (verifyBtn && codeInput) {
+  
+  // ✅ AUTO-VERIFY on input (when 4 digits entered)
+  codeInput.addEventListener('input', async (e) => {
+    const enteredCode = e.target.value.trim();
+    
+    // Only allow numbers
+    e.target.value = e.target.value.replace(/[^0-9]/g, '');
+    
+    // Hide success icon when typing
+    if (successIcon) successIcon.style.display = 'none';
+    
+    // Auto-verify when 4 digits entered
+    if (e.target.value.length === 4) {
+      console.log('✅ 4 digits entered - auto-verifying...');
       
-      if (enteredCode.length !== 4) {
-        this.showCodeError('Please enter a 4-digit code');
-        return;
-      }
+      // Show loading spinner
+      if (loadingSpinner) loadingSpinner.style.display = 'block';
       
-      // Disable button during verification
-      verifyBtn.disabled = true;
-      verifyBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Verifying...';
+      // Disable input during verification
+      codeInput.disabled = true;
+      
+      // Small delay for visual feedback
+      await new Promise(resolve => setTimeout(resolve, 300));
       
       // Verify code from Firebase
-      const verification = await this.verifyDynamicCode(enteredCode);
+      const verification = await this.verifyDynamicCode(e.target.value);
+      
+      // Hide loading spinner
+      if (loadingSpinner) loadingSpinner.style.display = 'none';
       
       if (verification.valid) {
-        // ✅ Code is valid - Enable camera button
-        this.showCodeSuccess('✅ Code verified! You can now start the camera.');
-        this.enableCameraButton();
-        
-        // Clear input
-        document.getElementById('securityCodeInput').value = '';
-        
-      } else {
-        // ❌ Code is invalid
+  // ✅ Code is valid
+  if (successIcon) successIcon.style.display = 'block';
+  
+  this.showCodeSuccess('✅ Code verified! Loading face data...');
+  this.enableCameraButton();
+  
+  // ✅ NOW load the face data (was blocked in handleQRScan)
+  try {
+    await this.loadFaceMatcher();
+    await this.updateStudentList();
+    await this.updateStats();
+    
+    this.showToast('✅ System ready! You can now start the camera.', 'success');
+    
+  } catch (error) {
+    console.error('Failed to load face data:', error);
+    this.showCodeError('Failed to load face data. Please try again.');
+    this.disableCameraButton();
+    
+    // Re-enable code input for retry
+    codeInput.value = '';
+    codeInput.disabled = false;
+    if (successIcon) successIcon.style.display = 'none';
+    codeInput.focus();
+    return;
+  }
+  
+  // Clear input after brief delay
+  setTimeout(() => {
+    codeInput.value = '';
+    codeInput.disabled = false;
+  }, 1000);
+} else {
+        // ❌ Code is invalid - allow retry
         this.showCodeError(verification.reason);
         
-        // Re-enable verify button
-        verifyBtn.disabled = false;
-        verifyBtn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Verify Code';
+        // Clear input and re-enable for retry
+        codeInput.value = '';
+        codeInput.disabled = false;
+        
+        // Focus back on input
+        codeInput.focus();
       }
-    });
+    }
+  });
+  
+  // ✅ Manual verify button (hidden but still functional)
+  verifyBtn.addEventListener('click', async () => {
+    const enteredCode = codeInput.value.trim();
     
-    // ✅ Also allow Enter key
-    document.getElementById('securityCodeInput').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        verifyBtn.click();
+    if (enteredCode.length !== 4) {
+      this.showCodeError('Please enter a 4-digit code');
+      codeInput.focus();
+      return;
+    }
+    
+    // Show loading
+    if (loadingSpinner) loadingSpinner.style.display = 'block';
+    codeInput.disabled = true;
+    
+    const verification = await this.verifyDynamicCode(enteredCode);
+    
+    if (loadingSpinner) loadingSpinner.style.display = 'none';
+    
+    if (verification.valid) {
+      if (successIcon) successIcon.style.display = 'block';
+      this.showCodeSuccess('✅ Code verified! You can now start the camera.');
+      this.enableCameraButton();
+      
+      setTimeout(() => {
+        codeInput.value = '';
+        codeInput.disabled = false;
+      }, 1000);
+      
+    } else {
+      this.showCodeError(verification.reason);
+      codeInput.value = '';
+      codeInput.disabled = false;
+      codeInput.focus();
+    }
+  });
+  
+  // ✅ Auto-focus on input when section appears
+  if (this.userRole === 'student') {
+    setTimeout(() => {
+      if (document.getElementById('securityCodeSection').style.display !== 'none') {
+        codeInput.focus();
       }
-    });
+    }, 500);
   }
+
+}
   }
 
   /**
@@ -3060,6 +3229,12 @@ window.addEventListener('beforeunload', () => {
     // Detach Firebase listeners
     if (faceSystem.firebaseSync) {
       faceSystem.firebaseSync.detachListeners();
+    }
+    
+    // ✅✅✅ ADD THIS: Clear student session data
+    if (faceSystem.userRole === 'student') {
+      localStorage.removeItem('faceRecDivisionConfig');
+      console.log('🧹 Cleared student session data');
     }
     
     console.log('✅ Cleaned up intervals and listeners');
