@@ -698,9 +698,9 @@
       <div class="section-card">
         <h4 class="section-title"><i class="bi bi-calendar3 me-2"></i>Academic Year & Calendar</h4>
 
-        <div class="teacher-only">
+        <div>
           <div class="row g-2">
-            <div class="col-2">
+            <div class="col-2 teacher-only">
               <label class="form-label fw-bold small">Academic Year</label>
               <select id="academicYearLevelSelect" class="form-select form-select-sm">
                 <option value="">-- Select --</option>
@@ -711,7 +711,7 @@
             </div>
 
 
-            <div class="col-2">
+            <div class="col-2 teacher-only">
               <label class="form-label fw-bold small">Division</label>
               <select id="divisionSelect" class="form-select form-select-sm">
                 <option value="">-- Select --</option>
@@ -820,7 +820,7 @@
     <!-- Statistics Section -->
     <section id="stats-section" class="nav-section">
       <div class="row g-3 mb-4">
-        <div class="col-md-3">
+        <div class="col-md-3 teacher-only">
           <div class="stats-card">
             <div class="d-flex justify-content-between align-items-center">
               <div>
@@ -831,7 +831,7 @@
             </div>
           </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3 teacher-only">
           <div class="stats-card success">
             <div class="d-flex justify-content-between align-items-center">
               <div>
@@ -842,7 +842,7 @@
             </div>
           </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3 teacher-only">
           <div class="stats-card danger">
             <div class="d-flex justify-content-between align-items-center">
               <div>
@@ -947,32 +947,31 @@
 
         <!-- Day Navigation -->
         <div class="row g-3 mb-3">
-          <div class="col-md-4">
-            <label class="form-label fw-bold">Select Day</label>
-            <select id="dateSelect" class="form-select" disabled>
-              <option value="">-- Select month first --</option>
-            </select>
-          </div>
-          <div class="col-md-4">
-            <label class="form-label fw-bold">Navigation</label>
-            <div class="btn-group w-100">
-              <button id="prevDayBtn" class="btn btn-outline-primary" disabled>
-                <i class="bi bi-chevron-left"></i> Previous
-              </button>
-              <button id="nextDayBtn" class="btn btn-outline-primary" disabled>
-                Next <i class="bi bi-chevron-right"></i>
-              </button>
-            </div>
-          </div>
-          <div class="col-md-4 teacher-only">
-            <label class="form-label fw-bold">Quick Actions</label>
-            <div class="btn-group w-100"> <!-- ✅ Remove duplicate col-md-4 div -->
-              <button id="markAllPresentBtn" class="btn btn-outline-success">All Present</button>
-              <button id="markAllAbsentBtn" class="btn btn-outline-danger">All Absent</button>
-            </div>
-          </div>
-        </div>
-
+  <div class="col-md-4">
+    <label class="form-label fw-bold">Select Day</label>
+    <select id="dateSelect" class="form-select" disabled>
+      <option value="">-- Select month first --</option>
+    </select>
+  </div>
+  <div class="col-md-4">
+    <label class="form-label fw-bold">Navigation</label>
+    <div class="btn-group w-100">
+      <button id="prevDayBtn" class="btn btn-outline-primary" disabled>
+        <i class="bi bi-chevron-left"></i> Previous
+      </button>
+      <button id="nextDayBtn" class="btn btn-outline-primary" disabled>
+        Next <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+  <div class="col-md-4">  <!-- ✅ REMOVED teacher-only from div -->
+    <label class="form-label fw-bold teacher-only">Quick Actions</label>  <!-- ✅ MOVED to label -->
+    <div class="btn-group w-100 teacher-only">  <!-- ✅ MOVED to buttons container -->
+      <button id="markAllPresentBtn" class="btn btn-outline-success">All Present</button>
+      <button id="markAllAbsentBtn" class="btn btn-outline-danger">All Absent</button>
+    </div>
+  </div>
+</div>
         <div class="teacher-only">
           <div class="row g-2 mb-3">
             <div class="col-12 col-sm-6 col-md-3">
@@ -1021,7 +1020,7 @@
                 <th width="25%">Name</th>
                 <th width="15%">Today</th>
                 <th width="25%">Monthly Stats</th>
-                <th width="25%">Actions</th>
+                <th width="25%" class="teacher-only">Actions</th>
               </tr>
             </thead>
             <tbody id="attendanceTableBody">
@@ -1036,7 +1035,7 @@
         </div>
 
         <!-- Summary -->
-        <div class="d-flex justify-content-between align-items-center mt-3 p-3 bg-light rounded">
+        <div class="d-flex justify-content-between align-items-center mt-3 p-3 bg-light rounded teacher-only">
           <div>
             <strong>Total:</strong> <span id="summaryTotal" class="badge bg-primary">0</span>
             <strong class="ms-3">Present:</strong> <span id="summaryPresent" class="badge bg-success">0</span>
@@ -1388,7 +1387,46 @@
         console.warn(`⚠️ Firebase not connected, using IndexedDB only`);
       }
     }
-    // Load data (try cloud first, fallback to local)
+    // After successful login, read user's division attributes
+async function initializeMainSystemForStudent() {
+  try {
+    const user = await getCurrentUser();
+    const attributes = await getUserAttributes();
+    
+    // Extract custom attributes
+    const department = attributes['custom:department'];
+    const course = attributes['custom:course'];
+    const academicYear = attributes['custom:academicYear'];
+    const division = attributes['custom:division'];
+    
+    if (department && course && academicYear && division) {
+      // Auto-populate and LOCK the dropdowns
+      document.getElementById('departmentSelect').value = department;
+      document.getElementById('departmentSelect').disabled = true;
+      
+      // Load courses for this department
+      await loadCoursesForDepartment(department);
+      document.getElementById('courseSelect').value = course;
+      document.getElementById('courseSelect').disabled = true;
+      
+      document.getElementById('academicYearSelect').value = academicYear;
+      document.getElementById('academicYearSelect').disabled = true;
+      
+      document.getElementById('divisionSelect').value = division;
+      document.getElementById('divisionSelect').disabled = true;
+      
+      console.log('✅ Student division locked:', { department, course, academicYear, division });
+      
+      // Load their attendance data
+      await loadAttendanceForDivision();
+    } else {
+      console.warn('⚠️ Student missing division attributes');
+    }
+    
+  } catch (error) {
+    console.error('Error initializing student:', error);
+  }
+}
     // Load data (FIREBASE FIRST, fallback to IndexedDB)
     async function loadFromStorage(key) {
       let path;
@@ -1501,24 +1539,46 @@
 
     // ==================== AUTHENTICATION CHECK ====================
     async function checkAuthAndInit() {
-      try {
-        // Check if logged in
-        const user = await getCurrentUser();
+  try {
+    // Check if logged in
+    const user = await getCurrentUser();
 
-        if (!user) {
-          // Not logged in - redirect to login
-          window.location.href = 'index.html';
-          return;
-        }
+    if (!user) {
+      // Not logged in - redirect to login
+      window.location.href = 'index.html';
+      return;
+    }
 
-        // Get role
-        const role = await getUserRole();
+    // Get role
+    const role = await getUserRole();
 
+    // Show user info
+    console.log(`Logged in as: ${user.attributes.email} (${role})`);
 
-        // Show user info
-        console.log(`Logged in as: ${user.attributes.email} (${role})`);
+    // ✅ FOR STUDENTS: Auto-populate and lock division fields
+    if (role === 'student') {
+      const attributes = await getUserAttributes();
+      
+      const department = attributes['custom:department'];
+      const course = attributes['custom:course'];
+      const academicYear = attributes['custom:academicYear'];
+      const division = attributes['custom:division'];
+      
+      if (department && course && academicYear && division) {
+        // Set in appState
+        appState.selectedDepartment = department;
+        appState.selectedCourse = course;
+        appState.selectedAcademicYear = academicYear;
+        appState.selectedDivision = division;
+        
+        console.log('✅ Student division locked:', { department, course, academicYear, division });
+      } else {
+        console.warn('⚠️ Student missing division attributes');
+        alert('Your account is missing division information. Please contact admin.');
+      }
+    }
 
-         if (role === 'teacher') {
+    if (role === 'teacher') {
       console.log('🔄 Teacher login - Clearing session selections');
       
       // Clear from appState
@@ -1586,25 +1646,59 @@
     }
 
     function makeTableReadOnly() {
-      // Disable ONLY teacher controls, not navigation
-      document.querySelectorAll('.teacher-only input, .teacher-only select, .teacher-only button').forEach(el => {
-        el.disabled = true;
-      });
+  // ✅ Disable ONLY teacher-specific controls
+  document.querySelectorAll('.teacher-only input, .teacher-only select, .teacher-only button').forEach(el => {
+    el.disabled = true;
+  });
 
-      // Keep day navigation enabled
-      elements.prevDayBtn.disabled = false;
-      elements.nextDayBtn.disabled = false;
-      elements.dateSelect.disabled = false;
+  // ✅ Disable month/year/division/academic year selects for students
+  elements.academicYearLevelSelect.disabled = false; // Keep academic year select enabled for students
+  elements.divisionSelect.disabled = false;
+  elements.monthSelect.disabled = false;
+  elements.yearSelect.disabled = false;
 
-      // Hide action buttons in table
-      const style = document.createElement('style');
-      style.textContent = `
-    .mark-present-btn, .mark-absent-btn { display: none !important; }
-    .teacher-only { opacity: 0.6; pointer-events: none; }
-  `;
-      document.head.appendChild(style);
+  // ✅ EXPLICITLY ENABLE day navigation (force override)
+  elements.prevDayBtn.disabled = false;
+  elements.nextDayBtn.disabled = false;
+  elements.dateSelect.disabled = false;
+  
+  // ✅ Make buttons visible and clickable for students
+  elements.prevDayBtn.style.pointerEvents = 'auto';
+  elements.nextDayBtn.style.pointerEvents = 'auto';
+  elements.dateSelect.style.pointerEvents = 'auto';
+
+  // ✅ Hide ONLY action buttons in table (NOT navigation)
+  const style = document.createElement('style');
+  style.id = 'student-readonly-styles';
+  style.textContent = `
+    /* Hide mark attendance buttons */
+    .mark-present-btn, 
+    .mark-absent-btn { 
+      display: none !important; 
     }
-
+    
+    /* Hide teacher-only sections but NOT day navigation */
+    .teacher-only:not(#prevDayBtn):not(#nextDayBtn):not(#dateSelect) { 
+      display: none !important; 
+    }
+    
+    /* Keep day navigation visible and clickable */
+    #prevDayBtn, 
+    #nextDayBtn, 
+    #dateSelect {
+      opacity: 1 !important;
+      pointer-events: auto !important;
+      display: inline-block !important;
+    }
+  `;
+  
+  // ✅ Only add if not already added
+  if (!document.getElementById('student-readonly-styles')) {
+    document.head.appendChild(style);
+  }
+  
+  console.log('✅ Student read-only mode applied - day navigation enabled');
+}
     // Logout function (if you add logout button)
     async function handleLogout() {
       if (confirm('Are you sure you want to logout?')) {
@@ -3955,94 +4049,121 @@ elements.finalDepartmentSelect.addEventListener('change', () => {
       });
 
       // Generate QR button
-      document.getElementById('generateQRBtn').addEventListener('click', () => {
-        const missing = [];
-        if (!appState.selectedDepartment) missing.push('Department');
-        if (!appState.selectedCourse) missing.push('Course');
-        if (!appState.selectedSubject) missing.push('Subject');
-        if (!appState.selectedAcademicYear) missing.push('Academic Year');
-        if (!appState.selectedDivision) missing.push('Division');
-        if (appState.selectedMonth === null) missing.push('Month');
-        if (appState.selectedYear === null) missing.push('Year');
+      document.getElementById('generateQRBtn').addEventListener('click', async () => {
+  const missing = [];
+  if (!appState.selectedDepartment) missing.push('Department');
+  if (!appState.selectedCourse) missing.push('Course');
+  if (!appState.selectedSubject) missing.push('Subject');
+  if (!appState.selectedAcademicYear) missing.push('Academic Year');
+  if (!appState.selectedDivision) missing.push('Division');
+  if (appState.selectedMonth === null) missing.push('Month');
+  if (appState.selectedYear === null) missing.push('Year');
 
-        const validationAlert = document.getElementById('qrValidationAlert');
-        const qrContainer = document.getElementById('qrCodeContainer');
+  const validationAlert = document.getElementById('qrValidationAlert');
+  const qrContainer = document.getElementById('qrCodeContainer');
 
-        if (missing.length > 0) {
-          document.getElementById('qrValidationMsg').textContent = 'Missing: ' + missing.join(', ');
-          validationAlert.style.display = 'block';
-          qrContainer.innerHTML = '';
-        } else {
-          validationAlert.style.display = 'none';
+  if (missing.length > 0) {
+    document.getElementById('qrValidationMsg').textContent = 'Missing: ' + missing.join(', ');
+    validationAlert.style.display = 'block';
+    qrContainer.innerHTML = '';
+  } else {
+    validationAlert.style.display = 'none';
 
-          const qrId = Math.random().toString(36).substring(2, 5).toUpperCase();
-          const payload = JSON.stringify({
-            qrId: qrId,
-            department: appState.selectedDepartment,
-            course: appState.selectedCourse,
-            academicYear: appState.selectedAcademicYear,
-            division: appState.selectedDivision,
-            subject: appState.selectedSubject,
-            month: appState.selectedMonth,   // 0-indexed, pass as-is
-            year: appState.selectedYear,
-            day: appState.currentDay
-          });
-          // Create division-specific key for tracking
-          const divisionKey = `${appState.selectedDepartment}_${appState.selectedCourse}_${appState.selectedAcademicYear}_${appState.selectedDivision}`;
+    // ✅ CREATE DIVISION KEY FIRST
+    const divisionKey = `${appState.selectedDepartment}_${appState.selectedCourse}_${appState.selectedAcademicYear}_${appState.selectedDivision}`;
 
-          // Delete previous QR for THIS division if exists
-          if (window.activeQRsByDivision && window.activeQRsByDivision[divisionKey]) {
-            const oldQRId = window.activeQRsByDivision[divisionKey];
-            if (useCloud && firebaseDB) {
-              firebaseDB.ref(`mainSystem/activeQRs/${oldQRId}`).remove();
-            }
+    // ✅ STEP 1: DELETE OLD QR FROM FIREBASE (if exists)
+    if (useCloud && firebaseDB) {
+      try {
+        console.log(`🔍 Checking for existing QR for: ${divisionKey}`);
+        
+        const snapshot = await firebaseDB.ref('mainSystem/activeQRs').once('value');
+        const allQRs = snapshot.val() || {};
+        
+        // Find and delete any QR for this division
+        for (const id in allQRs) {
+          const qrData = allQRs[id];
+          if (qrData.division === divisionKey) {
+            console.log(`🗑️ Deleting old QR: ${id}`);
+            await firebaseDB.ref(`mainSystem/activeQRs/${id}`).remove();
           }
-
-          // Initialize tracking object if needed
-          if (!window.activeQRsByDivision) {
-            window.activeQRsByDivision = {};
-          }
-
-          // Track new QR for this division
-          window.activeQRsByDivision[divisionKey] = qrId;
-          saveToStorage(`activeQRs/${qrId}`, {
-            createdAt: Date.now(),
-            expiresAt: Date.now() + 600000,
-            division: divisionKey,
-            data: JSON.parse(payload) // ✅ Now includes qrId
-          });
-
-          // Start countdown timer
-          startQRCountdown(600);
-
-          // Generate QR using qrcode-generator
-          const qr = qrcode(0, 'M');
-          qr.addData(payload);
-          qr.make();
-          qrContainer.innerHTML = qr.createSvgTag(6, 0);
-
-          // Show active status
-          document.getElementById('qrStatus').style.display = 'block';
-          document.getElementById('qrStatus').className = 'alert alert-success mb-3';
-          document.getElementById('qrStatus').innerHTML = '✅ Active - Expires in: <span id="qrTimer">10:00</span>';
-          document.getElementById('qrCodeContainer').style.opacity = '1';
-          // Show and start dynamic code rotation
-          document.getElementById('qrDynamicCodeDisplay').style.display = 'block';
-          startDynamicCodeRotation();
-          // Update path badges
-          document.getElementById('qrBadgeDept').textContent = appState.selectedDepartment;
-          document.getElementById('qrBadgeCourse').textContent = appState.selectedCourse;
-          document.getElementById('qrBadgeSubject').textContent = appState.selectedSubject;
-          document.getElementById('qrBadgeAcYear').textContent = appState.selectedAcademicYear;
-          document.getElementById('qrBadgeDiv').textContent = appState.selectedDivision;
-          document.getElementById('qrBadgeMonth').textContent = monthNames[appState.selectedMonth];
-          document.getElementById('qrBadgeDay').textContent = 'Day ' + appState.currentDay;
         }
+        
+      } catch (error) {
+        console.error('Error deleting old QR:', error);
+      }
+    }
 
-        // Open modal
-        const modal = new bootstrap.Modal(document.getElementById('qrModal'));
-        modal.show();
-      });
+    // ✅ STEP 2: CREATE NEW QR ID (always fresh)
+    const qrId = Math.random().toString(36).substring(2, 10).toUpperCase();
+    console.log(`🆕 Generated NEW QR ID: ${qrId}`);
+    
+    const payload = JSON.stringify({
+      qrId: qrId,
+      department: appState.selectedDepartment,
+      course: appState.selectedCourse,
+      academicYear: appState.selectedAcademicYear,
+      division: appState.selectedDivision,
+      subject: appState.selectedSubject,
+      month: appState.selectedMonth,
+      year: appState.selectedYear,
+      day: appState.currentDay
+    });
+
+    // ✅ STEP 3: TRACK NEW QR LOCALLY
+    if (!window.activeQRsByDivision) {
+      window.activeQRsByDivision = {};
+    }
+    window.activeQRsByDivision[divisionKey] = qrId;
+
+    // ✅ STEP 4: SAVE TO FIREBASE (new QR)
+    if (useCloud && firebaseDB) {
+      try {
+        await firebaseDB.ref(`mainSystem/activeQRs/${qrId}`).set({
+          createdAt: Date.now(),
+          expiresAt: Date.now() + 600000,
+          division: divisionKey,
+          data: JSON.parse(payload)
+        });
+        console.log(`✅ Saved NEW QR to Firebase: ${qrId}`);
+      } catch (error) {
+        console.error('Error saving QR to Firebase:', error);
+      }
+    }
+
+    // Start countdown timer
+    startQRCountdown(600);
+
+    // Generate QR using qrcode-generator
+    const qr = qrcode(0, 'M');
+    qr.addData(payload);
+    qr.make();
+    qrContainer.innerHTML = qr.createSvgTag(6, 0);
+
+    // Show active status
+    document.getElementById('qrStatus').style.display = 'block';
+    document.getElementById('qrStatus').className = 'alert alert-success mb-3';
+    document.getElementById('qrStatus').innerHTML = '✅ Active - Expires in: <span id="qrTimer">10:00</span>';
+    document.getElementById('qrCodeContainer').style.opacity = '1';
+    
+    // Show and start dynamic code rotation
+    document.getElementById('qrDynamicCodeDisplay').style.display = 'block';
+    startDynamicCodeRotation();
+    
+    // Update path badges
+    document.getElementById('qrBadgeDept').textContent = appState.selectedDepartment;
+    document.getElementById('qrBadgeCourse').textContent = appState.selectedCourse;
+    document.getElementById('qrBadgeSubject').textContent = appState.selectedSubject;
+    document.getElementById('qrBadgeAcYear').textContent = appState.selectedAcademicYear;
+    document.getElementById('qrBadgeDiv').textContent = appState.selectedDivision;
+    document.getElementById('qrBadgeMonth').textContent = monthNames[appState.selectedMonth];
+    document.getElementById('qrBadgeDay').textContent = 'Day ' + appState.currentDay;
+  }
+
+  // Open modal
+  const modal = new bootstrap.Modal(document.getElementById('qrModal'));
+  modal.show();
+});
       // Day navigation events
       elements.dateSelect.addEventListener('change', () => {
         if (isUpdatingDayDropdown) return;

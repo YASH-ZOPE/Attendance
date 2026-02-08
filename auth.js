@@ -33,13 +33,17 @@ function initCognito() {
 }
 
 /**
- * Sign up a new user
+ * Sign up a new user with division attributes
  * @param {string} email - User's email
  * @param {string} name - User's full name
  * @param {string} password - User's password
+ * @param {string} department - Student's department
+ * @param {string} course - Student's course
+ * @param {string} academicYear - Student's academic year (FY/SY/TY)
+ * @param {string} division - Student's division (Division A/B/C)
  * @returns {Promise} - Resolves with user data
  */
-function signup(email, name, password) {
+function signup(email, name, password, department, course, academicYear, division) {
   return new Promise((resolve, reject) => {
     if (!userPool) initCognito();
 
@@ -51,6 +55,23 @@ function signup(email, name, password) {
       new AmazonCognitoIdentity.CognitoUserAttribute({
         Name: 'name',
         Value: name
+      }),
+      // Add custom division attributes
+      new AmazonCognitoIdentity.CognitoUserAttribute({
+        Name: 'custom:department',
+        Value: department
+      }),
+      new AmazonCognitoIdentity.CognitoUserAttribute({
+        Name: 'custom:course',
+        Value: course
+      }),
+      new AmazonCognitoIdentity.CognitoUserAttribute({
+        Name: 'custom:academicYear',
+        Value: academicYear
+      }),
+      new AmazonCognitoIdentity.CognitoUserAttribute({
+        Name: 'custom:division',
+        Value: division
       })
     ];
 
@@ -62,6 +83,7 @@ function signup(email, name, password) {
       }
 
       console.log('✓ User signed up successfully:', result.user.getUsername());
+      console.log('✓ Division assigned:', { department, course, academicYear, division });
       resolve(result);
     });
   });
@@ -299,6 +321,65 @@ function getUserRole() {
 }
 
 /**
+ * Get user's profile attributes from Cognito
+ * @returns {Promise<object>} - Returns user attributes object
+ */
+function getUserAttributes() {
+  return new Promise((resolve, reject) => {
+    if (!userPool) initCognito();
+
+    const cognitoUser = userPool.getCurrentUser();
+
+    if (!cognitoUser) {
+      reject(new Error('No user logged in'));
+      return;
+    }
+
+    cognitoUser.getSession((err, session) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+
+      cognitoUser.getUserAttributes((err, attributes) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        // Convert attributes array to object
+        const attrs = {};
+        attributes.forEach(attr => {
+          attrs[attr.Name] = attr.Value;
+        });
+
+        resolve(attrs);
+      });
+    });
+  });
+}
+
+/**
+ * Check if user profile is complete
+ * @returns {Promise<boolean>}
+ */
+async function isProfileComplete() {
+  try {
+    const attrs = await getUserAttributes();
+    
+    const hasCompleteProfile = attrs['custom:department'] && 
+                              attrs['custom:course'] && 
+                              attrs['custom:academicYear'] && 
+                              attrs['custom:division'];
+    
+    return hasCompleteProfile;
+  } catch (error) {
+    console.error('Error checking profile completion:', error);
+    return false;
+  }
+}
+
+/**
  * Check if user is authenticated
  * @returns {Promise<boolean>}
  */
@@ -350,28 +431,45 @@ async function isStudent() {
 }
 
 /**
- * Redirect user based on their role
+ * Redirect user based on their role and profile completion
  * @returns {Promise}
  */
 async function redirectBasedOnRole() {
   try {
+    console.log('=== REDIRECT DEBUG START ===');
+    
+    // Get role first
     const role = await getUserRole();
-    console.log('Redirecting user with role:', role);
-
+    console.log('User role:', role);
+    
+    // Admin and teachers skip profile check
     if (role === 'admin' || role === 'teacher') {
-      window.location.href = '/main-system';
-    } else if (role === 'student') {
-      window.location.href = '/face-recognition';
-    } else {
-      // Default to face recognition for unknown roles
-      window.location.href = '/face-recognition';
+      console.log('Admin/Teacher - redirecting to main-system');
+      window.location.href = 'main-system.html';
+      return;
     }
+    
+    // For students, check if profile is complete
+    const profileComplete = await isProfileComplete();
+    console.log('Student profile complete?', profileComplete);
+    
+    if (!profileComplete) {
+      console.log('Profile incomplete, redirecting to profile page');
+      window.location.href = 'profile.html';
+      return;
+    }
+
+    // Profile complete - redirect to face recognition
+    console.log('Redirecting to face-recognition');
+    window.location.href = 'face-recognition.html';
+    
+    console.log('=== REDIRECT DEBUG END ===');
   } catch (error) {
     console.error('Redirect error:', error);
-    throw error;
+    // If there's an error, redirect to login
+    window.location.href = 'index.html';
   }
 }
-
 /**
  * Forgot password - Send reset code to email
  * @param {string} email - User's email
@@ -470,41 +568,50 @@ function changePassword(oldPassword, newPassword) {
 }
 
 /**
- * Get user attributes
- * @returns {Promise} - Resolves with user attributes object
+ * Get user's division attributes (department, course, year, division)
+ * @returns {Promise} - Resolves with division object
  */
-function getUserAttributes() {
-  return new Promise((resolve, reject) => {
-    if (!userPool) initCognito();
-
-    const cognitoUser = userPool.getCurrentUser();
-
-    if (!cognitoUser) {
-      reject(new Error('No user logged in'));
-      return;
+function getDivisionAttributes() {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const attrs = await getUserAttributes();
+      
+      const division = {
+        department: attrs['custom:department'] || null,
+        course: attrs['custom:course'] || null,
+        academicYear: attrs['custom:academicYear'] || null,
+        division: attrs['custom:division'] || null
+      };
+      
+      console.log('✓ Division attributes:', division);
+      resolve(division);
+      
+    } catch (error) {
+      console.error('Error getting division attributes:', error);
+      reject(error);
     }
-
-    cognitoUser.getSession((err, session) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-
-      cognitoUser.getUserAttributes((err, attributes) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-
-        const attrs = {};
-        attributes.forEach(attr => {
-          attrs[attr.Name] = attr.Value;
-        });
-
-        resolve(attrs);
-      });
-    });
   });
+}
+
+/**
+ * Check if user has complete division attributes
+ * @returns {Promise<boolean>}
+ */
+async function hasCompleteDivisionInfo() {
+  try {
+    const division = await getDivisionAttributes();
+    
+    return !!(
+      division.department && 
+      division.course && 
+      division.academicYear && 
+      division.division
+    );
+    
+  } catch (error) {
+    console.error('Error checking division info:', error);
+    return false;
+  }
 }
 
 // Initialize Cognito on script load
@@ -525,6 +632,8 @@ if (typeof window !== 'undefined') {
     logout,
     getCurrentUser,
     getUserRole,
+    getUserAttributes,
+    isProfileComplete,
     isAuthenticated,
     isAdmin,
     isTeacher,
@@ -533,6 +642,7 @@ if (typeof window !== 'undefined') {
     forgotPassword,
     confirmPasswordReset,
     changePassword,
-    getUserAttributes
+    getDivisionAttributes,
+    hasCompleteDivisionInfo
   };
 }

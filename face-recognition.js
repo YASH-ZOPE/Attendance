@@ -33,17 +33,16 @@ class FaceRecognitionSystem {
     this.mainDB = null;
     this.firebaseSync = null;
     this.mainSystemConfig = {
-      currentDate: null,
-      selectedSubject: null,
-      selectedMonth: null,
-      selectedYear: null,
-      currentDay: null,
-       selectedDepartment: null,    // ✅ ADD
-  selectedCourse: null,         // ✅ ADD
-  selectedAcademicYear: null,   // ✅ ADD
+  currentDate: null,
+  selectedSubject: null,
+  selectedMonth: null,
+  selectedYear: null,
+  currentDay: null,
+  selectedDepartment: null,
+  selectedCourse: null,
+  selectedAcademicYear: null,
   selectedDivision: null
-  
-    };
+};
        this.isHandlingDayChange = false;
        this.userRole = null;
   }
@@ -66,13 +65,24 @@ class FaceRecognitionSystem {
     const role = await getUserRole();
     window.currentUserRole = role; // Store globally
     
-    console.log(`Logged in as: ${user.attributes.email} (${role})`);
-    
     this.userRole = role; // ✅ WORKS - adds property to class
+  console.log(`Logged in as: ${user.attributes.email} (${role})`);
+
+// ✅ Get division from Cognito
+const divisionInfo = await getDivisionAttributes();
+
+if (divisionInfo.department && divisionInfo.course && divisionInfo.academicYear && divisionInfo.division) {
+  this.mainSystemConfig.selectedDepartment = divisionInfo.department;
+  this.mainSystemConfig.selectedCourse = divisionInfo.course;
+  this.mainSystemConfig.selectedAcademicYear = divisionInfo.academicYear;
+  this.mainSystemConfig.selectedDivision = divisionInfo.division;
   
-   console.log(`Logged in as: ${user.attributes.email} (${role})`);
-    
-   
+  console.log('✅ Division loaded from Cognito:', divisionInfo);
+} else {
+  console.warn('⚠️ User missing division attributes');
+  this.showToast('⚠️ Your account is missing division info. Contact admin.', 'warning');
+}
+
 if (role === 'student') {
       console.log('🔄 Student login - Clearing saved session');
       localStorage.removeItem('faceRecDivisionConfig');
@@ -264,19 +274,13 @@ async validateQRSession(qrId) {
   }
 }
 
-/**
- * Handle QR code scan - STRICT MODE (requires valid QR ID)
- */
 async handleQRScan(qrDataString) {
   try {
     console.log('═══════════════════════════════════');
     console.log('RAW QR DATA:', qrDataString);
     console.log('═══════════════════════════════════');
     const qrData = JSON.parse(qrDataString);
-     console.log('PARSED QR DATA:', qrData);
-    console.log('Has qrId?', !!qrData.qrId);
-    console.log('qrId value:', qrData.qrId);
-    console.log('═══════════════════════════════════');
+    
     // ✅ STRICT: Require QR ID
     if (!qrData.qrId) {
       this.showToast(
@@ -286,7 +290,40 @@ async handleQRScan(qrDataString) {
         'danger'
       );
       console.error('❌ QR rejected - missing qrId');
-      return; // ❌ STOP - don't process further
+      return;
+    }
+    
+    // ✅ NEW: VALIDATE DIVISION MATCH FOR STUDENTS
+    if (this.userRole === 'student') {
+      const userDept = this.mainSystemConfig.selectedDepartment;
+      const userCourse = this.mainSystemConfig.selectedCourse;
+      const userYear = this.mainSystemConfig.selectedAcademicYear;
+      const userDiv = this.mainSystemConfig.selectedDivision;
+      
+      const qrDept = qrData.department;
+      const qrCourse = qrData.course;
+      const qrYear = qrData.academicYear;
+      const qrDiv = qrData.division;
+      
+      // Check if QR matches student's division
+      if (userDept !== qrDept || 
+          userCourse !== qrCourse || 
+          userYear !== qrYear || 
+          userDiv !== qrDiv) {
+        
+        this.showToast(
+          '❌ WRONG DIVISION!\n\n' +
+          `This QR is for: ${qrDept}/${qrCourse}/${qrYear}/${qrDiv}\n\n` +
+          `Your division: ${userDept}/${userCourse}/${userYear}/${userDiv}\n\n` +
+          '⚠️ You can ONLY scan QR codes for YOUR OWN division!',
+          'danger'
+        );
+        
+        console.error('❌ QR rejected - division mismatch');
+        return; // ❌ STOP - don't process
+      }
+      
+      console.log('✅ Division verified - QR matches student division');
     }
     
     // ✅ Validate QR ID in Firebase
@@ -299,7 +336,7 @@ async handleQRScan(qrDataString) {
         'Please check your internet connection.',
         'danger'
       );
-      return; // ❌ STOP if Firebase is down
+      return;
     }
     
     const isValid = await this.validateQRSession(qrData.qrId);
@@ -311,7 +348,7 @@ async handleQRScan(qrDataString) {
         'Please scan a NEW QR code.',
         'danger'
       );
-      return; // ❌ STOP - invalid QR
+      return;
     }
     
     // ✅ QR is valid - setup expiration watcher
@@ -319,23 +356,28 @@ async handleQRScan(qrDataString) {
     this.watchQRExpiration(qrData.qrId);
     console.log(`✅ QR validated successfully - ID: ${qrData.qrId}`);
     
-    // ✅ Update config
-    this.mainSystemConfig.selectedDepartment = qrData.department;
-    this.mainSystemConfig.selectedCourse = qrData.course;
-    this.mainSystemConfig.selectedAcademicYear = qrData.academicYear;
-    this.mainSystemConfig.selectedDivision = qrData.division;
+    // ✅ FOR ADMIN/TEACHER: Allow division change
+    // ✅ FOR STUDENTS: Division already validated above
+    if (this.userRole !== 'student') {
+      this.mainSystemConfig.selectedDepartment = qrData.department;
+      this.mainSystemConfig.selectedCourse = qrData.course;
+      this.mainSystemConfig.selectedAcademicYear = qrData.academicYear;
+      this.mainSystemConfig.selectedDivision = qrData.division;
+    }
+    
+    // ✅ Update subject/date config (allowed for all roles)
     this.mainSystemConfig.selectedSubject = qrData.subject;
     this.mainSystemConfig.selectedMonth = qrData.month;
     this.mainSystemConfig.selectedYear = qrData.year;
     this.mainSystemConfig.currentDay = qrData.day;
     
-    // ✅ Save to localStorage
+    // ✅ Save to localStorage (with role-based logic)
     const configToSave = {
       qrId: qrData.qrId,
-      department: qrData.department,
-      course: qrData.course,
-      academicYear: qrData.academicYear,
-      division: qrData.division,
+      department: this.mainSystemConfig.selectedDepartment, // Use mainSystemConfig (not qrData for students)
+      course: this.mainSystemConfig.selectedCourse,
+      academicYear: this.mainSystemConfig.selectedAcademicYear,
+      division: this.mainSystemConfig.selectedDivision,
       subject: qrData.subject,
       month: qrData.month,
       year: qrData.year,
@@ -348,30 +390,31 @@ async handleQRScan(qrDataString) {
     // ✅ Re-setup Firebase live listeners
     this.firebaseSync.detachListeners();
     this.firebaseSync.setupLiveListeners({
-      department:   qrData.department,
-      course:       qrData.course,
-      academicYear: qrData.academicYear,
-      division:     qrData.division,
+      department:   this.mainSystemConfig.selectedDepartment,
+      course:       this.mainSystemConfig.selectedCourse,
+      academicYear: this.mainSystemConfig.selectedAcademicYear,
+      division:     this.mainSystemConfig.selectedDivision,
       year:         qrData.year,
       onSubjectChange: (newSubject, oldSubject) => this.handleFirebaseSubjectChange(newSubject, oldSubject),
       onMonthChange:   (newMonth, oldMonth)     => this.handleFirebaseMonthChange(newMonth, oldMonth),
       onYearChange:    (newYear, oldYear)       => this.handleFirebaseYearChange(newYear, oldYear),
       onDayChange:     (newDay, oldDay)         => this.handleFirebaseDayChange(newDay, oldDay)
     });
-    console.log('✅ Live listeners attached for new division');
+    console.log('✅ Live listeners attached for division');
     
     // ✅ Update UI
-this.updateConfigDisplay();
-
-// ✅ ALWAYS require code for students
-if (this.userRole === 'student') {
-  // Lock camera button
+    this.updateConfigDisplay();
+    
+    // ✅ ALWAYS require code for students
+    if (this.userRole === 'student') {
+      // Lock camera button
   this.disableCameraButton();
   
   // ✅ CRITICAL: Clear any previous code entry state
   const codeInput = document.getElementById('securityCodeInput');
   const successIcon = document.getElementById('codeSuccessIcon');
   const loadingSpinner = document.getElementById('codeLoadingSpinner');
+  const validationMsg = document.getElementById('codeValidationMsg');
   
   if (codeInput) {
     codeInput.value = '';
@@ -379,10 +422,13 @@ if (this.userRole === 'student') {
   }
   if (successIcon) successIcon.style.display = 'none';
   if (loadingSpinner) loadingSpinner.style.display = 'none';
+  if (validationMsg) validationMsg.style.display = 'none';
   
-  // ✅ Show security code input section
+  // ✅ SHOW security code input section
   const codeSection = document.getElementById('securityCodeSection');
-  codeSection.style.display = 'block';
+  if (codeSection) {
+    codeSection.style.display = 'block';
+  }
   
   // ✅ Auto-focus on code input
   setTimeout(() => {
@@ -398,18 +444,17 @@ if (this.userRole === 'student') {
   // ✅ IMPORTANT: Don't load face data until code is verified
   console.log('⏳ Waiting for security code verification...');
   return; // ❌ STOP - don't load faces yet
-  
-} else {
-  // Admin/Teacher - no code needed
-  this.enableCameraButton();
-  
-  // ✅ Load face data immediately for admin/teacher
-  await this.loadFaceMatcher();
-  await this.updateStudentList();
-  await this.updateStats();
-}
+    } else {
+      // Admin/Teacher - no code needed
+      this.enableCameraButton();
+      
+      // ✅ Load face data immediately for admin/teacher
+      await this.loadFaceMatcher();
+      await this.updateStudentList();
+      await this.updateStats();
+    }
     
-    const divisionName = `${qrData.department}/${qrData.course}/${qrData.academicYear}/${qrData.division}`;
+    const divisionName = `${this.mainSystemConfig.selectedDepartment}/${this.mainSystemConfig.selectedCourse}/${this.mainSystemConfig.selectedAcademicYear}/${this.mainSystemConfig.selectedDivision}`;
     this.showToast(
       `✅ QR CODE ACCEPTED!\n\n` +
       `Division: ${divisionName}\n` +
@@ -417,11 +462,6 @@ if (this.userRole === 'student') {
       `QR ID: ${qrData.qrId.substring(0, 8)}...`,
       'success'
     );
-    
-    // ✅ Load face data
-    await this.loadFaceMatcher();
-    await this.updateStudentList();
-    await this.updateStats();
     
   } catch (error) {
     this.showToast('❌ Invalid QR code format', 'danger');

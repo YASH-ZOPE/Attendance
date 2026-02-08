@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Update Profile - Smart Attendance System</title>
+  
+  <!-- AWS Cognito SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.3.7/dist/amazon-cognito-identity.min.js"></script>
+  <script src="cognito-config.js"></script>
+  <script src="auth.js"></script>
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e8ba3 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background: rgba(20, 35, 55, 0.95);
+      border-radius: 12px;
+      padding: 40px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    h1 {
+      color: #ffffff;
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: #b0b8c4;
+      margin-bottom: 32px;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    .form-group label {
+      display: block;
+      color: #e8ecf1;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(30, 45, 65, 0.8);
+      border: 2px solid rgba(80, 120, 180, 0.4);
+      border-radius: 8px;
+      color: #ffffff;
+      font-size: 15px;
+      transition: all 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #5b9bd5;
+      background: rgba(30, 45, 65, 1);
+    }
+
+    .form-group input:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .form-group select {
+      cursor: pointer;
+    }
+
+    .form-group select:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 14px;
+      background: #5b9bd5;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 12px;
+    }
+
+    .btn-primary:hover {
+      background: #4a8bc2;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(91, 155, 213, 0.4);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-secondary {
+      width: 100%;
+      padding: 14px;
+      background: transparent;
+      color: #5b9bd5;
+      border: 2px solid rgba(80, 120, 180, 0.4);
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+      border-color: #5b9bd5;
+      background: rgba(91, 155, 213, 0.1);
+    }
+
+    .error-message {
+      background: rgba(220, 53, 69, 0.2);
+      border: 1px solid rgba(220, 53, 69, 0.5);
+      color: #ff6b7a;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .success-message {
+      background: rgba(40, 167, 69, 0.2);
+      border: 1px solid rgba(40, 167, 69, 0.5);
+      color: #6bffa1;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .loading-spinner {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top: 3px solid #ffffff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .btn-primary.loading {
+      position: relative;
+      color: transparent;
+    }
+
+    .btn-primary.loading .loading-spinner {
+      display: block;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .info-box {
+      background: rgba(91, 155, 213, 0.1);
+      border: 1px solid rgba(91, 155, 213, 0.3);
+      color: #b0b8c4;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Update Profile</h1>
+    <p class="subtitle">Complete your profile information</p>
+
+    <div id="errorMessage" class="error-message"></div>
+    <div id="successMessage" class="success-message"></div>
+
+    <div class="info-box" id="currentInfo" style="display: none;">
+      Loading your current information...
+    </div>
+
+    <form id="profileForm">
+      <div class="form-group">
+        <label for="email">Email address</label>
+        <input type="email" id="email" disabled>
+      </div>
+
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" id="name" disabled>
+      </div>
+
+      <div class="form-group">
+        <label for="department">Department</label>
+        <select id="department" required>
+          <option value="">Loading departments...</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="course">Course</label>
+        <select id="course" required disabled>
+          <option value="">Select department first</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="academicYear">Academic Year</label>
+        <select id="academicYear" required>
+          <option value="">Select year</option>
+          <option value="FY">First Year (FY)</option>
+          <option value="SY">Second Year (SY)</option>
+          <option value="TY">Third Year (TY)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="division">Division</label>
+        <select id="division" required>
+          <option value="">Select division</option>
+          <option value="Division A">Division A</option>
+          <option value="Division B">Division B</option>
+          <option value="Division C">Division C</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn-primary">
+        Update Profile
+        <div class="loading-spinner"></div>
+      </button>
+
+      <button type="button" class="btn-secondary" id="logoutBtn">Sign Out</button>
+    </form>
+  </div>
+
+  <script>
+    let profileCurrentUser = null;
+
+    // Show error message
+    function showError(message) {
+      const errorEl = document.getElementById('errorMessage');
+      errorEl.textContent = message;
+      errorEl.style.display = 'block';
+      document.getElementById('successMessage').style.display = 'none';
+    }
+
+    // Show success message
+    function showSuccess(message) {
+      const successEl = document.getElementById('successMessage');
+      successEl.textContent = message;
+      successEl.style.display = 'block';
+      document.getElementById('errorMessage').style.display = 'none';
+    }
+
+    // Clear messages
+    function clearMessages() {
+      document.getElementById('errorMessage').style.display = 'none';
+      document.getElementById('successMessage').style.display = 'none';
+    }
+
+    // Set button loading state
+    function setButtonLoading(button, isLoading) {
+      if (isLoading) {
+        button.classList.add('loading');
+        button.disabled = true;
+      } else {
+        button.classList.remove('loading');
+        button.disabled = false;
+      }
+    }
+
+    // Load departments from Firebase
+    async function loadDepartments() {
+      console.log('=== LOADING DEPARTMENTS ===');
+      
+      try {
+        // Check if Firebase is initialized
+        if (!firebase || !firebase.apps || firebase.apps.length === 0) {
+          console.error('Firebase not initialized!');
+          showError('Firebase not initialized. Please check firebase-config.js');
+          return;
+        }
+        
+        console.log('Firebase initialized:', firebase.apps.length, 'apps');
+        
+        const db = firebase.database();
+        console.log('Database reference obtained');
+        
+        const departmentsRef = db.ref('mainSystem/departments');
+        console.log('Attempting to read from: mainSystem/departments');
+        
+        const snapshot = await departmentsRef.once('value');
+        const departments = snapshot.val();
+        
+        console.log('Departments data:', departments);
+        
+        const departmentSelect = document.getElementById('department');
+        
+        departmentSelect.innerHTML = '<option value="">Select department</option>';
+        
+        if (departments && Array.isArray(departments) && departments.length > 0) {
+          console.log('Loading', departments.length, 'departments');
+          departments.forEach(dept => {
+            const option = document.createElement('option');
+            option.value = dept;
+            option.textContent = dept;
+            departmentSelect.appendChild(option);
+          });
+        } else if (departments && typeof departments === 'object') {
+          // If departments is an object instead of array
+          console.log('Departments is an object, converting to array');
+          const deptArray = Object.values(departments);
+          deptArray.forEach(dept => {
+            const option = document.createElement('option');
+            option.value = dept;
+            option.textContent = dept;
+            departmentSelect.appendChild(option);
+          });
+        } else {
+          console.warn('No departments found or invalid format');
+          departmentSelect.innerHTML = '<option value="">No departments available</option>';
+          showError('No departments configured. Please contact admin.');
+        }
+      } catch (error) {
+        console.error('Error loading departments:', error);
+        showError('Failed to load departments: ' + error.message);
+      }
+    }
+
+    // Load courses based on department
+    async function loadCourses(department) {
+      console.log('=== LOADING COURSES FOR:', department, '===');
+      
+      const courseSelect = document.getElementById('course');
+      
+      if (!department) {
+        courseSelect.disabled = true;
+        courseSelect.innerHTML = '<option value="">Select department first</option>';
+        return;
+      }
+      
+      try {
+        const db = firebase.database();
+        const coursesRef = db.ref(`mainSystem/courses/${department}`);
+        
+        console.log('Attempting to read from: mainSystem/courses/' + department);
+        
+        const snapshot = await coursesRef.once('value');
+        const courses = snapshot.val();
+        
+        console.log('Courses data:', courses);
+        
+        courseSelect.innerHTML = '<option value="">Select course</option>';
+        
+        if (courses && Array.isArray(courses) && courses.length > 0) {
+          console.log('Loading', courses.length, 'courses');
+          courses.forEach(course => {
+            const option = document.createElement('option');
+            option.value = course;
+            option.textContent = course;
+            courseSelect.appendChild(option);
+          });
+          courseSelect.disabled = false;
+        } else if (courses && typeof courses === 'object') {
+          // If courses is an object instead of array
+          console.log('Courses is an object, converting to array');
+          const courseArray = Object.values(courses);
+          courseArray.forEach(course => {
+            const option = document.createElement('option');
+            option.value = course;
+            option.textContent = course;
+            courseSelect.appendChild(option);
+          });
+          courseSelect.disabled = false;
+        } else {
+          console.warn('No courses found');
+          courseSelect.innerHTML = '<option value="">No courses available</option>';
+          courseSelect.disabled = true;
+          showError('No courses available for this department.');
+        }
+      } catch (error) {
+        console.error('Error loading courses:', error);
+        showError('Failed to load courses: ' + error.message);
+      }
+    }
+
+    // Load current user data
+    async function loadUserData() {
+      console.log('=== LOADING USER DATA ===');
+      
+      try {
+        // Check if Cognito is initialized
+        if (!window.AmazonCognitoIdentity) {
+          console.error('Cognito SDK not loaded');
+          showError('Authentication system not loaded. Please refresh the page.');
+          return;
+        }
+
+        if (!window.COGNITO_CONFIG) {
+          console.error('Cognito config not found');
+          showError('Configuration error. Please check cognito-config.js');
+          return;
+        }
+
+        const poolData = {
+          UserPoolId: window.COGNITO_CONFIG.userPoolId,
+          ClientId: window.COGNITO_CONFIG.clientId
+        };
+
+        const userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+        profileCurrentUser = userPool.getCurrentUser();
+
+        if (!profileCurrentUser) {
+          console.log('No user logged in, redirecting to login');
+          window.location.href = 'index.html';
+          return;
+        }
+
+        console.log('Current user:', profileCurrentUser.getUsername());
+
+        profileCurrentUser.getSession((err, session) => {
+          if (err) {
+            console.error('Session error:', err);
+            window.location.href = 'index.html';
+            return;
+          }
+
+          console.log('Session valid:', session.isValid());
+
+          profileCurrentUser.getUserAttributes((err, attributes) => {
+            if (err) {
+              console.error('Error getting attributes:', err);
+              showError('Failed to load user data');
+              return;
+            }
+
+            console.log('User attributes:', attributes);
+
+            // Convert to object
+            const attrs = {};
+            attributes.forEach(attr => {
+              attrs[attr.Name] = attr.Value;
+            });
+
+            console.log('Parsed attributes:', attrs);
+
+            // Fill in the form
+            document.getElementById('email').value = attrs.email || '';
+            document.getElementById('name').value = attrs.name || '';
+            
+            // Set current values if they exist
+            if (attrs['custom:department']) {
+              console.log('Setting department:', attrs['custom:department']);
+              document.getElementById('department').value = attrs['custom:department'];
+              loadCourses(attrs['custom:department']).then(() => {
+                if (attrs['custom:course']) {
+                  console.log('Setting course:', attrs['custom:course']);
+                  document.getElementById('course').value = attrs['custom:course'];
+                }
+              });
+            }
+            
+            if (attrs['custom:academicYear']) {
+              console.log('Setting academic year:', attrs['custom:academicYear']);
+              document.getElementById('academicYear').value = attrs['custom:academicYear'];
+            }
+            
+            if (attrs['custom:division']) {
+              console.log('Setting division:', attrs['custom:division']);
+              document.getElementById('division').value = attrs['custom:division'];
+            }
+
+            // Show current info
+            const hasAllInfo = attrs['custom:department'] && attrs['custom:course'] && 
+                              attrs['custom:academicYear'] && attrs['custom:division'];
+            
+            console.log('Has complete profile?', hasAllInfo);
+            
+            if (hasAllInfo) {
+              document.getElementById('currentInfo').style.display = 'block';
+              document.getElementById('currentInfo').innerHTML = `
+                <strong>Current Information:</strong><br>
+                Department: ${attrs['custom:department']}<br>
+                Course: ${attrs['custom:course']}<br>
+                Year: ${attrs['custom:academicYear']}<br>
+                Division: ${attrs['custom:division']}
+              `;
+            }
+          });
+        });
+      } catch (error) {
+        console.error('Error loading user data:', error);
+        showError('Failed to load user information: ' + error.message);
+      }
+    }
+
+    // Update user attributes
+    async function updateUserAttributes(attributes) {
+      console.log('=== UPDATING USER ATTRIBUTES ===');
+      console.log('Attributes to update:', attributes);
+      
+      return new Promise((resolve, reject) => {
+        profileCurrentUser.getSession((err, session) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+
+          const attributeList = attributes.map(attr => 
+            new AmazonCognitoIdentity.CognitoUserAttribute(attr)
+          );
+
+          profileCurrentUser.updateAttributes(attributeList, (err, result) => {
+            if (err) {
+              console.error('Update error:', err);
+              reject(err);
+            } else {
+              console.log('Update successful:', result);
+              resolve(result);
+            }
+          });
+        });
+      });
+    }
+
+    // Handle form submission
+    document.getElementById('profileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const department = document.getElementById('department').value;
+      const course = document.getElementById('course').value;
+      const academicYear = document.getElementById('academicYear').value;
+      const division = document.getElementById('division').value;
+      
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      
+      clearMessages();
+
+      if (!department || !course || !academicYear || !division) {
+        showError('Please fill in all fields');
+        return;
+      }
+
+      setButtonLoading(submitBtn, true);
+
+      try {
+        await updateUserAttributes([
+          { Name: 'custom:department', Value: department },
+          { Name: 'custom:course', Value: course },
+          { Name: 'custom:academicYear', Value: academicYear },
+          { Name: 'custom:division', Value: division }
+        ]);
+
+        setButtonLoading(submitBtn, false);
+        showSuccess('✓ Profile updated successfully! Redirecting...');
+        
+        // Redirect after 2 seconds
+        setTimeout(async () => {
+          // Use the redirectBasedOnRole from auth.js
+          await redirectBasedOnRole();
+        }, 2000);
+
+      } catch (error) {
+        setButtonLoading(submitBtn, false);
+        showError(error.message || 'Failed to update profile');
+      }
+    });
+
+    // Department change handler
+    document.getElementById('department').addEventListener('change', (e) => {
+      loadCourses(e.target.value);
+    });
+
+    // Logout handler
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      if (profileCurrentUser) {
+        profileCurrentUser.signOut();
+      }
+      window.location.href = 'index.html';
+    });
+
+    // Initialize on page load
+    window.addEventListener('DOMContentLoaded', async () => {
+      console.log('=== PAGE LOADED ===');
+      console.log('Firebase available?', typeof firebase !== 'undefined');
+      console.log('Cognito available?', typeof AmazonCognitoIdentity !== 'undefined');
+      
+      // Wait a bit for Firebase to initialize
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      await loadDepartments();
+      await loadUserData();
+    });
+  </script>
+</body>
+</html>

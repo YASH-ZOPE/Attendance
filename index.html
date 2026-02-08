@@ -9,7 +9,10 @@
   <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.3.7/dist/amazon-cognito-identity.min.js"></script>
   <script src="cognito-config.js"></script>
   <script src="auth.js"></script>
-  
+  <!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
   <style>
     * {
       margin: 0;
@@ -316,6 +319,33 @@
       color: #7a8a9a;
       font-size: 14px;
     }
+    .form-group select {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(30, 45, 65, 0.8);
+  border: 2px solid rgba(80, 120, 180, 0.4);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.form-group select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.form-group select:focus {
+  outline: none;
+  border-color: #5b9bd5;
+  background: rgba(30, 45, 65, 1);
+}
+
+.form-group select option {
+  background: rgba(20, 35, 55, 1);
+  color: #ffffff;
+}
   </style>
 </head>
 <body>
@@ -397,6 +427,42 @@
           <label for="signupName">Name</label>
           <input type="text" id="signupName" placeholder="Enter your full name" required autocomplete="name">
         </div>
+
+        <!-- After password confirmation, before checkbox -->
+
+<div class="form-group">
+  <label for="signupDepartment">Department</label>
+  <select id="signupDepartment" required>
+    <option value="">Loading departments...</option>
+  </select>
+</div>
+
+<div class="form-group">
+  <label for="signupCourse">Course</label>
+  <select id="signupCourse" required disabled>
+    <option value="">Select department first</option>
+  </select>
+</div>
+
+<div class="form-group">
+  <label for="signupAcademicYear">Academic Year</label>
+  <select id="signupAcademicYear" required>
+    <option value="">Select year</option>
+    <option value="FY">First Year (FY)</option>
+    <option value="SY">Second Year (SY)</option>
+    <option value="TY">Third Year (TY)</option>
+  </select>
+</div>
+
+<div class="form-group">
+  <label for="signupDivision">Division</label>
+  <select id="signupDivision" required>
+    <option value="">Select division</option>
+    <option value="Division A">Division A</option>
+    <option value="Division B">Division B</option>
+    <option value="Division C">Division C</option>
+  </select>
+</div>
 
         <div class="form-group">
           <label for="signupPassword">Password</label>
@@ -649,53 +715,70 @@
     });
 
     // PAGE 3: Signup Form
-    document.getElementById('signupForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('signupEmail').value.trim();
-      const name = document.getElementById('signupName').value.trim();
-      const password = document.getElementById('signupPassword').value;
-      const confirmPassword = document.getElementById('signupPasswordConfirm').value;
-      const submitBtn = e.target.querySelector('button[type="submit"]');
+    // Update existing signup form submit handler
+document.getElementById('signupForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  // Existing fields
+  const email = document.getElementById('signupEmail').value.trim();
+  const name = document.getElementById('signupName').value.trim();
+  const password = document.getElementById('signupPassword').value;
+  const confirmPassword = document.getElementById('signupPasswordConfirm').value;
+  
+  // NEW: Division fields
+  const department = document.getElementById('signupDepartment').value;
+  const course = document.getElementById('signupCourse').value;
+  const academicYear = document.getElementById('signupAcademicYear').value;
+  const division = document.getElementById('signupDivision').value;
+  
+  const submitBtn = e.target.querySelector('button[type="submit"]');
 
-      clearAllErrors();
+  clearAllErrors();
 
-      if (!email || !name || !password || !confirmPassword) {
-        showError('signupError', 'Please fill in all fields');
-        return;
-      }
+  // Existing validations
+  if (!email || !name || !password || !confirmPassword) {
+    showError('signupError', 'Please fill in all fields');
+    return;
+  }
+  
+  // NEW: Validate division fields
+  if (!department || !course || !academicYear || !division) {
+    showError('signupError', 'Please select department, course, academic year, and division');
+    return;
+  }
 
-      if (password !== confirmPassword) {
-        showError('signupError', 'Passwords do not match');
-        return;
-      }
+  if (password !== confirmPassword) {
+    showError('signupError', 'Passwords do not match');
+    return;
+  }
 
-      if (password.length < 8) {
-        showError('signupError', 'Password must be at least 8 characters long');
-        return;
-      }
+  if (password.length < 8) {
+    showError('signupError', 'Password must be at least 8 characters long');
+    return;
+  }
 
-      setButtonLoading(submitBtn, true);
+  setButtonLoading(submitBtn, true);
 
-      try {
-        // Call auth.js signup function
-        const result = await signup(email, name, password);
-        
-        setButtonLoading(submitBtn, false);
-        
-        // Store for verification
-        currentEmail = email;
-        currentUserForVerification = result;
-        
-        // Show verification page
-        document.getElementById('verifyEmailDisplay').textContent = email;
-        showPage('page-verify');
-        showSuccess('verifySuccess', 'Verification code sent to your email!');
-        
-      } catch (error) {
-        setButtonLoading(submitBtn, false);
-        showError('signupError', error.message || 'Failed to create account');
-      }
-    });
+  try {
+    // Call signup with all 7 parameters
+    const result = await signup(email, name, password, department, course, academicYear, division);
+    
+    setButtonLoading(submitBtn, false);
+    
+    // Store for verification
+    currentEmail = email;
+    currentUserForVerification = result;
+    
+    // Show verification page
+    document.getElementById('verifyEmailDisplay').textContent = email;
+    showPage('page-verify');
+    showSuccess('verifySuccess', 'Verification code sent to your email!');
+    
+  } catch (error) {
+    setButtonLoading(submitBtn, false);
+    showError('signupError', error.message || 'Failed to create account');
+  }
+});
 
     // PAGE 4: Verify Email
     document.getElementById('verifyForm').addEventListener('submit', async (e) => {
@@ -885,6 +968,87 @@
         console.log('Not logged in');
       }
     });
+
+    // Initialize Firebase dropdowns on page load
+window.addEventListener('DOMContentLoaded', async () => {
+  // ... existing code ...
+  
+  // Load departments from Firebase
+  await initializeFirebaseDropdowns();
+});
+
+// Initialize Firebase and load departments
+async function initializeFirebaseDropdowns() {
+  try {
+    const db = firebase.database();
+    
+    // Load departments
+    const departmentsRef = db.ref('mainSystem/departments');
+    departmentsRef.on('value', (snapshot) => {
+      const departments = snapshot.val();
+      const departmentSelect = document.getElementById('signupDepartment');
+      
+      // Clear existing options
+      departmentSelect.innerHTML = '<option value="">Select department</option>';
+      
+      if (departments && departments.length > 0) {
+        departments.forEach(dept => {
+          const option = document.createElement('option');
+          option.value = dept;
+          option.textContent = dept;
+          departmentSelect.appendChild(option);
+        });
+      } else {
+        departmentSelect.innerHTML = '<option value="">No departments available</option>';
+        showError('signupError', 'No departments configured. Please contact admin.');
+      }
+    });
+    
+  } catch (error) {
+    console.error('Firebase initialization error:', error);
+    showError('signupError', 'Failed to load departments. Please refresh the page.');
+  }
+}
+
+// When department changes, load courses
+document.getElementById('signupDepartment').addEventListener('change', async (e) => {
+  const selectedDept = e.target.value;
+  const courseSelect = document.getElementById('signupCourse');
+  
+  if (!selectedDept) {
+    courseSelect.disabled = true;
+    courseSelect.innerHTML = '<option value="">Select department first</option>';
+    return;
+  }
+  
+  try {
+    const db = firebase.database();
+    const coursesRef = db.ref(`mainSystem/courses/${selectedDept}`);
+    
+    const snapshot = await coursesRef.once('value');
+    const courses = snapshot.val();
+    
+    courseSelect.innerHTML = '<option value="">Select course</option>';
+    
+    if (courses && courses.length > 0) {
+      courses.forEach(course => {
+        const option = document.createElement('option');
+        option.value = course;
+        option.textContent = course;
+        courseSelect.appendChild(option);
+      });
+      courseSelect.disabled = false;
+    } else {
+      courseSelect.innerHTML = '<option value="">No courses available</option>';
+      courseSelect.disabled = true;
+      showError('signupError', 'No courses available for this department.');
+    }
+    
+  } catch (error) {
+    console.error('Error loading courses:', error);
+    showError('signupError', 'Failed to load courses for this department.');
+  }
+});
   </script>
 </body>
 </html>
