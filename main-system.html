@@ -341,52 +341,54 @@
     }
 
     /* Collapsible Info Box */
-.info-alert {
-  background: linear-gradient(135deg, #E8E4F0 0%, #DDD8E8 100%);
-  border: none;
-  border-left: 4px solid #C8B8D8;
-  color: #6A5A7A;
-  transition: max-height 0.3s ease, padding 0.3s ease;
-  overflow: hidden;
-  cursor: pointer;
-  max-height: 60px; /* Collapsed state */
-  padding: 15px 20px;
-}
+    .info-alert {
+      background: linear-gradient(135deg, #E8E4F0 0%, #DDD8E8 100%);
+      border: none;
+      border-left: 4px solid #C8B8D8;
+      color: #6A5A7A;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+      overflow: hidden;
+      cursor: pointer;
+      max-height: 60px;
+      /* Collapsed state */
+      padding: 15px 20px;
+    }
 
-.info-alert.collapsed {
-  max-height: 60px;
-}
+    .info-alert.collapsed {
+      max-height: 60px;
+    }
 
-.info-alert.collapsed .info-content {
-  display: none;
-}
+    .info-alert.collapsed .info-content {
+      display: none;
+    }
 
-.info-alert.collapsed h5::after {
-  content: " (Click to expand)";
-  font-size: 0.8rem;
-  font-weight: normal;
-  opacity: 0.7;
-}
+    .info-alert.collapsed h5::after {
+      content: " (Click to expand)";
+      font-size: 0.8rem;
+      font-weight: normal;
+      opacity: 0.7;
+    }
 
-.info-alert:hover,
-.info-alert.expanded {
-  max-height: 500px; /* Expanded state */
-  padding: 20px;
-}
+    .info-alert:hover,
+    .info-alert.expanded {
+      max-height: 500px;
+      /* Expanded state */
+      padding: 20px;
+    }
 
-.info-alert:hover .info-content,
-.info-alert.expanded .info-content {
-  display: block;
-}
+    .info-alert:hover .info-content,
+    .info-alert.expanded .info-content {
+      display: block;
+    }
 
-.info-alert h5 {
-  margin-bottom: 10px;
-  transition: margin 0.3s ease;
-}
+    .info-alert h5 {
+      margin-bottom: 10px;
+      transition: margin 0.3s ease;
+    }
 
-.info-alert.collapsed h5 {
-  margin-bottom: 0;
-}
+    .info-alert.collapsed h5 {
+      margin-bottom: 0;
+    }
 
     .modal-header-custom {
       background: linear-gradient(135deg, #F5D6D6 0%, #EDCACA 100%);
@@ -451,225 +453,345 @@
 
 
 
-/* Fix Academic Year section spacing */
-#month-section .row.g-2 {
-  gap: 10px !important;
-  margin-bottom: 15px;
-}
+    /* Fix Academic Year section spacing */
+    #month-section .row.g-2 {
+      gap: 10px !important;
+      margin-bottom: 15px;
+    }
 
-/* Better dropdown sizing */
-#month-section .col-2 {
-  min-width: 150px; /* Prevent squeezing */
-}
+    /* Better dropdown sizing */
+    #month-section .col-2 {
+      min-width: 150px;
+      /* Prevent squeezing */
+    }
 
-/* Academic Year dropdowns - more space */
-#academicYearLevelSelect,
-#divisionSelect {
-  min-width: 120px;
-}
+    /* Academic Year dropdowns - more space */
+    #academicYearLevelSelect,
+    #divisionSelect {
+      min-width: 120px;
+    }
 
-/* Apply button - better alignment */
-#applyMonthBtn {
-  margin-top: 0;
-  height: 38px; /* Match dropdown height */
-}
+    /* Apply button - better alignment */
+    #applyMonthBtn {
+      margin-top: 0;
+      height: 38px;
+      /* Match dropdown height */
+    }
 
-/* Alert boxes - prevent text cutoff */
-#currentAcademicDisplay,
-#currentMonthDisplay {
-  word-wrap: break-word;
-  white-space: normal;
-  line-height: 1.4;
-}
+    /* Alert boxes - prevent text cutoff */
+    #currentAcademicDisplay,
+    #currentMonthDisplay {
+      word-wrap: break-word;
+      white-space: normal;
+      line-height: 1.4;
+    }
 
-.alert.mb-0.py-2 {
-  padding: 10px 15px !important;
-  min-height: 45px;
-}
+    .alert.mb-0.py-2 {
+      padding: 10px 15px !important;
+      min-height: 45px;
+    }
 
-/* Better label spacing */
-#month-section .form-label.fw-bold.small {
-  margin-bottom: 5px;
-  font-size: 0.85rem;
-}
+    /* Better label spacing */
+    #month-section .form-label.fw-bold.small {
+      margin-bottom: 5px;
+      font-size: 0.85rem;
+    }
 
-/* ==================== ATTENDANCE SECTION BUTTON FIX ==================== */
+    /* ==================== ATTENDANCE SECTION BUTTON FIX ==================== */
 
-/* Fix camera/attendance section */
-#camera-section {
-  margin: 30px 0; /* Space from navbar and other sections */
-  padding: 0 15px;
-  position: relative;
-  z-index: 1; /* Below navbar */
-}
+    /* Fix camera/attendance section */
+    #camera-section {
+      margin: 30px 0;
+      /* Space from navbar and other sections */
+      padding: 0 15px;
+      position: relative;
+      z-index: 1;
+      /* Below navbar */
+    }
 
-/* Attendance button - cleaner design */
-.go-btn {
-  width: 100%; /* Full width on mobile, container width on desktop */
-  max-width: 1050px; /* Limit max width */
-  height: auto;
-  min-height: 80px;
-  padding: 20px 30px;
-  margin: 0 auto 30px; /* Center horizontally */
-  display: block;
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #fff;
-  background: linear-gradient(135deg, #4facfe 0%, #00c6ff 100%);
-  border: none;
-  border-radius: 15px;
-  box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-align: center;
-  line-height: 1.4;
-}
+    /* Attendance button - cleaner design */
+    .go-btn {
+      width: 100%;
+      /* Full width on mobile, container width on desktop */
+      max-width: 1050px;
+      /* Limit max width */
+      height: auto;
+      min-height: 80px;
+      padding: 20px 30px;
+      margin: 0 auto 30px;
+      /* Center horizontally */
+      display: block;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #fff;
+      background: linear-gradient(135deg, #4facfe 0%, #00c6ff 100%);
+      border: none;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      line-height: 1.4;
+    }
 
-.go-btn:hover {
-  background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
-}
+    .go-btn:hover {
+      background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+    }
 
-.go-btn:active {
-  transform: translateY(-1px);
-}
-/* ==================== RESPONSIVE FIXES ==================== */
+    .go-btn:active {
+      transform: translateY(-1px);
+    }
 
-/* Desktop view */
-@media (min-width: 992px) {
-  #month-section .row.g-2 {
-    gap: 15px !important;
-  }
-  
-  #month-section .col-2 {
-    flex: 0 0 auto;
-    width: auto;
-  }
-  
-  .go-btn {
-    width: 7000px;
-    min-height: 100px;
-    font-size: 1.3rem;
-  }
-}
+    /* ==================== RESPONSIVE FIXES ==================== */
 
-/* Tablet view */
-@media (max-width: 991px) and (min-width: 577px) {
-  #month-section .col-2 {
-    width: 48%;
-    margin-bottom: 10px;
-  }
-  
-  .go-btn {
-    width: 90%;
-    min-height: 90px;
-  }
-}
+    /* Desktop view */
+    @media (min-width: 992px) {
+      #month-section .row.g-2 {
+        gap: 15px !important;
+      }
 
-/* Mobile view */
-@media (max-width: 576px) {
-  /* Stack Academic Year dropdowns */
-  #month-section .col-2 {
-    width: 100%;
-    margin-bottom: 10px;
-  }
-  
-  #month-section .row.g-2 {
-    gap: 0 !important;
-  }
-  
-  /* Full width button on mobile */
-  .go-btn {
-    width: 100%;
-    min-height: 70px;
-    padding: 15px 20px;
-    margin-bottom: 20px;
-    font-size: 1.1rem;
-    border-radius: 12px;
-  }
-  
-  /* Smaller alert text on mobile */
-  .alert.mb-0.py-2 {
-    font-size: 0.85rem;
-    padding: 8px 12px !important;
-  }
-  
-  /* Fix navbar overlap */
-  body {
-    padding-top: 65px; /* Slightly more space */
-  }
-  
-  #camera-section {
-    margin-top: 15px;
-  }
-}
+      #month-section .col-2 {
+        flex: 0 0 auto;
+        width: auto;
+      }
 
-/* Extra small devices */
-@media (max-width: 400px) {
-  .go-btn {
-    font-size: 1rem;
-    min-height: 60px;
-    padding: 12px 15px;
-  }
-  
-  .go-btn::before {
-    font-size: 1.1rem;
-  }
-}
+      .go-btn {
+        width: 7000px;
+        min-height: 100px;
+        font-size: 1.3rem;
+      }
+    }
 
-/* ==================== NAVBAR Z-INDEX FIX ==================== */
+    /* Tablet view */
+    @media (max-width: 991px) and (min-width: 577px) {
+      #month-section .col-2 {
+        width: 48%;
+        margin-bottom: 10px;
+      }
 
-/* Ensure navbar stays on top */
-.navbar.fixed-top {
-  z-index: 1030; /* Bootstrap default, but explicitly set */
-}
+      .go-btn {
+        width: 90%;
+        min-height: 90px;
+      }
+    }
 
-/* All content below navbar */
-.container.py-4 {
-  position: relative;
-  z-index: 1;
-}
+    /* Mobile view */
+    @media (max-width: 576px) {
 
-/* ==================== ALIGNMENT & SPACING IMPROVEMENTS ==================== */
+      /* Stack Academic Year dropdowns */
+      #month-section .col-2 {
+        width: 100%;
+        margin-bottom: 10px;
+      }
 
-/* Better section spacing */
-.nav-section {
-  margin-bottom: 25px;
-  scroll-margin-top: 90px; /* Account for fixed navbar */
-}
+      #month-section .row.g-2 {
+        gap: 0 !important;
+      }
 
-/* Section cards - consistent padding */
-.section-card {
-  padding: 25px;
-}
+      /* Full width button on mobile */
+      .go-btn {
+        width: 100%;
+        min-height: 70px;
+        padding: 15px 20px;
+        margin-bottom: 20px;
+        font-size: 1.1rem;
+        border-radius: 12px;
+      }
 
-@media (max-width: 576px) {
-  .section-card {
-    padding: 15px;
-  }
-}
+      /* Smaller alert text on mobile */
+      .alert.mb-0.py-2 {
+        font-size: 0.85rem;
+        padding: 8px 12px !important;
+      }
 
-/* Calendar container spacing */
-#calendarContainer {
-  margin-top: 25px !important;
-  padding: 20px;
-  background: #fafafa;
-  border-radius: 10px;
-}
+      /* Fix navbar overlap */
+      body {
+        padding-top: 65px;
+        /* Slightly more space */
+      }
 
-/* Better form control heights */
-.form-select,
-.form-control {
-  height: 38px;
-  padding: 6px 12px;
-}
+      #camera-section {
+        margin-top: 15px;
+      }
+    }
 
-.form-select-sm {
-  height: 32px;
-  padding: 4px 10px;
-  font-size: 0.875rem;
-}
+    /* Extra small devices */
+    @media (max-width: 400px) {
+      .go-btn {
+        font-size: 1rem;
+        min-height: 60px;
+        padding: 12px 15px;
+      }
+
+      .go-btn::before {
+        font-size: 1.1rem;
+      }
+    }
+
+    /* ==================== NAVBAR Z-INDEX FIX ==================== */
+
+    /* Ensure navbar stays on top */
+    .navbar.fixed-top {
+      z-index: 1030;
+      /* Bootstrap default, but explicitly set */
+    }
+
+    /* All content below navbar */
+    .container.py-4 {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ==================== ALIGNMENT & SPACING IMPROVEMENTS ==================== */
+
+    /* Better section spacing */
+    .nav-section {
+      margin-bottom: 25px;
+      scroll-margin-top: 90px;
+      /* Account for fixed navbar */
+    }
+
+    /* Section cards - consistent padding */
+    .section-card {
+      padding: 25px;
+    }
+
+    @media (max-width: 576px) {
+      .section-card {
+        padding: 15px;
+      }
+    }
+
+    /* Calendar container spacing */
+    #calendarContainer {
+      margin-top: 25px !important;
+      padding: 20px;
+      background: #fafafa;
+      border-radius: 10px;
+    }
+
+    /* Better form control heights */
+    .form-select,
+    .form-control {
+      height: 38px;
+      padding: 6px 12px;
+    }
+
+    .form-select-sm {
+      height: 32px;
+      padding: 4px 10px;
+      font-size: 0.875rem;
+    }
+
+    /* ==================== LEAVE APPLICATION STYLES ==================== */
+
+    /* Leave Header Hover Effect */
+    .leave-header:hover {
+      background: #f8f9fa;
+    }
+
+    .leave-header:active {
+      background: #e9ecef;
+    }
+
+    /* Leave Status Badges */
+    .leave-status-pending {
+      background: #ffc107;
+      color: #000;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .leave-status-approved {
+      background: #28a745;
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .leave-status-rejected {
+      background: #dc3545;
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    /* Leave Reason Text */
+    .leave-reason-text {
+      font-size: 0.9rem;
+      color: #6c757d;
+      font-style: italic;
+    }
+
+    /* On Leave Badge (for attendance table) */
+    .on-leave-badge {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      padding: 3px 10px;
+      border-radius: 15px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    /* Leave Note in Defaulter List */
+    .leave-note {
+      background: #e7f3ff;
+      border-left: 3px solid #667eea;
+      padding: 8px 12px;
+      margin-top: 5px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+
+    .leave-note i {
+      color: #667eea;
+    }
+
+    /* Leave Action Buttons */
+    .leave-action-btn {
+      padding: 4px 10px;
+      font-size: 0.85rem;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    .leave-action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Leave Table Row Highlighting */
+    .leave-row-pending {
+      background-color: #fff9e6;
+    }
+
+    .leave-row-approved {
+      background-color: #e8f5e9;
+    }
+
+    .leave-row-rejected {
+      background-color: #ffebee;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      #leaveContent .table {
+        font-size: 0.85rem;
+      }
+
+      .leave-action-btn {
+        font-size: 0.75rem;
+        padding: 3px 8px;
+      }
+    }
   </style>
 </head>
 
@@ -704,6 +826,9 @@
           <li class="nav-item teacher-only">
             <a class="nav-link" href="#upload-section"><i class="bi bi-upload me-1"></i>Upload</a>
           </li>
+          <li class="nav-item teacher-only">
+            <a class="nav-link" href="#leave-section"><i class="bi bi-calendar-x me-1"></i>Leave</a>
+          </li>
           <li class="nav-item">
             <a class="nav-link" href="#attendance-section"><i class="bi bi-table me-1"></i>Attendance</a>
           </li>
@@ -728,6 +853,7 @@
     <a href="#selection-section" class="teacher-only"><i class="bi bi-check-square"></i></a>
     <a href="#month-section"><i class="bi bi-calendar3"></i></a>
     <a href="#upload-section" class="teacher-only"><i class="bi bi-upload"></i></a>
+    <a href="#leave-section" class="teacher-only"><i class="bi bi-calendar-x"></i></a>
     <a href="#attendance-section"><i class="bi bi-table"></i></a>
     <a href="#defaulter-section" class="teacher-only"><i class="bi bi-exclamation-triangle"></i></a>
   </div>
@@ -736,18 +862,18 @@
 
 
     <!-- Info Box -->
-<div class="alert info-alert collapsed mb-4" id="infoBox">
-  <h5><i class="bi bi-info-circle me-2"></i>How to Use</h5>
-  <ol class="mb-0 info-content">
-    <li><strong>Add Department</strong> - Create departments like Computer Science, Mechanical, etc.</li>
-    <li><strong>Add Course</strong> - Select department and add courses like BTech, MTech, etc.</li>
-    <li><strong>Add Subject</strong> - Select course and add subjects for that course</li>
-    <li><strong>Select All</strong> - Choose Department, Course, Subject</li>
-    <li><strong>Select Month & Academic Year</strong> - Choose academic year (FY/SY/TY), year, division, month</li>
-    <li><strong>Upload CSV</strong> - Upload attendance file</li>
-    <li><strong>Manage Attendance</strong> - View, edit, mark holidays, check defaulters</li>
-  </ol>
-</div>
+    <div class="alert info-alert collapsed mb-4" id="infoBox">
+      <h5><i class="bi bi-info-circle me-2"></i>How to Use</h5>
+      <ol class="mb-0 info-content">
+        <li><strong>Add Department</strong> - Create departments like Computer Science, Mechanical, etc.</li>
+        <li><strong>Add Course</strong> - Select department and add courses like BTech, MTech, etc.</li>
+        <li><strong>Add Subject</strong> - Select course and add subjects for that course</li>
+        <li><strong>Select All</strong> - Choose Department, Course, Subject</li>
+        <li><strong>Select Month & Academic Year</strong> - Choose academic year (FY/SY/TY), year, division, month</li>
+        <li><strong>Upload CSV</strong> - Upload attendance file</li>
+        <li><strong>Manage Attendance</strong> - View, edit, mark holidays, check defaulters</li>
+      </ol>
+    </div>
 
 
     <!-- SECTION 1: Department Management -->
@@ -833,7 +959,7 @@
             <div class="col-md-4 admin-only">
               <label class="form-label fw-bold">Actions</label>
               <div>
-                <button id="deleteCourseBtn" class="btn btn-outline-danger" disabled>
+                <button id="deleteCourseBtn" class="btn btn-outline-danger">
                   <i class="bi bi-trash me-1"></i>Delete Selected
                 </button>
               </div>
@@ -889,7 +1015,7 @@
             <div class="col-md-4 admin-only">
               <label class="form-label fw-bold">Actions</label>
               <div>
-                <button id="deleteSubjectBtn" class="btn btn-outline-danger" disabled>
+                <button id="deleteSubjectBtn" class="btn btn-outline-danger">
                   <i class="bi bi-trash me-1"></i>Delete Selected
                 </button>
               </div>
@@ -1080,7 +1206,7 @@
     </section>
 
 
-    <!-- Statistics Section --> 
+    <!-- Statistics Section -->
     <section id="stats-section" class="nav-section">
       <div class="row g-3 mb-4">
         <div class="col-md-3 teacher-only">
@@ -1116,7 +1242,7 @@
             </div>
           </div>
         </div>
-        
+
         <div class="col-md-3 teacher-only">
           <div class="stats-card warning">
             <div class="d-flex justify-content-between align-items-center">
@@ -1199,6 +1325,88 @@
         </div>
       </div>
     </section>
+
+    <!-- SECTION: Leave Applications (Collapsible) -->
+    <section id="leave-section" class="nav-section teacher-only">
+      <div class="section-card">
+
+        <!-- Collapsed Header (Clickable) -->
+        <div class="d-flex justify-content-between align-items-center leave-header" id="leaveHeaderToggle"
+          style="cursor: pointer; padding: 10px; border-radius: 8px; transition: background 0.2s;">
+          <div>
+            <h4 class="section-title mb-0" style="display: inline-block; border: none; padding: 0;">
+              <i class="bi bi-calendar-x me-2"></i>Leave Applications
+            </h4>
+            <span class="badge bg-warning text-dark ms-2" id="leavePendingCount" style="display: none;">0</span>
+            <span class="badge bg-success text-white ms-1" id="leaveApprovedCount" style="display: none;">0</span>
+          </div>
+          <i class="bi bi-chevron-down fs-4 text-muted" id="leaveToggleIcon"></i>
+        </div>
+
+        <!-- Expandable Content (Hidden by default) -->
+        <div id="leaveContent" style="display: none; margin-top: 20px;">
+
+          <!-- Submit Button & Filters -->
+          <div class="row mb-3 align-items-end">
+            <div class="col-md-3">
+              <button class="btn btn-primary w-100" id="openLeaveFormBtn">
+                <i class="bi bi-plus-circle me-1"></i>Submit New Leave
+              </button>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-bold small">Filter by Status</label>
+              <select id="leaveStatusFilter" class="form-select form-select-sm">
+                <option value="all">All Applications</option>
+                <option value="pending">Pending Only</option>
+                <option value="approved">Approved Only</option>
+                <option value="rejected">Rejected Only</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-bold small">Filter by Month</label>
+              <select id="leaveMonthFilter" class="form-select form-select-sm">
+                <option value="current">Current Month</option>
+                <option value="all">All Months</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <button class="btn btn-outline-secondary btn-sm w-100" id="refreshLeavesBtn">
+                <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+              </button>
+            </div>
+          </div>
+
+          <!-- Leave Applications Table -->
+          <div class="table-responsive">
+            <table class="table table-hover table-sm">
+              <thead class="table-light">
+                <tr>
+                  <th width="8%">ID</th>
+                  <th width="15%">Student Name</th>
+                  <th width="12%">From</th>
+                  <th width="12%">To</th>
+                  <th width="8%">Days</th>
+                  <th width="20%">Reason</th>
+                  <th width="10%">Status</th>
+                  <th width="15%">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="leaveTableBody">
+                <tr>
+                  <td colspan="8" class="text-center text-muted py-4">
+                    <i class="bi bi-inbox fs-2"></i>
+                    <p class="mt-2 mb-0">No leave applications yet</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+
     <section id="camera-section" class="nav-section">
       <button class="go-btn" onclick="window.location.href='face-recognition.html'">
         Attendance Section
@@ -1211,31 +1419,31 @@
 
         <!-- Day Navigation -->
         <div class="row g-3 mb-3">
-  <div class="col-md-4">
-    <label class="form-label fw-bold">Select Day</label>
-    <select id="dateSelect" class="form-select" disabled>
-      <option value="">-- Select month first --</option>
-    </select>
-  </div>
-  <div class="col-md-4">
-    <label class="form-label fw-bold">Navigation</label>
-    <div class="btn-group w-100">
-      <button id="prevDayBtn" class="btn btn-outline-primary" disabled>
-        <i class="bi bi-chevron-left"></i> Previous
-      </button>
-      <button id="nextDayBtn" class="btn btn-outline-primary" disabled>
-        Next <i class="bi bi-chevron-right"></i>
-      </button>
-    </div>
-  </div>
-  <div class="col-md-4">  <!-- ✅ REMOVED teacher-only from div -->
-    <label class="form-label fw-bold teacher-only">Quick Actions</label>  <!-- ✅ MOVED to label -->
-    <div class="btn-group w-100 teacher-only">  <!-- ✅ MOVED to buttons container -->
-      <button id="markAllPresentBtn" class="btn btn-outline-success">All Present</button>
-      <button id="markAllAbsentBtn" class="btn btn-outline-danger">All Absent</button>
-    </div>
-  </div>
-</div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Select Day</label>
+            <select id="dateSelect" class="form-select" disabled>
+              <option value="">-- Select month first --</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Navigation</label>
+            <div class="btn-group w-100">
+              <button id="prevDayBtn" class="btn btn-outline-primary" disabled>
+                <i class="bi bi-chevron-left"></i> Previous
+              </button>
+              <button id="nextDayBtn" class="btn btn-outline-primary" disabled>
+                Next <i class="bi bi-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+          <div class="col-md-4"> <!-- ✅ REMOVED teacher-only from div -->
+            <label class="form-label fw-bold teacher-only">Quick Actions</label> <!-- ✅ MOVED to label -->
+            <div class="btn-group w-100 teacher-only"> <!-- ✅ MOVED to buttons container -->
+              <button id="markAllPresentBtn" class="btn btn-outline-success">All Present</button>
+              <button id="markAllAbsentBtn" class="btn btn-outline-danger">All Absent</button>
+            </div>
+          </div>
+        </div>
         <div class="teacher-only">
           <div class="row g-2 mb-3">
             <div class="col-12 col-sm-6 col-md-3">
@@ -1652,45 +1860,45 @@
       }
     }
     // After successful login, read user's division attributes
-async function initializeMainSystemForStudent() {
-  try {
-    const user = await getCurrentUser();
-    const attributes = await getUserAttributes();
-    
-    // Extract custom attributes
-    const department = attributes['custom:department'];
-    const course = attributes['custom:course'];
-    const academicYear = attributes['custom:academicYear'];
-    const division = attributes['custom:division'];
-    
-    if (department && course && academicYear && division) {
-      // Auto-populate and LOCK the dropdowns
-      document.getElementById('departmentSelect').value = department;
-      document.getElementById('departmentSelect').disabled = true;
-      
-      // Load courses for this department
-      await loadCoursesForDepartment(department);
-      document.getElementById('courseSelect').value = course;
-      document.getElementById('courseSelect').disabled = true;
-      
-      document.getElementById('academicYearSelect').value = academicYear;
-      document.getElementById('academicYearSelect').disabled = true;
-      
-      document.getElementById('divisionSelect').value = division;
-      document.getElementById('divisionSelect').disabled = true;
-      
-      console.log('✅ Student division locked:', { department, course, academicYear, division });
-      
-      // Load their attendance data
-      await loadAttendanceForDivision();
-    } else {
-      console.warn('⚠️ Student missing division attributes');
+    async function initializeMainSystemForStudent() {
+      try {
+        const user = await getCurrentUser();
+        const attributes = await getUserAttributes();
+
+        // Extract custom attributes
+        const department = attributes['custom:department'];
+        const course = attributes['custom:course'];
+        const academicYear = attributes['custom:academicYear'];
+        const division = attributes['custom:division'];
+
+        if (department && course && academicYear && division) {
+          // Auto-populate and LOCK the dropdowns
+          document.getElementById('departmentSelect').value = department;
+          document.getElementById('departmentSelect').disabled = true;
+
+          // Load courses for this department
+          await loadCoursesForDepartment(department);
+          document.getElementById('courseSelect').value = course;
+          document.getElementById('courseSelect').disabled = true;
+
+          document.getElementById('academicYearSelect').value = academicYear;
+          document.getElementById('academicYearSelect').disabled = true;
+
+          document.getElementById('divisionSelect').value = division;
+          document.getElementById('divisionSelect').disabled = true;
+
+          console.log('✅ Student division locked:', { department, course, academicYear, division });
+
+          // Load their attendance data
+          await loadAttendanceForDivision();
+        } else {
+          console.warn('⚠️ Student missing division attributes');
+        }
+
+      } catch (error) {
+        console.error('Error initializing student:', error);
+      }
     }
-    
-  } catch (error) {
-    console.error('Error initializing student:', error);
-  }
-}
     // Load data (FIREBASE FIRST, fallback to IndexedDB)
     async function loadFromStorage(key) {
       let path;
@@ -1803,71 +2011,71 @@ async function initializeMainSystemForStudent() {
 
     // ==================== AUTHENTICATION CHECK ====================
     async function checkAuthAndInit() {
-  try {
-    // Check if logged in
-    const user = await getCurrentUser();
+      try {
+        // Check if logged in
+        const user = await getCurrentUser();
 
-    if (!user) {
-      // Not logged in - redirect to login
-      window.location.href = 'index.html';
-      return;
-    }
+        if (!user) {
+          // Not logged in - redirect to login
+          window.location.href = 'index.html';
+          return;
+        }
 
-    // Get role
-    const role = await getUserRole();
+        // Get role
+        const role = await getUserRole();
 
-    // Show user info
-    console.log(`Logged in as: ${user.attributes.email} (${role})`);
+        // Show user info
+        console.log(`Logged in as: ${user.attributes.email} (${role})`);
 
-    // ✅ FOR STUDENTS: Auto-populate and lock division fields
-    if (role === 'student') {
-      const attributes = await getUserAttributes();
-      
-      const department = attributes['custom:department'];
-      const course = attributes['custom:course'];
-      const academicYear = attributes['custom:academicYear'];
-      const division = attributes['custom:division'];
-      
-      if (department && course && academicYear && division) {
-        // Set in appState
-        appState.selectedDepartment = department;
-        appState.selectedCourse = course;
-        appState.selectedAcademicYear = academicYear;
-        appState.selectedDivision = division;
-        
-        console.log('✅ Student division locked:', { department, course, academicYear, division });
-      } else {
-        console.warn('⚠️ Student missing division attributes');
-        alert('Your account is missing division information. Please contact admin.');
+        // ✅ FOR STUDENTS: Auto-populate and lock division fields
+        if (role === 'student') {
+          const attributes = await getUserAttributes();
+
+          const department = attributes['custom:department'];
+          const course = attributes['custom:course'];
+          const academicYear = attributes['custom:academicYear'];
+          const division = attributes['custom:division'];
+
+          if (department && course && academicYear && division) {
+            // Set in appState
+            appState.selectedDepartment = department;
+            appState.selectedCourse = course;
+            appState.selectedAcademicYear = academicYear;
+            appState.selectedDivision = division;
+
+            console.log('✅ Student division locked:', { department, course, academicYear, division });
+          } else {
+            console.warn('⚠️ Student missing division attributes');
+            alert('Your account is missing division information. Please contact admin.');
+          }
+        }
+
+        if (role === 'teacher') {
+          console.log('🔄 Teacher login - Clearing session selections');
+
+          // Clear from appState
+          appState.selectedDepartment = null;
+          appState.selectedCourse = null;
+          appState.selectedSubject = null;
+          appState.selectedAcademicYear = null;
+          appState.selectedDivision = null;
+
+          // Clear from storage
+          await saveToStorage('selectedDepartment', null);
+          await saveToStorage('selectedCourse', null);
+          await saveToStorage('selectedSubject', null);
+          await saveToStorage('selectedAcademicYear', null);
+          await saveToStorage('selectedDivision', null);
+        }
+
+        // Continue with normal initialization
+        initialize();
+
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        window.location.href = 'index.html';
       }
     }
-
-    if (role === 'teacher') {
-      console.log('🔄 Teacher login - Clearing session selections');
-      
-      // Clear from appState
-      appState.selectedDepartment = null;
-      appState.selectedCourse = null;
-      appState.selectedSubject = null;
-      appState.selectedAcademicYear = null;
-      appState.selectedDivision = null;
-      
-      // Clear from storage
-      await saveToStorage('selectedDepartment', null);
-      await saveToStorage('selectedCourse', null);
-      await saveToStorage('selectedSubject', null);
-      await saveToStorage('selectedAcademicYear', null);
-      await saveToStorage('selectedDivision', null);
-    }
-    
-    // Continue with normal initialization
-    initialize();
-    
-  } catch (error) {
-    console.error('Auth check failed:', error);
-    window.location.href = 'index.html';
-  }
-}
 
     // ==================== ROLE-BASED UI HIDING ====================
     async function applyRoleBasedUI() {
@@ -1910,31 +2118,31 @@ async function initializeMainSystemForStudent() {
     }
 
     function makeTableReadOnly() {
-  // ✅ Disable ONLY teacher-specific controls
-  document.querySelectorAll('.teacher-only input, .teacher-only select, .teacher-only button').forEach(el => {
-    el.disabled = true;
-  });
+      // ✅ Disable ONLY teacher-specific controls
+      document.querySelectorAll('.teacher-only input, .teacher-only select, .teacher-only button').forEach(el => {
+        el.disabled = true;
+      });
 
-  // ✅ Disable month/year/division/academic year selects for students
-  elements.academicYearLevelSelect.disabled = false; // Keep academic year select enabled for students
-  elements.divisionSelect.disabled = false;
-  elements.monthSelect.disabled = false;
-  elements.yearSelect.disabled = false;
+      // ✅ Disable month/year/division/academic year selects for students
+      elements.academicYearLevelSelect.disabled = false; // Keep academic year select enabled for students
+      elements.divisionSelect.disabled = false;
+      elements.monthSelect.disabled = false;
+      elements.yearSelect.disabled = false;
 
-  // ✅ EXPLICITLY ENABLE day navigation (force override)
-  elements.prevDayBtn.disabled = false;
-  elements.nextDayBtn.disabled = false;
-  elements.dateSelect.disabled = false;
-  
-  // ✅ Make buttons visible and clickable for students
-  elements.prevDayBtn.style.pointerEvents = 'auto';
-  elements.nextDayBtn.style.pointerEvents = 'auto';
-  elements.dateSelect.style.pointerEvents = 'auto';
+      // ✅ EXPLICITLY ENABLE day navigation (force override)
+      elements.prevDayBtn.disabled = false;
+      elements.nextDayBtn.disabled = false;
+      elements.dateSelect.disabled = false;
 
-  // ✅ Hide ONLY action buttons in table (NOT navigation)
-  const style = document.createElement('style');
-  style.id = 'student-readonly-styles';
-  style.textContent = `
+      // ✅ Make buttons visible and clickable for students
+      elements.prevDayBtn.style.pointerEvents = 'auto';
+      elements.nextDayBtn.style.pointerEvents = 'auto';
+      elements.dateSelect.style.pointerEvents = 'auto';
+
+      // ✅ Hide ONLY action buttons in table (NOT navigation)
+      const style = document.createElement('style');
+      style.id = 'student-readonly-styles';
+      style.textContent = `
     /* Hide mark attendance buttons */
     .mark-present-btn, 
     .mark-absent-btn { 
@@ -1955,14 +2163,14 @@ async function initializeMainSystemForStudent() {
       display: inline-block !important;
     }
   `;
-  
-  // ✅ Only add if not already added
-  if (!document.getElementById('student-readonly-styles')) {
-    document.head.appendChild(style);
-  }
-  
-  console.log('✅ Student read-only mode applied - day navigation enabled');
-}
+
+      // ✅ Only add if not already added
+      if (!document.getElementById('student-readonly-styles')) {
+        document.head.appendChild(style);
+      }
+
+      console.log('✅ Student read-only mode applied - day navigation enabled');
+    }
     // Logout function (if you add logout button)
     async function handleLogout() {
       if (confirm('Are you sure you want to logout?')) {
@@ -1978,10 +2186,10 @@ async function initializeMainSystemForStudent() {
     async function initialize() {
       // Your existing initialization code...
       // Collapsible info box - click to toggle
-document.getElementById('infoBox').addEventListener('click', function() {
-  this.classList.toggle('collapsed');
-  this.classList.toggle('expanded');
-});
+      document.getElementById('infoBox').addEventListener('click', function () {
+        this.classList.toggle('collapsed');
+        this.classList.toggle('expanded');
+      });
       await openDatabase();
       // ... rest of code
     }
@@ -2459,13 +2667,23 @@ document.getElementById('infoBox').addEventListener('click', function() {
       appState.selectedSubject = name;
       isUpdatingSubjectDropdown = true;
       elements.subjectSelect.value = name;
-      elements.finalSubjectSelect.value = name;  // ✅ UPDATE FINAL SELECTION DROPDOWN
+      elements.finalSubjectSelect.value = name;
       isUpdatingSubjectDropdown = false;
+
       updateSubjectDisplay();
       renderSubjectTags();
-      updateFinalSelectionBadges();  // ✅ UPDATE VISUAL BADGES
-      refreshAttendanceTable();
+      updateFinalSelectionBadges();
+      ensureSubjectStructureExists();
+      // ✅ FIX: Force reload attendance data
+      loadStudentList();  // Reload students first
+      refreshAttendanceTable();  // Then refresh table
+      updateStats();  // Update stats
+      renderCalendarGrid();  // Update calendar
+
       saveAllData();
+
+      // ✅ RELOAD leave applications when subject changes
+      loadLeaveApplications();
     }
 
     function updateSubjectDisplay() {
@@ -2499,11 +2717,15 @@ document.getElementById('infoBox').addEventListener('click', function() {
       renderCalendarGrid();
       updateHolidayDisplay();
       elements.calendarContainer.style.display = 'block';
+      if (appState.selectedSubject) {
+        ensureSubjectStructureExists();
+      }
 
       refreshAttendanceTable();
       saveAllData();
-
       showAlert(`Month set to ${monthNames[appState.selectedMonth]} ${appState.selectedYear}`, 'success');
+
+      loadLeaveApplications();
     }
 
     function updateMonthDisplay() {
@@ -2823,9 +3045,15 @@ document.getElementById('infoBox').addEventListener('click', function() {
         appState.attendanceData[year][dept][course][academicYear] = {};
       }
       if (!appState.attendanceData[year][dept][course][academicYear][division]) {
-        appState.attendanceData[year][dept][course][academicYear][division] = { months: {} };
+        appState.attendanceData[year][dept][course][academicYear][division] = {
+          students: {},  // ✅ ADD THIS
+          months: {}
+        };
       }
-
+      // ✅ Ensure students object exists
+      if (!appState.attendanceData[year][dept][course][academicYear][division].students) {
+        appState.attendanceData[year][dept][course][academicYear][division].students = {};
+      }
       // ✅ FIX: Check if months exists before accessing it
       if (!appState.attendanceData[year][dept][course][academicYear][division].months) {
         appState.attendanceData[year][dept][course][academicYear][division].months = {};
@@ -3015,7 +3243,6 @@ document.getElementById('infoBox').addEventListener('click', function() {
         return;
       }
 
-      // ✅ FIX: Get subject data FIRST (don't check master student list)
       const subjectData = getSubjectData();
 
       if (!subjectData || Object.keys(subjectData).filter(key => !key.startsWith('_')).length === 0) {
@@ -3025,7 +3252,6 @@ document.getElementById('infoBox').addEventListener('click', function() {
 
       const holidays = getHolidaysForMonth();
 
-      // ✅ FIND WHICH DAYS HAVE ACTUAL LECTURE DATA
       const daysWithLectures = new Set();
 
       for (const studentId in subjectData) {
@@ -3047,7 +3273,7 @@ document.getElementById('infoBox').addEventListener('click', function() {
         return;
       }
 
-      // ✅ CREATE HEADERS - Only for days with lectures
+      // ✅ MODIFIED HEADERS - Add Leave Info Columns
       const headers = ['ID', 'Name'];
 
       lectureDays.forEach(day => {
@@ -3055,11 +3281,10 @@ document.getElementById('infoBox').addEventListener('click', function() {
         headers.push(`Day ${day}${isHoliday ? ' (H)' : ''}`);
       });
 
-      headers.push('Present', 'Absent', 'Total Lectures', 'Percentage');
+      headers.push('Present', 'Absent', 'Total Lectures', 'Percentage', 'Leave Applications', 'Leave Days Approved');
 
       const rows = [headers];
 
-      // ✅ LOOP THROUGH STUDENTS FROM SUBJECT DATA (not master list)
       for (const studentId in subjectData) {
         if (studentId.startsWith('_')) continue;
 
@@ -3089,7 +3314,12 @@ document.getElementById('infoBox').addEventListener('click', function() {
         const totalLectures = present + absent;
         const percentage = totalLectures > 0 ? Math.round((present / totalLectures) * 100) : 0;
 
-        row.push(present, absent, totalLectures, `${percentage}%`);
+        // ✅ ADD LEAVE INFO
+        const leaveSummary = getStudentLeaveSummary(studentId);
+        const leaveApps = leaveSummary ? leaveSummary.applications : 0;
+        const leaveDays = leaveSummary ? leaveSummary.count : 0;
+
+        row.push(present, absent, totalLectures, `${percentage}%`, leaveApps, leaveDays);
         rows.push(row);
       }
 
@@ -3099,9 +3329,8 @@ document.getElementById('infoBox').addEventListener('click', function() {
 
       downloadFile(csv, filename);
 
-      showAlert(`Report exported with ${lectureDays.length} lecture days: ${lectureDays.join(', ')}`, 'success');
+      showAlert(`Report exported with ${lectureDays.length} lecture days and leave information`, 'success');
     }
-
 
     async function clearSelectedSubjectMonth() {
       if (!appState.selectedSubject) {
@@ -3190,6 +3419,78 @@ document.getElementById('infoBox').addEventListener('click', function() {
         ?.attendance || null;
     }
 
+    function ensureSubjectStructureExists() {
+      const year = appState.selectedYear;
+      const dept = appState.selectedDepartment;
+      const course = appState.selectedCourse;
+      const academicYear = appState.selectedAcademicYear;
+      const division = appState.selectedDivision;
+      const monthKey = getMonthKey();
+      const subject = appState.selectedSubject;
+
+      // ❌ Exit if any required field is missing
+      if (!year || !dept || !course || !academicYear || !division || !monthKey || !subject) {
+        console.log('⚠️ Cannot create subject structure - context incomplete');
+        return false;
+      }
+
+      // ✅ Build the full path step by step
+      if (!appState.attendanceData[year]) {
+        appState.attendanceData[year] = {};
+      }
+      if (!appState.attendanceData[year][dept]) {
+        appState.attendanceData[year][dept] = {};
+      }
+      if (!appState.attendanceData[year][dept][course]) {
+        appState.attendanceData[year][dept][course] = {};
+      }
+      if (!appState.attendanceData[year][dept][course][academicYear]) {
+        appState.attendanceData[year][dept][course][academicYear] = {};
+      }
+      if (!appState.attendanceData[year][dept][course][academicYear][division]) {
+        appState.attendanceData[year][dept][course][academicYear][division] = {
+          students: {},  // ✅ Master student list
+          months: {}
+        };
+      }
+
+      // ✅ Ensure students object exists
+      if (!appState.attendanceData[year][dept][course][academicYear][division].students) {
+        appState.attendanceData[year][dept][course][academicYear][division].students = {};
+      }
+
+      // ✅ Ensure months object exists
+      if (!appState.attendanceData[year][dept][course][academicYear][division].months) {
+        appState.attendanceData[year][dept][course][academicYear][division].months = {};
+      }
+
+      if (!appState.attendanceData[year][dept][course][academicYear][division].months[monthKey]) {
+        appState.attendanceData[year][dept][course][academicYear][division].months[monthKey] = {
+          subjects: {}
+        };
+      }
+
+      // ✅ Ensure subjects object exists
+      if (!appState.attendanceData[year][dept][course][academicYear][division].months[monthKey].subjects) {
+        appState.attendanceData[year][dept][course][academicYear][division].months[monthKey].subjects = {};
+      }
+
+      // ✅ Create THIS subject's structure if it doesn't exist
+      if (!appState.attendanceData[year][dept][course][academicYear][division].months[monthKey].subjects[subject]) {
+        console.log(`✅ Creating attendance structure for subject: ${subject}`);
+        appState.attendanceData[year][dept][course][academicYear][division].months[monthKey].subjects[subject] = {
+          attendance: {}
+        };
+      }
+
+      // ✅ Ensure attendance object exists
+      if (!appState.attendanceData[year][dept][course][academicYear][division].months[monthKey].subjects[subject].attendance) {
+        appState.attendanceData[year][dept][course][academicYear][division].months[monthKey].subjects[subject].attendance = {};
+      }
+
+      console.log(`✅ Subject structure exists: ${year}/${dept}/${course}/${academicYear}/${division}/${monthKey}/${subject}`);
+      return true;
+    }
     function getStudentStats(studentId) {
       const subjectData = getSubjectData();
       if (!subjectData || !subjectData[studentId]) {
@@ -3235,12 +3536,78 @@ document.getElementById('infoBox').addEventListener('click', function() {
 
       return { present, absent, workingDays, percentage };
     }
+
     function loadStudentList() {
+      console.log('🔄 loadStudentList called (HYBRID version)');
+
       appState.studentList = [];
+
+      const year = appState.selectedYear;
+      const dept = appState.selectedDepartment;
+      const course = appState.selectedCourse;
+      const academicYear = appState.selectedAcademicYear;
+      const division = appState.selectedDivision;
+
+      // ✅ STEP 1: Try to load MASTER STUDENT LIST from division level (NEW WAY)
+      let masterStudents = null;
+
+      if (year && dept && course && academicYear && division) {
+        masterStudents = appState.attendanceData
+          ?.[year]
+          ?.[dept]
+          ?.[course]
+          ?.[academicYear]
+          ?.[division]
+          ?.students || null;
+
+        if (masterStudents && Object.keys(masterStudents).length > 0) {
+          console.log(`✅ Found division master list: ${Object.keys(masterStudents).length} students`);
+        }
+      }
+
+      // ✅ STEP 2: If master list exists, use it (NEW WAY)
+      if (masterStudents && Object.keys(masterStudents).length > 0) {
+        console.log('📊 Loading from DIVISION MASTER LIST');
+
+        const subjectData = getSubjectData(); // Get current subject's attendance
+        console.log('📊 Subject data:', subjectData ? 'EXISTS' : 'NULL');
+
+        let count = 0;
+        for (const studentId in masterStudents) {
+          const masterStudent = masterStudents[studentId];
+
+          // Get today's status from subject attendance (if available)
+          let todayStatus = 'Absent'; // Default
+
+          if (subjectData && subjectData[studentId]) {
+            todayStatus = subjectData[studentId][appState.currentDay] || 'Absent';
+          }
+
+          appState.studentList.push({
+            id: studentId,
+            name: masterStudent.name || studentId,
+            status: todayStatus
+          });
+
+          count++;
+        }
+
+        console.log(`✅ Loaded ${count} students from master list`);
+        return;
+      }
+
+      // ✅ STEP 3: Fall back to old method (SUBJECT DATA) if master list doesn't exist
+      console.log('📊 Master list not found - falling back to SUBJECT DATA (old method)');
+
       const subjectData = getSubjectData();
+      console.log('📊 Subject data:', subjectData ? 'EXISTS' : 'NULL');
 
-      if (!subjectData) return;
+      if (!subjectData) {
+        console.warn('⚠️ No subject data available - upload CSV first');
+        return;
+      }
 
+      let count = 0;
       for (const studentId in subjectData) {
         if (studentId.startsWith('_')) continue;
 
@@ -3252,11 +3619,21 @@ document.getElementById('infoBox').addEventListener('click', function() {
           name: student._name || studentId,
           status: todayStatus
         });
+        count++;
       }
+
+      console.log(`✅ Loaded ${count} students from subject data (old method)`);
     }
 
     function refreshAttendanceTable() {
+      console.log('🔄 refreshAttendanceTable called');
+      console.log('📌 Current subject:', appState.selectedSubject);
+      console.log('📌 Current month:', appState.selectedMonth);
+      console.log('📌 Current day:', appState.currentDay);
+
       loadStudentList();
+
+      console.log('📊 Student list length:', appState.studentList.length);
 
       let displayList = [...appState.studentList];
 
@@ -3533,14 +3910,24 @@ document.getElementById('infoBox').addEventListener('click', function() {
 
       defaulters.forEach(d => {
         const row = document.createElement('tr');
+
+        // ✅ GET LEAVE SUMMARY FOR THIS STUDENT
+        const leaveSummary = getStudentLeaveSummary(d.id);
+
         row.innerHTML = `
-          <td>${escapeHtml(d.id)}</td>
-          <td>${escapeHtml(d.name)}</td>
-          <td>${d.present}</td>
-          <td>${d.absent}</td>
-          <td>${d.workingDays}</td>
-          <td><span class="defaulter-badge">${d.percentage}%</span></td>
-        `;
+      <td>${escapeHtml(d.id)}</td>
+      <td>
+        ${escapeHtml(d.name)}
+        ${leaveSummary ? `<br><small class="text-info">📝 ${leaveSummary.applications} leave application(s)</small>` : ''}
+      </td>
+      <td>${d.present}</td>
+      <td>${d.absent}</td>
+      <td>${d.workingDays}</td>
+      <td>
+        <span class="defaulter-badge">${d.percentage}%</span>
+        ${leaveSummary ? `<br><small class="badge bg-info mt-1">${leaveSummary.count} days leave approved</small>` : ''}
+      </td>
+    `;
         elements.defaulterTableBody.appendChild(row);
       });
 
@@ -3573,15 +3960,24 @@ document.getElementById('infoBox').addEventListener('click', function() {
 
         elements.modalDefaulterTableBody.innerHTML = '';
         defaulters.forEach(d => {
+          // ✅ GET LEAVE SUMMARY
+          const leaveSummary = getStudentLeaveSummary(d.id);
+
           const row = document.createElement('tr');
           row.innerHTML = `
-            <td>${escapeHtml(d.id)}</td>
-            <td>${escapeHtml(d.name)}</td>
-            <td>${d.present}</td>
-            <td>${d.absent}</td>
-            <td>${d.workingDays}</td>
-            <td><span class="defaulter-badge">${d.percentage}%</span></td>
-          `;
+        <td>${escapeHtml(d.id)}</td>
+        <td>
+          ${escapeHtml(d.name)}
+          ${leaveSummary ? `<br><small class="text-info">📝 Leave: ${escapeHtml(leaveSummary.reasons)}</small>` : ''}
+        </td>
+        <td>${d.present}</td>
+        <td>${d.absent}</td>
+        <td>${d.workingDays}</td>
+        <td>
+          <span class="defaulter-badge">${d.percentage}%</span>
+          ${leaveSummary ? `<br><small class="badge bg-info mt-1">${leaveSummary.count} day(s) approved</small>` : ''}
+        </td>
+      `;
           elements.modalDefaulterTableBody.appendChild(row);
         });
       }
@@ -3603,18 +3999,34 @@ document.getElementById('infoBox').addEventListener('click', function() {
         return;
       }
 
-      const headers = ['ID', 'Name', 'Present Days', 'Absent Days', 'Working Days', 'Attendance %'];
+      // ✅ MODIFIED HEADERS - Add Leave Info Column
+      const headers = ['ID', 'Name', 'Present Days', 'Absent Days', 'Working Days', 'Attendance %', 'Leave Applications', 'Leave Days', 'Leave Reason'];
       const rows = [headers];
 
       defaulters.forEach(d => {
-        rows.push([d.id, d.name, d.present, d.absent, d.workingDays, `${d.percentage}%`]);
+        // ✅ GET LEAVE INFO
+        const leaveSummary = getStudentLeaveSummary(d.id);
+
+        const leaveApps = leaveSummary ? leaveSummary.applications : 0;
+        const leaveDays = leaveSummary ? leaveSummary.count : 0;
+        const leaveReason = leaveSummary ? leaveSummary.reasons : 'N/A';
+
+        rows.push([
+          d.id,
+          d.name,
+          d.present,
+          d.absent,
+          d.workingDays,
+          `${d.percentage}%`,
+          leaveApps,
+          leaveDays,
+          leaveReason
+        ]);
       });
 
       const csv = rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\r\n');
       downloadFile(csv, `defaulters_${appState.selectedSubject}_${monthNames[appState.selectedMonth]}_${appState.selectedYear}.csv`);
     }
-
-    // ==================== DEPARTMENT FUNCTIONS ====================
     function addDepartment(name) {
       name = String(name).trim();
 
@@ -3642,7 +4054,6 @@ document.getElementById('infoBox').addEventListener('click', function() {
       showAlert(`Department "${name}" added successfully!`, 'success');
       return true;
     }
-
     function deleteDepartment(name) {
       if (!confirm(`⚠️ DELETE DEPARTMENT "${name}"?...`)) {
         return;
@@ -3716,6 +4127,7 @@ document.getElementById('infoBox').addEventListener('click', function() {
       renderCourseTags();
       updateFinalSelectionDropdowns();
       saveAllData();
+      loadLeaveApplications();
     }
 
     function populateDepartmentDropdown() {
@@ -3876,6 +4288,7 @@ document.getElementById('infoBox').addEventListener('click', function() {
       renderSubjectTags(); // ✅ Show course-specific subjects
       updateFinalSelectionDropdowns();
       saveAllData();
+      loadLeaveApplications();
     }
 
     function populateCourseDropdown() {
@@ -3952,6 +4365,57 @@ document.getElementById('infoBox').addEventListener('click', function() {
       elements.selectedPathCourse.textContent = appState.selectedCourse || 'No Course';
     }
 
+    function deleteSubject(name) {
+      const dept = appState.selectedDepartment;
+      const course = appState.selectedCourse;
+
+      if (!dept || !course) {
+        showAlert('Please select department and course first!', 'warning');
+        return;
+      }
+
+      if (!confirm(`⚠️ DELETE SUBJECT "${name}"?\n\nThis will also delete all attendance data for this subject.\n\nThis action cannot be undone!`)) {
+        return;
+      }
+
+      // Remove from subjects array
+      if (appState.subjects[dept] && appState.subjects[dept][course]) {
+        appState.subjects[dept][course] = appState.subjects[dept][course].filter(s => s !== name);
+      }
+
+      // Delete attendance data for ALL YEARS
+      for (const year in appState.attendanceData) {
+        if (appState.attendanceData[year]?.[dept]?.[course]) {
+          for (const acYear in appState.attendanceData[year][dept][course]) {
+            for (const div in appState.attendanceData[year][dept][course][acYear]) {
+              if (appState.attendanceData[year][dept][course][acYear][div]?.months) {
+                for (const month in appState.attendanceData[year][dept][course][acYear][div].months) {
+                  if (appState.attendanceData[year][dept][course][acYear][div].months[month]?.subjects?.[name]) {
+                    delete appState.attendanceData[year][dept][course][acYear][div].months[month].subjects[name];
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // Reset selection if needed
+      if (appState.selectedSubject === name) {
+        appState.selectedSubject = null;
+        updateSubjectDisplay();
+      }
+
+      // Update UI
+      populateSubjectDropdown();
+      renderSubjectTags();
+      updateFinalSelectionDropdowns();
+      refreshAttendanceTable();
+
+      saveAllData();
+      showAlert(`Subject "${name}" and all related data deleted!`, 'info');
+    }
+
     // ==================== FINAL SELECTION & ACADEMIC YEAR ====================
     function updateFinalSelectionDropdowns() {
       // ✅ Populate all three dropdowns (these handle their own null checks)
@@ -4015,42 +4479,42 @@ document.getElementById('infoBox').addEventListener('click', function() {
       });
 
       // Select Department
-elements.departmentSelect.addEventListener('change', () => {
-  const dept = elements.departmentSelect.value;
-  
-  // ✅ FIX: Handle empty selection
-  if (!dept || dept === '') {
-    // Reset department and all dependent selections
-    appState.selectedDepartment = null;
-    appState.selectedCourse = null;
-    appState.selectedSubject = null;
-    
-    // Disable dependent inputs
-    elements.newCourseInput.disabled = true;
-    elements.addCourseBtn.disabled = true;
-    elements.courseSelect.disabled = true;
-    elements.newSubjectInput.disabled = true;
-    elements.addSubjectBtn.disabled = true;
-    elements.subjectSelect.disabled = true;
-    
-    // Update displays
-    updateDepartmentDisplay();
-    updateCourseDisplay();
-    updateSubjectDisplay();
-    updateFinalSelectionBadges();
-    
-    // Clear dropdowns
-    populateCourseDropdown();
-    populateSubjectDropdown();
-    renderCourseTags();
-    renderSubjectTags();
-    
-    saveAllData();
-    return;
-  }
-  
-  selectDepartment(dept);
-});
+      elements.departmentSelect.addEventListener('change', () => {
+        const dept = elements.departmentSelect.value;
+
+        // ✅ FIX: Handle empty selection
+        if (!dept || dept === '') {
+          // Reset department and all dependent selections
+          appState.selectedDepartment = null;
+          appState.selectedCourse = null;
+          appState.selectedSubject = null;
+
+          // Disable dependent inputs
+          elements.newCourseInput.disabled = true;
+          elements.addCourseBtn.disabled = true;
+          elements.courseSelect.disabled = true;
+          elements.newSubjectInput.disabled = true;
+          elements.addSubjectBtn.disabled = true;
+          elements.subjectSelect.disabled = true;
+
+          // Update displays
+          updateDepartmentDisplay();
+          updateCourseDisplay();
+          updateSubjectDisplay();
+          updateFinalSelectionBadges();
+
+          // Clear dropdowns
+          populateCourseDropdown();
+          populateSubjectDropdown();
+          renderCourseTags();
+          renderSubjectTags();
+
+          saveAllData();
+          return;
+        }
+
+        selectDepartment(dept);
+      });
 
       // Delete Department
       elements.deleteDepartmentBtn.addEventListener('click', () => {
@@ -4080,55 +4544,55 @@ elements.departmentSelect.addEventListener('change', () => {
       });
 
       // Select Course
-elements.courseSelect.addEventListener('change', () => {
-  const course = elements.courseSelect.value;
-  
-  if (!course || course === '') {
-    appState.selectedCourse = null;
-    appState.selectedSubject = null;
-    
-    elements.newSubjectInput.disabled = true;
-    elements.addSubjectBtn.disabled = true;
-    elements.subjectSelect.disabled = true;
-    
-    updateCourseDisplay();
-    updateSubjectDisplay();
-    updateFinalSelectionBadges();
-    
-    populateSubjectDropdown();
-    renderSubjectTags();
-    
-    saveAllData();
-    return;
-  }
-  
-  selectCourse(course);
-});
+      elements.courseSelect.addEventListener('change', () => {
+        const course = elements.courseSelect.value;
 
-// Final Course Select
-elements.finalCourseSelect.addEventListener('change', () => {
-  const course = elements.finalCourseSelect.value;
-  
-  if (!course || course === '') {
-    appState.selectedCourse = null;
-    appState.selectedSubject = null;
-    
-    elements.courseSelect.value = '';
-    elements.finalSubjectSelect.value = '';
-    
-    updateCourseDisplay();
-    updateSubjectDisplay();
-    updateFinalSelectionBadges();
-    
-    populateSubjectDropdown();
-    
-    saveAllData();
-    return;
-  }
-  
-  selectCourse(course);
-  updateFinalSelectionDropdowns();
-});
+        if (!course || course === '') {
+          appState.selectedCourse = null;
+          appState.selectedSubject = null;
+
+          elements.newSubjectInput.disabled = true;
+          elements.addSubjectBtn.disabled = true;
+          elements.subjectSelect.disabled = true;
+
+          updateCourseDisplay();
+          updateSubjectDisplay();
+          updateFinalSelectionBadges();
+
+          populateSubjectDropdown();
+          renderSubjectTags();
+
+          saveAllData();
+          return;
+        }
+
+        selectCourse(course);
+      });
+
+      // Final Course Select
+      elements.finalCourseSelect.addEventListener('change', () => {
+        const course = elements.finalCourseSelect.value;
+
+        if (!course || course === '') {
+          appState.selectedCourse = null;
+          appState.selectedSubject = null;
+
+          elements.courseSelect.value = '';
+          elements.finalSubjectSelect.value = '';
+
+          updateCourseDisplay();
+          updateSubjectDisplay();
+          updateFinalSelectionBadges();
+
+          populateSubjectDropdown();
+
+          saveAllData();
+          return;
+        }
+
+        selectCourse(course);
+        updateFinalSelectionDropdowns();
+      });
 
       // Delete Course
       elements.deleteCourseBtn.addEventListener('click', () => {
@@ -4141,34 +4605,34 @@ elements.finalCourseSelect.addEventListener('change', () => {
 
       // ==================== FINAL SELECTION EVENTS ====================
       // Final Department Select
-elements.finalDepartmentSelect.addEventListener('change', () => {
-  const dept = elements.finalDepartmentSelect.value;
-  
-  // ✅ FIX: Handle empty selection
-  if (!dept || dept === '') {
-    appState.selectedDepartment = null;
-    appState.selectedCourse = null;
-    appState.selectedSubject = null;
-    
-    elements.departmentSelect.value = '';
-    elements.finalCourseSelect.value = '';
-    elements.finalSubjectSelect.value = '';
-    
-    updateDepartmentDisplay();
-    updateCourseDisplay();
-    updateSubjectDisplay();
-    updateFinalSelectionBadges();
-    
-    populateCourseDropdown();
-    populateSubjectDropdown();
-    
-    saveAllData();
-    return;
-  }
-  
-  selectDepartment(dept);
-  updateFinalSelectionDropdowns();
-});
+      elements.finalDepartmentSelect.addEventListener('change', () => {
+        const dept = elements.finalDepartmentSelect.value;
+
+        // ✅ FIX: Handle empty selection
+        if (!dept || dept === '') {
+          appState.selectedDepartment = null;
+          appState.selectedCourse = null;
+          appState.selectedSubject = null;
+
+          elements.departmentSelect.value = '';
+          elements.finalCourseSelect.value = '';
+          elements.finalSubjectSelect.value = '';
+
+          updateDepartmentDisplay();
+          updateCourseDisplay();
+          updateSubjectDisplay();
+          updateFinalSelectionBadges();
+
+          populateCourseDropdown();
+          populateSubjectDropdown();
+
+          saveAllData();
+          return;
+        }
+
+        selectDepartment(dept);
+        updateFinalSelectionDropdowns();
+      });
 
       // Final Course Select
       elements.finalCourseSelect.addEventListener('change', () => {
@@ -4194,6 +4658,7 @@ elements.finalDepartmentSelect.addEventListener('change', () => {
         appState.selectedAcademicYear = elements.academicYearLevelSelect.value;
         updateAcademicYearDisplay();
         saveAllData();
+        loadLeaveApplications();
       });
 
       // Division Select
@@ -4201,6 +4666,7 @@ elements.finalDepartmentSelect.addEventListener('change', () => {
         appState.selectedDivision = elements.divisionSelect.value;
         updateAcademicYearDisplay();
         saveAllData();
+        loadLeaveApplications();
       });
 
       // Subject events
@@ -4319,120 +4785,120 @@ elements.finalDepartmentSelect.addEventListener('change', () => {
 
       // Generate QR button
       document.getElementById('generateQRBtn').addEventListener('click', async () => {
-  const missing = [];
-  if (!appState.selectedDepartment) missing.push('Department');
-  if (!appState.selectedCourse) missing.push('Course');
-  if (!appState.selectedSubject) missing.push('Subject');
-  if (!appState.selectedAcademicYear) missing.push('Academic Year');
-  if (!appState.selectedDivision) missing.push('Division');
-  if (appState.selectedMonth === null) missing.push('Month');
-  if (appState.selectedYear === null) missing.push('Year');
+        const missing = [];
+        if (!appState.selectedDepartment) missing.push('Department');
+        if (!appState.selectedCourse) missing.push('Course');
+        if (!appState.selectedSubject) missing.push('Subject');
+        if (!appState.selectedAcademicYear) missing.push('Academic Year');
+        if (!appState.selectedDivision) missing.push('Division');
+        if (appState.selectedMonth === null) missing.push('Month');
+        if (appState.selectedYear === null) missing.push('Year');
 
-  const validationAlert = document.getElementById('qrValidationAlert');
-  const qrContainer = document.getElementById('qrCodeContainer');
+        const validationAlert = document.getElementById('qrValidationAlert');
+        const qrContainer = document.getElementById('qrCodeContainer');
 
-  if (missing.length > 0) {
-    document.getElementById('qrValidationMsg').textContent = 'Missing: ' + missing.join(', ');
-    validationAlert.style.display = 'block';
-    qrContainer.innerHTML = '';
-  } else {
-    validationAlert.style.display = 'none';
+        if (missing.length > 0) {
+          document.getElementById('qrValidationMsg').textContent = 'Missing: ' + missing.join(', ');
+          validationAlert.style.display = 'block';
+          qrContainer.innerHTML = '';
+        } else {
+          validationAlert.style.display = 'none';
 
-    // ✅ CREATE DIVISION KEY FIRST
-    const divisionKey = `${appState.selectedDepartment}_${appState.selectedCourse}_${appState.selectedAcademicYear}_${appState.selectedDivision}`;
+          // ✅ CREATE DIVISION KEY FIRST
+          const divisionKey = `${appState.selectedDepartment}_${appState.selectedCourse}_${appState.selectedAcademicYear}_${appState.selectedDivision}`;
 
-    // ✅ STEP 1: DELETE OLD QR FROM FIREBASE (if exists)
-    if (useCloud && firebaseDB) {
-      try {
-        console.log(`🔍 Checking for existing QR for: ${divisionKey}`);
-        
-        const snapshot = await firebaseDB.ref('mainSystem/activeQRs').once('value');
-        const allQRs = snapshot.val() || {};
-        
-        // Find and delete any QR for this division
-        for (const id in allQRs) {
-          const qrData = allQRs[id];
-          if (qrData.division === divisionKey) {
-            console.log(`🗑️ Deleting old QR: ${id}`);
-            await firebaseDB.ref(`mainSystem/activeQRs/${id}`).remove();
+          // ✅ STEP 1: DELETE OLD QR FROM FIREBASE (if exists)
+          if (useCloud && firebaseDB) {
+            try {
+              console.log(`🔍 Checking for existing QR for: ${divisionKey}`);
+
+              const snapshot = await firebaseDB.ref('mainSystem/activeQRs').once('value');
+              const allQRs = snapshot.val() || {};
+
+              // Find and delete any QR for this division
+              for (const id in allQRs) {
+                const qrData = allQRs[id];
+                if (qrData.division === divisionKey) {
+                  console.log(`🗑️ Deleting old QR: ${id}`);
+                  await firebaseDB.ref(`mainSystem/activeQRs/${id}`).remove();
+                }
+              }
+
+            } catch (error) {
+              console.error('Error deleting old QR:', error);
+            }
           }
+
+          // ✅ STEP 2: CREATE NEW QR ID (always fresh)
+          const qrId = Math.random().toString(36).substring(2, 10).toUpperCase();
+          console.log(`🆕 Generated NEW QR ID: ${qrId}`);
+
+          const payload = JSON.stringify({
+            qrId: qrId,
+            department: appState.selectedDepartment,
+            course: appState.selectedCourse,
+            academicYear: appState.selectedAcademicYear,
+            division: appState.selectedDivision,
+            subject: appState.selectedSubject,
+            month: appState.selectedMonth,
+            year: appState.selectedYear,
+            day: appState.currentDay
+          });
+
+          // ✅ STEP 3: TRACK NEW QR LOCALLY
+          if (!window.activeQRsByDivision) {
+            window.activeQRsByDivision = {};
+          }
+          window.activeQRsByDivision[divisionKey] = qrId;
+
+          // ✅ STEP 4: SAVE TO FIREBASE (new QR)
+          if (useCloud && firebaseDB) {
+            try {
+              await firebaseDB.ref(`mainSystem/activeQRs/${qrId}`).set({
+                createdAt: Date.now(),
+                expiresAt: Date.now() + 600000,
+                division: divisionKey,
+                data: JSON.parse(payload)
+              });
+              console.log(`✅ Saved NEW QR to Firebase: ${qrId}`);
+            } catch (error) {
+              console.error('Error saving QR to Firebase:', error);
+            }
+          }
+
+          // Start countdown timer
+          startQRCountdown(600);
+
+          // Generate QR using qrcode-generator
+          const qr = qrcode(0, 'M');
+          qr.addData(payload);
+          qr.make();
+          qrContainer.innerHTML = qr.createSvgTag(6, 0);
+
+          // Show active status
+          document.getElementById('qrStatus').style.display = 'block';
+          document.getElementById('qrStatus').className = 'alert alert-success mb-3';
+          document.getElementById('qrStatus').innerHTML = '✅ Active - Expires in: <span id="qrTimer">10:00</span>';
+          document.getElementById('qrCodeContainer').style.opacity = '1';
+
+          // Show and start dynamic code rotation
+          document.getElementById('qrDynamicCodeDisplay').style.display = 'block';
+          startDynamicCodeRotation();
+
+          // Update path badges
+          document.getElementById('qrBadgeDept').textContent = appState.selectedDepartment;
+          document.getElementById('qrBadgeCourse').textContent = appState.selectedCourse;
+          document.getElementById('qrBadgeSubject').textContent = appState.selectedSubject;
+          document.getElementById('qrBadgeAcYear').textContent = appState.selectedAcademicYear;
+          document.getElementById('qrBadgeDiv').textContent = appState.selectedDivision;
+          document.getElementById('qrBadgeMonth').textContent = monthNames[appState.selectedMonth];
+          document.getElementById('qrBadgeDay').textContent = 'Day ' + appState.currentDay;
         }
-        
-      } catch (error) {
-        console.error('Error deleting old QR:', error);
-      }
-    }
 
-    // ✅ STEP 2: CREATE NEW QR ID (always fresh)
-    const qrId = Math.random().toString(36).substring(2, 10).toUpperCase();
-    console.log(`🆕 Generated NEW QR ID: ${qrId}`);
-    
-    const payload = JSON.stringify({
-      qrId: qrId,
-      department: appState.selectedDepartment,
-      course: appState.selectedCourse,
-      academicYear: appState.selectedAcademicYear,
-      division: appState.selectedDivision,
-      subject: appState.selectedSubject,
-      month: appState.selectedMonth,
-      year: appState.selectedYear,
-      day: appState.currentDay
-    });
-
-    // ✅ STEP 3: TRACK NEW QR LOCALLY
-    if (!window.activeQRsByDivision) {
-      window.activeQRsByDivision = {};
-    }
-    window.activeQRsByDivision[divisionKey] = qrId;
-
-    // ✅ STEP 4: SAVE TO FIREBASE (new QR)
-    if (useCloud && firebaseDB) {
-      try {
-        await firebaseDB.ref(`mainSystem/activeQRs/${qrId}`).set({
-          createdAt: Date.now(),
-          expiresAt: Date.now() + 600000,
-          division: divisionKey,
-          data: JSON.parse(payload)
-        });
-        console.log(`✅ Saved NEW QR to Firebase: ${qrId}`);
-      } catch (error) {
-        console.error('Error saving QR to Firebase:', error);
-      }
-    }
-
-    // Start countdown timer
-    startQRCountdown(600);
-
-    // Generate QR using qrcode-generator
-    const qr = qrcode(0, 'M');
-    qr.addData(payload);
-    qr.make();
-    qrContainer.innerHTML = qr.createSvgTag(6, 0);
-
-    // Show active status
-    document.getElementById('qrStatus').style.display = 'block';
-    document.getElementById('qrStatus').className = 'alert alert-success mb-3';
-    document.getElementById('qrStatus').innerHTML = '✅ Active - Expires in: <span id="qrTimer">10:00</span>';
-    document.getElementById('qrCodeContainer').style.opacity = '1';
-    
-    // Show and start dynamic code rotation
-    document.getElementById('qrDynamicCodeDisplay').style.display = 'block';
-    startDynamicCodeRotation();
-    
-    // Update path badges
-    document.getElementById('qrBadgeDept').textContent = appState.selectedDepartment;
-    document.getElementById('qrBadgeCourse').textContent = appState.selectedCourse;
-    document.getElementById('qrBadgeSubject').textContent = appState.selectedSubject;
-    document.getElementById('qrBadgeAcYear').textContent = appState.selectedAcademicYear;
-    document.getElementById('qrBadgeDiv').textContent = appState.selectedDivision;
-    document.getElementById('qrBadgeMonth').textContent = monthNames[appState.selectedMonth];
-    document.getElementById('qrBadgeDay').textContent = 'Day ' + appState.currentDay;
-  }
-
-  // Open modal
-  const modal = new bootstrap.Modal(document.getElementById('qrModal'));
-  modal.show();
-});
+        // Open modal
+        const modal = new bootstrap.Modal(document.getElementById('qrModal'));
+        modal.show();
+      });
       // Day navigation events
       elements.dateSelect.addEventListener('change', () => {
         if (isUpdatingDayDropdown) return;
@@ -4514,24 +4980,24 @@ elements.finalDepartmentSelect.addEventListener('change', () => {
         if (modal) modal.hide();
       });
       // When QR modal closes, stop dynamic code rotation
-     const qrModal = document.getElementById('qrModal');
+      const qrModal = document.getElementById('qrModal');
 
-qrModal.addEventListener('hidden.bs.modal', () => {
-  console.log('🔒 QR Modal closed - stopping code rotation');
-  stopDynamicCodeRotation();
-  // ✅ DON'T stop the countdown timer - QR is still valid in Firebase
-  // Timer continues running in background to show accurate time remaining
-});
+      qrModal.addEventListener('hidden.bs.modal', () => {
+        console.log('🔒 QR Modal closed - stopping code rotation');
+        stopDynamicCodeRotation();
+        // ✅ DON'T stop the countdown timer - QR is still valid in Firebase
+        // Timer continues running in background to show accurate time remaining
+      });
 
-// ✅ When modal opens, sync the timer display
-qrModal.addEventListener('shown.bs.modal', () => {
-  console.log('🔓 QR Modal opened');
-  // ✅ If we have an active QR, sync the timer display
-  if (qrExpiryTimestamp) {
-    updateQRTimer();
-    console.log('✅ QR timer synced with actual expiry time');
-  }
-});
+      // ✅ When modal opens, sync the timer display
+      qrModal.addEventListener('shown.bs.modal', () => {
+        console.log('🔓 QR Modal opened');
+        // ✅ If we have an active QR, sync the timer display
+        if (qrExpiryTimestamp) {
+          updateQRTimer();
+          console.log('✅ QR timer synced with actual expiry time');
+        }
+      });
       // Smooth scroll for navigation
       document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
@@ -4542,7 +5008,1081 @@ qrModal.addEventListener('shown.bs.modal', () => {
           }
         });
       });
+
+      // ==================== LEAVE APPLICATION EVENT LISTENERS ====================
+
+      // Toggle Leave Section (Expand/Collapse)
+      document.getElementById('leaveHeaderToggle').addEventListener('click', () => {
+        const content = document.getElementById('leaveContent');
+        const icon = document.getElementById('leaveToggleIcon');
+
+        if (content.style.display === 'none') {
+          content.style.display = 'block';
+          icon.classList.remove('bi-chevron-down');
+          icon.classList.add('bi-chevron-up');
+
+          // Load leave applications when opening
+          loadLeaveApplications();
+        } else {
+          content.style.display = 'none';
+          icon.classList.remove('bi-chevron-up');
+          icon.classList.add('bi-chevron-down');
+        }
+      });
+
+      // Open Leave Form Modal
+      document.getElementById('openLeaveFormBtn').addEventListener('click', () => {
+        // Validate division context
+        const validation = validateDivisionContext();
+
+        if (!validation.valid) {
+          showAlert(`Please select: ${validation.missing.join(', ')} before submitting leave applications!`, 'warning');
+          return;
+        }
+
+        // Reset form
+        resetLeaveForm();
+
+        // Load students for dropdown
+        loadStudentsForLeaveForm();
+
+        // Set date range limits (current month)
+        const year = appState.selectedYear;
+        const month = appState.selectedMonth;
+
+        if (month !== null && year !== null) {
+          const firstDay = new Date(year, month, 1);
+          const lastDay = new Date(year, month + 1, 0);
+
+          const fromInput = document.getElementById('leaveFromDate');
+          const toInput = document.getElementById('leaveToDate');
+
+          fromInput.min = formatDateForInput(firstDay);
+          fromInput.max = formatDateForInput(lastDay);
+          toInput.min = formatDateForInput(firstDay);
+          toInput.max = formatDateForInput(lastDay);
+
+          // Set default values to current day
+          if (appState.currentDay) {
+            const currentDate = new Date(year, month, appState.currentDay);
+            fromInput.value = formatDateForInput(currentDate);
+            toInput.value = formatDateForInput(currentDate);
+            updateLeaveDayCount();
+          }
+        }
+
+        // Show modal
+        if (!leaveModal) {
+          leaveModal = new bootstrap.Modal(document.getElementById('leaveModal'));
+        }
+        leaveModal.show();
+      });
+
+      // Date change listeners (update day count)
+      document.getElementById('leaveFromDate').addEventListener('change', updateLeaveDayCount);
+      document.getElementById('leaveToDate').addEventListener('change', updateLeaveDayCount);
+
+      // Submit Leave Button
+      document.getElementById('submitLeaveBtn').addEventListener('click', submitLeaveApplication);
+
+      // Leave Filter - Status
+      document.getElementById('leaveStatusFilter').addEventListener('change', (e) => {
+        leaveState.filters.status = e.target.value;
+        renderLeaveTable();
+      });
+
+      // Leave Filter - Month
+      document.getElementById('leaveMonthFilter').addEventListener('change', (e) => {
+        leaveState.filters.month = e.target.value;
+        renderLeaveTable();
+      });
+
+      // Refresh Leaves Button
+      document.getElementById('refreshLeavesBtn').addEventListener('click', () => {
+        loadLeaveApplications();
+        showAlert('Leave applications refreshed', 'info');
+      });
     }
+    // ==================== LEAVE APPLICATION SYSTEM ====================
+
+    // State for leave applications
+    const leaveState = {
+      applications: [],
+      filters: {
+        status: 'all',
+        month: 'current'
+      }
+    };
+
+    // Initialize leave modal
+    let leaveModal = null;
+
+    // ===== UTILITY FUNCTIONS =====
+
+    /**
+     * Get date in YYYY-MM-DD format
+     */
+    function formatDateForInput(date) {
+      const d = new Date(date);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    /**
+     * Calculate all days between two dates
+     */
+    function getDaysBetweenDates(fromDate, toDate) {
+      const days = [];
+      const start = new Date(fromDate);
+      const end = new Date(toDate);
+
+      // Validate dates
+      if (start > end) {
+        return [];
+      }
+
+      const current = new Date(start);
+      while (current <= end) {
+        days.push(current.getDate());
+        current.setDate(current.getDate() + 1);
+      }
+
+      return days;
+    }
+
+    /**
+     * Get Firebase path for leave applications
+     */
+    function getLeaveApplicationsPath() {
+      const year = appState.selectedYear;
+      const dept = appState.selectedDepartment;
+      const course = appState.selectedCourse;
+      const academicYear = appState.selectedAcademicYear;
+      const division = appState.selectedDivision;
+
+      if (!year || !dept || !course || !academicYear || !division) {
+        return null;
+      }
+
+      return `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}/leaveApplications`;
+    }
+
+    /**
+     * Validate division context
+     */
+    function validateDivisionContext() {
+      const missing = [];
+
+      if (!appState.selectedDepartment) missing.push('Department');
+      if (!appState.selectedCourse) missing.push('Course');
+      if (!appState.selectedAcademicYear) missing.push('Academic Year');
+      if (!appState.selectedDivision) missing.push('Division');
+      if (appState.selectedMonth === null) missing.push('Month');
+      if (appState.selectedYear === null) missing.push('Year');
+
+      return {
+        valid: missing.length === 0,
+        missing: missing
+      };
+    }
+
+    // ===== LOAD STUDENT LIST FOR DROPDOWN =====
+
+    async function loadStudentsForLeaveForm() {
+      const studentSelect = document.getElementById('leaveStudentSelect');
+      studentSelect.innerHTML = '<option value="">-- Select Student --</option>';
+
+      const year = appState.selectedYear;
+      const dept = appState.selectedDepartment;
+      const course = appState.selectedCourse;
+      const academicYear = appState.selectedAcademicYear;
+      const division = appState.selectedDivision;
+      const monthKey = getMonthKey();
+      const subject = appState.selectedSubject;
+
+      if (!year || !dept || !course || !academicYear || !division || !monthKey || !subject) {
+        console.warn('Cannot load students: context incomplete');
+        studentSelect.innerHTML += '<option value="" disabled>Please select all required fields first</option>';
+        return;
+      }
+
+      // ✅ FIX: Load from CURRENT SUBJECT'S attendance data
+      const attendancePath = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}/months/${monthKey}/subjects/${subject}/attendance`;
+
+      try {
+        let students = {};
+
+        if (useCloud && firebaseDB) {
+          const snapshot = await firebaseDB.ref(attendancePath).once('value');
+          students = snapshot.val() || {};
+        } else {
+          // Fallback to local data
+          const subjectData = getSubjectData();
+          students = subjectData || {};
+        }
+
+        if (Object.keys(students).length === 0) {
+          console.warn('⚠️ No students found in current subject');
+          studentSelect.innerHTML += '<option value="" disabled>No students found - please upload attendance first</option>';
+          return;
+        }
+
+        // Convert to array and sort
+        const studentArray = [];
+
+        for (const studentId in students) {
+          if (studentId.startsWith('_')) continue; // Skip metadata
+
+          const studentName = students[studentId]._name || studentId;
+
+          studentArray.push({
+            id: studentId,
+            name: studentName
+          });
+        }
+
+        // Sort by ID (numerically if possible)
+        studentArray.sort((a, b) => {
+          const aNum = parseInt(a.id);
+          const bNum = parseInt(b.id);
+
+          if (!isNaN(aNum) && !isNaN(bNum)) {
+            return aNum - bNum;
+          }
+
+          return a.name.localeCompare(b.name);
+        });
+
+        // Populate dropdown
+        studentArray.forEach(student => {
+          const option = document.createElement('option');
+          option.value = student.id;
+          option.textContent = `${student.id} - ${student.name}`;
+          studentSelect.appendChild(option);
+        });
+
+        console.log(`✅ Loaded ${studentArray.length} students for leave form`);
+
+      } catch (error) {
+        console.error('Error loading students:', error);
+        studentSelect.innerHTML += '<option value="" disabled>Error loading students</option>';
+      }
+    }
+
+    // ===== DATE CHANGE HANDLER (Calculate Days) =====
+
+    function updateLeaveDayCount() {
+      const fromDate = document.getElementById('leaveFromDate').value;
+      const toDate = document.getElementById('leaveToDate').value;
+      const dayCountAlert = document.getElementById('leaveDayCountAlert');
+      const totalLeaveDaysSpan = document.getElementById('totalLeaveDays');
+      const leaveDaysListDiv = document.getElementById('leaveDaysList');
+
+      if (!fromDate || !toDate) {
+        dayCountAlert.style.display = 'none';
+        return;
+      }
+
+      const days = getDaysBetweenDates(fromDate, toDate);
+
+      if (days.length === 0) {
+        dayCountAlert.style.display = 'none';
+        return;
+      }
+
+      totalLeaveDaysSpan.textContent = days.length;
+      leaveDaysListDiv.textContent = `Days: ${days.join(', ')}`;
+      dayCountAlert.style.display = 'block';
+    }
+
+    // ===== SUBMIT LEAVE APPLICATION =====
+
+    async function submitLeaveApplication() {
+      // Get form values
+      const studentId = document.getElementById('leaveStudentSelect').value;
+      const fromDate = document.getElementById('leaveFromDate').value;
+      const toDate = document.getElementById('leaveToDate').value;
+      const reason = document.getElementById('leaveReason').value.trim();
+
+      const validationAlert = document.getElementById('leaveValidationAlert');
+      const validationMsg = document.getElementById('leaveValidationMsg');
+
+      // Validate division context
+      const contextValidation = validateDivisionContext();
+      if (!contextValidation.valid) {
+        validationMsg.textContent = `Please select: ${contextValidation.missing.join(', ')}`;
+        validationAlert.style.display = 'block';
+        return;
+      }
+
+      // Validate form fields
+      if (!studentId) {
+        validationMsg.textContent = 'Please select a student';
+        validationAlert.style.display = 'block';
+        return;
+      }
+
+      if (!fromDate || !toDate) {
+        validationMsg.textContent = 'Please select both From and To dates';
+        validationAlert.style.display = 'block';
+        return;
+      }
+
+      if (new Date(fromDate) > new Date(toDate)) {
+        validationMsg.textContent = 'From date cannot be after To date';
+        validationAlert.style.display = 'block';
+        return;
+      }
+
+      if (!reason) {
+        validationMsg.textContent = 'Please provide a reason for leave';
+        validationAlert.style.display = 'block';
+        return;
+      }
+
+      // Calculate days
+      const days = getDaysBetweenDates(fromDate, toDate);
+
+      if (days.length === 0) {
+        validationMsg.textContent = 'Invalid date range';
+        validationAlert.style.display = 'block';
+        return;
+      }
+
+      // Get student name
+      const studentSelect = document.getElementById('leaveStudentSelect');
+      const studentName = studentSelect.options[studentSelect.selectedIndex].text.split(' - ')[1] || studentId;
+
+      // Get current user
+      let submittedBy = 'unknown';
+      try {
+        const user = await getCurrentUser();
+        submittedBy = user.attributes.email;
+      } catch (error) {
+        console.warn('Could not get current user:', error);
+      }
+
+      // Generate leave ID
+      const leaveId = `leave_${Date.now()}`;
+
+      // Create leave data
+      const leaveData = {
+        studentId: studentId,
+        studentName: studentName,
+        fromDate: fromDate,
+        toDate: toDate,
+        days: days,
+        month: new Date(fromDate).getMonth(),
+        year: new Date(fromDate).getFullYear(),
+        reason: reason,
+        status: 'pending',
+        submittedBy: submittedBy,
+        submittedAt: Date.now()
+      };
+
+      // Save to Firebase
+      const leavePath = getLeaveApplicationsPath();
+
+      if (!leavePath) {
+        showAlert('Cannot save leave: division context incomplete', 'danger');
+        return;
+      }
+
+      try {
+        if (useCloud && firebaseDB) {
+          await firebaseDB.ref(`${leavePath}/${leaveId}`).set(leaveData);
+          console.log(`✅ Leave application submitted: ${leaveId}`);
+        } else {
+          // Fallback to IndexedDB
+          const allLeaves = await loadFromDatabase('leaveApplications') || {};
+          allLeaves[leaveId] = leaveData;
+          await saveToDatabase('leaveApplications', allLeaves);
+        }
+
+        // Close modal
+        if (leaveModal) {
+          leaveModal.hide();
+        }
+
+        // Reset form
+        resetLeaveForm();
+
+        // Refresh leave list
+        await loadLeaveApplications();
+
+        showAlert(`Leave application submitted for ${studentName} (${days.length} days)`, 'success');
+
+      } catch (error) {
+        console.error('Error submitting leave:', error);
+        showAlert('Failed to submit leave application. Please try again.', 'danger');
+      }
+    }
+
+    // ===== RESET FORM =====
+
+    function resetLeaveForm() {
+      document.getElementById('leaveStudentSelect').value = '';
+      document.getElementById('leaveFromDate').value = '';
+      document.getElementById('leaveToDate').value = '';
+      document.getElementById('leaveReason').value = '';
+      document.getElementById('leaveDayCountAlert').style.display = 'none';
+      document.getElementById('leaveValidationAlert').style.display = 'none';
+    }
+
+    // ===== LOAD LEAVE APPLICATIONS =====
+
+    async function loadLeaveApplications() {
+      const leavePath = getLeaveApplicationsPath();
+
+      if (!leavePath) {
+        console.warn('Cannot load leaves: division context incomplete');
+        leaveState.applications = [];
+        renderLeaveTable();
+        return;
+      }
+
+      try {
+        let leaves = {};
+
+        if (useCloud && firebaseDB) {
+          const snapshot = await firebaseDB.ref(leavePath).once('value');
+          leaves = snapshot.val() || {};
+        } else {
+          leaves = await loadFromDatabase('leaveApplications') || {};
+        }
+
+        // Convert to array
+        leaveState.applications = Object.keys(leaves).map(id => ({
+          id: id,
+          ...leaves[id]
+        }));
+
+        // Sort by submission date (newest first)
+        leaveState.applications.sort((a, b) => b.submittedAt - a.submittedAt);
+
+        console.log(`✅ Loaded ${leaveState.applications.length} leave applications`);
+
+        renderLeaveTable();
+        updateLeaveBadges();
+
+      } catch (error) {
+        console.error('Error loading leave applications:', error);
+        leaveState.applications = [];
+        renderLeaveTable();
+      }
+    }
+    // ===== RENDER LEAVE TABLE =====
+
+    function renderLeaveTable() {
+      const tbody = document.getElementById('leaveTableBody');
+
+      if (leaveState.applications.length === 0) {
+        tbody.innerHTML = `
+      <tr>
+        <td colspan="8" class="text-center text-muted py-4">
+          <i class="bi bi-inbox fs-2"></i>
+          <p class="mt-2 mb-0">No leave applications yet</p>
+          <small>Click "Submit New Leave" to add one</small>
+        </td>
+      </tr>
+    `;
+        return;
+      }
+
+      // Apply filters
+      let filteredLeaves = [...leaveState.applications];
+
+      // Filter by status
+      if (leaveState.filters.status !== 'all') {
+        filteredLeaves = filteredLeaves.filter(leave => leave.status === leaveState.filters.status);
+      }
+
+      // Filter by month
+      if (leaveState.filters.month === 'current') {
+        filteredLeaves = filteredLeaves.filter(leave =>
+          leave.month === appState.selectedMonth && leave.year === appState.selectedYear
+        );
+      }
+
+      // Render filtered leaves
+      tbody.innerHTML = '';
+
+      if (filteredLeaves.length === 0) {
+        tbody.innerHTML = `
+      <tr>
+        <td colspan="8" class="text-center text-muted py-4">
+          <i class="bi bi-funnel fs-2"></i>
+          <p class="mt-2 mb-0">No applications match the selected filters</p>
+        </td>
+      </tr>
+    `;
+        return;
+      }
+
+      filteredLeaves.forEach(leave => {
+        const row = document.createElement('tr');
+
+        // Add row class based on status
+        if (leave.status === 'pending') {
+          row.classList.add('leave-row-pending');
+        } else if (leave.status === 'approved') {
+          row.classList.add('leave-row-approved');
+        } else if (leave.status === 'rejected') {
+          row.classList.add('leave-row-rejected');
+        }
+
+        // Format dates
+        const fromDateObj = new Date(leave.fromDate);
+        const toDateObj = new Date(leave.toDate);
+        const fromFormatted = `${fromDateObj.getDate()} ${monthNames[fromDateObj.getMonth()]}`;
+        const toFormatted = `${toDateObj.getDate()} ${monthNames[toDateObj.getMonth()]}`;
+
+        // Status badge
+        let statusBadge = '';
+        if (leave.status === 'pending') {
+          statusBadge = '<span class="leave-status-pending">Pending</span>';
+        } else if (leave.status === 'approved') {
+          statusBadge = '<span class="leave-status-approved">✓ Approved</span>';
+        } else if (leave.status === 'rejected') {
+          statusBadge = '<span class="leave-status-rejected">✗ Rejected</span>';
+        }
+
+        // Action buttons
+        let actionButtons = '';
+        if (leave.status === 'pending') {
+          actionButtons = `
+        <button class="btn btn-success btn-sm leave-action-btn me-1" 
+                onclick="approveLeave('${leave.id}')" 
+                title="Approve Leave">
+          <i class="bi bi-check-circle"></i> Approve
+        </button>
+        <button class="btn btn-danger btn-sm leave-action-btn" 
+                onclick="rejectLeave('${leave.id}')" 
+                title="Reject Leave">
+          <i class="bi bi-x-circle"></i> Reject
+        </button>
+      `;
+        } else {
+          actionButtons = `
+        <button class="btn btn-outline-secondary btn-sm leave-action-btn" 
+                onclick="deleteLeave('${leave.id}')" 
+                title="Delete Leave">
+          <i class="bi bi-trash"></i> Delete
+        </button>
+      `;
+        }
+
+        row.innerHTML = `
+      <td><strong>${escapeHtml(leave.studentId)}</strong></td>
+      <td>${escapeHtml(leave.studentName)}</td>
+      <td>${fromFormatted}</td>
+      <td>${toFormatted}</td>
+      <td><span class="badge bg-secondary">${leave.days.length}</span></td>
+      <td>
+        <span class="leave-reason-text" title="${escapeHtml(leave.reason)}">
+          ${escapeHtml(leave.reason.substring(0, 30))}${leave.reason.length > 30 ? '...' : ''}
+        </span>
+      </td>
+      <td>${statusBadge}</td>
+      <td>${actionButtons}</td>
+    `;
+
+        tbody.appendChild(row);
+      });
+    }
+
+    // ===== UPDATE LEAVE BADGES (Pending/Approved Count) =====
+
+    function updateLeaveBadges() {
+      const pendingCount = leaveState.applications.filter(l => l.status === 'pending').length;
+      const approvedCount = leaveState.applications.filter(l => l.status === 'approved').length;
+
+      const pendingBadge = document.getElementById('leavePendingCount');
+      const approvedBadge = document.getElementById('leaveApprovedCount');
+
+      if (pendingCount > 0) {
+        pendingBadge.textContent = pendingCount;
+        pendingBadge.style.display = 'inline-block';
+      } else {
+        pendingBadge.style.display = 'none';
+      }
+
+      if (approvedCount > 0) {
+        approvedBadge.textContent = approvedCount;
+        approvedBadge.style.display = 'inline-block';
+      } else {
+        approvedBadge.style.display = 'none';
+      }
+    }
+
+    // ===== APPROVE LEAVE =====
+
+    async function approveLeave(leaveId) {
+      const leave = leaveState.applications.find(l => l.id === leaveId);
+
+      if (!leave) {
+        showAlert('Leave application not found', 'danger');
+        return;
+      }
+
+      const confirmMsg = `✅ APPROVE LEAVE?\n\nStudent: ${leave.studentName}\nDates: ${leave.fromDate} to ${leave.toDate}\nDays: ${leave.days.length}\nReason: ${leave.reason}\n\nThis will mark the student as "On Leave" for ALL subjects on these days.`;
+
+      if (!confirm(confirmMsg)) {
+        return;
+      }
+
+      try {
+        // Get current user
+        let approvedBy = 'unknown';
+        try {
+          const user = await getCurrentUser();
+          approvedBy = user.attributes.email;
+        } catch (error) {
+          console.warn('Could not get current user:', error);
+        }
+
+        // Update status in Firebase
+        const leavePath = getLeaveApplicationsPath();
+
+        if (!leavePath) {
+          showAlert('Cannot approve leave: division context incomplete', 'danger');
+          return;
+        }
+
+        const updates = {
+          status: 'approved',
+          approvedBy: approvedBy,
+          approvedAt: Date.now()
+        };
+
+        if (useCloud && firebaseDB) {
+          await firebaseDB.ref(`${leavePath}/${leaveId}`).update(updates);
+        } else {
+          const allLeaves = await loadFromDatabase('leaveApplications') || {};
+          if (allLeaves[leaveId]) {
+            allLeaves[leaveId] = { ...allLeaves[leaveId], ...updates };
+            await saveToDatabase('leaveApplications', allLeaves);
+          }
+        }
+
+        console.log(`✅ Leave approved: ${leaveId}`);
+
+        await loadLeaveApplications();
+
+        // Reload leave applications
+        await loadLeaveApplications();
+
+        // Refresh attendance table and stats
+        refreshAttendanceTable();
+        updateStats();
+        renderCalendarGrid();
+
+        showAlert(`Leave approved for ${leave.studentName}. Attendance updated for ${leave.days.length} days.`, 'success');
+
+      } catch (error) {
+        console.error('Error approving leave:', error);
+        showAlert('Failed to approve leave. Please try again.', 'danger');
+      }
+    }
+
+    // ===== REJECT LEAVE =====
+
+    async function rejectLeave(leaveId) {
+      const leave = leaveState.applications.find(l => l.id === leaveId);
+
+      if (!leave) {
+        showAlert('Leave application not found', 'danger');
+        return;
+      }
+
+      const confirmMsg = `⚠️ REJECT LEAVE?\n\nStudent: ${leave.studentName}\nDates: ${leave.fromDate} to ${leave.toDate}\nReason: ${leave.reason}\n\nThis action can be undone by deleting and resubmitting.`;
+
+      if (!confirm(confirmMsg)) {
+        return;
+      }
+
+      try {
+        // Get current user
+        let rejectedBy = 'unknown';
+        try {
+          const user = await getCurrentUser();
+          rejectedBy = user.attributes.email;
+        } catch (error) {
+          console.warn('Could not get current user:', error);
+        }
+
+        // Update status in Firebase
+        const leavePath = getLeaveApplicationsPath();
+
+        if (!leavePath) {
+          showAlert('Cannot reject leave: division context incomplete', 'danger');
+          return;
+        }
+
+        const updates = {
+          status: 'rejected',
+          rejectedBy: rejectedBy,
+          rejectedAt: Date.now()
+        };
+
+        if (useCloud && firebaseDB) {
+          await firebaseDB.ref(`${leavePath}/${leaveId}`).update(updates);
+        } else {
+          const allLeaves = await loadFromDatabase('leaveApplications') || {};
+          if (allLeaves[leaveId]) {
+            allLeaves[leaveId] = { ...allLeaves[leaveId], ...updates };
+            await saveToDatabase('leaveApplications', allLeaves);
+          }
+        }
+
+        console.log(`❌ Leave rejected: ${leaveId}`);
+
+        // Reload leave applications
+        await loadLeaveApplications();
+
+        showAlert(`Leave rejected for ${leave.studentName}.`, 'info');
+
+      } catch (error) {
+        console.error('Error rejecting leave:', error);
+        showAlert('Failed to reject leave. Please try again.', 'danger');
+      }
+    }
+
+    // ===== DELETE LEAVE =====
+
+    async function deleteLeave(leaveId) {
+      const leave = leaveState.applications.find(l => l.id === leaveId);
+
+      if (!leave) {
+        showAlert('Leave application not found', 'danger');
+        return;
+      }
+
+      const confirmMsg = `🗑️ DELETE LEAVE APPLICATION?\n\nStudent: ${leave.studentName}\nDates: ${leave.fromDate} to ${leave.toDate}\n\nThis action cannot be undone.`;
+
+      if (!confirm(confirmMsg)) {
+        return;
+      }
+
+      try {
+        const leavePath = getLeaveApplicationsPath();
+
+        if (!leavePath) {
+          showAlert('Cannot delete leave: division context incomplete', 'danger');
+          return;
+        }
+
+        if (useCloud && firebaseDB) {
+          await firebaseDB.ref(`${leavePath}/${leaveId}`).remove();
+        } else {
+          const allLeaves = await loadFromDatabase('leaveApplications') || {};
+          delete allLeaves[leaveId];
+          await saveToDatabase('leaveApplications', allLeaves);
+        }
+
+        console.log(`🗑️ Leave deleted: ${leaveId}`);
+
+        // If leave was approved, optionally clear "On Leave" marks
+        if (leave.status === 'approved') {
+          const clearMarks = confirm(`This leave was approved. Do you want to remove "On Leave" marks from attendance?`);
+
+          if (clearMarks) {
+            await clearOnLeaveMarks(leave);
+            refreshAttendanceTable();
+            updateStats();
+            renderCalendarGrid();
+          }
+        }
+
+        // Reload leave applications
+        await loadLeaveApplications();
+
+        showAlert(`Leave application deleted.`, 'info');
+
+      } catch (error) {
+        console.error('Error deleting leave:', error);
+        showAlert('Failed to delete leave. Please try again.', 'danger');
+      }
+    }
+
+    // ===== AUTO-MARK ATTENDANCE AS "ON LEAVE" =====
+
+    async function markDaysAsOnLeave(leave) {
+      const year = appState.selectedYear;
+      const dept = appState.selectedDepartment;
+      const course = appState.selectedCourse;
+      const academicYear = appState.selectedAcademicYear;
+      const division = appState.selectedDivision;
+
+      if (!year || !dept || !course || !academicYear || !division) {
+        console.error('Cannot mark attendance: division context incomplete');
+        return;
+      }
+
+      // Get all subjects for this division
+      const subjects = getCurrentSubjects();
+
+      if (subjects.length === 0) {
+        console.warn('No subjects found for division');
+        return;
+      }
+
+      const monthKey = `${leave.year}-${String(leave.month + 1).padStart(2, '0')}`;
+
+      console.log(`🔄 Marking ${leave.days.length} days as "On Leave" for ${subjects.length} subjects...`);
+
+      for (const subject of subjects) {
+        const attendancePath = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}/months/${monthKey}/subjects/${subject}/attendance/${leave.studentId}`;
+
+        try {
+          // Check if student exists in this subject
+          if (useCloud && firebaseDB) {
+            const studentSnapshot = await firebaseDB.ref(attendancePath).once('value');
+            const studentData = studentSnapshot.val();
+
+            if (!studentData) {
+              console.warn(`Student ${leave.studentId} not found in subject ${subject} - skipping`);
+              continue;
+            }
+
+            // Mark each day as "On Leave"
+            const updates = {};
+            leave.days.forEach(day => {
+              updates[day] = 'On Leave';
+            });
+
+            await firebaseDB.ref(attendancePath).update(updates);
+            console.log(`✅ Marked ${leave.days.length} days as "On Leave" in ${subject}`);
+
+          } else {
+            // Fallback: Update local attendance data
+            if (appState.attendanceData?.[year]?.[dept]?.[course]?.[academicYear]?.[division]?.months?.[monthKey]?.subjects?.[subject]?.attendance?.[leave.studentId]) {
+              const studentAttendance = appState.attendanceData[year][dept][course][academicYear][division].months[monthKey].subjects[subject].attendance[leave.studentId];
+
+              leave.days.forEach(day => {
+                studentAttendance[day] = 'On Leave';
+              });
+
+              await saveAllData();
+            }
+          }
+
+        } catch (error) {
+          console.error(`Error marking attendance for subject ${subject}:`, error);
+        }
+      }
+
+      console.log(`✅ Completed marking attendance as "On Leave"`);
+    }
+
+    // ===== CLEAR "ON LEAVE" MARKS (when deleting approved leave) =====
+
+    async function clearOnLeaveMarks(leave) {
+      const year = appState.selectedYear;
+      const dept = appState.selectedDepartment;
+      const course = appState.selectedCourse;
+      const academicYear = appState.selectedAcademicYear;
+      const division = appState.selectedDivision;
+
+      if (!year || !dept || !course || !academicYear || !division) {
+        console.error('Cannot clear attendance: division context incomplete');
+        return;
+      }
+
+      const subjects = getCurrentSubjects();
+      const monthKey = `${leave.year}-${String(leave.month + 1).padStart(2, '0')}`;
+
+      console.log(`🔄 Clearing "On Leave" marks for ${leave.days.length} days...`);
+
+      for (const subject of subjects) {
+        const attendancePath = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}/months/${monthKey}/subjects/${subject}/attendance/${leave.studentId}`;
+
+        try {
+          if (useCloud && firebaseDB) {
+            const updates = {};
+            leave.days.forEach(day => {
+              updates[day] = 'Absent'; // Default to Absent when clearing
+            });
+
+            await firebaseDB.ref(attendancePath).update(updates);
+
+          } else {
+            if (appState.attendanceData?.[year]?.[dept]?.[course]?.[academicYear]?.[division]?.months?.[monthKey]?.subjects?.[subject]?.attendance?.[leave.studentId]) {
+              const studentAttendance = appState.attendanceData[year][dept][course][academicYear][division].months[monthKey].subjects[subject].attendance[leave.studentId];
+
+              leave.days.forEach(day => {
+                studentAttendance[day] = 'Absent';
+              });
+
+              await saveAllData();
+            }
+          }
+
+        } catch (error) {
+          console.error(`Error clearing attendance for subject ${subject}:`, error);
+        }
+      }
+
+      console.log(`✅ Cleared "On Leave" marks`);
+    }
+
+    // ===== GET LEAVE INFO FOR STUDENT (for displaying in defaulter list) =====
+
+    function getStudentLeaveInfo(studentId) {
+      if (!appState.selectedMonth || !appState.selectedYear) {
+        return null;
+      }
+
+      const approvedLeaves = leaveState.applications.filter(leave =>
+        leave.status === 'approved' &&
+        leave.studentId === studentId &&
+        leave.month === appState.selectedMonth &&
+        leave.year === appState.selectedYear
+      );
+
+      if (approvedLeaves.length === 0) {
+        return null;
+      }
+
+      // Combine all approved leave days
+      const totalLeaveDays = new Set();
+      const reasons = [];
+
+      approvedLeaves.forEach(leave => {
+        leave.days.forEach(day => totalLeaveDays.add(day));
+        if (!reasons.includes(leave.reason)) {
+          reasons.push(leave.reason);
+        }
+      });
+
+      return {
+        count: totalLeaveDays.size,
+        reasons: reasons,
+        applications: approvedLeaves
+      };
+    }
+
+    // ===== GET APPROVED LEAVES FOR STUDENT (Current Month) =====
+
+    function getApprovedLeavesForStudent(studentId) {
+      if (!appState.selectedMonth || !appState.selectedYear) {
+        return [];
+      }
+
+      return leaveState.applications.filter(leave =>
+        leave.status === 'approved' &&
+        leave.studentId === studentId &&
+        leave.month === appState.selectedMonth &&
+        leave.year === appState.selectedYear
+      );
+    }
+
+    // ===== GET LEAVE SUMMARY FOR STUDENT =====
+
+    function getStudentLeaveSummary(studentId) {
+      const approvedLeaves = getApprovedLeavesForStudent(studentId);
+
+      if (approvedLeaves.length === 0) {
+        return null;
+      }
+
+      // Calculate total leave days
+      const totalLeaveDays = new Set();
+      const reasons = [];
+
+      approvedLeaves.forEach(leave => {
+        leave.days.forEach(day => totalLeaveDays.add(day));
+
+        // Get first 20 chars of reason
+        const shortReason = leave.reason.substring(0, 20) + (leave.reason.length > 20 ? '...' : '');
+        if (!reasons.includes(shortReason)) {
+          reasons.push(shortReason);
+        }
+      });
+
+      return {
+        count: totalLeaveDays.size,
+        days: Array.from(totalLeaveDays).sort((a, b) => a - b),
+        reasons: reasons.join(', '),
+        applications: approvedLeaves.length
+      };
+    }
+
+    function renderAttendanceTable(students) {
+      if (!students || students.length === 0) {
+        elements.attendanceTableBody.innerHTML = `
+      <tr>
+        <td colspan="5" class="text-center text-muted py-5">
+          <i class="bi bi-inbox fs-1"></i>
+          <p class="mt-2">No students found. Upload a CSV file to get started.</p>
+        </td>
+      </tr>
+    `;
+        return;
+      }
+
+      const isHolidayToday = isHoliday(appState.currentDay);
+      const threshold = appState.threshold;
+
+      elements.attendanceTableBody.innerHTML = '';
+
+      students.forEach(student => {
+        const stats = getStudentStats(student.id);
+        const isDefaulter = stats.percentage < threshold;
+
+        // ✅ CHECK IF STUDENT HAS APPROVED LEAVE
+        const leaveSummary = getStudentLeaveSummary(student.id);
+        const hasLeaveToday = leaveSummary && leaveSummary.days.includes(appState.currentDay);
+
+        const row = document.createElement('tr');
+        row.className = student.status === 'Present' ? 'present' : 'absent';
+
+        row.innerHTML = `
+      <td><strong>${escapeHtml(student.id)}</strong></td>
+      <td>${escapeHtml(student.name)}</td>
+      <td>
+        <span class="badge ${student.status === 'Present' ? 'bg-success' : 'bg-danger'}">
+          ${student.status}
+        </span>
+        ${isHolidayToday ? '<span class="holiday-badge ms-1">Holiday</span>' : ''}
+        ${hasLeaveToday ? '<span class="badge bg-info ms-1" title="Approved leave application exists for today">📝 Leave App</span>' : ''}
+      </td>
+      <td>
+        ${stats.present}/${stats.workingDays} days
+        <span class="${isDefaulter ? 'defaulter-badge' : 'good-badge'} ms-2">
+          ${stats.percentage}%
+        </span>
+        ${leaveSummary ? `<br><small class="text-muted">📝 ${leaveSummary.applications} leave app(s) - ${leaveSummary.count} days</small>` : ''}
+      </td>
+      <td class="teacher-only">
+        <button class="btn btn-sm btn-outline-success mark-present-btn" 
+          data-id="${escapeHtml(student.id)}" 
+          ${isHolidayToday ? 'disabled' : ''}>
+          <i class="bi bi-check"></i>
+        </button>
+        <button class="btn btn-sm btn-outline-danger mark-absent-btn" 
+          data-id="${escapeHtml(student.id)}" 
+          ${isHolidayToday ? 'disabled' : ''}>
+          <i class="bi bi-x"></i>
+        </button>
+      </td>
+    `;
+
+        elements.attendanceTableBody.appendChild(row);
+      });
+
+      // Add event listeners for mark buttons
+      document.querySelectorAll('.mark-present-btn').forEach(btn => {
+        btn.addEventListener('click', () => markAttendance(btn.dataset.id, 'Present'));
+      });
+
+      document.querySelectorAll('.mark-absent-btn').forEach(btn => {
+        btn.addEventListener('click', () => markAttendance(btn.dataset.id, 'Absent'));
+      });
+    }
+
 
     // ==================== INITIALIZATION ====================
     async function initialize() {
@@ -4556,6 +6096,25 @@ qrModal.addEventListener('shown.bs.modal', () => {
 
         // Load saved data
         await loadAllData();
+
+        // ==================== INITIALIZE LEAVE SYSTEM ====================
+
+        // Initialize leave modal reference
+        leaveModal = null;
+
+        // Load leave applications if division context is complete
+        if (appState.selectedDepartment &&
+          appState.selectedCourse &&
+          appState.selectedAcademicYear &&
+          appState.selectedDivision &&
+          appState.selectedMonth !== null &&
+          appState.selectedYear !== null) {
+
+          console.log('✅ Loading leave applications on startup...');
+          await loadLeaveApplications();
+        } else {
+          console.log('⚠️ Division context incomplete - leave applications will load when context is set');
+        }
 
         // Populate year dropdown
         populateYearDropdown();
@@ -4662,151 +6221,151 @@ qrModal.addEventListener('shown.bs.modal', () => {
     // Start the application
     initialize();
     //start>>>>>>>>>>
-let qrTimerInterval = null;
-let qrExpiryTimestamp = null; // ✅ Track actual expiry time instead of countdown
+    let qrTimerInterval = null;
+    let qrExpiryTimestamp = null; // ✅ Track actual expiry time instead of countdown
 
-function startQRCountdown(seconds) {
-  // Clear previous timer
-  if (qrTimerInterval) {
-    clearInterval(qrTimerInterval);
-    qrTimerInterval = null;
-  }
+    function startQRCountdown(seconds) {
+      // Clear previous timer
+      if (qrTimerInterval) {
+        clearInterval(qrTimerInterval);
+        qrTimerInterval = null;
+      }
 
-  // ✅ Store the actual expiry timestamp (absolute time)
-  qrExpiryTimestamp = Date.now() + (seconds * 1000);
-  
-  // Update immediately
-  updateQRTimer();
-  
-  // ✅ Update every second based on actual time remaining
-  qrTimerInterval = setInterval(() => {
-    updateQRTimer();
-  }, 1000);
-}
+      // ✅ Store the actual expiry timestamp (absolute time)
+      qrExpiryTimestamp = Date.now() + (seconds * 1000);
 
-function updateQRTimer() {
-  // ✅ Calculate remaining time from actual expiry timestamp
-  const remaining = Math.max(0, Math.floor((qrExpiryTimestamp - Date.now()) / 1000));
-  
-  const mins = Math.floor(remaining / 60);
-  const secs = remaining % 60;
-  
-  const timerElement = document.getElementById('qrTimer');
-  if (timerElement) {
-    timerElement.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
-  }
-  
-  const statusElement = document.getElementById('qrStatus');
-  const qrContainer = document.getElementById('qrCodeContainer');
-  
-  if (remaining <= 0) {
-    // ✅ Actually expired
-    clearInterval(qrTimerInterval);
-    qrTimerInterval = null;
-    qrExpiryTimestamp = null;
-    
-    if (statusElement) {
-      statusElement.className = 'alert alert-danger mb-3';
-      statusElement.innerHTML = '⚠️ EXPIRED - Click Generate QR again';
+      // Update immediately
+      updateQRTimer();
+
+      // ✅ Update every second based on actual time remaining
+      qrTimerInterval = setInterval(() => {
+        updateQRTimer();
+      }, 1000);
     }
-    
-    if (qrContainer) {
-      qrContainer.style.opacity = '0.3';
-    }
-    
-    // ✅ Stop dynamic code rotation when expired
-    stopDynamicCodeRotation();
-  } else {
-    // ✅ Still valid - ensure proper styling
-    if (statusElement) {
-      statusElement.className = 'alert alert-success mb-3';
-    }
-    
-    if (qrContainer) {
-      qrContainer.style.opacity = '1';
-    }
-  }
-}
 
-function stopQRCountdown() {
-  if (qrTimerInterval) {
-    clearInterval(qrTimerInterval);
-    qrTimerInterval = null;
-  }
-  qrExpiryTimestamp = null;
-}
-//end>>>>>>>>>>
+    function updateQRTimer() {
+      // ✅ Calculate remaining time from actual expiry timestamp
+      const remaining = Math.max(0, Math.floor((qrExpiryTimestamp - Date.now()) / 1000));
 
-let dynamicCodeInterval = null;
+      const mins = Math.floor(remaining / 60);
+      const secs = remaining % 60;
 
-function generateDynamicCode() {
-  const array = new Uint32Array(1);
-  window.crypto.getRandomValues(array);
-  return (array[0] % 10000).toString().padStart(4, '0');
-}
+      const timerElement = document.getElementById('qrTimer');
+      if (timerElement) {
+        timerElement.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+      }
 
-function getRemainingSeconds() {
-  const currentTime = Date.now();
-  const remaining = 8 - Math.floor((currentTime % 8000) / 1000);
-  return remaining;
-}
+      const statusElement = document.getElementById('qrStatus');
+      const qrContainer = document.getElementById('qrCodeContainer');
 
-function startDynamicCodeRotation() {
-  if (dynamicCodeInterval) {
-    clearInterval(dynamicCodeInterval);
-  }
+      if (remaining <= 0) {
+        // ✅ Actually expired
+        clearInterval(qrTimerInterval);
+        qrTimerInterval = null;
+        qrExpiryTimestamp = null;
 
-  const codeElement = document.getElementById('qrDynamicCode');
-  const countdownElement = document.getElementById('qrCountdown');
+        if (statusElement) {
+          statusElement.className = 'alert alert-danger mb-3';
+          statusElement.innerHTML = '⚠️ EXPIRED - Click Generate QR again';
+        }
 
-  function update() {
-    const now = Date.now();
+        if (qrContainer) {
+          qrContainer.style.opacity = '0.3';
+        }
 
-    // Update code every 8 sec
-    if (codeElement) {
-      const windowIndex = Math.floor(now / 8000);
-      if (!codeElement.dataset.window || codeElement.dataset.window != windowIndex) {
-        codeElement.dataset.window = windowIndex;
-        const newCode = generateDynamicCode();
-        codeElement.textContent = newCode;
+        // ✅ Stop dynamic code rotation when expired
+        stopDynamicCodeRotation();
+      } else {
+        // ✅ Still valid - ensure proper styling
+        if (statusElement) {
+          statusElement.className = 'alert alert-success mb-3';
+        }
 
-        // Save to Firebase
-        if (useCloud && firebaseDB) {
-          firebaseDB.ref('mainSystem/dynamicCode').set({
-            code: newCode,
-            timestamp: Date.now(),
-            expiresAt: Date.now() + 8000
-          });
+        if (qrContainer) {
+          qrContainer.style.opacity = '1';
         }
       }
     }
 
-    // Update countdown every second
-    if (countdownElement) {
-      const remaining = 8 - Math.floor((now % 8000) / 1000);
-      countdownElement.textContent = remaining + "s";
+    function stopQRCountdown() {
+      if (qrTimerInterval) {
+        clearInterval(qrTimerInterval);
+        qrTimerInterval = null;
+      }
+      qrExpiryTimestamp = null;
     }
-  }
+    //end>>>>>>>>>>
 
-  update();
-  dynamicCodeInterval = setInterval(update, 1000);
-}
+    let dynamicCodeInterval = null;
 
-function stopDynamicCodeRotation() {
-  if (dynamicCodeInterval) {
-    clearInterval(dynamicCodeInterval);
-    dynamicCodeInterval = null;
-  }
-  if (useCloud && firebaseDB) {
-    firebaseDB.ref('mainSystem/dynamicCode').remove()
-      .then(() => {
-        console.log('✅ Dynamic code cleared from Firebase');
-      })
-      .catch((error) => {
-        console.error('❌ Failed to clear dynamic code:', error);
-      });
-  }
-}
+    function generateDynamicCode() {
+      const array = new Uint32Array(1);
+      window.crypto.getRandomValues(array);
+      return (array[0] % 10000).toString().padStart(4, '0');
+    }
+
+    function getRemainingSeconds() {
+      const currentTime = Date.now();
+      const remaining = 8 - Math.floor((currentTime % 8000) / 1000);
+      return remaining;
+    }
+
+    function startDynamicCodeRotation() {
+      if (dynamicCodeInterval) {
+        clearInterval(dynamicCodeInterval);
+      }
+
+      const codeElement = document.getElementById('qrDynamicCode');
+      const countdownElement = document.getElementById('qrCountdown');
+
+      function update() {
+        const now = Date.now();
+
+        // Update code every 8 sec
+        if (codeElement) {
+          const windowIndex = Math.floor(now / 8000);
+          if (!codeElement.dataset.window || codeElement.dataset.window != windowIndex) {
+            codeElement.dataset.window = windowIndex;
+            const newCode = generateDynamicCode();
+            codeElement.textContent = newCode;
+
+            // Save to Firebase
+            if (useCloud && firebaseDB) {
+              firebaseDB.ref('mainSystem/dynamicCode').set({
+                code: newCode,
+                timestamp: Date.now(),
+                expiresAt: Date.now() + 8000
+              });
+            }
+          }
+        }
+
+        // Update countdown every second
+        if (countdownElement) {
+          const remaining = 8 - Math.floor((now % 8000) / 1000);
+          countdownElement.textContent = remaining + "s";
+        }
+      }
+
+      update();
+      dynamicCodeInterval = setInterval(update, 1000);
+    }
+
+    function stopDynamicCodeRotation() {
+      if (dynamicCodeInterval) {
+        clearInterval(dynamicCodeInterval);
+        dynamicCodeInterval = null;
+      }
+      if (useCloud && firebaseDB) {
+        firebaseDB.ref('mainSystem/dynamicCode').remove()
+          .then(() => {
+            console.log('✅ Dynamic code cleared from Firebase');
+          })
+          .catch((error) => {
+            console.error('❌ Failed to clear dynamic code:', error);
+          });
+      }
+    }
 
     // Listen for refresh requests from face recognition system
     setupRefreshListener();
@@ -4883,6 +6442,87 @@ function stopDynamicCodeRotation() {
       }, 3000);
     }
   </script>
+  <!-- Leave Application Modal -->
+  <div class="modal fade" id="leaveModal" tabindex="-1" aria-labelledby="leaveModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+
+        <!-- Header -->
+        <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+          <h5 class="modal-title" id="leaveModalLabel">
+            <i class="bi bi-calendar-x me-2"></i>Submit Leave Application
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <!-- Body -->
+        <div class="modal-body">
+
+          <!-- Validation Alert -->
+          <div id="leaveValidationAlert" class="alert alert-warning" style="display: none;">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            <span id="leaveValidationMsg"></span>
+          </div>
+
+          <!-- Student Selection -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">
+              Student <span class="text-danger">*</span>
+            </label>
+            <select id="leaveStudentSelect" class="form-select" required>
+              <option value="">-- Select Student --</option>
+            </select>
+            <small class="text-muted">Select from students in current division</small>
+          </div>
+
+          <!-- Date Range -->
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-bold">
+                From Date <span class="text-danger">*</span>
+              </label>
+              <input type="date" id="leaveFromDate" class="form-control" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-bold">
+                To Date <span class="text-danger">*</span>
+              </label>
+              <input type="date" id="leaveToDate" class="form-control" required>
+            </div>
+          </div>
+
+          <!-- Day Count Display -->
+          <div class="alert alert-info mb-3" id="leaveDayCountAlert" style="display: none;">
+            <i class="bi bi-calendar-check me-2"></i>
+            <strong>Total Leave Days:</strong> <span id="totalLeaveDays">0</span> day(s)
+            <div id="leaveDaysList" class="mt-1 small"></div>
+          </div>
+
+          <!-- Reason -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">
+              Reason <span class="text-danger">*</span>
+            </label>
+            <textarea id="leaveReason" class="form-control" rows="3"
+              placeholder="e.g., Sick - High Fever, Family Emergency, Medical Appointment" required></textarea>
+            <small class="text-muted">Please provide detailed reason for leave</small>
+          </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="bi bi-x-circle me-1"></i>Cancel
+          </button>
+          <button type="button" class="btn btn-primary" id="submitLeaveBtn">
+            <i class="bi bi-check-circle me-1"></i>Submit Leave
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
 </body>
 
 </html>
