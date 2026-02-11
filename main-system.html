@@ -792,6 +792,101 @@
         padding: 3px 8px;
       }
     }
+
+    /* ==================== STUDENT ATTENDANCE CALENDAR STYLES ==================== */
+
+/* Student Present - Green */
+.day-btn.student-present {
+  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%) !important;
+  border-color: #28a745 !important;
+  color: #155724 !important;
+  font-weight: 600;
+}
+
+.day-btn.student-present:hover {
+  background: linear-gradient(135deg, #c3e6cb 0%, #b1dfbb 100%) !important;
+  transform: scale(1.05);
+}
+
+.day-btn.student-present.active {
+  background: #28a745 !important;
+  color: white !important;
+  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.3);
+}
+
+/* Student Absent - Red */
+.day-btn.student-absent {
+  background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%) !important;
+  border-color: #dc3545 !important;
+  color: #721c24 !important;
+  font-weight: 600;
+}
+
+.day-btn.student-absent:hover {
+  background: linear-gradient(135deg, #f5c6cb 0%, #f1b0b7 100%) !important;
+  transform: scale(1.05);
+}
+
+.day-btn.student-absent.active {
+  background: #dc3545 !important;
+  color: white !important;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.3);
+}
+
+/* Student On Leave - Yellow/Amber */
+.day-btn.student-leave {
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%) !important;
+  border-color: #ffc107 !important;
+  color: #856404 !important;
+  font-weight: 600;
+}
+
+.day-btn.student-leave:hover {
+  background: linear-gradient(135deg, #ffeaa7 0%, #ffe082 100%) !important;
+  transform: scale(1.05);
+}
+
+.day-btn.student-leave.active {
+  background: #ffc107 !important;
+  color: #212529 !important;
+  box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.3);
+}
+
+/* Add subtle animation for student days */
+.day-btn.student-present,
+.day-btn.student-absent,
+.day-btn.student-leave {
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+/* Add icon indicators (optional) */
+.day-btn.student-present::before {
+  content: '✓';
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  font-size: 0.7rem;
+  opacity: 0.6;
+}
+
+.day-btn.student-absent::before {
+  content: '✗';
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  font-size: 0.7rem;
+  opacity: 0.6;
+}
+
+.day-btn.student-leave::before {
+  content: '📝';
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  font-size: 0.6rem;
+  opacity: 0.7;
+}
   </style>
 </head>
 
@@ -1622,7 +1717,9 @@
     // ==================== FIREBASE CLOUD STORAGE ====================
     let firebaseDB = null;
     let useCloud = false;
-
+    // Add after appState declaration
+let currentUserRole = null;
+let currentStudentId = null;
     // Initialize Firebase
     async function initFirebase() {
       try {
@@ -1957,6 +2054,13 @@
 
         // Show user info
         console.log(`Logged in as: ${user.attributes.email} (${role})`);
+        // ✅ STORE ROLE GLOBALLY
+currentUserRole = role;
+
+if (role === 'student') {
+  const attributes = await getUserAttributes();
+  currentStudentId = attributes['custom:studentId'];
+}
 
         // ✅ FOR STUDENTS: Auto-populate and lock division fields
         if (role === 'student') {
@@ -2689,54 +2793,81 @@
     }
 
     function renderCalendarGrid() {
-      elements.dayGrid.innerHTML = '';
+  elements.dayGrid.innerHTML = '';
 
-      const firstDay = getFirstDayOfMonth(appState.selectedMonth, appState.selectedYear);
-      const monthKey = getMonthKey();
-      const subjectData = getSubjectData();
+  const firstDay = getFirstDayOfMonth(appState.selectedMonth, appState.selectedYear);
+  const monthKey = getMonthKey();
+  const subjectData = getSubjectData();
 
-      // Empty cells before first day
-      for (let i = 0; i < firstDay; i++) {
-        const emptyCell = document.createElement('div');
-        emptyCell.style.visibility = 'hidden';
-        elements.dayGrid.appendChild(emptyCell);
+  // ✅ USE GLOBAL ROLE (no async needed)
+  const studentId = (currentUserRole === 'student') ? currentStudentId : null;
+
+  // Empty cells before first day
+  for (let i = 0; i < firstDay; i++) {
+    const emptyCell = document.createElement('div');
+    emptyCell.style.visibility = 'hidden';
+    elements.dayGrid.appendChild(emptyCell);
+  }
+
+  // Day buttons
+  for (let day = 1; day <= appState.daysInMonth; day++) {
+    const dayBtn = document.createElement('div');
+    dayBtn.className = 'day-btn';
+    dayBtn.textContent = day;
+    dayBtn.setAttribute('data-day', day);
+
+    // ✅ FOR STUDENTS: Show their personal attendance status
+    if (studentId && subjectData && subjectData[studentId]) {
+      const status = subjectData[studentId][day];
+      
+      if (isHoliday(day)) {
+        dayBtn.classList.add('holiday');
+        dayBtn.title = 'Holiday';
+      } else if (status === 'Present') {
+        dayBtn.classList.add('student-present');
+        dayBtn.title = `Day ${day}: Present`;
+      } else if (status === 'Absent') {
+        dayBtn.classList.add('student-absent');
+        dayBtn.title = `Day ${day}: Absent`;
+      } else if (status === 'On Leave') {
+        dayBtn.classList.add('student-leave');
+        dayBtn.title = `Day ${day}: On Leave`;
+      } else if (status) {
+        dayBtn.classList.add('has-data');
+        dayBtn.title = `Day ${day}: ${status}`;
       }
-
-      // Day buttons
-      for (let day = 1; day <= appState.daysInMonth; day++) {
-        const dayBtn = document.createElement('div');
-        dayBtn.className = 'day-btn';
-        dayBtn.textContent = day;
-        dayBtn.setAttribute('data-day', day);
-
-        // Check if has data
-        let hasData = false;
-        if (subjectData) {
-          for (const studentId in subjectData) {
-            if (!studentId.startsWith('_') && subjectData[studentId][day]) {
-              hasData = true;
-              break;
-            }
+    } 
+    // ✅ FOR TEACHERS/ADMINS: Show general data status
+    else {
+      let hasData = false;
+      if (subjectData) {
+        for (const sid in subjectData) {
+          if (!sid.startsWith('_') && subjectData[sid][day]) {
+            hasData = true;
+            break;
           }
         }
-
-        if (isHoliday(day)) {
-          dayBtn.classList.add('holiday');
-        } else if (hasData) {
-          dayBtn.classList.add('has-data');
-        }
-
-        if (day === appState.currentDay) {
-          dayBtn.classList.add('active');
-        }
-
-        dayBtn.addEventListener('click', () => selectDay(day));
-        elements.dayGrid.appendChild(dayBtn);
       }
 
-      updateCurrentDayDisplay();
+      if (isHoliday(day)) {
+        dayBtn.classList.add('holiday');
+        dayBtn.title = 'Holiday';
+      } else if (hasData) {
+        dayBtn.classList.add('has-data');
+        dayBtn.title = `Day ${day}: Attendance recorded`;
+      }
     }
 
+    if (day === appState.currentDay) {
+      dayBtn.classList.add('active');
+    }
+
+    dayBtn.addEventListener('click', () => selectDay(day));
+    elements.dayGrid.appendChild(dayBtn);
+  }
+
+  updateCurrentDayDisplay();
+}
     function selectDay(day) {
       // Validate input
       day = parseInt(day);
@@ -4942,52 +5073,95 @@
 
 
       // Open Leave Form Modal
-      document.getElementById('openLeaveFormBtn').addEventListener('click', () => {
-        // Validate division context
-        const validation = validateDivisionContext();
+document.getElementById('openLeaveFormBtn').addEventListener('click', async () => {
+  // Validate division context
+  const validation = validateDivisionContext();
 
-        if (!validation.valid) {
-          showAlert(`Please select: ${validation.missing.join(', ')} before submitting leave applications!`, 'warning');
-          return;
-        }
+  if (!validation.valid) {
+    showAlert(`Please select: ${validation.missing.join(', ')} before submitting leave applications!`, 'warning');
+    return;
+  }
 
-        // Reset form
-        resetLeaveForm();
+  // Reset form
+  resetLeaveForm();
 
-        // Load students for dropdown
-        loadStudentsForLeaveForm();
+  // ✅ CHECK USER ROLE FIRST (before loading students)
+  const role = await getUserRole();
+  const attributes = await getUserAttributes();
 
-        // Set date range limits (current month)
-        const year = appState.selectedYear;
-        const month = appState.selectedMonth;
+  if (role === 'student') {
+    // ✅ FOR STUDENTS: Only load THEIR student data
+    const studentId = attributes['custom:studentId'];
+    
+    if (!studentId) {
+      showAlert('Your student ID is not configured. Please contact admin.', 'danger');
+      return;
+    }
 
-        if (month !== null && year !== null) {
-          const firstDay = new Date(year, month, 1);
-          const lastDay = new Date(year, month + 1, 0);
+    // ✅ MANUALLY POPULATE DROPDOWN WITH ONLY THEIR ID
+    const studentSelect = document.getElementById('leaveStudentSelect');
+    studentSelect.innerHTML = ''; // Clear dropdown
+    
+    // Get student name from current student list
+    const currentStudent = appState.studentList.find(s => s.id === studentId);
+    const studentName = currentStudent ? currentStudent.name : 'You';
+    
+    // Add ONLY their option
+    const option = document.createElement('option');
+    option.value = studentId;
+    option.textContent = `${studentId} - ${studentName}`;
+    option.selected = true;
+    studentSelect.appendChild(option);
+    
+    // ✅ DISABLE THE DROPDOWN
+    studentSelect.disabled = true;
+    
+    // Add visual indicator
+    const selectContainer = studentSelect.parentElement;
+    const lockedMsg = document.createElement('small');
+    lockedMsg.className = 'text-info d-block mt-1';
+    lockedMsg.id = 'leaveStudentLocked';
+    lockedMsg.innerHTML = '<i class="bi bi-lock me-1"></i>You can only submit leave for yourself';
+    selectContainer.appendChild(lockedMsg);
+    
+    console.log(`✅ Student dropdown restricted to: ${studentId}`);
+    
+  } else {
+    // ✅ FOR TEACHERS/ADMINS: Load full student list
+    await loadStudentsForLeaveForm();
+  }
 
-          const fromInput = document.getElementById('leaveFromDate');
-          const toInput = document.getElementById('leaveToDate');
+  // Set date range limits (current month)
+  const year = appState.selectedYear;
+  const month = appState.selectedMonth;
 
-          fromInput.min = formatDateForInput(firstDay);
-          fromInput.max = formatDateForInput(lastDay);
-          toInput.min = formatDateForInput(firstDay);
-          toInput.max = formatDateForInput(lastDay);
+  if (month !== null && year !== null) {
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
 
-          // Set default values to current day
-          if (appState.currentDay) {
-            const currentDate = new Date(year, month, appState.currentDay);
-            fromInput.value = formatDateForInput(currentDate);
-            toInput.value = formatDateForInput(currentDate);
-            updateLeaveDayCount();
-          }
-        }
+    const fromInput = document.getElementById('leaveFromDate');
+    const toInput = document.getElementById('leaveToDate');
 
-        // Show modal
-        if (!leaveModal) {
-          leaveModal = new bootstrap.Modal(document.getElementById('leaveModal'));
-        }
-        leaveModal.show();
-      });
+    fromInput.min = formatDateForInput(firstDay);
+    fromInput.max = formatDateForInput(lastDay);
+    toInput.min = formatDateForInput(firstDay);
+    toInput.max = formatDateForInput(lastDay);
+
+    // Set default values to current day
+    if (appState.currentDay) {
+      const currentDate = new Date(year, month, appState.currentDay);
+      fromInput.value = formatDateForInput(currentDate);
+      toInput.value = formatDateForInput(currentDate);
+      updateLeaveDayCount();
+    }
+  }
+
+  // Show modal
+  if (!leaveModal) {
+    leaveModal = new bootstrap.Modal(document.getElementById('leaveModal'));
+  }
+  leaveModal.show();
+});
 
       // Date change listeners (update day count)
       document.getElementById('leaveFromDate').addEventListener('change', updateLeaveDayCount);
@@ -5202,6 +5376,19 @@
 
       const validationAlert = document.getElementById('leaveValidationAlert');
       const validationMsg = document.getElementById('leaveValidationMsg');
+      const role = await getUserRole();
+  const attributes = await getUserAttributes();
+  
+  if (role === 'student') {
+    const authenticatedStudentId = attributes['custom:studentId'];
+    
+    if (studentId !== authenticatedStudentId) {
+      validationMsg.textContent = '⚠️ Security Error: You can only submit leave for yourself!';
+      validationAlert.style.display = 'block';
+      console.error('❌ Student tried to submit leave for different ID');
+      return;
+    }
+  }
 
       // Validate division context
       const contextValidation = validateDivisionContext();
@@ -5317,12 +5504,17 @@
 
     function resetLeaveForm() {
       document.getElementById('leaveStudentSelect').value = '';
+      document.getElementById('leaveStudentSelect').disabled = false;
       document.getElementById('leaveFromDate').value = '';
       document.getElementById('leaveToDate').value = '';
       document.getElementById('leaveReason').value = '';
       document.getElementById('leaveDayCountAlert').style.display = 'none';
       document.getElementById('leaveValidationAlert').style.display = 'none';
-    }
+    const lockedMsg = document.getElementById('leaveStudentLocked');
+  if (lockedMsg) {
+    lockedMsg.remove();
+  }
+}
     // ===== AUTO-MARK ATTENDANCE AS "ON LEAVE" =====
 
     async function markDaysAsOnLeave(leave) {
@@ -5448,34 +5640,330 @@
     // ===== GET LEAVE SUMMARY FOR STUDENT =====
 
     function getStudentLeaveSummary(studentId) {
-      const approvedLeaves = getApprovedLeavesForStudent(studentId);
+  if (!appState.selectedMonth || !appState.selectedYear) {
+    return null;
+  }
 
-      if (approvedLeaves.length === 0) {
-        return null;
-      }
+  // ✅ CHANGED: Filter from leaveState.applications (array) instead of object
+  const approvedLeaves = leaveState.applications.filter(leave =>
+    leave.status === 'approved' &&
+    leave.studentId === studentId &&
+    leave.month === appState.selectedMonth &&
+    leave.year === appState.selectedYear
+  );
 
-      // Calculate total leave days
-      const totalLeaveDays = new Set();
-      const reasons = [];
+  if (approvedLeaves.length === 0) {
+    return null;
+  }
 
-      approvedLeaves.forEach(leave => {
-        leave.days.forEach(day => totalLeaveDays.add(day));
+  // Combine all approved leave days
+  const totalLeaveDays = new Set();
+  const reasons = [];
 
-        // Get first 20 chars of reason
-        const shortReason = leave.reason.substring(0, 20) + (leave.reason.length > 20 ? '...' : '');
-        if (!reasons.includes(shortReason)) {
-          reasons.push(shortReason);
-        }
-      });
-
-      return {
-        count: totalLeaveDays.size,
-        days: Array.from(totalLeaveDays).sort((a, b) => a - b),
-        reasons: reasons.join(', '),
-        applications: approvedLeaves.length
-      };
+  approvedLeaves.forEach(leave => {
+    leave.days.forEach(day => totalLeaveDays.add(day));
+    
+    // Get first 20 chars of reason
+    const shortReason = leave.reason.substring(0, 20) + (leave.reason.length > 20 ? '...' : '');
+    if (!reasons.includes(shortReason)) {
+      reasons.push(shortReason);
     }
+  });
 
+  return {
+    count: totalLeaveDays.size,
+    days: Array.from(totalLeaveDays).sort((a, b) => a - b),
+    reasons: reasons.join(', '),
+    applications: approvedLeaves.length
+  };
+}
+
+    // ==================== ADD THESE FUNCTIONS TO YOUR MAIN HTML FILE ====================
+// Add after line 1380 (after getStudentLeaveSummary function)
+
+/**
+ * Load leave applications from Firebase/IndexedDB
+ */
+async function loadLeaveApplications() {
+  const leavePath = getLeaveApplicationsPath();
+  
+  if (!leavePath) {
+    console.warn('Cannot load leaves: division context incomplete');
+    leaveState.applications = {};
+    return;
+  }
+
+  try {
+    if (useCloud && firebaseDB) {
+      // Load from Firebase
+      const snapshot = await firebaseDB.ref(leavePath).once('value');
+      const cloudLeaves = snapshot.val() || {};
+      
+      // Convert to array format
+      leaveState.applications = Object.keys(cloudLeaves).map(key => ({
+        id: key,
+        ...cloudLeaves[key]
+      }));
+      
+      console.log(`✅ Loaded ${leaveState.applications.length} leave applications from Firebase`);
+      
+    } else {
+      // Fallback to IndexedDB
+      const localLeaves = await loadFromDatabase('leaveApplications') || {};
+      
+      leaveState.applications = Object.keys(localLeaves).map(key => ({
+        id: key,
+        ...localLeaves[key]
+      }));
+      
+      console.log(`✅ Loaded ${leaveState.applications.length} leave applications from IndexedDB`);
+    }
+    
+  } catch (error) {
+    console.error('Error loading leave applications:', error);
+    leaveState.applications = [];
+  }
+}
+
+/**
+ * Get leave applications for current student (for student view)
+ */
+async function getMyLeaveApplications() {
+  try {
+    const role = await getUserRole();
+    
+    if (role !== 'student') {
+      return [];
+    }
+    
+    const attributes = await getUserAttributes();
+    const studentId = attributes['custom:studentId'];
+    
+    if (!studentId) {
+      console.warn('Student ID not found in attributes');
+      return [];
+    }
+    
+    // Filter leaves for current student
+    return leaveState.applications.filter(leave => 
+      leave.studentId === studentId
+    );
+    
+  } catch (error) {
+    console.error('Error getting student leaves:', error);
+    return [];
+  }
+}
+
+/**
+ * Display leave status in UI (for students)
+ */
+async function displayMyLeaveStatus() {
+  try {
+    const role = await getUserRole();
+    
+    if (role !== 'student') {
+      return; // Only for students
+    }
+    
+    const myLeaves = await getMyLeaveApplications();
+    
+    if (myLeaves.length === 0) {
+      console.log('No leave applications found for current student');
+      return;
+    }
+    
+    // Create/update leave status section
+    let leaveStatusSection = document.getElementById('studentLeaveStatus');
+    
+    if (!leaveStatusSection) {
+      // Create section if it doesn't exist
+      const statsSection = document.getElementById('stats-section');
+      
+      if (statsSection) {
+        leaveStatusSection = document.createElement('div');
+        leaveStatusSection.id = 'studentLeaveStatus';
+        leaveStatusSection.className = 'section-card mb-4';
+        statsSection.insertAdjacentElement('afterend', leaveStatusSection);
+      }
+    }
+    
+    if (!leaveStatusSection) return;
+    
+    // Build HTML for leave status
+    let html = `
+      <h4 class="section-title">
+        <i class="bi bi-calendar-x me-2"></i>My Leave Applications
+      </h4>
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="table-light">
+            <tr>
+              <th>Date Range</th>
+              <th>Days</th>
+              <th>Reason</th>
+              <th>Status</th>
+              <th>Submitted</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
+    
+    // Sort by submission date (newest first)
+    myLeaves.sort((a, b) => b.submittedAt - a.submittedAt);
+    
+    myLeaves.forEach(leave => {
+      const fromDate = new Date(leave.fromDate).toLocaleDateString();
+      const toDate = new Date(leave.toDate).toLocaleDateString();
+      const submittedDate = new Date(leave.submittedAt).toLocaleDateString();
+      
+      let statusBadge = '';
+      if (leave.status === 'pending') {
+        statusBadge = '<span class="badge bg-warning text-dark">⏳ Pending</span>';
+      } else if (leave.status === 'approved') {
+        statusBadge = '<span class="badge bg-success">✅ Approved</span>';
+      } else if (leave.status === 'rejected') {
+        statusBadge = '<span class="badge bg-danger">❌ Rejected</span>';
+      }
+      
+      html += `
+        <tr class="leave-row-${leave.status}">
+          <td>${fromDate} - ${toDate}</td>
+          <td>${leave.days.length} day(s)</td>
+          <td>${escapeHtml(leave.reason)}</td>
+          <td>${statusBadge}</td>
+          <td>${submittedDate}</td>
+        </tr>
+      `;
+    });
+    
+    html += `
+          </tbody>
+        </table>
+      </div>
+      <div class="alert alert-info mb-0">
+        <i class="bi bi-info-circle me-2"></i>
+        <strong>Total Applications:</strong> ${myLeaves.length} |
+        <strong>Pending:</strong> ${myLeaves.filter(l => l.status === 'pending').length} |
+        <strong>Approved:</strong> ${myLeaves.filter(l => l.status === 'approved').length} |
+        <strong>Rejected:</strong> ${myLeaves.filter(l => l.status === 'rejected').length}
+      </div>
+    `;
+    
+    leaveStatusSection.innerHTML = html;
+    
+    console.log(`✅ Displayed ${myLeaves.length} leave applications for student`);
+    
+  } catch (error) {
+    console.error('Error displaying leave status:', error);
+  }
+}
+
+/**
+ * Real-time listener for leave updates (for students)
+ */
+function setupLeaveStatusListener() {
+  if (!useCloud || !firebaseDB) return;
+  
+  const leavePath = getLeaveApplicationsPath();
+  if (!leavePath) return;
+  
+  firebaseDB.ref(leavePath).on('value', async (snapshot) => {
+    console.log('📡 Leave applications updated from Firebase');
+    
+    // Reload leaves
+    await loadLeaveApplications();
+    
+    // Update display for students
+    const role = await getUserRole();
+    if (role === 'student') {
+      await displayMyLeaveStatus();
+    }
+    
+    // Refresh attendance table to show updated leave info
+    refreshAttendanceTable();
+  });
+  
+  console.log('📡 Real-time leave status listener enabled');
+}
+
+// ==================== MODIFICATIONS TO EXISTING FUNCTIONS ====================
+
+// MODIFY the initialize() function - ADD THESE LINES after loadAllData():
+/*
+async function initialize() {
+  try {
+    await initFirebase();
+    await openDatabase();
+    await loadAllData();
+    
+    // ✅ ADD THESE 3 LINES:
+    await loadLeaveApplications();
+    await displayMyLeaveStatus();
+    setupLeaveStatusListener();
+    
+    populateYearDropdown();
+    // ... rest of existing code
+*/
+
+// MODIFY getStudentLeaveSummary() - REPLACE ENTIRE FUNCTION:
+/*
+function getStudentLeaveSummary(studentId) {
+  if (!appState.selectedMonth || !appState.selectedYear) {
+    return null;
+  }
+
+  // ✅ CHANGED: Filter from leaveState.applications (array) instead of object
+  const approvedLeaves = leaveState.applications.filter(leave =>
+    leave.status === 'approved' &&
+    leave.studentId === studentId &&
+    leave.month === appState.selectedMonth &&
+    leave.year === appState.selectedYear
+  );
+
+  if (approvedLeaves.length === 0) {
+    return null;
+  }
+
+  // Combine all approved leave days
+  const totalLeaveDays = new Set();
+  const reasons = [];
+
+  approvedLeaves.forEach(leave => {
+    leave.days.forEach(day => totalLeaveDays.add(day));
+    
+    // Get first 20 chars of reason
+    const shortReason = leave.reason.substring(0, 20) + (leave.reason.length > 20 ? '...' : '');
+    if (!reasons.includes(shortReason)) {
+      reasons.push(shortReason);
+    }
+  });
+
+  return {
+    count: totalLeaveDays.size,
+    days: Array.from(totalLeaveDays).sort((a, b) => a - b),
+    reasons: reasons.join(', '),
+    applications: approvedLeaves.length
+  };
+}
+*/
+
+// MODIFY getApprovedLeavesForStudent() - REPLACE ENTIRE FUNCTION:
+/*
+function getApprovedLeavesForStudent(studentId) {
+  if (!appState.selectedMonth || !appState.selectedYear) {
+    return [];
+  }
+
+  // ✅ CHANGED: Filter from array instead of object
+  return leaveState.applications.filter(leave =>
+    leave.status === 'approved' &&
+    leave.studentId === studentId &&
+    leave.month === appState.selectedMonth &&
+    leave.year === appState.selectedYear
+  );
+}
+*/
     function renderAttendanceTable(students) {
       if (!students || students.length === 0) {
         elements.attendanceTableBody.innerHTML = `
@@ -5562,8 +6050,9 @@
 
         // Load saved data
         await loadAllData();
-
-
+        await loadLeaveApplications();
+        await displayMyLeaveStatus();
+        setupLeaveStatusListener();
         // Populate year dropdown
         populateYearDropdown();
 

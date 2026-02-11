@@ -1,20 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Update Profile - Smart Attendance System</title>
-  
+
   <!-- AWS Cognito SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.3.7/dist/amazon-cognito-identity.min.js"></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.3.7/dist/amazon-cognito-identity.min.js"></script>
   <script src="cognito-config.js"></script>
   <script src="auth.js"></script>
-  
+
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
   <script src="firebase-config.js"></script>
-  
+
   <style>
     * {
       margin: 0;
@@ -173,8 +175,13 @@
     }
 
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
     }
 
     .btn-primary.loading {
@@ -201,6 +208,7 @@
     }
   </style>
 </head>
+
 <body>
   <div class="container">
     <h1>Update Profile</h1>
@@ -222,6 +230,12 @@
       <div class="form-group">
         <label for="name">Name</label>
         <input type="text" id="name" disabled>
+      </div>
+
+      <div class="form-group">
+        <label for="studentId">Student ID / Roll Number</label>
+        <input type="text" id="studentId" required>
+        <small style="color: #b0b8c4;">Your unique student identification number</small>
       </div>
 
       <div class="form-group">
@@ -306,7 +320,7 @@
     // Load departments from Firebase
     async function loadDepartments() {
       console.log('=== LOADING DEPARTMENTS ===');
-      
+
       try {
         // Check if Firebase is initialized
         if (!firebase || !firebase.apps || firebase.apps.length === 0) {
@@ -314,24 +328,24 @@
           showError('Firebase not initialized. Please check firebase-config.js');
           return;
         }
-        
+
         console.log('Firebase initialized:', firebase.apps.length, 'apps');
-        
+
         const db = firebase.database();
         console.log('Database reference obtained');
-        
+
         const departmentsRef = db.ref('mainSystem/departments');
         console.log('Attempting to read from: mainSystem/departments');
-        
+
         const snapshot = await departmentsRef.once('value');
         const departments = snapshot.val();
-        
+
         console.log('Departments data:', departments);
-        
+
         const departmentSelect = document.getElementById('department');
-        
+
         departmentSelect.innerHTML = '<option value="">Select department</option>';
-        
+
         if (departments && Array.isArray(departments) && departments.length > 0) {
           console.log('Loading', departments.length, 'departments');
           departments.forEach(dept => {
@@ -364,28 +378,28 @@
     // Load courses based on department
     async function loadCourses(department) {
       console.log('=== LOADING COURSES FOR:', department, '===');
-      
+
       const courseSelect = document.getElementById('course');
-      
+
       if (!department) {
         courseSelect.disabled = true;
         courseSelect.innerHTML = '<option value="">Select department first</option>';
         return;
       }
-      
+
       try {
         const db = firebase.database();
         const coursesRef = db.ref(`mainSystem/courses/${department}`);
-        
+
         console.log('Attempting to read from: mainSystem/courses/' + department);
-        
+
         const snapshot = await coursesRef.once('value');
         const courses = snapshot.val();
-        
+
         console.log('Courses data:', courses);
-        
+
         courseSelect.innerHTML = '<option value="">Select course</option>';
-        
+
         if (courses && Array.isArray(courses) && courses.length > 0) {
           console.log('Loading', courses.length, 'courses');
           courses.forEach(course => {
@@ -421,7 +435,7 @@
     // Load current user data
     async function loadUserData() {
       console.log('=== LOADING USER DATA ===');
-      
+
       try {
         // Check if Cognito is initialized
         if (!window.AmazonCognitoIdentity) {
@@ -481,7 +495,9 @@
             // Fill in the form
             document.getElementById('email').value = attrs.email || '';
             document.getElementById('name').value = attrs.name || '';
-            
+            document.getElementById('studentId').value = attrs['custom:studentId'] || '';
+
+
             // Set current values if they exist
             if (attrs['custom:department']) {
               console.log('Setting department:', attrs['custom:department']);
@@ -493,27 +509,33 @@
                 }
               });
             }
-            
+
+            if (attrs['custom:studentId']) {
+  console.log('Setting student ID:', attrs['custom:studentId']);
+  document.getElementById('studentId').value = attrs['custom:studentId'];
+}
+
             if (attrs['custom:academicYear']) {
               console.log('Setting academic year:', attrs['custom:academicYear']);
               document.getElementById('academicYear').value = attrs['custom:academicYear'];
             }
-            
+
             if (attrs['custom:division']) {
               console.log('Setting division:', attrs['custom:division']);
               document.getElementById('division').value = attrs['custom:division'];
             }
 
             // Show current info
-            const hasAllInfo = attrs['custom:department'] && attrs['custom:course'] && 
-                              attrs['custom:academicYear'] && attrs['custom:division'];
-            
+            const hasAllInfo = attrs['custom:department'] && attrs['custom:course'] &&
+              attrs['custom:academicYear'] && attrs['custom:division'];
+
             console.log('Has complete profile?', hasAllInfo);
-            
+
             if (hasAllInfo) {
               document.getElementById('currentInfo').style.display = 'block';
               document.getElementById('currentInfo').innerHTML = `
                 <strong>Current Information:</strong><br>
+                Student ID: ${attrs['custom:studentId'] || 'Not set'}<br> 
                 Department: ${attrs['custom:department']}<br>
                 Course: ${attrs['custom:course']}<br>
                 Year: ${attrs['custom:academicYear']}<br>
@@ -532,7 +554,7 @@
     async function updateUserAttributes(attributes) {
       console.log('=== UPDATING USER ATTRIBUTES ===');
       console.log('Attributes to update:', attributes);
-      
+
       return new Promise((resolve, reject) => {
         profileCurrentUser.getSession((err, session) => {
           if (err) {
@@ -540,7 +562,7 @@
             return;
           }
 
-          const attributeList = attributes.map(attr => 
+          const attributeList = attributes.map(attr =>
             new AmazonCognitoIdentity.CognitoUserAttribute(attr)
           );
 
@@ -560,25 +582,27 @@
     // Handle form submission
     document.getElementById('profileForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      
+
       const department = document.getElementById('department').value;
       const course = document.getElementById('course').value;
       const academicYear = document.getElementById('academicYear').value;
       const division = document.getElementById('division').value;
-      
+      const studentId = document.getElementById('studentId').value.trim();
+
       const submitBtn = e.target.querySelector('button[type="submit"]');
-      
+
       clearMessages();
 
-      if (!department || !course || !academicYear || !division) {
-        showError('Please fill in all fields');
-        return;
-      }
+      if (!department || !course || !academicYear || !division || !studentId) { 
+  showError('Please fill in all fields');
+  return;
+}
 
       setButtonLoading(submitBtn, true);
 
       try {
         await updateUserAttributes([
+          { Name: 'custom:studentId', Value: studentId },
           { Name: 'custom:department', Value: department },
           { Name: 'custom:course', Value: course },
           { Name: 'custom:academicYear', Value: academicYear },
@@ -587,7 +611,7 @@
 
         setButtonLoading(submitBtn, false);
         showSuccess('✓ Profile updated successfully! Redirecting...');
-        
+
         // Redirect after 2 seconds
         setTimeout(async () => {
           // Use the redirectBasedOnRole from auth.js
@@ -618,13 +642,14 @@
       console.log('=== PAGE LOADED ===');
       console.log('Firebase available?', typeof firebase !== 'undefined');
       console.log('Cognito available?', typeof AmazonCognitoIdentity !== 'undefined');
-      
+
       // Wait a bit for Firebase to initialize
       await new Promise(resolve => setTimeout(resolve, 300));
-      
+
       await loadDepartments();
       await loadUserData();
     });
   </script>
 </body>
+
 </html>

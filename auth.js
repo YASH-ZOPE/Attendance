@@ -37,13 +37,14 @@ function initCognito() {
  * @param {string} email - User's email
  * @param {string} name - User's full name
  * @param {string} password - User's password
+ * @param {string} studentId - Student's ID/Roll Number
  * @param {string} department - Student's department
  * @param {string} course - Student's course
  * @param {string} academicYear - Student's academic year (FY/SY/TY)
  * @param {string} division - Student's division (Division A/B/C)
  * @returns {Promise} - Resolves with user data
  */
-function signup(email, name, password, department, course, academicYear, division) {
+function signup(email, name, password, studentId, department, course, academicYear, division) {
   return new Promise((resolve, reject) => {
     if (!userPool) initCognito();
 
@@ -56,6 +57,11 @@ function signup(email, name, password, department, course, academicYear, divisio
         Name: 'name',
         Value: name
       }),
+      new AmazonCognitoIdentity.CognitoUserAttribute({
+        Name: 'custom:studentId',
+        Value: studentId
+      }),
+      
       // Add custom division attributes
       new AmazonCognitoIdentity.CognitoUserAttribute({
         Name: 'custom:department',
@@ -367,10 +373,11 @@ async function isProfileComplete() {
   try {
     const attrs = await getUserAttributes();
     
-    const hasCompleteProfile = attrs['custom:department'] && 
-                              attrs['custom:course'] && 
-                              attrs['custom:academicYear'] && 
-                              attrs['custom:division'];
+    const hasCompleteProfile = attrs['custom:studentId'] &&    
+                          attrs['custom:department'] && 
+                          attrs['custom:course'] && 
+                          attrs['custom:academicYear'] && 
+                          attrs['custom:division'];
     
     return hasCompleteProfile;
   } catch (error) {

@@ -464,6 +464,12 @@
   </select>
 </div>
 
+<div class="form-group">
+  <label for="signupStudentID">Student ID / Roll Number <span class="text-danger">*</span></label>
+  <input type="text" id="signupStudentID" placeholder="e.g., 1,2" required>
+  <small style="color: #b0b8c4;">Your unique student identification number</small>
+</div>
+
         <div class="form-group">
           <label for="signupPassword">Password</label>
           <input type="password" id="signupPassword" placeholder="Enter password" required autocomplete="new-password">
@@ -722,6 +728,7 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
   // Existing fields
   const email = document.getElementById('signupEmail').value.trim();
   const name = document.getElementById('signupName').value.trim();
+  const studentId = document.getElementById('signupStudentID').value.trim(); 
   const password = document.getElementById('signupPassword').value;
   const confirmPassword = document.getElementById('signupPasswordConfirm').value;
   
