@@ -558,7 +558,7 @@
       }
 
       .go-btn {
-        width: 7000px;
+        width: 100vw;
         min-height: 100px;
         font-size: 1.3rem;
       }
@@ -826,9 +826,6 @@
           <li class="nav-item teacher-only">
             <a class="nav-link" href="#upload-section"><i class="bi bi-upload me-1"></i>Upload</a>
           </li>
-          <li class="nav-item teacher-only">
-            <a class="nav-link" href="#leave-section"><i class="bi bi-calendar-x me-1"></i>Leave</a>
-          </li>
           <li class="nav-item">
             <a class="nav-link" href="#attendance-section"><i class="bi bi-table me-1"></i>Attendance</a>
           </li>
@@ -853,7 +850,6 @@
     <a href="#selection-section" class="teacher-only"><i class="bi bi-check-square"></i></a>
     <a href="#month-section"><i class="bi bi-calendar3"></i></a>
     <a href="#upload-section" class="teacher-only"><i class="bi bi-upload"></i></a>
-    <a href="#leave-section" class="teacher-only"><i class="bi bi-calendar-x"></i></a>
     <a href="#attendance-section"><i class="bi bi-table"></i></a>
     <a href="#defaulter-section" class="teacher-only"><i class="bi bi-exclamation-triangle"></i></a>
   </div>
@@ -1254,6 +1250,7 @@
             </div>
           </div>
         </div>
+
       </div>
     </section>
 
@@ -1326,86 +1323,11 @@
       </div>
     </section>
 
-    <!-- SECTION: Leave Applications (Collapsible) -->
-    <section id="leave-section" class="nav-section teacher-only">
-      <div class="section-card">
-
-        <!-- Collapsed Header (Clickable) -->
-        <div class="d-flex justify-content-between align-items-center leave-header" id="leaveHeaderToggle"
-          style="cursor: pointer; padding: 10px; border-radius: 8px; transition: background 0.2s;">
-          <div>
-            <h4 class="section-title mb-0" style="display: inline-block; border: none; padding: 0;">
-              <i class="bi bi-calendar-x me-2"></i>Leave Applications
-            </h4>
-            <span class="badge bg-warning text-dark ms-2" id="leavePendingCount" style="display: none;">0</span>
-            <span class="badge bg-success text-white ms-1" id="leaveApprovedCount" style="display: none;">0</span>
-          </div>
-          <i class="bi bi-chevron-down fs-4 text-muted" id="leaveToggleIcon"></i>
-        </div>
-
-        <!-- Expandable Content (Hidden by default) -->
-        <div id="leaveContent" style="display: none; margin-top: 20px;">
-
-          <!-- Submit Button & Filters -->
-          <div class="row mb-3 align-items-end">
-            <div class="col-md-3">
-              <button class="btn btn-primary w-100" id="openLeaveFormBtn">
-                <i class="bi bi-plus-circle me-1"></i>Submit New Leave
-              </button>
-            </div>
-            <div class="col-md-3">
-              <label class="form-label fw-bold small">Filter by Status</label>
-              <select id="leaveStatusFilter" class="form-select form-select-sm">
-                <option value="all">All Applications</option>
-                <option value="pending">Pending Only</option>
-                <option value="approved">Approved Only</option>
-                <option value="rejected">Rejected Only</option>
-              </select>
-            </div>
-            <div class="col-md-3">
-              <label class="form-label fw-bold small">Filter by Month</label>
-              <select id="leaveMonthFilter" class="form-select form-select-sm">
-                <option value="current">Current Month</option>
-                <option value="all">All Months</option>
-              </select>
-            </div>
-            <div class="col-md-3">
-              <button class="btn btn-outline-secondary btn-sm w-100" id="refreshLeavesBtn">
-                <i class="bi bi-arrow-clockwise me-1"></i>Refresh
-              </button>
-            </div>
-          </div>
-
-          <!-- Leave Applications Table -->
-          <div class="table-responsive">
-            <table class="table table-hover table-sm">
-              <thead class="table-light">
-                <tr>
-                  <th width="8%">ID</th>
-                  <th width="15%">Student Name</th>
-                  <th width="12%">From</th>
-                  <th width="12%">To</th>
-                  <th width="8%">Days</th>
-                  <th width="20%">Reason</th>
-                  <th width="10%">Status</th>
-                  <th width="15%">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="leaveTableBody">
-                <tr>
-                  <td colspan="8" class="text-center text-muted py-4">
-                    <i class="bi bi-inbox fs-2"></i>
-                    <p class="mt-2 mb-0">No leave applications yet</p>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-        </div>
-      </div>
-    </section>
-
+    <div class="col-md-3">
+      <button class="btn btn-primary w-100" id="openLeaveFormBtn">
+        <i class="bi bi-plus-circle me-1"></i>Submit New Leave
+      </button>
+    </div>
 
     <section id="camera-section" class="nav-section">
       <button class="go-btn" onclick="window.location.href='face-recognition.html'">
@@ -1519,7 +1441,15 @@
         </div>
       </div>
     </section>
-
+<div class="col-md-3 teacher-only">
+    <div class="section-card">
+      <li class="nav-item teacher-only">
+        <a class="nav-link" href="leave-applications.html">
+          <i class="bi bi-calendar-x me-1"></i>Leave Applications
+        </a>
+      </li>
+    </div>
+  </div>
     <!-- Defaulter Section -->
     <section id="defaulter-section" class="nav-section teacher-only">
       <div class="section-card">
@@ -1628,6 +1558,7 @@
     </div>
   </div>
 
+  
   <!-- QR Code Modal -->
   <div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
@@ -2683,7 +2614,7 @@
       saveAllData();
 
       // ✅ RELOAD leave applications when subject changes
-      loadLeaveApplications();
+      ;
     }
 
     function updateSubjectDisplay() {
@@ -2725,7 +2656,7 @@
       saveAllData();
       showAlert(`Month set to ${monthNames[appState.selectedMonth]} ${appState.selectedYear}`, 'success');
 
-      loadLeaveApplications();
+      ;
     }
 
     function updateMonthDisplay() {
@@ -4127,7 +4058,7 @@
       renderCourseTags();
       updateFinalSelectionDropdowns();
       saveAllData();
-      loadLeaveApplications();
+      ;
     }
 
     function populateDepartmentDropdown() {
@@ -4288,7 +4219,7 @@
       renderSubjectTags(); // ✅ Show course-specific subjects
       updateFinalSelectionDropdowns();
       saveAllData();
-      loadLeaveApplications();
+      ;
     }
 
     function populateCourseDropdown() {
@@ -4658,7 +4589,7 @@
         appState.selectedAcademicYear = elements.academicYearLevelSelect.value;
         updateAcademicYearDisplay();
         saveAllData();
-        loadLeaveApplications();
+        ;
       });
 
       // Division Select
@@ -4666,7 +4597,7 @@
         appState.selectedDivision = elements.divisionSelect.value;
         updateAcademicYearDisplay();
         saveAllData();
-        loadLeaveApplications();
+        ;
       });
 
       // Subject events
@@ -5009,26 +4940,6 @@
         });
       });
 
-      // ==================== LEAVE APPLICATION EVENT LISTENERS ====================
-
-      // Toggle Leave Section (Expand/Collapse)
-      document.getElementById('leaveHeaderToggle').addEventListener('click', () => {
-        const content = document.getElementById('leaveContent');
-        const icon = document.getElementById('leaveToggleIcon');
-
-        if (content.style.display === 'none') {
-          content.style.display = 'block';
-          icon.classList.remove('bi-chevron-down');
-          icon.classList.add('bi-chevron-up');
-
-          // Load leave applications when opening
-          loadLeaveApplications();
-        } else {
-          content.style.display = 'none';
-          icon.classList.remove('bi-chevron-up');
-          icon.classList.add('bi-chevron-down');
-        }
-      });
 
       // Open Leave Form Modal
       document.getElementById('openLeaveFormBtn').addEventListener('click', () => {
@@ -5085,23 +4996,6 @@
       // Submit Leave Button
       document.getElementById('submitLeaveBtn').addEventListener('click', submitLeaveApplication);
 
-      // Leave Filter - Status
-      document.getElementById('leaveStatusFilter').addEventListener('change', (e) => {
-        leaveState.filters.status = e.target.value;
-        renderLeaveTable();
-      });
-
-      // Leave Filter - Month
-      document.getElementById('leaveMonthFilter').addEventListener('change', (e) => {
-        leaveState.filters.month = e.target.value;
-        renderLeaveTable();
-      });
-
-      // Refresh Leaves Button
-      document.getElementById('refreshLeavesBtn').addEventListener('click', () => {
-        loadLeaveApplications();
-        showAlert('Leave applications refreshed', 'info');
-      });
     }
     // ==================== LEAVE APPLICATION SYSTEM ====================
 
@@ -5409,8 +5303,7 @@
         // Reset form
         resetLeaveForm();
 
-        // Refresh leave list
-        await loadLeaveApplications();
+
 
         showAlert(`Leave application submitted for ${studentName} (${days.length} days)`, 'success');
 
@@ -5430,383 +5323,6 @@
       document.getElementById('leaveDayCountAlert').style.display = 'none';
       document.getElementById('leaveValidationAlert').style.display = 'none';
     }
-
-    // ===== LOAD LEAVE APPLICATIONS =====
-
-    async function loadLeaveApplications() {
-      const leavePath = getLeaveApplicationsPath();
-
-      if (!leavePath) {
-        console.warn('Cannot load leaves: division context incomplete');
-        leaveState.applications = [];
-        renderLeaveTable();
-        return;
-      }
-
-      try {
-        let leaves = {};
-
-        if (useCloud && firebaseDB) {
-          const snapshot = await firebaseDB.ref(leavePath).once('value');
-          leaves = snapshot.val() || {};
-        } else {
-          leaves = await loadFromDatabase('leaveApplications') || {};
-        }
-
-        // Convert to array
-        leaveState.applications = Object.keys(leaves).map(id => ({
-          id: id,
-          ...leaves[id]
-        }));
-
-        // Sort by submission date (newest first)
-        leaveState.applications.sort((a, b) => b.submittedAt - a.submittedAt);
-
-        console.log(`✅ Loaded ${leaveState.applications.length} leave applications`);
-
-        renderLeaveTable();
-        updateLeaveBadges();
-
-      } catch (error) {
-        console.error('Error loading leave applications:', error);
-        leaveState.applications = [];
-        renderLeaveTable();
-      }
-    }
-    // ===== RENDER LEAVE TABLE =====
-
-    function renderLeaveTable() {
-      const tbody = document.getElementById('leaveTableBody');
-
-      if (leaveState.applications.length === 0) {
-        tbody.innerHTML = `
-      <tr>
-        <td colspan="8" class="text-center text-muted py-4">
-          <i class="bi bi-inbox fs-2"></i>
-          <p class="mt-2 mb-0">No leave applications yet</p>
-          <small>Click "Submit New Leave" to add one</small>
-        </td>
-      </tr>
-    `;
-        return;
-      }
-
-      // Apply filters
-      let filteredLeaves = [...leaveState.applications];
-
-      // Filter by status
-      if (leaveState.filters.status !== 'all') {
-        filteredLeaves = filteredLeaves.filter(leave => leave.status === leaveState.filters.status);
-      }
-
-      // Filter by month
-      if (leaveState.filters.month === 'current') {
-        filteredLeaves = filteredLeaves.filter(leave =>
-          leave.month === appState.selectedMonth && leave.year === appState.selectedYear
-        );
-      }
-
-      // Render filtered leaves
-      tbody.innerHTML = '';
-
-      if (filteredLeaves.length === 0) {
-        tbody.innerHTML = `
-      <tr>
-        <td colspan="8" class="text-center text-muted py-4">
-          <i class="bi bi-funnel fs-2"></i>
-          <p class="mt-2 mb-0">No applications match the selected filters</p>
-        </td>
-      </tr>
-    `;
-        return;
-      }
-
-      filteredLeaves.forEach(leave => {
-        const row = document.createElement('tr');
-
-        // Add row class based on status
-        if (leave.status === 'pending') {
-          row.classList.add('leave-row-pending');
-        } else if (leave.status === 'approved') {
-          row.classList.add('leave-row-approved');
-        } else if (leave.status === 'rejected') {
-          row.classList.add('leave-row-rejected');
-        }
-
-        // Format dates
-        const fromDateObj = new Date(leave.fromDate);
-        const toDateObj = new Date(leave.toDate);
-        const fromFormatted = `${fromDateObj.getDate()} ${monthNames[fromDateObj.getMonth()]}`;
-        const toFormatted = `${toDateObj.getDate()} ${monthNames[toDateObj.getMonth()]}`;
-
-        // Status badge
-        let statusBadge = '';
-        if (leave.status === 'pending') {
-          statusBadge = '<span class="leave-status-pending">Pending</span>';
-        } else if (leave.status === 'approved') {
-          statusBadge = '<span class="leave-status-approved">✓ Approved</span>';
-        } else if (leave.status === 'rejected') {
-          statusBadge = '<span class="leave-status-rejected">✗ Rejected</span>';
-        }
-
-        // Action buttons
-        let actionButtons = '';
-        if (leave.status === 'pending') {
-          actionButtons = `
-        <button class="btn btn-success btn-sm leave-action-btn me-1" 
-                onclick="approveLeave('${leave.id}')" 
-                title="Approve Leave">
-          <i class="bi bi-check-circle"></i> Approve
-        </button>
-        <button class="btn btn-danger btn-sm leave-action-btn" 
-                onclick="rejectLeave('${leave.id}')" 
-                title="Reject Leave">
-          <i class="bi bi-x-circle"></i> Reject
-        </button>
-      `;
-        } else {
-          actionButtons = `
-        <button class="btn btn-outline-secondary btn-sm leave-action-btn" 
-                onclick="deleteLeave('${leave.id}')" 
-                title="Delete Leave">
-          <i class="bi bi-trash"></i> Delete
-        </button>
-      `;
-        }
-
-        row.innerHTML = `
-      <td><strong>${escapeHtml(leave.studentId)}</strong></td>
-      <td>${escapeHtml(leave.studentName)}</td>
-      <td>${fromFormatted}</td>
-      <td>${toFormatted}</td>
-      <td><span class="badge bg-secondary">${leave.days.length}</span></td>
-      <td>
-        <span class="leave-reason-text" title="${escapeHtml(leave.reason)}">
-          ${escapeHtml(leave.reason.substring(0, 30))}${leave.reason.length > 30 ? '...' : ''}
-        </span>
-      </td>
-      <td>${statusBadge}</td>
-      <td>${actionButtons}</td>
-    `;
-
-        tbody.appendChild(row);
-      });
-    }
-
-    // ===== UPDATE LEAVE BADGES (Pending/Approved Count) =====
-
-    function updateLeaveBadges() {
-      const pendingCount = leaveState.applications.filter(l => l.status === 'pending').length;
-      const approvedCount = leaveState.applications.filter(l => l.status === 'approved').length;
-
-      const pendingBadge = document.getElementById('leavePendingCount');
-      const approvedBadge = document.getElementById('leaveApprovedCount');
-
-      if (pendingCount > 0) {
-        pendingBadge.textContent = pendingCount;
-        pendingBadge.style.display = 'inline-block';
-      } else {
-        pendingBadge.style.display = 'none';
-      }
-
-      if (approvedCount > 0) {
-        approvedBadge.textContent = approvedCount;
-        approvedBadge.style.display = 'inline-block';
-      } else {
-        approvedBadge.style.display = 'none';
-      }
-    }
-
-    // ===== APPROVE LEAVE =====
-
-    async function approveLeave(leaveId) {
-      const leave = leaveState.applications.find(l => l.id === leaveId);
-
-      if (!leave) {
-        showAlert('Leave application not found', 'danger');
-        return;
-      }
-
-      const confirmMsg = `✅ APPROVE LEAVE?\n\nStudent: ${leave.studentName}\nDates: ${leave.fromDate} to ${leave.toDate}\nDays: ${leave.days.length}\nReason: ${leave.reason}\n\nThis will mark the student as "On Leave" for ALL subjects on these days.`;
-
-      if (!confirm(confirmMsg)) {
-        return;
-      }
-
-      try {
-        // Get current user
-        let approvedBy = 'unknown';
-        try {
-          const user = await getCurrentUser();
-          approvedBy = user.attributes.email;
-        } catch (error) {
-          console.warn('Could not get current user:', error);
-        }
-
-        // Update status in Firebase
-        const leavePath = getLeaveApplicationsPath();
-
-        if (!leavePath) {
-          showAlert('Cannot approve leave: division context incomplete', 'danger');
-          return;
-        }
-
-        const updates = {
-          status: 'approved',
-          approvedBy: approvedBy,
-          approvedAt: Date.now()
-        };
-
-        if (useCloud && firebaseDB) {
-          await firebaseDB.ref(`${leavePath}/${leaveId}`).update(updates);
-        } else {
-          const allLeaves = await loadFromDatabase('leaveApplications') || {};
-          if (allLeaves[leaveId]) {
-            allLeaves[leaveId] = { ...allLeaves[leaveId], ...updates };
-            await saveToDatabase('leaveApplications', allLeaves);
-          }
-        }
-
-        console.log(`✅ Leave approved: ${leaveId}`);
-
-        await loadLeaveApplications();
-
-        // Reload leave applications
-        await loadLeaveApplications();
-
-        // Refresh attendance table and stats
-        refreshAttendanceTable();
-        updateStats();
-        renderCalendarGrid();
-
-        showAlert(`Leave approved for ${leave.studentName}. Attendance updated for ${leave.days.length} days.`, 'success');
-
-      } catch (error) {
-        console.error('Error approving leave:', error);
-        showAlert('Failed to approve leave. Please try again.', 'danger');
-      }
-    }
-
-    // ===== REJECT LEAVE =====
-
-    async function rejectLeave(leaveId) {
-      const leave = leaveState.applications.find(l => l.id === leaveId);
-
-      if (!leave) {
-        showAlert('Leave application not found', 'danger');
-        return;
-      }
-
-      const confirmMsg = `⚠️ REJECT LEAVE?\n\nStudent: ${leave.studentName}\nDates: ${leave.fromDate} to ${leave.toDate}\nReason: ${leave.reason}\n\nThis action can be undone by deleting and resubmitting.`;
-
-      if (!confirm(confirmMsg)) {
-        return;
-      }
-
-      try {
-        // Get current user
-        let rejectedBy = 'unknown';
-        try {
-          const user = await getCurrentUser();
-          rejectedBy = user.attributes.email;
-        } catch (error) {
-          console.warn('Could not get current user:', error);
-        }
-
-        // Update status in Firebase
-        const leavePath = getLeaveApplicationsPath();
-
-        if (!leavePath) {
-          showAlert('Cannot reject leave: division context incomplete', 'danger');
-          return;
-        }
-
-        const updates = {
-          status: 'rejected',
-          rejectedBy: rejectedBy,
-          rejectedAt: Date.now()
-        };
-
-        if (useCloud && firebaseDB) {
-          await firebaseDB.ref(`${leavePath}/${leaveId}`).update(updates);
-        } else {
-          const allLeaves = await loadFromDatabase('leaveApplications') || {};
-          if (allLeaves[leaveId]) {
-            allLeaves[leaveId] = { ...allLeaves[leaveId], ...updates };
-            await saveToDatabase('leaveApplications', allLeaves);
-          }
-        }
-
-        console.log(`❌ Leave rejected: ${leaveId}`);
-
-        // Reload leave applications
-        await loadLeaveApplications();
-
-        showAlert(`Leave rejected for ${leave.studentName}.`, 'info');
-
-      } catch (error) {
-        console.error('Error rejecting leave:', error);
-        showAlert('Failed to reject leave. Please try again.', 'danger');
-      }
-    }
-
-    // ===== DELETE LEAVE =====
-
-    async function deleteLeave(leaveId) {
-      const leave = leaveState.applications.find(l => l.id === leaveId);
-
-      if (!leave) {
-        showAlert('Leave application not found', 'danger');
-        return;
-      }
-
-      const confirmMsg = `🗑️ DELETE LEAVE APPLICATION?\n\nStudent: ${leave.studentName}\nDates: ${leave.fromDate} to ${leave.toDate}\n\nThis action cannot be undone.`;
-
-      if (!confirm(confirmMsg)) {
-        return;
-      }
-
-      try {
-        const leavePath = getLeaveApplicationsPath();
-
-        if (!leavePath) {
-          showAlert('Cannot delete leave: division context incomplete', 'danger');
-          return;
-        }
-
-        if (useCloud && firebaseDB) {
-          await firebaseDB.ref(`${leavePath}/${leaveId}`).remove();
-        } else {
-          const allLeaves = await loadFromDatabase('leaveApplications') || {};
-          delete allLeaves[leaveId];
-          await saveToDatabase('leaveApplications', allLeaves);
-        }
-
-        console.log(`🗑️ Leave deleted: ${leaveId}`);
-
-        // If leave was approved, optionally clear "On Leave" marks
-        if (leave.status === 'approved') {
-          const clearMarks = confirm(`This leave was approved. Do you want to remove "On Leave" marks from attendance?`);
-
-          if (clearMarks) {
-            await clearOnLeaveMarks(leave);
-            refreshAttendanceTable();
-            updateStats();
-            renderCalendarGrid();
-          }
-        }
-
-        // Reload leave applications
-        await loadLeaveApplications();
-
-        showAlert(`Leave application deleted.`, 'info');
-
-      } catch (error) {
-        console.error('Error deleting leave:', error);
-        showAlert('Failed to delete leave. Please try again.', 'danger');
-      }
-    }
-
     // ===== AUTO-MARK ATTENDANCE AS "ON LEAVE" =====
 
     async function markDaysAsOnLeave(leave) {
@@ -5877,56 +5393,6 @@
       console.log(`✅ Completed marking attendance as "On Leave"`);
     }
 
-    // ===== CLEAR "ON LEAVE" MARKS (when deleting approved leave) =====
-
-    async function clearOnLeaveMarks(leave) {
-      const year = appState.selectedYear;
-      const dept = appState.selectedDepartment;
-      const course = appState.selectedCourse;
-      const academicYear = appState.selectedAcademicYear;
-      const division = appState.selectedDivision;
-
-      if (!year || !dept || !course || !academicYear || !division) {
-        console.error('Cannot clear attendance: division context incomplete');
-        return;
-      }
-
-      const subjects = getCurrentSubjects();
-      const monthKey = `${leave.year}-${String(leave.month + 1).padStart(2, '0')}`;
-
-      console.log(`🔄 Clearing "On Leave" marks for ${leave.days.length} days...`);
-
-      for (const subject of subjects) {
-        const attendancePath = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}/months/${monthKey}/subjects/${subject}/attendance/${leave.studentId}`;
-
-        try {
-          if (useCloud && firebaseDB) {
-            const updates = {};
-            leave.days.forEach(day => {
-              updates[day] = 'Absent'; // Default to Absent when clearing
-            });
-
-            await firebaseDB.ref(attendancePath).update(updates);
-
-          } else {
-            if (appState.attendanceData?.[year]?.[dept]?.[course]?.[academicYear]?.[division]?.months?.[monthKey]?.subjects?.[subject]?.attendance?.[leave.studentId]) {
-              const studentAttendance = appState.attendanceData[year][dept][course][academicYear][division].months[monthKey].subjects[subject].attendance[leave.studentId];
-
-              leave.days.forEach(day => {
-                studentAttendance[day] = 'Absent';
-              });
-
-              await saveAllData();
-            }
-          }
-
-        } catch (error) {
-          console.error(`Error clearing attendance for subject ${subject}:`, error);
-        }
-      }
-
-      console.log(`✅ Cleared "On Leave" marks`);
-    }
 
     // ===== GET LEAVE INFO FOR STUDENT (for displaying in defaulter list) =====
 
@@ -6097,24 +5563,6 @@
         // Load saved data
         await loadAllData();
 
-        // ==================== INITIALIZE LEAVE SYSTEM ====================
-
-        // Initialize leave modal reference
-        leaveModal = null;
-
-        // Load leave applications if division context is complete
-        if (appState.selectedDepartment &&
-          appState.selectedCourse &&
-          appState.selectedAcademicYear &&
-          appState.selectedDivision &&
-          appState.selectedMonth !== null &&
-          appState.selectedYear !== null) {
-
-          console.log('✅ Loading leave applications on startup...');
-          await loadLeaveApplications();
-        } else {
-          console.log('⚠️ Division context incomplete - leave applications will load when context is set');
-        }
 
         // Populate year dropdown
         populateYearDropdown();
