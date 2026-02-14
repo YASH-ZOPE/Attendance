@@ -138,35 +138,35 @@ if (role === 'student') {
       this.firebaseSync = new FirebaseLiveSync();
       await this.firebaseSync.init();
       
-      // ✅ FIX 3: Only setup listeners for admin/teacher with saved config
-      const savedConfig = localStorage.getItem('faceRecDivisionConfig');
-      if (savedConfig && this.userRole !== 'student') {
-        const config = JSON.parse(savedConfig);
-        
-        // ✅ FIX 5: Check config age (optional - 24 hours expiry)
-        const configAge = Date.now() - config.scannedAt;
-        const maxAge = 24 * 60 * 60 * 1000; // 24 hours
-        
-        if (configAge < maxAge) {
-          this.firebaseSync.setupLiveListeners({
-            department: config.department,
-            course: config.course,
-            academicYear: config.academicYear,
-            division: config.division,
-            year: config.year,
-            onSubjectChange: (newSubject, oldSubject) => this.handleFirebaseSubjectChange(newSubject, oldSubject),
-            onMonthChange: (newMonth, oldMonth) => this.handleFirebaseMonthChange(newMonth, oldMonth),
-            onYearChange: (newYear, oldYear) => this.handleFirebaseYearChange(newYear, oldYear),
-            onDayChange: (newDay, oldDay) => this.handleFirebaseDayChange(newDay, oldDay)
-          });
-          console.log('✅ Firebase listeners attached from saved config');
-        } else {
-          console.log('⚠️ Saved config too old - cleared');
-          localStorage.removeItem('faceRecDivisionConfig');
-        }
-      } else {
-        console.log('⚠️ No saved config or student mode - listeners will be set after QR scan');
-      }
+      
+// Teachers/admins read directly from Firebase via forceReadFirebaseData()
+const savedConfig = localStorage.getItem('faceRecDivisionConfig');
+
+if (savedConfig && this.userRole === 'student') {
+  const config = JSON.parse(savedConfig);
+  
+  const configAge = Date.now() - config.scannedAt;
+  const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+  
+  if (configAge < maxAge) {
+    // Setup listeners for students
+    this.firebaseSync.setupLiveListeners({
+      department: config.department,
+      course: config.course,
+      academicYear: config.academicYear,
+      division: config.division,
+      year: config.year,
+      onSubjectChange: (newSubject, oldSubject) => this.handleFirebaseSubjectChange(newSubject, oldSubject),
+      onMonthChange: (newMonth, oldMonth) => this.handleFirebaseMonthChange(newMonth, oldMonth),
+      onYearChange: (newYear, oldYear) => this.handleFirebaseYearChange(newYear, oldYear),
+      onDayChange: (newDay, oldDay) => this.handleFirebaseDayChange(newDay, oldDay)
+    });
+    console.log('✅ Firebase listeners attached for student');
+  } else {
+    console.log('⚠️ Saved config expired - cleared');
+    localStorage.removeItem('faceRecDivisionConfig');
+  }
+}
 
       console.log('✅ Firebase live sync enabled');
     } catch (error) {
@@ -507,6 +507,7 @@ async handleQRScan(qrDataString) {
     };
   });
 }
+
 
 /**
  * Force read latest Firebase data (called periodically)

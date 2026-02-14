@@ -2654,33 +2654,69 @@
     }
 
     async function saveAllData() {
-      try {
-        if (appState.selectedYear === null && elements.yearSelect.value) {
-          appState.selectedYear = parseInt(elements.yearSelect.value);
-        }
-
-        await saveToStorage("subjects", appState.subjects);
-        await saveToStorage("selectedSubject", appState.selectedSubject);
-        await saveToStorage("selectedMonth", appState.selectedMonth);
-        await saveToStorage("selectedYear", appState.selectedYear);
-        await saveToStorage("currentDay", appState.currentDay);
-        await saveToStorage("attendanceData", appState.attendanceData);
-        await saveToStorage("holidays", appState.holidays);
-        await saveToStorage("threshold", appState.threshold);
-        await saveToStorage("departments", appState.departments);
-        await saveToStorage("selectedDepartment", appState.selectedDepartment);
-        await saveToStorage("courses", appState.courses);
-        await saveToStorage("selectedCourse", appState.selectedCourse);
-        await saveToStorage("selectedAcademicYear", appState.selectedAcademicYear);
-        await saveToStorage("selectedDivision", appState.selectedDivision);
-        const currentDate = new Date().toDateString();
-        await saveToStorage("currentDate", currentDate);
-        console.log("All data saved (cloud + local)");
-      } catch (error) {
-        console.error("Failed to save data:", error);
-      }
+  try {
+    if (appState.selectedYear === null && elements.yearSelect.value) {
+      appState.selectedYear = parseInt(elements.yearSelect.value);
     }
 
+    await saveToStorage("subjects", appState.subjects);
+    await saveToStorage("selectedSubject", appState.selectedSubject);
+    await saveToStorage("selectedMonth", appState.selectedMonth);
+    await saveToStorage("selectedYear", appState.selectedYear);
+    await saveToStorage("currentDay", appState.currentDay);
+    await saveToStorage("attendanceData", appState.attendanceData);
+    await saveToStorage("holidays", appState.holidays);
+    await saveToStorage("threshold", appState.threshold);
+    await saveToStorage("departments", appState.departments);
+    await saveToStorage("selectedDepartment", appState.selectedDepartment);
+    await saveToStorage("courses", appState.courses);
+    await saveToStorage("selectedCourse", appState.selectedCourse);
+    await saveToStorage("selectedAcademicYear", appState.selectedAcademicYear);
+    await saveToStorage("selectedDivision", appState.selectedDivision);
+    const currentDate = new Date().toDateString();
+    await saveToStorage("currentDate", currentDate);
+    
+    // ✅ ADD THIS BLOCK:
+    // Save teacher's current selection to their user profile
+    if (useCloud && firebaseDB && currentUserRole !== 'student') {
+      try {
+        const user = await getCurrentUser();
+        const userEmail = user.attributes.email;
+        const userKey = userEmail.replace(/[@.]/g, '_');
+        
+        // Only save if all required fields are set
+        if (appState.selectedDepartment && 
+            appState.selectedCourse && 
+            appState.selectedAcademicYear && 
+            appState.selectedDivision &&
+            appState.selectedSubject &&
+            appState.selectedMonth !== null &&
+            appState.selectedYear !== null) {
+          
+          await firebaseDB.ref(`mainSystem/userPreferences/${userKey}/lastSelection`).set({
+            department: appState.selectedDepartment,
+            course: appState.selectedCourse,
+            academicYear: appState.selectedAcademicYear,
+            division: appState.selectedDivision,
+            subject: appState.selectedSubject,
+            month: appState.selectedMonth,
+            year: appState.selectedYear,
+            day: appState.currentDay,
+            timestamp: Date.now()
+          });
+          
+          console.log('✅ Saved user selection to Firebase');
+        }
+      } catch (error) {
+        console.warn('Could not save user preference:', error);
+      }
+    }
+    
+    console.log("All data saved (cloud + local)");
+  } catch (error) {
+    console.error("Failed to save data:", error);
+  }
+}
     async function loadAllData() {
       try {
         // ✅ STEP 1: Load GLOBAL data first
