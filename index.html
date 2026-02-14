@@ -10,19 +10,28 @@
   <script src="cognito-config.js"></script>
   <script src="auth.js"></script>
   <!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-<script src="firebase-config.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
+    *::-webkit-scrollbar {
+  display: none;
+}
 
+/* Hide scrollbar for IE, Edge and Firefox */
+* {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e8ba3 100%);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
       display: flex;
       justify-content: center;
@@ -31,68 +40,152 @@
     }
 
     .auth-container {
-      background: rgba(20, 35, 55, 0.95);
-      border-radius: 12px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
       padding: 40px;
       width: 100%;
-      max-width: 440px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      max-width: 480px;
+      position: relative;
+      height: 480px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-content-wrapper {
+      flex: 1;
+      overflow: hidden;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Toggle Switch */
+    .toggle-container {
+      display: flex;
+      background: #f0f0f5;
+      border-radius: 30px;
+      padding: 4px;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .toggle-btn {
+      flex: 1;
+      padding: 12px 20px;
+      border: none;
+      background: transparent;
+      color: #6c63ff;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 26px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 2;
+    }
+
+    .toggle-btn.active {
+      color: white;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: calc(50% - 4px);
+      height: calc(100% - 8px);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 26px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 1;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+    }
+
+    .toggle-slider.signup {
+      left: calc(50%);
     }
 
     .auth-header {
-      margin-bottom: 32px;
+      margin-bottom: 24px;
+      text-align: center;
+      flex-shrink: 0;
+      margin-top: 5vh;
     }
 
     .auth-header h1 {
-      color: #ffffff;
-      font-size: 28px;
-      font-weight: 600;
+      color: #2d3748;
+      font-size: 26px;
+      font-weight: 700;
       margin-bottom: 8px;
     }
 
     .auth-header p {
-      color: #b0b8c4;
-      font-size: 16px;
+      color: #718096;
+      font-size: 14px;
     }
 
     .form-group {
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
 
     .form-group label {
       display: block;
-      color: #e8ecf1;
+      color: #2d3748;
       font-size: 14px;
-      font-weight: 500;
+      font-weight: 600;
       margin-bottom: 8px;
     }
 
-    .form-group input {
+    .form-group input,
+    .form-group select {
       width: 100%;
       padding: 12px 16px;
-      background: rgba(30, 45, 65, 0.8);
-      border: 2px solid rgba(80, 120, 180, 0.4);
-      border-radius: 8px;
-      color: #ffffff;
+      background: #f7fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      color: #2d3748;
       font-size: 15px;
       transition: all 0.3s ease;
     }
 
-    .form-group input:focus {
+    .form-group input:focus,
+    .form-group select:focus {
       outline: none;
-      border-color: #5b9bd5;
-      background: rgba(30, 45, 65, 1);
+      border-color: #667eea;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
 
     .form-group input::placeholder {
-      color: #7a8a9a;
+      color: #a0aec0;
+    }
+
+    .form-group select {
+      cursor: pointer;
+    }
+
+    .form-group select:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .form-group select option {
+      background: white;
+      color: #2d3748;
+    }
+
+    .form-group small {
+      display: block;
+      margin-top: 6px;
+      color: #718096;
+      font-size: 12px;
     }
 
     .checkbox-group {
       display: flex;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
 
     .checkbox-group input[type="checkbox"] {
@@ -100,10 +193,11 @@
       height: 18px;
       margin-right: 8px;
       cursor: pointer;
+      accent-color: #667eea;
     }
 
     .checkbox-group label {
-      color: #b0b8c4;
+      color: #718096;
       font-size: 14px;
       margin: 0;
       cursor: pointer;
@@ -112,21 +206,21 @@
     .btn-primary {
       width: 100%;
       padding: 14px;
-      background: #5b9bd5;
-      color: #ffffff;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s ease;
       margin-bottom: 12px;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
     }
 
     .btn-primary:hover {
-      background: #4a8bc2;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(91, 155, 213, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
     }
 
     .btn-primary:active {
@@ -137,9 +231,9 @@
       width: 100%;
       padding: 14px;
       background: transparent;
-      color: #5b9bd5;
-      border: 2px solid rgba(80, 120, 180, 0.4);
-      border-radius: 8px;
+      color: #667eea;
+      border: 2px solid #667eea;
+      border-radius: 10px;
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
@@ -147,19 +241,19 @@
     }
 
     .btn-secondary:hover {
-      border-color: #5b9bd5;
-      background: rgba(91, 155, 213, 0.1);
+      background: #f7fafc;
+      border-color: #764ba2;
     }
 
     .link-text {
       text-align: center;
-      margin-top: 24px;
-      color: #b0b8c4;
+      margin-top: 20px;
+      color: #718096;
       font-size: 14px;
     }
 
     .link-text a {
-      color: #5b9bd5;
+      color: #667eea;
       text-decoration: none;
       font-weight: 500;
       cursor: pointer;
@@ -167,6 +261,7 @@
 
     .link-text a:hover {
       text-decoration: underline;
+      color: #764ba2;
     }
 
     .forgot-link {
@@ -176,33 +271,35 @@
     }
 
     .forgot-link a {
-      color: #5b9bd5;
+      color: #667eea;
       text-decoration: none;
       font-size: 14px;
       cursor: pointer;
+      font-weight: 500;
     }
 
     .forgot-link a:hover {
       text-decoration: underline;
+      color: #764ba2;
     }
 
     .error-message {
-      background: rgba(220, 53, 69, 0.2);
-      border: 1px solid rgba(220, 53, 69, 0.5);
-      color: #ff6b7a;
+      background: #fff5f5;
+      border: 1px solid #feb2b2;
+      color: #c53030;
       padding: 12px;
-      border-radius: 8px;
+      border-radius: 10px;
       margin-bottom: 20px;
       font-size: 14px;
       display: none;
     }
 
     .success-message {
-      background: rgba(40, 167, 69, 0.2);
-      border: 1px solid rgba(40, 167, 69, 0.5);
-      color: #6bffa1;
+      background: #f0fff4;
+      border: 1px solid #9ae6b4;
+      color: #2f855a;
       padding: 12px;
-      border-radius: 8px;
+      border-radius: 10px;
       margin-bottom: 20px;
       font-size: 14px;
       display: none;
@@ -210,11 +307,27 @@
 
     .page {
       display: none;
+      height: 100%;
+      flex-direction: column;
     }
 
     .page.active {
-      display: block;
-      animation: fadeIn 0.3s ease;
+      display: flex;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .page-form-content {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding-right: 5px;
+      /* Hide scrollbar */
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .page-form-content::-webkit-scrollbar {
+      display: none;
     }
 
     @keyframes fadeIn {
@@ -233,7 +346,7 @@
       width: 20px;
       height: 20px;
       border: 3px solid rgba(255, 255, 255, 0.3);
-      border-top: 3px solid #ffffff;
+      border-top: 3px solid white;
       border-radius: 50%;
       animation: spin 1s linear infinite;
       margin: 0 auto;
@@ -264,7 +377,7 @@
 
     .password-strength .strength-bar {
       height: 4px;
-      background: rgba(80, 120, 180, 0.3);
+      background: #e2e8f0;
       border-radius: 2px;
       overflow: hidden;
       margin-bottom: 4px;
@@ -279,318 +392,304 @@
 
     .password-strength .strength-fill.weak {
       width: 33%;
-      background: #dc3545;
+      background: #fc8181;
     }
 
     .password-strength .strength-fill.medium {
       width: 66%;
-      background: #ffc107;
+      background: #f6ad55;
     }
 
     .password-strength .strength-fill.strong {
       width: 100%;
-      background: #28a745;
+      background: #68d391;
     }
 
     .password-strength .strength-text {
-      color: #b0b8c4;
+      color: #718096;
     }
 
-    .divider {
-      text-align: center;
-      margin: 24px 0;
-      position: relative;
+    @media (max-width: 576px) {
+      .auth-container {
+        padding: 30px 20px;
+        height: 540px;
+      }
+
+      .auth-header h1 {
+        font-size: 22px;
+      }
+
+      .toggle-btn {
+        font-size: 14px;
+        padding: 10px 16px;
+      }
+
+      .page-form-content {
+        padding-right: 3px;
+      }
     }
-
-    .divider::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 0;
-      width: 100%;
-      height: 1px;
-      background: rgba(80, 120, 180, 0.3);
-    }
-
-    .divider span {
-      background: rgba(20, 35, 55, 0.95);
-      padding: 0 12px;
-      position: relative;
-      color: #7a8a9a;
-      font-size: 14px;
-    }
-    .form-group select {
-  width: 100%;
-  padding: 12px 16px;
-  background: rgba(30, 45, 65, 0.8);
-  border: 2px solid rgba(80, 120, 180, 0.4);
-  border-radius: 8px;
-  color: #ffffff;
-  font-size: 15px;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.form-group select:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.form-group select:focus {
-  outline: none;
-  border-color: #5b9bd5;
-  background: rgba(30, 45, 65, 1);
-}
-
-.form-group select option {
-  background: rgba(20, 35, 55, 1);
-  color: #ffffff;
-}
   </style>
 </head>
 <body>
   <div class="auth-container">
-    <!-- PAGE 1: Email Entry -->
-    <div id="page-email" class="page active">
-      <div class="auth-header">
-        <h1>Sign in</h1>
-        <p>Sign in to your account.</p>
-      </div>
-
-      <div id="emailError" class="error-message"></div>
-
-      <form id="emailForm">
-        <div class="form-group">
-          <label for="emailInput">Email address</label>
-          <input type="email" id="emailInput" placeholder="name@host.com" required autocomplete="email">
+    <!-- Scrollable Content Wrapper -->
+    <div class="form-content-wrapper">
+      <!-- PAGE 1: Email Entry (Login Flow) -->
+      <div id="page-email" class="page active">
+        <div class="auth-header">
+          <h1>Welcome Back</h1>
+          <p>Sign in to your account</p>
         </div>
 
-        <button type="submit" class="btn-primary">
-          Next
-          <div class="loading-spinner"></div>
-        </button>
-      </form>
+        <div class="page-form-content">
+          <div id="emailError" class="error-message"></div>
 
-      <div class="link-text">
-        New user? <a id="showSignupFromEmail">Create an account</a>
-      </div>
-    </div>
-
-    <!-- PAGE 2: Password Entry -->
-    <div id="page-password" class="page">
-      <div class="auth-header">
-        <h1>Enter your password</h1>
-      </div>
-
-      <div id="passwordError" class="error-message"></div>
-
-      <form id="passwordForm">
-        <div class="form-group">
-          <label for="passwordInput">Password</label>
-          <input type="password" id="passwordInput" placeholder="Enter password" required autocomplete="current-password">
-        </div>
-
-        <div class="checkbox-group">
-          <input type="checkbox" id="showPasswordCheckbox">
-          <label for="showPasswordCheckbox">Show password</label>
-        </div>
-
-        <div class="forgot-link">
-          <a id="showForgotPassword">Forgot your password?</a>
-        </div>
-
-        <button type="submit" class="btn-primary">
-          Continue
-          <div class="loading-spinner"></div>
-        </button>
-        <button type="button" class="btn-secondary" id="backToEmail">Back</button>
-      </form>
-    </div>
-
-    <!-- PAGE 3: Sign Up -->
-    <div id="page-signup" class="page">
-      <div class="auth-header">
-        <h1>Sign up</h1>
-        <p>Create a new account.</p>
-      </div>
-
-      <div id="signupError" class="error-message"></div>
-      <div id="signupSuccess" class="success-message"></div>
-
-      <form id="signupForm">
-        <div class="form-group">
-          <label for="signupEmail">Email address</label>
-          <input type="email" id="signupEmail" placeholder="name@host.com" required autocomplete="email">
-        </div>
-
-        <div class="form-group">
-          <label for="signupName">Name</label>
-          <input type="text" id="signupName" placeholder="Enter your full name" required autocomplete="name">
-        </div>
-
-        <!-- After password confirmation, before checkbox -->
-
-<div class="form-group">
-  <label for="signupDepartment">Department</label>
-  <select id="signupDepartment" required>
-    <option value="">Loading departments...</option>
-  </select>
-</div>
-
-<div class="form-group">
-  <label for="signupCourse">Course</label>
-  <select id="signupCourse" required disabled>
-    <option value="">Select department first</option>
-  </select>
-</div>
-
-<div class="form-group">
-  <label for="signupAcademicYear">Academic Year</label>
-  <select id="signupAcademicYear" required>
-    <option value="">Select year</option>
-    <option value="FY">First Year (FY)</option>
-    <option value="SY">Second Year (SY)</option>
-    <option value="TY">Third Year (TY)</option>
-  </select>
-</div>
-
-<div class="form-group">
-  <label for="signupDivision">Division</label>
-  <select id="signupDivision" required>
-    <option value="">Select division</option>
-    <option value="Division A">Division A</option>
-    <option value="Division B">Division B</option>
-    <option value="Division C">Division C</option>
-  </select>
-</div>
-
-<div class="form-group">
-  <label for="signupStudentID">Student ID / Roll Number <span class="text-danger">*</span></label>
-  <input type="text" id="signupStudentID" placeholder="e.g., 1,2" required>
-  <small style="color: #b0b8c4;">Your unique student identification number</small>
-</div>
-
-        <div class="form-group">
-          <label for="signupPassword">Password</label>
-          <input type="password" id="signupPassword" placeholder="Enter password" required autocomplete="new-password">
-          <div class="password-strength">
-            <div class="strength-bar">
-              <div class="strength-fill" id="strengthFill"></div>
+          <form id="emailForm">
+            <div class="form-group">
+              <label for="emailInput">Email address</label>
+              <input type="email" id="emailInput" placeholder="name@host.com" required autocomplete="email">
             </div>
-            <div class="strength-text" id="strengthText"></div>
-          </div>
+
+            <button type="submit" class="btn-primary">
+              Next
+              <div class="loading-spinner"></div>
+            </button>
+          </form>
         </div>
-
-        <div class="form-group">
-          <label for="signupPasswordConfirm">Confirm password</label>
-          <input type="password" id="signupPasswordConfirm" placeholder="Reenter password" required autocomplete="new-password">
-        </div>
-
-        <div class="checkbox-group">
-          <input type="checkbox" id="showSignupPasswordCheckbox">
-          <label for="showSignupPasswordCheckbox">Show password</label>
-        </div>
-
-        <button type="submit" class="btn-primary">
-          Sign up
-          <div class="loading-spinner"></div>
-        </button>
-      </form>
-
-      <div class="link-text">
-        Have an account already? <a id="showSigninFromSignup">Sign in</a>
-      </div>
-    </div>
-
-    <!-- PAGE 4: Verify Email (Confirmation Code) -->
-    <div id="page-verify" class="page">
-      <div class="auth-header">
-        <h1>Verify your email</h1>
-        <p>We sent a code to <strong id="verifyEmailDisplay"></strong></p>
       </div>
 
-      <div id="verifyError" class="error-message"></div>
-      <div id="verifySuccess" class="success-message"></div>
-
-      <form id="verifyForm">
-        <div class="form-group">
-          <label for="verificationCode">Verification code</label>
-          <input type="text" id="verificationCode" placeholder="Enter 6-digit code" required maxlength="6" pattern="[0-9]{6}">
+      <!-- PAGE 2: Password Entry -->
+      <div id="page-password" class="page">
+        <div class="auth-header">
+          <h1>Enter Password</h1>
+          <p>Continue to your account</p>
         </div>
 
-        <button type="submit" class="btn-primary">
-          Verify
-          <div class="loading-spinner"></div>
-        </button>
-        <button type="button" class="btn-secondary" id="resendCode">Resend code</button>
-      </form>
+        <div class="page-form-content">
+          <div id="passwordError" class="error-message"></div>
 
-      <div class="link-text">
-        <a id="backToSignin">Back to sign in</a>
-      </div>
-    </div>
+          <form id="passwordForm">
+            <div class="form-group">
+              <label for="passwordInput">Password</label>
+              <input type="password" id="passwordInput" placeholder="Enter password" required autocomplete="current-password">
+            </div>
 
-    <!-- PAGE 5: Forgot Password -->
-    <div id="page-forgot" class="page">
-      <div class="auth-header">
-        <h1>Forgot your password?</h1>
-        <p>Enter your email address. We will send a message with a code to reset your password.</p>
-      </div>
+            <div class="checkbox-group">
+              <input type="checkbox" id="showPasswordCheckbox">
+              <label for="showPasswordCheckbox">Show password</label>
+            </div>
 
-      <div id="forgotError" class="error-message"></div>
-      <div id="forgotSuccess" class="success-message"></div>
+            <div class="forgot-link">
+              <a id="showForgotPassword">Forgot password?</a>
+            </div>
 
-      <form id="forgotForm">
-        <div class="form-group">
-          <label for="forgotEmail">Email address</label>
-          <input type="email" id="forgotEmail" placeholder="name@host.com" required>
+            <button type="submit" class="btn-primary">
+              Continue
+              <div class="loading-spinner"></div>
+            </button>
+            <button type="button" class="btn-secondary" id="backToEmail">Back</button>
+          </form>
         </div>
-
-        <button type="submit" class="btn-primary">
-          Reset my password
-          <div class="loading-spinner"></div>
-        </button>
-        <button type="button" class="btn-secondary" id="backToPasswordFromForgot">Back</button>
-      </form>
-    </div>
-
-    <!-- PAGE 6: Reset Password with Code -->
-    <div id="page-reset" class="page">
-      <div class="auth-header">
-        <h1>Reset your password</h1>
-        <p>Enter the code sent to your email and create a new password.</p>
       </div>
 
-      <div id="resetError" class="error-message"></div>
-      <div id="resetSuccess" class="success-message"></div>
-
-      <form id="resetForm">
-        <div class="form-group">
-          <label for="resetCode">Verification code</label>
-          <input type="text" id="resetCode" placeholder="Enter 6-digit code" required maxlength="6" pattern="[0-9]{6}">
+      <!-- PAGE 3: Sign Up -->
+      <div id="page-signup" class="page">
+        <div class="auth-header">
+          <h1>Create Account</h1>
+          <p>Join Smart Attendance System</p>
         </div>
 
-        <div class="form-group">
-          <label for="resetPassword">New password</label>
-          <input type="password" id="resetPassword" placeholder="Enter new password" required>
+        <div class="page-form-content">
+          <div id="signupError" class="error-message"></div>
+          <div id="signupSuccess" class="success-message"></div>
+
+          <form id="signupForm">
+            <div class="form-group">
+              <label for="signupEmail">Email address</label>
+              <input type="email" id="signupEmail" placeholder="name@host.com" required autocomplete="email">
+            </div>
+
+            <div class="form-group">
+              <label for="signupName">Full Name</label>
+              <input type="text" id="signupName" placeholder="Enter your full name" required autocomplete="name">
+            </div>
+
+            <div class="form-group">
+              <label for="signupDepartment">Department</label>
+              <select id="signupDepartment" required>
+                <option value="">Loading departments...</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="signupCourse">Course</label>
+              <select id="signupCourse" required disabled>
+                <option value="">Select department first</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="signupAcademicYear">Academic Year</label>
+              <select id="signupAcademicYear" required>
+                <option value="">Select year</option>
+                <option value="FY">First Year (FY)</option>
+                <option value="SY">Second Year (SY)</option>
+                <option value="TY">Third Year (TY)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="signupDivision">Division</label>
+              <select id="signupDivision" required>
+                <option value="">Select division</option>
+                <option value="Division A">Division A</option>
+                <option value="Division B">Division B</option>
+                <option value="Division C">Division C</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="signupStudentID">Student ID / Roll Number</label>
+              <input type="text" id="signupStudentID" placeholder="e.g., 1, 2, 3" required>
+              <small>Your unique student identification number</small>
+            </div>
+
+            <div class="form-group">
+              <label for="signupPassword">Password</label>
+              <input type="password" id="signupPassword" placeholder="Enter password" required autocomplete="new-password">
+              <div class="password-strength">
+                <div class="strength-bar">
+                  <div class="strength-fill" id="strengthFill"></div>
+                </div>
+                <div class="strength-text" id="strengthText"></div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="signupPasswordConfirm">Confirm Password</label>
+              <input type="password" id="signupPasswordConfirm" placeholder="Reenter password" required autocomplete="new-password">
+            </div>
+
+            <div class="checkbox-group">
+              <input type="checkbox" id="showSignupPasswordCheckbox">
+              <label for="showSignupPasswordCheckbox">Show password</label>
+            </div>
+
+            <button type="submit" class="btn-primary">
+              Create Account
+              <div class="loading-spinner"></div>
+            </button>
+
+            <div class="link-text">
+              Already have an account? <a id="showSigninFromSignup">Sign in</a>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- PAGE 4: Verify Email -->
+      <div id="page-verify" class="page">
+        <div class="auth-header">
+          <h1>Verify Email</h1>
+          <p>Enter the code sent to <strong id="verifyEmailDisplay"></strong></p>
         </div>
 
-        <div class="form-group">
-          <label for="resetPasswordConfirm">Confirm new password</label>
-          <input type="password" id="resetPasswordConfirm" placeholder="Reenter password" required>
+        <div class="page-form-content">
+          <div id="verifyError" class="error-message"></div>
+          <div id="verifySuccess" class="success-message"></div>
+
+          <form id="verifyForm">
+            <div class="form-group">
+              <label for="verificationCode">Verification Code</label>
+              <input type="text" id="verificationCode" placeholder="Enter 6-digit code" required maxlength="6" pattern="[0-9]{6}">
+            </div>
+
+            <button type="submit" class="btn-primary">
+              Verify Email
+              <div class="loading-spinner"></div>
+            </button>
+            <button type="button" class="btn-secondary" id="resendCode">Resend Code</button>
+
+            <div class="link-text">
+              <a id="backToSignin">Back to sign in</a>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- PAGE 5: Forgot Password -->
+      <div id="page-forgot" class="page">
+        <div class="auth-header">
+          <h1>Reset Password</h1>
+          <p>Enter your email to receive reset code</p>
         </div>
 
-        <div class="checkbox-group">
-          <input type="checkbox" id="showResetPasswordCheckbox">
-          <label for="showResetPasswordCheckbox">Show password</label>
+        <div class="page-form-content">
+          <div id="forgotError" class="error-message"></div>
+          <div id="forgotSuccess" class="success-message"></div>
+
+          <form id="forgotForm">
+            <div class="form-group">
+              <label for="forgotEmail">Email address</label>
+              <input type="email" id="forgotEmail" placeholder="name@host.com" required>
+            </div>
+
+            <button type="submit" class="btn-primary">
+              Send Reset Code
+              <div class="loading-spinner"></div>
+            </button>
+            <button type="button" class="btn-secondary" id="backToPasswordFromForgot">Back</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- PAGE 6: Reset Password -->
+      <div id="page-reset" class="page">
+        <div class="auth-header">
+          <h1>New Password</h1>
+          <p>Enter code and create new password</p>
         </div>
 
-        <button type="submit" class="btn-primary">
-          Reset password
-          <div class="loading-spinner"></div>
-        </button>
-        <button type="button" class="btn-secondary" id="backToSigninFromReset">Back to sign in</button>
-      </form>
+        <div class="page-form-content">
+          <div id="resetError" class="error-message"></div>
+          <div id="resetSuccess" class="success-message"></div>
+
+          <form id="resetForm">
+            <div class="form-group">
+              <label for="resetCode">Verification Code</label>
+              <input type="text" id="resetCode" placeholder="Enter 6-digit code" required maxlength="6" pattern="[0-9]{6}">
+            </div>
+
+            <div class="form-group">
+              <label for="resetPassword">New Password</label>
+              <input type="password" id="resetPassword" placeholder="Enter new password" required>
+            </div>
+
+            <div class="form-group">
+              <label for="resetPasswordConfirm">Confirm Password</label>
+              <input type="password" id="resetPasswordConfirm" placeholder="Reenter password" required>
+            </div>
+
+            <div class="checkbox-group">
+              <input type="checkbox" id="showResetPasswordCheckbox">
+              <label for="showResetPasswordCheckbox">Show password</label>
+            </div>
+
+            <button type="submit" class="btn-primary">
+              Reset Password
+              <div class="loading-spinner"></div>
+            </button>
+            <button type="button" class="btn-secondary" id="backToSigninFromReset">Back to sign in</button>
+          </form>
+        </div>
+      </div>
+    </div><!-- End of form-content-wrapper -->
+
+    <!-- Toggle Switch Fixed at Bottom -->
+    <div class="toggle-container">
+      <div class="toggle-slider" id="toggleSlider"></div>
+      <button class="toggle-btn active" id="loginToggle">Sign In</button>
+      <button class="toggle-btn" id="signupToggle">Sign Up</button>
     </div>
   </div>
 
@@ -598,6 +697,21 @@
     // State management
     let currentEmail = '';
     let currentUserForVerification = null;
+
+    // Toggle between Login/Signup
+    document.getElementById('loginToggle').addEventListener('click', () => {
+      document.getElementById('toggleSlider').classList.remove('signup');
+      document.getElementById('loginToggle').classList.add('active');
+      document.getElementById('signupToggle').classList.remove('active');
+      showPage('page-email');
+    });
+
+    document.getElementById('signupToggle').addEventListener('click', () => {
+      document.getElementById('toggleSlider').classList.add('signup');
+      document.getElementById('signupToggle').classList.add('active');
+      document.getElementById('loginToggle').classList.remove('active');
+      showPage('page-signup');
+    });
 
     // Page navigation
     function showPage(pageId) {
@@ -659,15 +773,15 @@
       if (strength <= 1) {
         fillElement.classList.add('weak');
         textElement.textContent = 'Weak password';
-        textElement.style.color = '#dc3545';
+        textElement.style.color = '#fc8181';
       } else if (strength <= 3) {
         fillElement.classList.add('medium');
         textElement.textContent = 'Medium password';
-        textElement.style.color = '#ffc107';
+        textElement.style.color = '#f6ad55';
       } else {
         fillElement.classList.add('strong');
         textElement.textContent = 'Strong password';
-        textElement.style.color = '#28a745';
+        textElement.style.color = '#68d391';
       }
     }
 
@@ -721,71 +835,70 @@
     });
 
     // PAGE 3: Signup Form
-    // Update existing signup form submit handler
-document.getElementById('signupForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  
-  // Existing fields
-  const email = document.getElementById('signupEmail').value.trim();
-  const name = document.getElementById('signupName').value.trim();
-  const studentId = document.getElementById('signupStudentID').value.trim(); 
-  const password = document.getElementById('signupPassword').value;
-  const confirmPassword = document.getElementById('signupPasswordConfirm').value;
-  
-  // NEW: Division fields
-  const department = document.getElementById('signupDepartment').value;
-  const course = document.getElementById('signupCourse').value;
-  const academicYear = document.getElementById('signupAcademicYear').value;
-  const division = document.getElementById('signupDivision').value;
-  
-  const submitBtn = e.target.querySelector('button[type="submit"]');
+    document.getElementById('signupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // Existing fields
+      const email = document.getElementById('signupEmail').value.trim();
+      const name = document.getElementById('signupName').value.trim();
+      const studentId = document.getElementById('signupStudentID').value.trim(); 
+      const password = document.getElementById('signupPassword').value;
+      const confirmPassword = document.getElementById('signupPasswordConfirm').value;
+      
+      // Division fields
+      const department = document.getElementById('signupDepartment').value;
+      const course = document.getElementById('signupCourse').value;
+      const academicYear = document.getElementById('signupAcademicYear').value;
+      const division = document.getElementById('signupDivision').value;
+      
+      const submitBtn = e.target.querySelector('button[type="submit"]');
 
-  clearAllErrors();
+      clearAllErrors();
 
-  // Existing validations
-  if (!email || !name || !password || !confirmPassword) {
-    showError('signupError', 'Please fill in all fields');
-    return;
-  }
-  
-  // NEW: Validate division fields
-  if (!department || !course || !academicYear || !division) {
-    showError('signupError', 'Please select department, course, academic year, and division');
-    return;
-  }
+      // Validations
+      if (!email || !name || !password || !confirmPassword || !studentId) {
+        showError('signupError', 'Please fill in all fields');
+        return;
+      }
+      
+      // Validate division fields
+      if (!department || !course || !academicYear || !division) {
+        showError('signupError', 'Please select department, course, academic year, and division');
+        return;
+      }
 
-  if (password !== confirmPassword) {
-    showError('signupError', 'Passwords do not match');
-    return;
-  }
+      if (password !== confirmPassword) {
+        showError('signupError', 'Passwords do not match');
+        return;
+      }
 
-  if (password.length < 8) {
-    showError('signupError', 'Password must be at least 8 characters long');
-    return;
-  }
+      if (password.length < 8) {
+        showError('signupError', 'Password must be at least 8 characters long');
+        return;
+      }
 
-  setButtonLoading(submitBtn, true);
+      setButtonLoading(submitBtn, true);
 
-  try {
-    // Call signup with all 7 parameters
-    const result = await signup(email, name, password, department, course, academicYear, division);
-    
-    setButtonLoading(submitBtn, false);
-    
-    // Store for verification
-    currentEmail = email;
-    currentUserForVerification = result;
-    
-    // Show verification page
-    document.getElementById('verifyEmailDisplay').textContent = email;
-    showPage('page-verify');
-    showSuccess('verifySuccess', 'Verification code sent to your email!');
-    
-  } catch (error) {
-    setButtonLoading(submitBtn, false);
-    showError('signupError', error.message || 'Failed to create account');
-  }
-});
+      try {
+        // Call signup with all parameters
+        const result = await signup(email, name, password, department, course, academicYear, division, studentId);
+        
+        setButtonLoading(submitBtn, false);
+        
+        // Store for verification
+        currentEmail = email;
+        currentUserForVerification = result;
+        
+        // Show verification page
+        document.getElementById('verifyEmailDisplay').textContent = email;
+        showPage('page-verify');
+        showSuccess('verifySuccess', 'Verification code sent to your email!');
+        
+      } catch (error) {
+        setButtonLoading(submitBtn, false);
+        showError('signupError', error.message || 'Failed to create account');
+      }
+    });
 
     // PAGE 4: Verify Email
     document.getElementById('verifyForm').addEventListener('submit', async (e) => {
@@ -810,6 +923,7 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
         setTimeout(() => {
           showPage('page-email');
           document.getElementById('emailInput').value = currentEmail;
+          document.getElementById('loginToggle').click();
         }, 2000);
         
       } catch (error) {
@@ -901,6 +1015,7 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
         setTimeout(() => {
           showPage('page-email');
           document.getElementById('emailInput').value = currentEmail;
+          document.getElementById('loginToggle').click();
         }, 2000);
         
       } catch (error) {
@@ -910,13 +1025,8 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
     });
 
     // Navigation buttons
-    document.getElementById('showSignupFromEmail').addEventListener('click', () => {
-      showPage('page-signup');
-      document.getElementById('signupEmail').value = document.getElementById('emailInput').value;
-    });
-
     document.getElementById('showSigninFromSignup').addEventListener('click', () => {
-      showPage('page-email');
+      document.getElementById('loginToggle').click();
     });
 
     document.getElementById('backToEmail').addEventListener('click', () => {
@@ -934,10 +1044,12 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
 
     document.getElementById('backToSignin').addEventListener('click', () => {
       showPage('page-email');
+      document.getElementById('loginToggle').click();
     });
 
     document.getElementById('backToSigninFromReset').addEventListener('click', () => {
       showPage('page-email');
+      document.getElementById('loginToggle').click();
     });
 
     // Show password toggles
@@ -974,88 +1086,83 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
         // Not logged in - stay on login page
         console.log('Not logged in');
       }
+      
+      // Load departments from Firebase
+      await initializeFirebaseDropdowns();
     });
 
-    // Initialize Firebase dropdowns on page load
-window.addEventListener('DOMContentLoaded', async () => {
-  // ... existing code ...
-  
-  // Load departments from Firebase
-  await initializeFirebaseDropdowns();
-});
-
-// Initialize Firebase and load departments
-async function initializeFirebaseDropdowns() {
-  try {
-    const db = firebase.database();
-    
-    // Load departments
-    const departmentsRef = db.ref('mainSystem/departments');
-    departmentsRef.on('value', (snapshot) => {
-      const departments = snapshot.val();
-      const departmentSelect = document.getElementById('signupDepartment');
-      
-      // Clear existing options
-      departmentSelect.innerHTML = '<option value="">Select department</option>';
-      
-      if (departments && departments.length > 0) {
-        departments.forEach(dept => {
-          const option = document.createElement('option');
-          option.value = dept;
-          option.textContent = dept;
-          departmentSelect.appendChild(option);
+    // Initialize Firebase and load departments
+    async function initializeFirebaseDropdowns() {
+      try {
+        const db = firebase.database();
+        
+        // Load departments
+        const departmentsRef = db.ref('mainSystem/departments');
+        departmentsRef.on('value', (snapshot) => {
+          const departments = snapshot.val();
+          const departmentSelect = document.getElementById('signupDepartment');
+          
+          // Clear existing options
+          departmentSelect.innerHTML = '<option value="">Select department</option>';
+          
+          if (departments && departments.length > 0) {
+            departments.forEach(dept => {
+              const option = document.createElement('option');
+              option.value = dept;
+              option.textContent = dept;
+              departmentSelect.appendChild(option);
+            });
+          } else {
+            departmentSelect.innerHTML = '<option value="">No departments available</option>';
+            showError('signupError', 'No departments configured. Please contact admin.');
+          }
         });
-      } else {
-        departmentSelect.innerHTML = '<option value="">No departments available</option>';
-        showError('signupError', 'No departments configured. Please contact admin.');
+        
+      } catch (error) {
+        console.error('Firebase initialization error:', error);
+        showError('signupError', 'Failed to load departments. Please refresh the page.');
+      }
+    }
+
+    // When department changes, load courses
+    document.getElementById('signupDepartment').addEventListener('change', async (e) => {
+      const selectedDept = e.target.value;
+      const courseSelect = document.getElementById('signupCourse');
+      
+      if (!selectedDept) {
+        courseSelect.disabled = true;
+        courseSelect.innerHTML = '<option value="">Select department first</option>';
+        return;
+      }
+      
+      try {
+        const db = firebase.database();
+        const coursesRef = db.ref(`mainSystem/courses/${selectedDept}`);
+        
+        const snapshot = await coursesRef.once('value');
+        const courses = snapshot.val();
+        
+        courseSelect.innerHTML = '<option value="">Select course</option>';
+        
+        if (courses && courses.length > 0) {
+          courses.forEach(course => {
+            const option = document.createElement('option');
+            option.value = course;
+            option.textContent = course;
+            courseSelect.appendChild(option);
+          });
+          courseSelect.disabled = false;
+        } else {
+          courseSelect.innerHTML = '<option value="">No courses available</option>';
+          courseSelect.disabled = true;
+          showError('signupError', 'No courses available for this department.');
+        }
+        
+      } catch (error) {
+        console.error('Error loading courses:', error);
+        showError('signupError', 'Failed to load courses for this department.');
       }
     });
-    
-  } catch (error) {
-    console.error('Firebase initialization error:', error);
-    showError('signupError', 'Failed to load departments. Please refresh the page.');
-  }
-}
-
-// When department changes, load courses
-document.getElementById('signupDepartment').addEventListener('change', async (e) => {
-  const selectedDept = e.target.value;
-  const courseSelect = document.getElementById('signupCourse');
-  
-  if (!selectedDept) {
-    courseSelect.disabled = true;
-    courseSelect.innerHTML = '<option value="">Select department first</option>';
-    return;
-  }
-  
-  try {
-    const db = firebase.database();
-    const coursesRef = db.ref(`mainSystem/courses/${selectedDept}`);
-    
-    const snapshot = await coursesRef.once('value');
-    const courses = snapshot.val();
-    
-    courseSelect.innerHTML = '<option value="">Select course</option>';
-    
-    if (courses && courses.length > 0) {
-      courses.forEach(course => {
-        const option = document.createElement('option');
-        option.value = course;
-        option.textContent = course;
-        courseSelect.appendChild(option);
-      });
-      courseSelect.disabled = false;
-    } else {
-      courseSelect.innerHTML = '<option value="">No courses available</option>';
-      courseSelect.disabled = true;
-      showError('signupError', 'No courses available for this department.');
-    }
-    
-  } catch (error) {
-    console.error('Error loading courses:', error);
-    showError('signupError', 'Failed to load courses for this department.');
-  }
-});
   </script>
 </body>
 </html>

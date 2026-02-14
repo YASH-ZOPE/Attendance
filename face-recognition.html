@@ -29,7 +29,15 @@
       min-height: 100vh;
       padding: 20px;
     }
+    *::-webkit-scrollbar {
+  display: none;
+}
 
+/* Hide scrollbar for IE, Edge and Firefox */
+* {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
     .main-card {
       background: white;
       border-radius: 20px;
@@ -901,21 +909,428 @@
 
 <body>
 
-  <!-- Loading Overlay -->
-  <div id="loadingOverlay" class="loading-overlay">
-    <div class="loading-content">
-      <div class="spinner"></div>
-      <h4>Loading Face Recognition Models...</h4>
-      <p>Please wait, this may take a moment</p>
-      <div id="loadingProgress" class="mt-3">
-        <div class="progress" style="width: 300px; margin: 0 auto;">
-          <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" role="progressbar"
-            style="width: 0%"></div>
+  <!-- ✅ Minimal Glass-Themed Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay">
+  <div style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(248, 246, 244, 0.95);
+    backdrop-filter: blur(10px);
+    z-index: 99999;
+    overflow: auto;
+  ">
+    <!-- Enhanced Navbar Skeleton -->
+    <nav class="navbar navbar-dark bg-primary shadow-sm" style="
+      background: linear-gradient(135deg, rgba(232, 196, 216, 0.8) 0%, rgba(221, 184, 204, 0.8) 100%) !important;
+      backdrop-filter: blur(10px);
+    ">
+      <div class="container">
+        <span class="navbar-brand" style="opacity: 0.5; color: #6A4A5A;">
+          <i class="bi bi-camera-video me-2"></i>Face Recognition
+        </span>
+        <div class="skeleton-shimmer" style="
+          width: 200px; 
+          height: 30px; 
+          background: rgba(106, 74, 90, 0.15); 
+          border-radius: 6px;
+          position: relative;
+          overflow: hidden;
+        ">
+          <div class="shimmer-wave"></div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Config Section Skeleton -->
+    <div style="
+      background: rgba(248, 249, 250, 0.6);
+      padding: 15px 30px;
+      border-bottom: 1px solid rgba(222, 226, 230, 0.5);
+      backdrop-filter: blur(5px);
+    ">
+      <div style="
+        max-width: 1200px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+      ">
+        <div class="skeleton-line mb-3" style="width: 200px; height: 20px;"></div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+          <div class="skeleton-shimmer" style="
+            height: 40px;
+            border-radius: 8px;
+            background: rgba(245, 245, 245, 0.6);
+            position: relative;
+            overflow: hidden;
+          ">
+            <div class="shimmer-wave"></div>
+          </div>
+          <div class="skeleton-shimmer" style="
+            height: 40px;
+            border-radius: 8px;
+            background: rgba(245, 245, 245, 0.6);
+            position: relative;
+            overflow: hidden;
+          ">
+            <div class="shimmer-wave"></div>
+          </div>
+          <div class="skeleton-shimmer" style="
+            height: 40px;
+            border-radius: 8px;
+            background: rgba(245, 245, 245, 0.6);
+            position: relative;
+            overflow: hidden;
+          ">
+            <div class="shimmer-wave"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container py-4">
+      <!-- Main Content Layout -->
+      <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+        
+        <!-- Video Container Skeleton (60%) -->
+        <div style="flex: 1 1 calc(60% - 7.5px); min-width: 280px;">
+          <div class="card border-0" style="
+            border-radius: 10px; 
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+          ">
+            <!-- Video Area -->
+            <div style="
+              background: rgba(26, 26, 26, 0.8);
+              backdrop-filter: blur(5px);
+              height: 400px;
+              position: relative;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            ">
+              <div style="text-align: center; color: rgba(108, 117, 125, 0.5);">
+                <i class="bi bi-camera-video" style="font-size: 4rem; opacity: 0.3;"></i>
+                <div class="skeleton-line mt-3" style="width: 120px; height: 20px; margin: 0 auto;"></div>
+              </div>
+            </div>
+
+            <div class="card-body">
+              <!-- Button Skeleton -->
+              <div class="skeleton-shimmer mb-3" style="
+                height: 45px;
+                border-radius: 25px;
+                background: rgba(232, 232, 232, 0.6);
+                position: relative;
+                overflow: hidden;
+              ">
+                <div class="shimmer-wave"></div>
+              </div>
+
+              <!-- Stats Cards -->
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px;">
+                <div class="card border-0 skeleton-card" style="
+                  height: 80px;
+                  border-radius: 10px;
+                  background: rgba(255, 255, 255, 0.6);
+                  backdrop-filter: blur(8px);
+                  position: relative;
+                  overflow: hidden;
+                  border: 1px solid rgba(255, 255, 255, 0.4);
+                ">
+                  <div class="shimmer-wave"></div>
+                  <div class="card-body text-center">
+                    <div class="skeleton-line mb-2" style="width: 40px; height: 24px; margin: 0 auto;"></div>
+                    <div class="skeleton-line" style="width: 60px; height: 14px; margin: 0 auto;"></div>
+                  </div>
+                </div>
+
+                <div class="card border-0 skeleton-card" style="
+                  height: 80px;
+                  border-radius: 10px;
+                  background: rgba(255, 255, 255, 0.6);
+                  backdrop-filter: blur(8px);
+                  position: relative;
+                  overflow: hidden;
+                  border: 1px solid rgba(255, 255, 255, 0.4);
+                ">
+                  <div class="shimmer-wave"></div>
+                  <div class="card-body text-center">
+                    <div class="skeleton-line mb-2" style="width: 40px; height: 24px; margin: 0 auto;"></div>
+                    <div class="skeleton-line" style="width: 60px; height: 14px; margin: 0 auto;"></div>
+                  </div>
+                </div>
+
+                <div class="card border-0 skeleton-card" style="
+                  height: 80px;
+                  border-radius: 10px;
+                  background: rgba(255, 255, 255, 0.6);
+                  backdrop-filter: blur(8px);
+                  position: relative;
+                  overflow: hidden;
+                  border: 1px solid rgba(255, 255, 255, 0.4);
+                ">
+                  <div class="shimmer-wave"></div>
+                  <div class="card-body text-center">
+                    <div class="skeleton-line mb-2" style="width: 40px; height: 24px; margin: 0 auto;"></div>
+                    <div class="skeleton-line" style="width: 60px; height: 14px; margin: 0 auto;"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;">
+                <div class="skeleton-shimmer" style="
+                  height: 40px;
+                  border-radius: 8px;
+                  background: rgba(245, 245, 245, 0.6);
+                  position: relative;
+                  overflow: hidden;
+                ">
+                  <div class="shimmer-wave"></div>
+                </div>
+                <div class="skeleton-shimmer" style="
+                  height: 40px;
+                  border-radius: 8px;
+                  background: rgba(245, 245, 245, 0.6);
+                  position: relative;
+                  overflow: hidden;
+                ">
+                  <div class="shimmer-wave"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Attendance Container Skeleton (40%) -->
+        <div style="flex: 1 1 calc(40% - 7.5px); min-width: 280px;">
+          <div class="card border-0" style="
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+          ">
+            <div class="card-body">
+              <!-- Title -->
+              <div class="skeleton-line mb-3" style="width: 180px; height: 20px;"></div>
+
+              <!-- Present Blocks -->
+              <div style="margin-bottom: 30px;">
+                <div class="skeleton-line mb-2" style="width: 100px; height: 18px; background: rgba(16, 185, 129, 0.2);"></div>
+                <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;">
+                  <div class="skeleton-shimmer" style="
+                    aspect-ratio: 1;
+                    border-radius: 8px;
+                    background: rgba(16, 185, 129, 0.15);
+                    position: relative;
+                    overflow: hidden;
+                    min-height: 45px;
+                  ">
+                    <div class="shimmer-wave" style="background: linear-gradient(90deg, transparent 0%, rgba(16, 185, 129, 0.3) 50%, transparent 100%);"></div>
+                  </div>
+                  <div class="skeleton-shimmer" style="
+                    aspect-ratio: 1;
+                    border-radius: 8px;
+                    background: rgba(16, 185, 129, 0.15);
+                    position: relative;
+                    overflow: hidden;
+                    min-height: 45px;
+                  ">
+                    <div class="shimmer-wave" style="background: linear-gradient(90deg, transparent 0%, rgba(16, 185, 129, 0.3) 50%, transparent 100%);"></div>
+                  </div>
+                  <div class="skeleton-shimmer" style="
+                    aspect-ratio: 1;
+                    border-radius: 8px;
+                    background: rgba(16, 185, 129, 0.15);
+                    position: relative;
+                    overflow: hidden;
+                    min-height: 45px;
+                  ">
+                    <div class="shimmer-wave" style="background: linear-gradient(90deg, transparent 0%, rgba(16, 185, 129, 0.3) 50%, transparent 100%);"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Absent Blocks -->
+              <div>
+                <div class="skeleton-line mb-2" style="width: 100px; height: 18px; background: rgba(239, 68, 68, 0.2);"></div>
+                <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;">
+                  <div class="skeleton-shimmer" style="
+                    aspect-ratio: 1;
+                    border-radius: 8px;
+                    background: rgba(239, 68, 68, 0.15);
+                    position: relative;
+                    overflow: hidden;
+                    min-height: 45px;
+                  ">
+                    <div class="shimmer-wave" style="background: linear-gradient(90deg, transparent 0%, rgba(239, 68, 68, 0.3) 50%, transparent 100%);"></div>
+                  </div>
+                  <div class="skeleton-shimmer" style="
+                    aspect-ratio: 1;
+                    border-radius: 8px;
+                    background: rgba(239, 68, 68, 0.15);
+                    position: relative;
+                    overflow: hidden;
+                    min-height: 45px;
+                  ">
+                    <div class="shimmer-wave" style="background: linear-gradient(90deg, transparent 0%, rgba(239, 68, 68, 0.3) 50%, transparent 100%);"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Minimal Loading Message (No Progress Bar) -->
+    <div style="
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(15px);
+      padding: 18px 28px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      animation: fadeInUp 0.5s ease;
+    ">
+      <div class="d-flex align-items-center gap-3">
+        <div style="
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, rgba(232, 196, 216, 0.8) 0%, rgba(221, 184, 204, 0.8) 100%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          animation: rotate 2s linear infinite;
+        ">
+          <i class="bi bi-arrow-repeat" style="color: #6A4A5A;"></i>
+        </div>
+        <div>
+          <div style="font-weight: 600; color: #2d3748; font-size: 0.9rem;">Loading AI Models</div>
+          <div id="loadingStageText" style="color: #718096; font-size: 0.75rem;">Initializing...</div>
         </div>
       </div>
     </div>
   </div>
+</div>
 
+<!-- ✅ Minimal Styles -->
+<style>
+/* Shimmer Wave Effect */
+.shimmer-wave {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  animation: shimmerMove 2s infinite;
+}
+
+@keyframes shimmerMove {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* Skeleton Lines */
+.skeleton-line {
+  background: rgba(224, 224, 224, 0.5);
+  border-radius: 4px;
+  animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeletonPulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.8; }
+}
+
+/* Skeleton Card Animation */
+.skeleton-card {
+  animation: fadeIn 0.6s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Loading Message Animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Rotate Animation */
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Skeleton Shimmer */
+.skeleton-shimmer {
+  background: rgba(232, 232, 232, 0.5);
+}
+</style>
+
+<!-- ✅ Simplified JavaScript (No Progress Bar) -->
+<script>
+// Update loading stage text only
+function updateLoadingStage() {
+  const stages = [
+    'Loading face detection...',
+    'Loading landmarks...',
+    'Loading recognition...',
+    'Processing neural networks...',
+    'Almost ready...'
+  ];
+  
+  let currentStage = 0;
+  
+  const interval = setInterval(() => {
+    const stageText = document.getElementById('loadingStageText');
+    
+    if (stageText && currentStage < stages.length) {
+      stageText.textContent = stages[currentStage];
+      currentStage++;
+    } else {
+      clearInterval(interval);
+    }
+  }, 1200);
+}
+
+// Start when page loads
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', updateLoadingStage);
+} else {
+  updateLoadingStage();
+}
+</script>
   <div class="main-card">
     <!-- Header -->
     <div class="header">
@@ -1412,7 +1827,8 @@ function updateConfigDisplay() {
             // Wait a bit for face-api models to start loading
             setTimeout(checkAuthAndInitFaceRecognition, 500);
           });
-
+          
+          
           // ==================== QR SCANNER ====================
           let qrVideo = null;
           let qrStream = null;

@@ -23,44 +23,78 @@
       padding: 0;
       box-sizing: border-box;
     }
+    *::-webkit-scrollbar {
+  display: none;
+}
 
+/* Hide scrollbar for IE, Edge and Firefox */
+* {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e8ba3 100%);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       padding: 20px;
     }
 
     .container {
-      max-width: 600px;
-      margin: 40px auto;
-      background: rgba(20, 35, 55, 0.95);
-      border-radius: 12px;
+      max-width: 500px;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 16px;
       padding: 40px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(102, 126, 234, 0.1);
+      height: 600px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container-header {
+      flex-shrink: 0;
+      margin-bottom: 24px;
     }
 
     h1 {
-      color: #ffffff;
+      color: #2d3748;
       font-size: 28px;
+      font-weight: 700;
       margin-bottom: 8px;
     }
 
     .subtitle {
-      color: #b0b8c4;
-      margin-bottom: 32px;
+      color: #718096;
+      font-size: 14px;
+    }
+
+    .scrollable-content {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding-right: 5px;
+      /* Hide scrollbar */
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .scrollable-content::-webkit-scrollbar {
+      display: none;
     }
 
     .form-group {
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
 
     .form-group label {
       display: block;
-      color: #e8ecf1;
+      color: #2d3748;
       font-size: 14px;
-      font-weight: 500;
+      font-weight: 600;
       margin-bottom: 8px;
     }
 
@@ -68,10 +102,10 @@
     .form-group select {
       width: 100%;
       padding: 12px 16px;
-      background: rgba(30, 45, 65, 0.8);
-      border: 2px solid rgba(80, 120, 180, 0.4);
-      border-radius: 8px;
-      color: #ffffff;
+      background: #f7fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      color: #2d3748;
       font-size: 15px;
       transition: all 0.3s ease;
     }
@@ -79,13 +113,19 @@
     .form-group input:focus,
     .form-group select:focus {
       outline: none;
-      border-color: #5b9bd5;
-      background: rgba(30, 45, 65, 1);
+      border-color: #667eea;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-group input::placeholder {
+      color: #a0aec0;
     }
 
     .form-group input:disabled {
       opacity: 0.6;
       cursor: not-allowed;
+      background: #edf2f7;
     }
 
     .form-group select {
@@ -97,24 +137,40 @@
       cursor: not-allowed;
     }
 
+    .form-group select option {
+      background: white;
+      color: #2d3748;
+    }
+
+    .form-group small {
+      display: block;
+      margin-top: 6px;
+      color: #718096;
+      font-size: 12px;
+    }
+
     .btn-primary {
       width: 100%;
       padding: 14px;
-      background: #5b9bd5;
-      color: #ffffff;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s ease;
       margin-bottom: 12px;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
     }
 
     .btn-primary:hover {
-      background: #4a8bc2;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(91, 155, 213, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
     }
 
     .btn-primary:disabled {
@@ -127,9 +183,9 @@
       width: 100%;
       padding: 14px;
       background: transparent;
-      color: #5b9bd5;
-      border: 2px solid rgba(80, 120, 180, 0.4);
-      border-radius: 8px;
+      color: #667eea;
+      border: 2px solid #667eea;
+      border-radius: 10px;
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
@@ -137,27 +193,27 @@
     }
 
     .btn-secondary:hover {
-      border-color: #5b9bd5;
-      background: rgba(91, 155, 213, 0.1);
+      background: #f7fafc;
+      border-color: #764ba2;
     }
 
     .error-message {
-      background: rgba(220, 53, 69, 0.2);
-      border: 1px solid rgba(220, 53, 69, 0.5);
-      color: #ff6b7a;
+      background: #fff5f5;
+      border: 1px solid #feb2b2;
+      color: #c53030;
       padding: 12px;
-      border-radius: 8px;
+      border-radius: 10px;
       margin-bottom: 20px;
       font-size: 14px;
       display: none;
     }
 
     .success-message {
-      background: rgba(40, 167, 69, 0.2);
-      border: 1px solid rgba(40, 167, 69, 0.5);
-      color: #6bffa1;
+      background: #f0fff4;
+      border: 1px solid #9ae6b4;
+      color: #2f855a;
       padding: 12px;
-      border-radius: 8px;
+      border-radius: 10px;
       margin-bottom: 20px;
       font-size: 14px;
       display: none;
@@ -168,7 +224,7 @@
       width: 20px;
       height: 20px;
       border: 3px solid rgba(255, 255, 255, 0.3);
-      border-top: 3px solid #ffffff;
+      border-top: 3px solid white;
       border-radius: 50%;
       animation: spin 1s linear infinite;
       margin: 0 auto;
@@ -198,13 +254,29 @@
     }
 
     .info-box {
-      background: rgba(91, 155, 213, 0.1);
-      border: 1px solid rgba(91, 155, 213, 0.3);
-      color: #b0b8c4;
+      background: rgba(102, 126, 234, 0.1);
+      border: 1px solid rgba(102, 126, 234, 0.2);
+      color: #4a5568;
       padding: 12px;
-      border-radius: 8px;
-      margin-bottom: 24px;
+      border-radius: 10px;
+      margin-bottom: 20px;
       font-size: 14px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 576px) {
+      .container {
+        padding: 30px 20px;
+        height: 550px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      .scrollable-content {
+        padding-right: 3px;
+      }
     }
   </style>
 </head>
@@ -213,74 +285,74 @@
   <div class="container">
     <h1>Update Profile</h1>
     <p class="subtitle">Complete your profile information</p>
+    <div class="scrollable-content">
+      <div id="errorMessage" class="error-message"></div>
+      <div id="successMessage" class="success-message"></div>
 
-    <div id="errorMessage" class="error-message"></div>
-    <div id="successMessage" class="success-message"></div>
+      <div class="info-box" id="currentInfo" style="display: none;">
+        Loading your current information...
+      </div>
 
-    <div class="info-box" id="currentInfo" style="display: none;">
-      Loading your current information...
+      <form id="profileForm">
+        <div class="form-group">
+          <label for="email">Email address</label>
+          <input type="email" id="email" disabled>
+        </div>
+
+        <div class="form-group">
+          <label for="name">Name</label>
+          <input type="text" id="name" disabled>
+        </div>
+
+        <div class="form-group">
+          <label for="studentId">Student ID / Roll Number</label>
+          <input type="text" id="studentId" required>
+          <small style="color: #b0b8c4;">Your unique student identification number</small>
+        </div>
+
+        <div class="form-group">
+          <label for="department">Department</label>
+          <select id="department" required>
+            <option value="">Loading departments...</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="course">Course</label>
+          <select id="course" required disabled>
+            <option value="">Select department first</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="academicYear">Academic Year</label>
+          <select id="academicYear" required>
+            <option value="">Select year</option>
+            <option value="FY">First Year (FY)</option>
+            <option value="SY">Second Year (SY)</option>
+            <option value="TY">Third Year (TY)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="division">Division</label>
+          <select id="division" required>
+            <option value="">Select division</option>
+            <option value="Division A">Division A</option>
+            <option value="Division B">Division B</option>
+            <option value="Division C">Division C</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn-primary">
+          Update Profile
+          <div class="loading-spinner"></div>
+        </button>
+
+        <button type="button" class="btn-secondary" id="logoutBtn">Sign Out</button>
+      </form>
     </div>
-
-    <form id="profileForm">
-      <div class="form-group">
-        <label for="email">Email address</label>
-        <input type="email" id="email" disabled>
-      </div>
-
-      <div class="form-group">
-        <label for="name">Name</label>
-        <input type="text" id="name" disabled>
-      </div>
-
-      <div class="form-group">
-        <label for="studentId">Student ID / Roll Number</label>
-        <input type="text" id="studentId" required>
-        <small style="color: #b0b8c4;">Your unique student identification number</small>
-      </div>
-
-      <div class="form-group">
-        <label for="department">Department</label>
-        <select id="department" required>
-          <option value="">Loading departments...</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="course">Course</label>
-        <select id="course" required disabled>
-          <option value="">Select department first</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="academicYear">Academic Year</label>
-        <select id="academicYear" required>
-          <option value="">Select year</option>
-          <option value="FY">First Year (FY)</option>
-          <option value="SY">Second Year (SY)</option>
-          <option value="TY">Third Year (TY)</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="division">Division</label>
-        <select id="division" required>
-          <option value="">Select division</option>
-          <option value="Division A">Division A</option>
-          <option value="Division B">Division B</option>
-          <option value="Division C">Division C</option>
-        </select>
-      </div>
-
-      <button type="submit" class="btn-primary">
-        Update Profile
-        <div class="loading-spinner"></div>
-      </button>
-
-      <button type="button" class="btn-secondary" id="logoutBtn">Sign Out</button>
-    </form>
   </div>
-
   <script>
     let profileCurrentUser = null;
 
@@ -511,9 +583,9 @@
             }
 
             if (attrs['custom:studentId']) {
-  console.log('Setting student ID:', attrs['custom:studentId']);
-  document.getElementById('studentId').value = attrs['custom:studentId'];
-}
+              console.log('Setting student ID:', attrs['custom:studentId']);
+              document.getElementById('studentId').value = attrs['custom:studentId'];
+            }
 
             if (attrs['custom:academicYear']) {
               console.log('Setting academic year:', attrs['custom:academicYear']);
@@ -593,10 +665,10 @@
 
       clearMessages();
 
-      if (!department || !course || !academicYear || !division || !studentId) { 
-  showError('Please fill in all fields');
-  return;
-}
+      if (!department || !course || !academicYear || !division || !studentId) {
+        showError('Please fill in all fields');
+        return;
+      }
 
       setButtonLoading(submitBtn, true);
 
