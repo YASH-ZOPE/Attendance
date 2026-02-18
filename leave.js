@@ -818,7 +818,7 @@
         const user = await getCurrentUser();
 
         if (!user) {
-          window.location.href = 'index.html';
+          window.location.href = '/';
           return;
         }
         await signIntoFirebase();
@@ -828,7 +828,7 @@
 
       } catch (error) {
         console.error('Auth check failed:', error);
-        window.location.href = 'index.html';
+        window.location.href = '/';
       }
     }
 

@@ -1246,7 +1246,7 @@
         <div class="d-flex align-items-center gap-2">
           <span class="badge bg-light text-dark" id="navSubjectBadge">No Subject</span>
           <span class="badge bg-warning text-dark" id="navMonthBadge">No Month</span>
-          <a href="profile.html" id="profileNavBtn" class="btn btn-outline-light btn-sm ms-1" style="display:none;">
+          <a href="/profile/" id="profileNavBtn" class="btn btn-outline-light btn-sm ms-1" style="display:none;">
             <i class="bi bi-person-circle me-1"></i>Profile
           </a>
           <button onclick="handleLogout()" class="btn btn-outline-light btn-sm ms-1">
@@ -1796,7 +1796,7 @@
       </div>
 
       <section id="camera-section" class="nav-section">
-        <button class="go-btn" onclick="window.location.href='face-recognition.html'">
+        <button class="go-btn" onclick="window.location.href='/face-recognition/'">
           Attendance Section
         </button>
       </section>
@@ -1911,7 +1911,7 @@
       <div class="col-md-3 teacher-only">
         <div class="section-card">
           <li class="nav-item teacher-only">
-            <a class="nav-link" href="leave-applications.html">
+            <a class="nav-link" href="/leave-applications/">
               <i class="bi bi-calendar-x me-1"></i>Leave Applications
             </a>
           </li>
@@ -2410,7 +2410,7 @@
 
         if (!user) {
           console.log('❌ No user - redirecting to login');
-          window.location.href = 'index.html';
+          window.location.href = '/';
           return;
         }
 
@@ -2496,7 +2496,7 @@
 
       } catch (error) {
         console.error('❌ Auth check failed:', error);
-        window.location.href = 'index.html';
+        window.location.href = '/';
       }
     }
 
@@ -2615,7 +2615,7 @@
     async function handleLogout() {
       if (confirm('Are you sure you want to logout?')) {
         await logout();
-        window.location.href = 'index.html';
+        window.location.href = '/';
       }
     }
 

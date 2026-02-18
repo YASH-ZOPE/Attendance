@@ -54,7 +54,7 @@ async init() {
     
     if (!user) {
       // Not logged in - redirect
-      window.location.href = 'index.html';
+      window.location.href = '/';
       return;
     }
     

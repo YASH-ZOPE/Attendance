@@ -562,7 +562,7 @@ async function redirectBasedOnRole() {
     // Admin and teachers skip profile check
     if (role === 'admin' || role === 'teacher') {
       console.log('Admin/Teacher - redirecting to main-system');
-      window.location.href = 'main-system.html';
+      window.location.href = '/main-system/';
       return;
     }
     
@@ -572,19 +572,20 @@ async function redirectBasedOnRole() {
     
     if (!profileComplete) {
       console.log('Profile incomplete, redirecting to profile page');
-      window.location.href = 'profile.html';
+      window.location.href = '/profile/';
       return;
     }
 
     // Profile complete - redirect to face recognition
     console.log('Redirecting to main-system');
-    window.location.href = 'main-system.html';
+    window.location.href = '/main-system/';
     
     console.log('=== REDIRECT DEBUG END ===');
   } catch (error) {
     console.error('Redirect error:', error);
+    
     // If there's an error, redirect to login
-    window.location.href = 'index.html';
+    window.location.href = '/';
   }
 }
 /**
@@ -620,7 +621,7 @@ function forgotPassword(email) {
     async function handleLogout() {
       if (confirm('Are you sure you want to logout?')) {
         await logout();
-        window.location.href = 'index.html';
+        window.location.href = '/';
       }
     }
 

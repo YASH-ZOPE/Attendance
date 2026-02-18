@@ -283,7 +283,7 @@
 
 <body>
   <div class="container">
-  <a href="main-system.html" style="
+  <a href="/main-system/" style="
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -516,7 +516,7 @@
         profileCurrentUser = userPool.getCurrentUser();
 
         if (!profileCurrentUser) {
-          window.location.href = 'index.html';
+          window.location.href = '/';
           return;
         }
 
@@ -526,7 +526,7 @@
         profileCurrentUser.getSession((err, session) => {
           if (err) {
             console.error('Session error:', err);
-            window.location.href = 'index.html';
+            window.location.href = '/';
             return;
           }
 
@@ -658,7 +658,7 @@
       if (profileCurrentUser) {
         profileCurrentUser.signOut();
       }
-      window.location.href = 'index.html';
+      window.location.href = '/';
     });
 
     // ✅ CHANGED: Single auth call + parallel loading
