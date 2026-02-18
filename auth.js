@@ -562,7 +562,7 @@ async function redirectBasedOnRole() {
     // Admin and teachers skip profile check
     if (role === 'admin' || role === 'teacher') {
       console.log('Admin/Teacher - redirecting to main-system');
-      window.location.href = '/main-system/';
+      window.location.href = '/main-system';
       return;
     }
     
@@ -572,13 +572,13 @@ async function redirectBasedOnRole() {
     
     if (!profileComplete) {
       console.log('Profile incomplete, redirecting to profile page');
-      window.location.href = '/profile/';
+      window.location.href = '/profile';
       return;
     }
 
     // Profile complete - redirect to face recognition
     console.log('Redirecting to main-system');
-    window.location.href = '/main-system/';
+    window.location.href = '/main-system';
     
     console.log('=== REDIRECT DEBUG END ===');
   } catch (error) {
