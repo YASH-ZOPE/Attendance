@@ -1466,46 +1466,56 @@
       <i class="bi bi-arrow-left me-2"></i> Back to Setup
     </button>
     <!-- SECTION 4: Final Selection -->
-    <section id="selection-section" class="nav-section teacher-only">
-      <div class="section-card">
-        <h4 class="section-title"><i class="bi bi-check-square me-2"></i>Final Selection</h4>
+<section id="selection-section" class="nav-section">
+  <div class="section-card">
+    <h4 class="section-title" id="selectionSectionTitle">
+      <i class="bi bi-check-square me-2"></i>Final Selection
+    </h4>
 
-        <div class="row g-3">
-          <div class="col-md-4">
-            <label class="form-label fw-bold">Department</label>
-            <select id="finalDepartmentSelect" class="form-select">
-              <option value="">-- Choose Department --</option>
-            </select>
-          </div>
-
-          <div class="col-md-4">
-            <label class="form-label fw-bold">Course</label>
-            <select id="finalCourseSelect" class="form-select" disabled>
-              <option value="">-- Choose Course --</option>
-            </select>
-          </div>
-
-          <div class="col-md-4">
-            <label class="form-label fw-bold">Subject</label>
-            <select id="finalSubjectSelect" class="form-select" disabled>
-              <option value="">-- Choose Subject --</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="alert alert-success mt-3 mb-0">
-          <strong><i class="bi bi-check-circle me-2"></i>Selected Path:</strong>
-          <div class="mt-2">
-            <span class="badge bg-primary me-2" id="selectedPathDept">No Department</span>
-            <i class="bi bi-arrow-right me-2"></i>
-            <span class="badge bg-primary me-2" id="selectedPathCourse">No Course</span>
-            <i class="bi bi-arrow-right me-2"></i>
-            <span class="badge bg-primary" id="selectedPathSubject">No Subject</span>
-          </div>
-        </div>
+    <div class="row g-3">
+      <!-- Department - locked for students -->
+      <div class="col-md-4" id="selectionDeptCol">
+        <label class="form-label fw-bold">Department</label>
+        <select id="finalDepartmentSelect" class="form-select">
+          <option value="">-- Choose Department --</option>
+        </select>
+        <small id="deptLockedNote" class="text-info mt-1" style="display:none;">
+          <i class="bi bi-lock me-1"></i>Locked to your division
+        </small>
       </div>
-    </section>
 
+      <!-- Course - locked for students -->
+      <div class="col-md-4" id="selectionCourseCol">
+        <label class="form-label fw-bold">Course</label>
+        <select id="finalCourseSelect" class="form-select" disabled>
+          <option value="">-- Choose Course --</option>
+        </select>
+        <small id="courseLockedNote" class="text-info mt-1" style="display:none;">
+          <i class="bi bi-lock me-1"></i>Locked to your division
+        </small>
+      </div>
+
+      <!-- Subject - available for both -->
+      <div class="col-md-4">
+        <label class="form-label fw-bold">Subject</label>
+        <select id="finalSubjectSelect" class="form-select" disabled>
+          <option value="">-- Choose Subject --</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="alert alert-success mt-3 mb-0">
+      <strong><i class="bi bi-check-circle me-2"></i>Selected Path:</strong>
+      <div class="mt-2">
+        <span class="badge bg-primary me-2" id="selectedPathDept">No Department</span>
+        <i class="bi bi-arrow-right me-2"></i>
+        <span class="badge bg-primary me-2" id="selectedPathCourse">No Course</span>
+        <i class="bi bi-arrow-right me-2"></i>
+        <span class="badge bg-primary" id="selectedPathSubject">No Subject</span>
+      </div>
+    </div>
+  </div>
+</section>
 
 
     <!-- SECTION 5: Month & Calendar (Modified) -->
@@ -2487,7 +2497,7 @@ async function applyRoleBasedUI() {
       makeTableReadOnly();
       console.log('✅ Student - Read-only mode');
     }
-
+    applySelectionSectionForRole(role);
   } catch (error) {
     console.error('❌ Error applying role-based UI:', error);
   } finally {
@@ -6759,8 +6769,9 @@ if (openLeaveFormBtn) {
         if (cloudData && JSON.stringify(cloudData) !== JSON.stringify(appState.attendanceData)) {
           console.log('📡 Attendance data updated from cloud');
           appState.attendanceData = cloudData;
-          // refreshAttendanceTable();
-          // updateStats();
+          refreshAttendanceTable();
+          updateStats();
+          renderCalendarGrid();
 
           // Show notification
           const notification = document.createElement('div');
@@ -7055,6 +7066,45 @@ function showAdminAttendanceSection() {
       }, 2000); // Check every 2 seconds
     }
 
+    function applySelectionSectionForRole(role) {
+  const title = document.getElementById('selectionSectionTitle');
+  const deptSelect = document.getElementById('finalDepartmentSelect');
+  const courseSelect = document.getElementById('finalCourseSelect');
+  const subjectSelect = document.getElementById('finalSubjectSelect');
+  const deptLockedNote = document.getElementById('deptLockedNote');
+  const courseLockedNote = document.getElementById('courseLockedNote');
+
+  if (role === 'student') {
+    // ✅ Change title
+    title.innerHTML = '<i class="bi bi-book me-2"></i>Select Subject';
+
+    // ✅ Lock dept and course
+    deptSelect.disabled = true;
+    courseSelect.disabled = true;
+
+    // ✅ Show lock indicators
+    deptLockedNote.style.display = 'block';
+    courseLockedNote.style.display = 'block';
+
+    // ✅ Enable subject selection (students CAN pick subject)
+    subjectSelect.disabled = false;
+
+    // ✅ Add visual lock styling
+    deptSelect.style.background = '#f0f0f0';
+    deptSelect.style.cursor = 'not-allowed';
+    courseSelect.style.background = '#f0f0f0';
+    courseSelect.style.cursor = 'not-allowed';
+
+    console.log('✅ Selection section: Student mode - dept/course locked, subject open');
+
+  } else {
+    // Teacher / Admin - keep as-is
+    title.innerHTML = '<i class="bi bi-check-square me-2"></i>Final Selection';
+    deptLockedNote.style.display = 'none';
+    courseLockedNote.style.display = 'none';
+    console.log('✅ Selection section: Teacher/Admin mode - full access');
+  }
+}
     async function handleRefreshRequest() {
       console.log('🔄 Refreshing attendance data...');
 
