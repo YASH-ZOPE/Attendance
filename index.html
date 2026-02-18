@@ -715,12 +715,17 @@
 
     // Page navigation
     function showPage(pageId) {
-      document.querySelectorAll('.page').forEach(page => {
-        page.classList.remove('active');
-      });
-      document.getElementById(pageId).classList.add('active');
-      clearAllErrors();
-    }
+  document.querySelectorAll('.page').forEach(page => {
+    page.classList.remove('active');
+  });
+  document.getElementById(pageId).classList.add('active');
+  clearAllErrors();
+
+  setTimeout(() => {
+    const firstInput = document.getElementById(pageId).querySelector('input');
+    if (firstInput) firstInput.focus();
+  }, 50);
+}
 
     // Error handling
     function showError(elementId, message) {
@@ -1089,6 +1094,7 @@
       
       // Load departments from Firebase
       await initializeFirebaseDropdowns();
+      showPage('page-email');
     });
 
     // Initialize Firebase and load departments

@@ -577,8 +577,8 @@ async function redirectBasedOnRole() {
     }
 
     // Profile complete - redirect to face recognition
-    console.log('Redirecting to face-recognition');
-    window.location.href = 'face-recognition.html';
+    console.log('Redirecting to main-system');
+    window.location.href = 'main-system.html';
     
     console.log('=== REDIRECT DEBUG END ===');
   } catch (error) {
@@ -615,6 +615,14 @@ function forgotPassword(email) {
     });
   });
 }
+
+// Logout function (if you add logout button)
+    async function handleLogout() {
+      if (confirm('Are you sure you want to logout?')) {
+        await logout();
+        window.location.href = 'index.html';
+      }
+    }
 
 /**
  * Confirm password reset with code

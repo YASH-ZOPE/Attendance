@@ -33,15 +33,19 @@
       --danger-color: #F5D6D6;
       --warning-color: #F9E8D9;
     }
-    *::-webkit-scrollbar {
-  display: none;
-}
 
-/* Hide scrollbar for IE, Edge and Firefox */
-* {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
-}
+    *::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Hide scrollbar for IE, Edge and Firefox */
+    * {
+      -ms-overflow-style: none;
+      /* IE and Edge */
+      scrollbar-width: none;
+      /* Firefox */
+    }
+
     body {
       background: #F8F6F4;
       padding-top: 70px;
@@ -460,31 +464,31 @@
     }
 
     /* Admin Two-Section Layout */
-.admin-config-section {
-  display: block;
-}
+    .admin-config-section {
+      display: block;
+    }
 
-.admin-attendance-section {
-  display: block;
-}
+    .admin-attendance-section {
+      display: block;
+    }
 
-.admin-nav-button {
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
-  z-index: 1000;
-  padding: 15px 30px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  border-radius: 50px;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-  transition: all 0.3s ease;
-}
+    .admin-nav-button {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 1000;
+      padding: 15px 30px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: 50px;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      transition: all 0.3s ease;
+    }
 
-.admin-nav-button:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-}
+    .admin-nav-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
 
     /* Fix Academic Year section spacing */
     #month-section .row.g-2 {
@@ -920,7 +924,6 @@
       font-size: 0.6rem;
       opacity: 0.7;
     }
-
   </style>
 </head>
 
@@ -935,15 +938,15 @@
   z-index: 99999;
   overflow: auto;
 ">
-  <!-- Enhanced Navbar Skeleton -->
-  <nav class="navbar navbar-dark bg-primary shadow-sm" style="
+    <!-- Enhanced Navbar Skeleton -->
+    <nav class="navbar navbar-dark bg-primary shadow-sm" style="
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
   ">
-    <div class="container">
-      <span class="navbar-brand" style="opacity: 0.7;">
-        <i class="bi bi-calendar-check me-2"></i>Smart Attendance
-      </span>
-      <div class="skeleton-shimmer" style="
+      <div class="container">
+        <span class="navbar-brand" style="opacity: 0.7;">
+          <i class="bi bi-calendar-check me-2"></i>Smart Attendance
+        </span>
+        <div class="skeleton-shimmer" style="
         width: 200px; 
         height: 30px; 
         background: rgba(255,255,255,0.2); 
@@ -951,85 +954,85 @@
         position: relative;
         overflow: hidden;
       ">
-        <div class="shimmer-wave"></div>
+          <div class="shimmer-wave"></div>
+        </div>
       </div>
-    </div>
-  </nav>
+    </nav>
 
-  <div class="container py-4">
-    
-    <!-- Enhanced Skeleton Cards (Stats Section) -->
-    <div class="row g-3 mb-4">
-      <div class="col-md-3">
-        <div class="card border-0 shadow-sm skeleton-card" style="
+    <div class="container py-4">
+
+      <!-- Enhanced Skeleton Cards (Stats Section) -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-3">
+          <div class="card border-0 shadow-sm skeleton-card" style="
           height: 100px; 
           border-radius: 10px;
           background: white;
           position: relative;
           overflow: hidden;
         ">
-          <div class="shimmer-wave"></div>
-          <div class="card-body">
-            <div class="skeleton-line mb-2" style="width: 60%; height: 16px;"></div>
-            <div class="skeleton-line" style="width: 40%; height: 24px;"></div>
+            <div class="shimmer-wave"></div>
+            <div class="card-body">
+              <div class="skeleton-line mb-2" style="width: 60%; height: 16px;"></div>
+              <div class="skeleton-line" style="width: 40%; height: 24px;"></div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="col-md-3">
-        <div class="card border-0 shadow-sm skeleton-card" style="
+        <div class="col-md-3">
+          <div class="card border-0 shadow-sm skeleton-card" style="
           height: 100px; 
           border-radius: 10px;
           background: white;
           position: relative;
           overflow: hidden;
         ">
-          <div class="shimmer-wave"></div>
-          <div class="card-body">
-            <div class="skeleton-line mb-2" style="width: 60%; height: 16px;"></div>
-            <div class="skeleton-line" style="width: 40%; height: 24px;"></div>
+            <div class="shimmer-wave"></div>
+            <div class="card-body">
+              <div class="skeleton-line mb-2" style="width: 60%; height: 16px;"></div>
+              <div class="skeleton-line" style="width: 40%; height: 24px;"></div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="col-md-3">
-        <div class="card border-0 shadow-sm skeleton-card" style="
+        <div class="col-md-3">
+          <div class="card border-0 shadow-sm skeleton-card" style="
           height: 100px; 
           border-radius: 10px;
           background: white;
           position: relative;
           overflow: hidden;
         ">
-          <div class="shimmer-wave"></div>
-          <div class="card-body">
-            <div class="skeleton-line mb-2" style="width: 60%; height: 16px;"></div>
-            <div class="skeleton-line" style="width: 40%; height: 24px;"></div>
+            <div class="shimmer-wave"></div>
+            <div class="card-body">
+              <div class="skeleton-line mb-2" style="width: 60%; height: 16px;"></div>
+              <div class="skeleton-line" style="width: 40%; height: 24px;"></div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="col-md-3">
-        <div class="card border-0 shadow-sm skeleton-card" style="
+        <div class="col-md-3">
+          <div class="card border-0 shadow-sm skeleton-card" style="
           height: 100px; 
           border-radius: 10px;
           background: white;
           position: relative;
           overflow: hidden;
         ">
-          <div class="shimmer-wave"></div>
-          <div class="card-body">
-            <div class="skeleton-line mb-2" style="width: 60%; height: 16px;"></div>
-            <div class="skeleton-line" style="width: 40%; height: 24px;"></div>
+            <div class="shimmer-wave"></div>
+            <div class="card-body">
+              <div class="skeleton-line mb-2" style="width: 60%; height: 16px;"></div>
+              <div class="skeleton-line" style="width: 40%; height: 24px;"></div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Enhanced Skeleton Table -->
-    <div class="card border-0 shadow-sm" style="border-radius: 10px;">
-      <div class="card-body">
-        <!-- Table Header -->
-        <div class="skeleton-shimmer mb-3" style="
+      <!-- Enhanced Skeleton Table -->
+      <div class="card border-0 shadow-sm" style="border-radius: 10px;">
+        <div class="card-body">
+          <!-- Table Header -->
+          <div class="skeleton-shimmer mb-3" style="
           height: 30px; 
           width: 40%; 
           border-radius: 6px;
@@ -1037,65 +1040,65 @@
           position: relative;
           overflow: hidden;
         ">
-          <div class="shimmer-wave"></div>
-        </div>
+            <div class="shimmer-wave"></div>
+          </div>
 
-        <!-- Table Rows -->
-        <div class="skeleton-shimmer mb-2" style="
+          <!-- Table Rows -->
+          <div class="skeleton-shimmer mb-2" style="
           height: 50px; 
           border-radius: 8px;
           background: #f5f5f5;
           position: relative;
           overflow: hidden;
         ">
-          <div class="shimmer-wave"></div>
-        </div>
+            <div class="shimmer-wave"></div>
+          </div>
 
-        <div class="skeleton-shimmer mb-2" style="
+          <div class="skeleton-shimmer mb-2" style="
           height: 50px; 
           border-radius: 8px;
           background: #f5f5f5;
           position: relative;
           overflow: hidden;
         ">
-          <div class="shimmer-wave"></div>
-        </div>
+            <div class="shimmer-wave"></div>
+          </div>
 
-        <div class="skeleton-shimmer mb-2" style="
+          <div class="skeleton-shimmer mb-2" style="
           height: 50px; 
           border-radius: 8px;
           background: #f5f5f5;
           position: relative;
           overflow: hidden;
         ">
-          <div class="shimmer-wave"></div>
-        </div>
+            <div class="shimmer-wave"></div>
+          </div>
 
-        <div class="skeleton-shimmer mb-2" style="
+          <div class="skeleton-shimmer mb-2" style="
           height: 50px; 
           border-radius: 8px;
           background: #f5f5f5;
           position: relative;
           overflow: hidden;
         ">
-          <div class="shimmer-wave"></div>
-        </div>
+            <div class="shimmer-wave"></div>
+          </div>
 
-        <div class="skeleton-shimmer" style="
+          <div class="skeleton-shimmer" style="
           height: 50px; 
           border-radius: 8px;
           background: #f5f5f5;
           position: relative;
           overflow: hidden;
         ">
-          <div class="shimmer-wave"></div>
+            <div class="shimmer-wave"></div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Enhanced Loading Message -->
-  <div style="
+    <!-- Enhanced Loading Message -->
+    <div style="
     position: fixed;
     bottom: 20px;
     right: 20px;
@@ -1105,88 +1108,102 @@
     box-shadow: 0 8px 20px rgba(0,0,0,0.15);
     animation: fadeInUp 0.5s ease;
   ">
-    <div class="d-flex align-items-center">
-      <div class="spinner-border spinner-border-sm text-primary me-2" style="
+      <div class="d-flex align-items-center">
+        <div class="spinner-border spinner-border-sm text-primary me-2" style="
         width: 20px;
         height: 20px;
       "></div>
-      <span style="color: #6A4A5A; font-weight: 500;">Authenticating...</span>
+        <span style="color: #6A4A5A; font-weight: 500;">Authenticating...</span>
+      </div>
     </div>
   </div>
-</div>
 
-<style>
-/* Shimmer Wave Effect */
-.shimmer-wave {
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.6) 50%,
-    transparent 100%
-  );
-  animation: shimmerMove 2s infinite;
-}
+  <style>
+    /* Shimmer Wave Effect */
+    .shimmer-wave {
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg,
+          transparent 0%,
+          rgba(255, 255, 255, 0.6) 50%,
+          transparent 100%);
+      animation: shimmerMove 2s infinite;
+    }
 
-@keyframes shimmerMove {
-  0% { left: -100%; }
-  100% { left: 100%; }
-}
+    @keyframes shimmerMove {
+      0% {
+        left: -100%;
+      }
 
-/* Skeleton Lines */
-.skeleton-line {
-  background: linear-gradient(
-    90deg,
-    #e0e0e0 25%,
-    #f0f0f0 50%,
-    #e0e0e0 75%
-  );
-  background-size: 200% 100%;
-  border-radius: 4px;
-  animation: skeletonPulse 1.5s ease-in-out infinite;
-}
+      100% {
+        left: 100%;
+      }
+    }
 
-@keyframes skeletonPulse {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
+    /* Skeleton Lines */
+    .skeleton-line {
+      background: linear-gradient(90deg,
+          #e0e0e0 25%,
+          #f0f0f0 50%,
+          #e0e0e0 75%);
+      background-size: 200% 100%;
+      border-radius: 4px;
+      animation: skeletonPulse 1.5s ease-in-out infinite;
+    }
 
-/* Skeleton Card Animation */
-.skeleton-card {
-  animation: fadeIn 0.6s ease;
-}
+    @keyframes skeletonPulse {
+      0% {
+        background-position: 200% 0;
+      }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+      100% {
+        background-position: -200% 0;
+      }
+    }
 
-/* Loading Message Animation */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+    /* Skeleton Card Animation */
+    .skeleton-card {
+      animation: fadeIn 0.6s ease;
+    }
 
-/* Remove old skeleton animation */
-.skeleton-shimmer {
-  background: #e8e8e8;
-}
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
 
-/* Improved spinner */
-.spinner-border {
-  border-width: 2px;
-}
-</style>
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Loading Message Animation */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Remove old skeleton animation */
+    .skeleton-shimmer {
+      background: #e8e8e8;
+    }
+
+    /* Improved spinner */
+    .spinner-border {
+      border-width: 2px;
+    }
+  </style>
   <!-- Navigation Bar (Update links) -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top shadow">
     <div class="container">
@@ -1198,37 +1215,43 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav me-auto">
-  <!-- Admin Config Section Links -->
-  <li class="nav-item teacher-only admin-config-nav">
-    <a class="nav-link" href="#department-section"><i class="bi bi-building me-1"></i>Departments</a>
-  </li>
-  <li class="nav-item teacher-only admin-config-nav">
-    <a class="nav-link" href="#course-section"><i class="bi bi-journal-bookmark me-1"></i>Courses</a>
-  </li>
-  <li class="nav-item teacher-only admin-config-nav">
-    <a class="nav-link" href="#subject-section"><i class="bi bi-book me-1"></i>Subjects</a>
-  </li>
-  
-  <!-- Admin Attendance Section Links -->
-  <li class="nav-item teacher-only admin-attendance-nav">
-    <a class="nav-link" href="#selection-section"><i class="bi bi-check-square me-1"></i>Selection</a>
-  </li>
-  <li class="nav-item admin-attendance-nav">
-    <a class="nav-link" href="#month-section"><i class="bi bi-calendar3 me-1"></i>Academic Year</a>
-  </li>
-  <li class="nav-item teacher-only admin-attendance-nav">
-    <a class="nav-link" href="#upload-section"><i class="bi bi-upload me-1"></i>Upload</a>
-  </li>
-  <li class="nav-item admin-attendance-nav">
-    <a class="nav-link" href="#attendance-section"><i class="bi bi-table me-1"></i>Attendance</a>
-  </li>
-  <li class="nav-item teacher-only admin-attendance-nav">
-    <a class="nav-link" href="#defaulter-section"><i class="bi bi-exclamation-triangle me-1"></i>Defaulters</a>
-  </li>
-</ul>
-        <div class="d-flex align-items-center">
-          <span class="badge bg-light text-dark me-2" id="navSubjectBadge">No Subject</span>
+          <!-- Admin Config Section Links -->
+          <li class="nav-item teacher-only admin-config-nav">
+            <a class="nav-link" href="#department-section"><i class="bi bi-building me-1"></i>Departments</a>
+          </li>
+          <li class="nav-item teacher-only admin-config-nav">
+            <a class="nav-link" href="#course-section"><i class="bi bi-journal-bookmark me-1"></i>Courses</a>
+          </li>
+          <li class="nav-item teacher-only admin-config-nav">
+            <a class="nav-link" href="#subject-section"><i class="bi bi-book me-1"></i>Subjects</a>
+          </li>
+
+          <!-- Admin Attendance Section Links -->
+          <li class="nav-item teacher-only admin-attendance-nav">
+            <a class="nav-link" href="#selection-section"><i class="bi bi-check-square me-1"></i>Selection</a>
+          </li>
+          <li class="nav-item admin-attendance-nav">
+            <a class="nav-link" href="#month-section"><i class="bi bi-calendar3 me-1"></i>Academic Year</a>
+          </li>
+          <li class="nav-item teacher-only admin-attendance-nav">
+            <a class="nav-link" href="#upload-section"><i class="bi bi-upload me-1"></i>Upload</a>
+          </li>
+          <li class="nav-item admin-attendance-nav">
+            <a class="nav-link" href="#attendance-section"><i class="bi bi-table me-1"></i>Attendance</a>
+          </li>
+          <li class="nav-item teacher-only admin-attendance-nav">
+            <a class="nav-link" href="#defaulter-section"><i class="bi bi-exclamation-triangle me-1"></i>Defaulters</a>
+          </li>
+        </ul>
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge bg-light text-dark" id="navSubjectBadge">No Subject</span>
           <span class="badge bg-warning text-dark" id="navMonthBadge">No Month</span>
+          <a href="profile.html" id="profileNavBtn" class="btn btn-outline-light btn-sm ms-1" style="display:none;">
+            <i class="bi bi-person-circle me-1"></i>Profile
+          </a>
+          <button onclick="handleLogout()" class="btn btn-outline-light btn-sm ms-1">
+            <i class="bi bi-box-arrow-right me-1"></i>Logout
+          </button>
         </div>
       </div>
     </div>
@@ -1237,712 +1260,716 @@
 
   <!-- Quick Navigation (Right Side) -->
   <div class="quick-nav d-none d-lg-block">
-  <!-- Admin Config Links -->
-  <a href="#department-section" class="teacher-only admin-config-nav"><i class="bi bi-building"></i></a>
-  <a href="#course-section" class="teacher-only admin-config-nav"><i class="bi bi-journal-bookmark"></i></a>
-  <a href="#subject-section" class="teacher-only admin-config-nav"><i class="bi bi-book"></i></a>
-  
-  <!-- Admin Attendance Links -->
-  <a href="#selection-section" class="teacher-only admin-attendance-nav"><i class="bi bi-check-square"></i></a>
-  <a href="#month-section" class="admin-attendance-nav"><i class="bi bi-calendar3"></i></a>
-  <a href="#upload-section" class="teacher-only admin-attendance-nav"><i class="bi bi-upload"></i></a>
-  <a href="#attendance-section" class="admin-attendance-nav"><i class="bi bi-table"></i></a>
-  <a href="#defaulter-section" class="teacher-only admin-attendance-nav"><i class="bi bi-exclamation-triangle"></i></a>
-</div>
+    <!-- Admin Config Links -->
+    <a href="#department-section" class="teacher-only admin-config-nav"><i class="bi bi-building"></i></a>
+    <a href="#course-section" class="teacher-only admin-config-nav"><i class="bi bi-journal-bookmark"></i></a>
+    <a href="#subject-section" class="teacher-only admin-config-nav"><i class="bi bi-book"></i></a>
+
+    <!-- Admin Attendance Links -->
+    <a href="#selection-section" class="teacher-only admin-attendance-nav"><i class="bi bi-check-square"></i></a>
+    <a href="#month-section" class="admin-attendance-nav"><i class="bi bi-calendar3"></i></a>
+    <a href="#upload-section" class="teacher-only admin-attendance-nav"><i class="bi bi-upload"></i></a>
+    <a href="#attendance-section" class="admin-attendance-nav"><i class="bi bi-table"></i></a>
+    <a href="#defaulter-section" class="teacher-only admin-attendance-nav"><i
+        class="bi bi-exclamation-triangle"></i></a>
+  </div>
 
   <div class="container py-4">
 
 
     <!-- Info Box -->
-<div class="alert info-alert collapsed mb-4 teacher-only" id="infoBox">
-  <h5><i class="bi bi-info-circle me-2"></i>How to Use</h5>
-  <div class="info-content">
-    
-    <!-- Admin Only Section 1 -->
-    <div class="admin-only">
-      <h6 class="mt-3 mb-2 text-primary"><i class="bi bi-shield-lock me-1"></i>Admin - Setup</h6>
-      <ol class="mb-0">
-        <li><strong>Add Department</strong> - Create departments like Computer Science, Mechanical, etc.</li>
-        <li><strong>Add Course</strong> - Select department and add courses like BTech, MTech, etc.</li>
-        <li><strong>Add Subject</strong> - Select course and add subjects for that course</li>
-      </ol>
-    </div>
+    <div class="alert info-alert collapsed mb-4 teacher-only" id="infoBox">
+      <h5><i class="bi bi-info-circle me-2"></i>How to Use</h5>
+      <div class="info-content">
 
-    <!-- Admin & Teacher Section 2 -->
-    <div class="teacher-only-block teacher-only">
-      <h6 class="mt-3 mb-2 text-success"><i class="bi bi-person-check me-1"></i>Admin & Teacher - Operations</h6>
-      <ol class="mb-0">
-        <li><strong>Select All</strong> - Choose Department, Course, Subject</li>
-        <li><strong>Select Month & Academic Year</strong> - Choose academic year (FY/SY/TY), year, division, month</li>
-        <li><strong>Upload CSV</strong> - Upload attendance file</li>
-        <li><strong>Manage Attendance</strong> - View, edit, mark holidays, check defaulters</li>
-      </ol>
-    </div>
-
-    <!-- Student Section (if needed in future) -->
-    <div class="student-only-block" style="display: none;">
-      <h6 class="mt-3 mb-2 text-info"><i class="bi bi-mortarboard me-1"></i>Student</h6>
-      <p class="mb-0 text-muted">View-only access to attendance records</p>
-    </div>
-
-  </div>
-</div>
-
-<!-- ========== ADMIN CONFIG SECTION (Department, Course, Subject, Final Selection) ========== -->
-<div id="adminConfigSection" class="admin-config-section">
-    <!-- SECTION 1: Department Management -->
-    <section id="department-section" class="nav-section admin-only">
-      <div class="section-card">
-        <h4 class="section-title"><i class="bi bi-building me-2"></i>Department Management</h4>
-
+        <!-- Admin Only Section 1 -->
         <div class="admin-only">
-          <div class="row g-3">
-            <div class="col-md-4">
-              <label class="form-label fw-bold">Add New Department</label>
-              <div class="input-group">
-                <input type="text" id="newDepartmentInput" class="form-control" placeholder="Enter department name">
-                <button id="addDepartmentBtn" class="btn btn-primary">
-                  <i class="bi bi-plus-lg me-1"></i>Add
-                </button>
+          <h6 class="mt-3 mb-2 text-primary"><i class="bi bi-shield-lock me-1"></i>Admin - Setup</h6>
+          <ol class="mb-0">
+            <li><strong>Add Department</strong> - Create departments like Computer Science, Mechanical, etc.</li>
+            <li><strong>Add Course</strong> - Select department and add courses like BTech, MTech, etc.</li>
+            <li><strong>Add Subject</strong> - Select course and add subjects for that course</li>
+          </ol>
+        </div>
+
+        <!-- Admin & Teacher Section 2 -->
+        <div class="teacher-only-block teacher-only">
+          <h6 class="mt-3 mb-2 text-success"><i class="bi bi-person-check me-1"></i>Admin & Teacher - Operations</h6>
+          <ol class="mb-0">
+            <li><strong>Select All</strong> - Choose Department, Course, Subject</li>
+            <li><strong>Select Month & Academic Year</strong> - Choose academic year (FY/SY/TY), year, division, month
+            </li>
+            <li><strong>Upload CSV</strong> - Upload attendance file</li>
+            <li><strong>Manage Attendance</strong> - View, edit, mark holidays, check defaulters</li>
+          </ol>
+        </div>
+
+        <!-- Student Section (if needed in future) -->
+        <div class="student-only-block" style="display: none;">
+          <h6 class="mt-3 mb-2 text-info"><i class="bi bi-mortarboard me-1"></i>Student</h6>
+          <p class="mb-0 text-muted">View-only access to attendance records</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ========== ADMIN CONFIG SECTION (Department, Course, Subject, Final Selection) ========== -->
+    <div id="adminConfigSection" class="admin-config-section">
+      <!-- SECTION 1: Department Management -->
+      <section id="department-section" class="nav-section admin-only">
+        <div class="section-card">
+          <h4 class="section-title"><i class="bi bi-building me-2"></i>Department Management</h4>
+
+          <div class="admin-only">
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label fw-bold">Add New Department</label>
+                <div class="input-group">
+                  <input type="text" id="newDepartmentInput" class="form-control" placeholder="Enter department name">
+                  <button id="addDepartmentBtn" class="btn btn-primary">
+                    <i class="bi bi-plus-lg me-1"></i>Add
+                  </button>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label fw-bold">Select Department</label>
+                <select id="departmentSelect" class="form-select">
+                  <option value="">-- Choose Department --</option>
+                </select>
+              </div>
+
+              <div class="col-md-4 admin-only">
+                <label class="form-label fw-bold">Actions</label>
+                <div>
+                  <button id="deleteDepartmentBtn" class="btn btn-outline-danger">
+                    <i class="bi bi-trash me-1"></i>Delete Selected
+                  </button>
+                </div>
               </div>
             </div>
 
-            <div class="col-md-4">
-              <label class="form-label fw-bold">Select Department</label>
-              <select id="departmentSelect" class="form-select">
+            <div class="mt-3">
+              <label class="form-label fw-bold">Available Departments:</label>
+              <div id="departmentTags">
+                <span class="text-muted">No departments added yet. Add your first department above.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="alert alert-info mt-3 mb-0" id="departmentStatus">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>Current Department:</strong> <span id="currentDepartmentDisplay">None selected</span>
+          </div>
+        </div>
+      </section>
+
+
+
+      <!-- SECTION 2: Course Management -->
+      <section id="course-section" class="nav-section admin-only">
+        <div class="section-card">
+          <h4 class="section-title"><i class="bi bi-journal-bookmark me-2"></i>Course Management</h4>
+
+          <div class="alert alert-warning mb-3">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            <strong>Note:</strong> Please select a department first before adding courses.
+          </div>
+
+          <div class="admin-only">
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label fw-bold">Add New Course</label>
+                <div class="input-group">
+                  <input type="text" id="newCourseInput" class="form-control" placeholder="Enter course name" disabled>
+                  <button id="addCourseBtn" class="btn btn-primary" disabled>
+                    <i class="bi bi-plus-lg me-1"></i>Add
+                  </button>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label fw-bold">Select Course</label>
+                <select id="courseSelect" class="form-select" disabled>
+                  <option value="">-- Choose Course --</option>
+                </select>
+              </div>
+
+              <div class="col-md-4 admin-only">
+                <label class="form-label fw-bold">Actions</label>
+                <div>
+                  <button id="deleteCourseBtn" class="btn btn-outline-danger">
+                    <i class="bi bi-trash me-1"></i>Delete Selected
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-3">
+              <label class="form-label fw-bold">Available Courses for <span
+                  id="coursesDepartmentName">--</span>:</label>
+              <div id="courseTags">
+                <span class="text-muted">Select a department first.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="alert alert-info mt-3 mb-0" id="courseStatus">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>Current Course:</strong> <span id="currentCourseDisplay">None selected</span>
+          </div>
+        </div>
+      </section>
+
+
+
+      <!-- SECTION 3: Subject Management -->
+      <section id="subject-section" class="nav-section admin-only">
+        <div class="section-card">
+          <h4 class="section-title"><i class="bi bi-book me-2"></i>Subject Management</h4>
+
+          <div class="alert alert-warning mb-3">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            <strong>Note:</strong> Please select a course first before adding subjects.
+          </div>
+
+          <div class="admin-only">
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label fw-bold">Add New Subject</label>
+                <div class="input-group">
+                  <input type="text" id="newSubjectInput" class="form-control" placeholder="Enter subject name"
+                    disabled>
+                  <button id="addSubjectBtn" class="btn btn-primary" disabled>
+                    <i class="bi bi-plus-lg me-1"></i>Add
+                  </button>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label fw-bold">Select Subject</label>
+                <select id="subjectSelect" class="form-select" disabled>
+                  <option value="">-- Choose Subject --</option>
+                </select>
+              </div>
+
+              <div class="col-md-4 admin-only">
+                <label class="form-label fw-bold">Actions</label>
+                <div>
+                  <button id="deleteSubjectBtn" class="btn btn-outline-danger">
+                    <i class="bi bi-trash me-1"></i>Delete Selected
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-3">
+              <label class="form-label fw-bold">Available Subjects for <span id="subjectsCourseName">--</span>:</label>
+              <div id="subjectTags">
+                <span class="text-muted">Select a course first.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="alert alert-info mt-3 mb-0" id="subjectStatus">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>Current Subject:</strong> <span id="currentSubjectDisplay">None selected</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Admin Navigation Button - Continue to Attendance -->
+      <button id="adminContinueBtn" class="btn btn-outline-secondary mb-4 admin-only" style="display: none;">
+        Continue to Attendance Management <i class="bi bi-arrow-right ms-2"></i>
+      </button>
+    </div>
+    <!-- End of Admin Config Section -->
+
+    <!-- ========== ADMIN ATTENDANCE SECTION (Everything else) ========== -->
+    <div id="adminAttendanceSection" class="admin-attendance-section">
+
+      <!-- Back Button for Admins -->
+      <button id="adminBackBtn" class="btn btn-outline-secondary mb-4 admin-only" style="display: none;">
+        <i class="bi bi-arrow-left me-2"></i> Back to Setup
+      </button>
+      <!-- SECTION 4: Final Selection -->
+      <section id="selection-section" class="nav-section">
+        <div class="section-card">
+          <h4 class="section-title" id="selectionSectionTitle">
+            <i class="bi bi-check-square me-2"></i>Final Selection
+          </h4>
+
+          <div class="row g-3">
+            <!-- Department - locked for students -->
+            <div class="col-md-4" id="selectionDeptCol">
+              <label class="form-label fw-bold">Department</label>
+              <select id="finalDepartmentSelect" class="form-select">
                 <option value="">-- Choose Department --</option>
               </select>
+              <small id="deptLockedNote" class="text-info mt-1" style="display:none;">
+                <i class="bi bi-lock me-1"></i>Locked to your division
+              </small>
             </div>
 
-            <div class="col-md-4 admin-only">
-              <label class="form-label fw-bold">Actions</label>
-              <div>
-                <button id="deleteDepartmentBtn" class="btn btn-outline-danger">
-                  <i class="bi bi-trash me-1"></i>Delete Selected
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-3">
-            <label class="form-label fw-bold">Available Departments:</label>
-            <div id="departmentTags">
-              <span class="text-muted">No departments added yet. Add your first department above.</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="alert alert-info mt-3 mb-0" id="departmentStatus">
-          <i class="bi bi-info-circle me-2"></i>
-          <strong>Current Department:</strong> <span id="currentDepartmentDisplay">None selected</span>
-        </div>
-      </div>
-    </section>
-
-
-
-    <!-- SECTION 2: Course Management -->
-    <section id="course-section" class="nav-section admin-only">
-      <div class="section-card">
-        <h4 class="section-title"><i class="bi bi-journal-bookmark me-2"></i>Course Management</h4>
-
-        <div class="alert alert-warning mb-3">
-          <i class="bi bi-exclamation-triangle me-2"></i>
-          <strong>Note:</strong> Please select a department first before adding courses.
-        </div>
-
-        <div class="admin-only">
-          <div class="row g-3">
-            <div class="col-md-4">
-              <label class="form-label fw-bold">Add New Course</label>
-              <div class="input-group">
-                <input type="text" id="newCourseInput" class="form-control" placeholder="Enter course name" disabled>
-                <button id="addCourseBtn" class="btn btn-primary" disabled>
-                  <i class="bi bi-plus-lg me-1"></i>Add
-                </button>
-              </div>
-            </div>
-
-            <div class="col-md-4">
-              <label class="form-label fw-bold">Select Course</label>
-              <select id="courseSelect" class="form-select" disabled>
+            <!-- Course - locked for students -->
+            <div class="col-md-4" id="selectionCourseCol">
+              <label class="form-label fw-bold">Course</label>
+              <select id="finalCourseSelect" class="form-select" disabled>
                 <option value="">-- Choose Course --</option>
               </select>
+              <small id="courseLockedNote" class="text-info mt-1" style="display:none;">
+                <i class="bi bi-lock me-1"></i>Locked to your division
+              </small>
             </div>
 
-            <div class="col-md-4 admin-only">
-              <label class="form-label fw-bold">Actions</label>
-              <div>
-                <button id="deleteCourseBtn" class="btn btn-outline-danger">
-                  <i class="bi bi-trash me-1"></i>Delete Selected
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-3">
-            <label class="form-label fw-bold">Available Courses for <span id="coursesDepartmentName">--</span>:</label>
-            <div id="courseTags">
-              <span class="text-muted">Select a department first.</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="alert alert-info mt-3 mb-0" id="courseStatus">
-          <i class="bi bi-info-circle me-2"></i>
-          <strong>Current Course:</strong> <span id="currentCourseDisplay">None selected</span>
-        </div>
-      </div>
-    </section>
-
-
-
-    <!-- SECTION 3: Subject Management -->
-    <section id="subject-section" class="nav-section admin-only">
-      <div class="section-card">
-        <h4 class="section-title"><i class="bi bi-book me-2"></i>Subject Management</h4>
-
-        <div class="alert alert-warning mb-3">
-          <i class="bi bi-exclamation-triangle me-2"></i>
-          <strong>Note:</strong> Please select a course first before adding subjects.
-        </div>
-
-        <div class="admin-only">
-          <div class="row g-3">
+            <!-- Subject - available for both -->
             <div class="col-md-4">
-              <label class="form-label fw-bold">Add New Subject</label>
-              <div class="input-group">
-                <input type="text" id="newSubjectInput" class="form-control" placeholder="Enter subject name" disabled>
-                <button id="addSubjectBtn" class="btn btn-primary" disabled>
-                  <i class="bi bi-plus-lg me-1"></i>Add
-                </button>
-              </div>
-            </div>
-
-            <div class="col-md-4">
-              <label class="form-label fw-bold">Select Subject</label>
-              <select id="subjectSelect" class="form-select" disabled>
+              <label class="form-label fw-bold">Subject</label>
+              <select id="finalSubjectSelect" class="form-select" disabled>
                 <option value="">-- Choose Subject --</option>
               </select>
             </div>
+          </div>
 
-            <div class="col-md-4 admin-only">
-              <label class="form-label fw-bold">Actions</label>
-              <div>
-                <button id="deleteSubjectBtn" class="btn btn-outline-danger">
-                  <i class="bi bi-trash me-1"></i>Delete Selected
+          <div class="alert alert-success mt-3 mb-0">
+            <strong><i class="bi bi-check-circle me-2"></i>Selected Path:</strong>
+            <div class="mt-2">
+              <span class="badge bg-primary me-2" id="selectedPathDept">No Department</span>
+              <i class="bi bi-arrow-right me-2"></i>
+              <span class="badge bg-primary me-2" id="selectedPathCourse">No Course</span>
+              <i class="bi bi-arrow-right me-2"></i>
+              <span class="badge bg-primary" id="selectedPathSubject">No Subject</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- SECTION 5: Month & Calendar (Modified) -->
+      <section id="month-section" class="nav-section">
+        <div class="section-card">
+          <h4 class="section-title"><i class="bi bi-calendar3 me-2"></i>Academic Year & Calendar</h4>
+
+          <div>
+            <div class="row g-2">
+              <div class="col-2 teacher-only">
+                <label class="form-label fw-bold small">Academic Year</label>
+                <select id="academicYearLevelSelect" class="form-select form-select-sm">
+                  <option value="">-- Select --</option>
+                  <option value="FY">FY</option>
+                  <option value="SY">SY</option>
+                  <option value="TY">TY</option>
+                </select>
+              </div>
+
+
+              <div class="col-2 teacher-only">
+                <label class="form-label fw-bold small">Division</label>
+                <select id="divisionSelect" class="form-select form-select-sm">
+                  <option value="">-- Select --</option>
+                  <option value="Division A">Div A</option>
+                  <option value="Division B">Div B</option>
+                  <option value="Division C">Div C</option>
+                </select>
+              </div>
+
+              <div class="col-2">
+                <label class="form-label fw-bold small">Month</label>
+                <select id="monthSelect" class="form-select form-select-sm">
+                  <option value="0">Jan</option>
+                  <option value="1">Feb</option>
+                  <option value="2">Mar</option>
+                  <option value="3">Apr</option>
+                  <option value="4">May</option>
+                  <option value="5">Jun</option>
+                  <option value="6">Jul</option>
+                  <option value="7">Aug</option>
+                  <option value="8">Sep</option>
+                  <option value="9">Oct</option>
+                  <option value="10">Nov</option>
+                  <option value="11">Dec</option>
+                </select>
+              </div>
+
+              <div class="col-2">
+                <label class="form-label fw-bold small">Year Number</label>
+                <select id="yearSelect" class="form-select form-select-sm"></select>
+              </div>
+
+              <div class="col-2">
+                <label class="form-label fw-bold small">&nbsp;</label>
+                <button id="applyMonthBtn" class="btn btn-success btn-sm w-100">
+                  <i class="bi bi-check-lg me-1"></i>Apply
                 </button>
               </div>
             </div>
           </div>
+
+          <div class="row mt-2">
+            <div class="col-12">
+              <div class="alert alert-success mb-0 py-2">
+                <strong>Selected:</strong>
+                <span id="currentAcademicDisplay">None</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mt-2">
+            <div class="col-12">
+              <div class="alert alert-info mb-0 py-2">
+                <strong>Month:</strong>
+                <span id="currentMonthDisplay">None</span>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- Calendar Grid (Same as before) -->
+          <div id="calendarContainer" class="mt-4" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="mb-0"><i class="bi bi-calendar-week me-2"></i>Select Day</h5>
+              <div class="teacher-only">
+                <button id="toggleHolidayBtn" class="btn btn-outline-danger btn-sm">
+                  <i class="bi bi-sun me-1"></i>Toggle Holiday
+                </button>
+                <button id="clearHolidaysBtn" class="btn btn-outline-secondary btn-sm ms-2">
+                  <i class="bi bi-x-circle me-1"></i>Clear All Holidays
+                </button>
+              </div>
+            </div>
+
+            <div class="day-grid mb-2">
+              <div class="day-header">Sun</div>
+              <div class="day-header">Mon</div>
+              <div class="day-header">Tue</div>
+              <div class="day-header">Wed</div>
+              <div class="day-header">Thu</div>
+              <div class="day-header">Fri</div>
+              <div class="day-header">Sat</div>
+            </div>
+            <div id="dayGrid" class="day-grid"></div>
+
+            <div class="row mt-3">
+              <div class="col-md-6">
+                <div class="alert alert-warning mb-0">
+                  <strong><i class="bi bi-sun me-1"></i>Holidays:</strong>
+                  <span id="holidayList">None</span>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="alert alert-info mb-0">
+                  <strong><i class="bi bi-calendar-check me-1"></i>Current Day:</strong>
+                  <span id="currentDayDisplay">None</span>
+                  <span id="holidayIndicator" class="badge bg-danger ms-2" style="display: none;">HOLIDAY</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- Statistics Section -->
+      <section id="stats-section" class="nav-section">
+        <div class="row g-3 mb-4">
+          <div class="col-md-3 teacher-only">
+            <div class="stats-card">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 class="mb-1">Total Students</h6>
+                  <h3 class="mb-0" id="statsTotalStudents">0</h3>
+                </div>
+                <i class="bi bi-people fs-1 opacity-50"></i>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 teacher-only">
+            <div class="stats-card success">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 class="mb-1">Present Today</h6>
+                  <h3 class="mb-0" id="statsPresentToday">0</h3>
+                </div>
+                <i class="bi bi-check-circle fs-1 opacity-50"></i>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 teacher-only">
+            <div class="stats-card danger">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 class="mb-1">Absent Today</h6>
+                  <h3 class="mb-0" id="statsAbsentToday">0</h3>
+                </div>
+                <i class="bi bi-x-circle fs-1 opacity-50"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-3 teacher-only">
+            <div class="stats-card warning">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 class="mb-1">Working Days</h6>
+                  <h3 class="mb-0" id="statsWorkingDays">0</h3>
+                </div>
+                <i class="bi bi-calendar-date fs-1 opacity-50"></i>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Upload Section -->
+      <section id="upload-section" class="nav-section teacher-only">
+        <div class="section-card">
+          <h4 class="section-title"><i class="bi bi-upload me-2"></i>Upload Attendance</h4>
+
+          <div class="row g-3">
+            <div class="col-md-8">
+              <div class="file-drop" id="fileDrop">
+                <i class="bi bi-cloud-upload fs-1 text-primary"></i>
+                <h5 class="mt-2">Drop CSV file here</h5>
+                <p class="text-muted mb-2">or click to browse</p>
+                <input type="file" id="fileInput" accept=".csv" style="display: none;">
+                <button class="btn btn-primary" id="browseBtn">
+                  <i class="bi bi-folder2-open me-1"></i>Browse Files
+                </button>
+              </div>
+              <div id="fileInfo" class="alert alert-info mt-2" style="display: none;"></div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="card h-100">
+                <div class="card-header bg-light">
+                  <strong><i class="bi bi-file-earmark-text me-1"></i>CSV Format</strong>
+                </div>
+                <div class="card-body">
+                  <small>
+                    <strong>Columns:</strong> ID, Name, Day1, Day2...Day31<br><br>
+                    <strong>Example:</strong><br>
+                    <code>1, YASH, Present, Absent, Present...</code><br>
+                    <code>2, SHAM, Absent, Present, Present...</code>
+                  </small>
+                </div>
+                <div class="card-footer">
+                  <button id="downloadTemplateBtn" class="btn btn-outline-info btn-sm w-100">
+                    <i class="bi bi-download me-1"></i>Download Template
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
 
           <div class="mt-3">
-            <label class="form-label fw-bold">Available Subjects for <span id="subjectsCourseName">--</span>:</label>
-            <div id="subjectTags">
-              <span class="text-muted">Select a course first.</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="alert alert-info mt-3 mb-0" id="subjectStatus">
-          <i class="bi bi-info-circle me-2"></i>
-          <strong>Current Subject:</strong> <span id="currentSubjectDisplay">None selected</span>
-        </div>
-      </div>
-    </section>
-
-<!-- Admin Navigation Button - Continue to Attendance -->
-    <button id="adminContinueBtn" class="btn btn-outline-secondary mb-4 admin-only" style="display: none;">
-      Continue to Attendance Management <i class="bi bi-arrow-right ms-2"></i>
-    </button>
-  </div>
-  <!-- End of Admin Config Section -->
-
-  <!-- ========== ADMIN ATTENDANCE SECTION (Everything else) ========== -->
-  <div id="adminAttendanceSection" class="admin-attendance-section">
-
-    <!-- Back Button for Admins -->
-    <button id="adminBackBtn" class="btn btn-outline-secondary mb-4 admin-only" style="display: none;">
-      <i class="bi bi-arrow-left me-2"></i> Back to Setup
-    </button>
-    <!-- SECTION 4: Final Selection -->
-<section id="selection-section" class="nav-section">
-  <div class="section-card">
-    <h4 class="section-title" id="selectionSectionTitle">
-      <i class="bi bi-check-square me-2"></i>Final Selection
-    </h4>
-
-    <div class="row g-3">
-      <!-- Department - locked for students -->
-      <div class="col-md-4" id="selectionDeptCol">
-        <label class="form-label fw-bold">Department</label>
-        <select id="finalDepartmentSelect" class="form-select">
-          <option value="">-- Choose Department --</option>
-        </select>
-        <small id="deptLockedNote" class="text-info mt-1" style="display:none;">
-          <i class="bi bi-lock me-1"></i>Locked to your division
-        </small>
-      </div>
-
-      <!-- Course - locked for students -->
-      <div class="col-md-4" id="selectionCourseCol">
-        <label class="form-label fw-bold">Course</label>
-        <select id="finalCourseSelect" class="form-select" disabled>
-          <option value="">-- Choose Course --</option>
-        </select>
-        <small id="courseLockedNote" class="text-info mt-1" style="display:none;">
-          <i class="bi bi-lock me-1"></i>Locked to your division
-        </small>
-      </div>
-
-      <!-- Subject - available for both -->
-      <div class="col-md-4">
-        <label class="form-label fw-bold">Subject</label>
-        <select id="finalSubjectSelect" class="form-select" disabled>
-          <option value="">-- Choose Subject --</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="alert alert-success mt-3 mb-0">
-      <strong><i class="bi bi-check-circle me-2"></i>Selected Path:</strong>
-      <div class="mt-2">
-        <span class="badge bg-primary me-2" id="selectedPathDept">No Department</span>
-        <i class="bi bi-arrow-right me-2"></i>
-        <span class="badge bg-primary me-2" id="selectedPathCourse">No Course</span>
-        <i class="bi bi-arrow-right me-2"></i>
-        <span class="badge bg-primary" id="selectedPathSubject">No Subject</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-
-    <!-- SECTION 5: Month & Calendar (Modified) -->
-    <section id="month-section" class="nav-section">
-      <div class="section-card">
-        <h4 class="section-title"><i class="bi bi-calendar3 me-2"></i>Academic Year & Calendar</h4>
-
-        <div>
-          <div class="row g-2">
-            <div class="col-2 teacher-only">
-              <label class="form-label fw-bold small">Academic Year</label>
-              <select id="academicYearLevelSelect" class="form-select form-select-sm">
-                <option value="">-- Select --</option>
-                <option value="FY">FY</option>
-                <option value="SY">SY</option>
-                <option value="TY">TY</option>
-              </select>
-            </div>
-
-
-            <div class="col-2 teacher-only">
-              <label class="form-label fw-bold small">Division</label>
-              <select id="divisionSelect" class="form-select form-select-sm">
-                <option value="">-- Select --</option>
-                <option value="Division A">Div A</option>
-                <option value="Division B">Div B</option>
-                <option value="Division C">Div C</option>
-              </select>
-            </div>
-
-            <div class="col-2">
-              <label class="form-label fw-bold small">Month</label>
-              <select id="monthSelect" class="form-select form-select-sm">
-                <option value="0">Jan</option>
-                <option value="1">Feb</option>
-                <option value="2">Mar</option>
-                <option value="3">Apr</option>
-                <option value="4">May</option>
-                <option value="5">Jun</option>
-                <option value="6">Jul</option>
-                <option value="7">Aug</option>
-                <option value="8">Sep</option>
-                <option value="9">Oct</option>
-                <option value="10">Nov</option>
-                <option value="11">Dec</option>
-              </select>
-            </div>
-
-            <div class="col-2">
-              <label class="form-label fw-bold small">Year Number</label>
-              <select id="yearSelect" class="form-select form-select-sm"></select>
-            </div>
-
-            <div class="col-2">
-              <label class="form-label fw-bold small">&nbsp;</label>
-              <button id="applyMonthBtn" class="btn btn-success btn-sm w-100">
-                <i class="bi bi-check-lg me-1"></i>Apply
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="row mt-2">
-          <div class="col-12">
-            <div class="alert alert-success mb-0 py-2">
-              <strong>Selected:</strong>
-              <span id="currentAcademicDisplay">None</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="row mt-2">
-          <div class="col-12">
-            <div class="alert alert-info mb-0 py-2">
-              <strong>Month:</strong>
-              <span id="currentMonthDisplay">None</span>
-            </div>
-          </div>
-        </div>
-
-
-        <!-- Calendar Grid (Same as before) -->
-        <div id="calendarContainer" class="mt-4" style="display: none;">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="mb-0"><i class="bi bi-calendar-week me-2"></i>Select Day</h5>
-            <div class="teacher-only">
-              <button id="toggleHolidayBtn" class="btn btn-outline-danger btn-sm">
-                <i class="bi bi-sun me-1"></i>Toggle Holiday
-              </button>
-              <button id="clearHolidaysBtn" class="btn btn-outline-secondary btn-sm ms-2">
-                <i class="bi bi-x-circle me-1"></i>Clear All Holidays
-              </button>
-            </div>
-          </div>
-
-          <div class="day-grid mb-2">
-            <div class="day-header">Sun</div>
-            <div class="day-header">Mon</div>
-            <div class="day-header">Tue</div>
-            <div class="day-header">Wed</div>
-            <div class="day-header">Thu</div>
-            <div class="day-header">Fri</div>
-            <div class="day-header">Sat</div>
-          </div>
-          <div id="dayGrid" class="day-grid"></div>
-
-          <div class="row mt-3">
-            <div class="col-md-6">
-              <div class="alert alert-warning mb-0">
-                <strong><i class="bi bi-sun me-1"></i>Holidays:</strong>
-                <span id="holidayList">None</span>
+            <div class="row g-2">
+              <div class="col-12 col-md-3">
+                <button id="downloadReportBtn" class="btn btn-outline-success btn-action w-100 teacher-only-inline">
+                  <i class="bi bi-file-earmark-arrow-down me-1"></i>Download Report
+                </button>
               </div>
-            </div>
-            <div class="col-md-6">
-              <div class="alert alert-info mb-0">
-                <strong><i class="bi bi-calendar-check me-1"></i>Current Day:</strong>
-                <span id="currentDayDisplay">None</span>
-                <span id="holidayIndicator" class="badge bg-danger ms-2" style="display: none;">HOLIDAY</span>
+              <div class="col-12 col-md-3">
+                <button id="clearAllBtn" class="btn btn-outline-danger btn-action w-100 admin-only-inline">
+                  <i class="bi bi-trash me-1"></i>Clear All Data
+                </button>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-
-    <!-- Statistics Section -->
-    <section id="stats-section" class="nav-section">
-      <div class="row g-3 mb-4">
-        <div class="col-md-3 teacher-only">
-          <div class="stats-card">
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <h6 class="mb-1">Total Students</h6>
-                <h3 class="mb-0" id="statsTotalStudents">0</h3>
+              <div class="col-12 col-md-3">
+                <button id="debugSaveBtn" class="btn btn-outline-warning btn-action w-100 admin-only-inline">
+                  <i class="bi bi-bug me-1"></i>DEBUG: Check Saved Data
+                </button>
               </div>
-              <i class="bi bi-people fs-1 opacity-50"></i>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-3 teacher-only">
-          <div class="stats-card success">
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <h6 class="mb-1">Present Today</h6>
-                <h3 class="mb-0" id="statsPresentToday">0</h3>
-              </div>
-              <i class="bi bi-check-circle fs-1 opacity-50"></i>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-3 teacher-only">
-          <div class="stats-card danger">
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <h6 class="mb-1">Absent Today</h6>
-                <h3 class="mb-0" id="statsAbsentToday">0</h3>
-              </div>
-              <i class="bi bi-x-circle fs-1 opacity-50"></i>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-3 teacher-only">
-          <div class="stats-card warning">
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <h6 class="mb-1">Working Days</h6>
-                <h3 class="mb-0" id="statsWorkingDays">0</h3>
-              </div>
-              <i class="bi bi-calendar-date fs-1 opacity-50"></i>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- Upload Section -->
-    <section id="upload-section" class="nav-section teacher-only">
-      <div class="section-card">
-        <h4 class="section-title"><i class="bi bi-upload me-2"></i>Upload Attendance</h4>
-
-        <div class="row g-3">
-          <div class="col-md-8">
-            <div class="file-drop" id="fileDrop">
-              <i class="bi bi-cloud-upload fs-1 text-primary"></i>
-              <h5 class="mt-2">Drop CSV file here</h5>
-              <p class="text-muted mb-2">or click to browse</p>
-              <input type="file" id="fileInput" accept=".csv" style="display: none;">
-              <button class="btn btn-primary" id="browseBtn">
-                <i class="bi bi-folder2-open me-1"></i>Browse Files
-              </button>
-            </div>
-            <div id="fileInfo" class="alert alert-info mt-2" style="display: none;"></div>
-          </div>
-
-          <div class="col-md-4">
-            <div class="card h-100">
-              <div class="card-header bg-light">
-                <strong><i class="bi bi-file-earmark-text me-1"></i>CSV Format</strong>
-              </div>
-              <div class="card-body">
-                <small>
-                  <strong>Columns:</strong> ID, Name, Day1, Day2...Day31<br><br>
-                  <strong>Example:</strong><br>
-                  <code>1, YASH, Present, Absent, Present...</code><br>
-                  <code>2, SHAM, Absent, Present, Present...</code>
-                </small>
-              </div>
-              <div class="card-footer">
-                <button id="downloadTemplateBtn" class="btn btn-outline-info btn-sm w-100">
-                  <i class="bi bi-download me-1"></i>Download Template
+              <div class="col-12 col-md-3">
+                <button id="generateQRBtn" class="btn btn-outline-info btn-action w-100 teacher-only-inline">
+                  <i class="bi bi-qr-code me-1"></i>Generate QR
                 </button>
               </div>
             </div>
           </div>
-        </div>
+      </section>
 
+      <div class="col-md-3" style="display: none;">
+        <button class="btn btn-primary w-100" id="studentOpenLeaveFormBtn">
+          <i class="bi bi-plus-circle me-1"></i>Submit New Leave
+        </button>
+      </div>
 
-        <div class="mt-3">
-  <div class="row g-2">
-    <div class="col-12 col-md-3">
-      <button id="downloadReportBtn" class="btn btn-outline-success btn-action w-100 teacher-only-inline">
-        <i class="bi bi-file-earmark-arrow-down me-1"></i>Download Report
-      </button>
-    </div>
-    <div class="col-12 col-md-3">
-      <button id="clearAllBtn" class="btn btn-outline-danger btn-action w-100 admin-only-inline">
-        <i class="bi bi-trash me-1"></i>Clear All Data
-      </button>
-    </div>
-    <div class="col-12 col-md-3">
-      <button id="debugSaveBtn" class="btn btn-outline-warning btn-action w-100 admin-only-inline">
-        <i class="bi bi-bug me-1"></i>DEBUG: Check Saved Data
-      </button>
-    </div>
-    <div class="col-12 col-md-3">
-      <button id="generateQRBtn" class="btn btn-outline-info btn-action w-100 teacher-only-inline">
-        <i class="bi bi-qr-code me-1"></i>Generate QR
-      </button>
-    </div>
-  </div>
-</div>
-    </section>
+      <section id="camera-section" class="nav-section">
+        <button class="go-btn" onclick="window.location.href='face-recognition.html'">
+          Attendance Section
+        </button>
+      </section>
 
-    <div class="col-md-3" style="display: none;">
-      <button class="btn btn-primary w-100" id="studentOpenLeaveFormBtn">
-        <i class="bi bi-plus-circle me-1"></i>Submit New Leave
-      </button>
-    </div>
+      <!-- Attendance Section -->
+      <section id="attendance-section" class="nav-section teacher-only">
+        <div class="section-card">
+          <h4 class="section-title"><i class="bi bi-table me-2"></i>Attendance Table</h4>
 
-    <section id="camera-section" class="nav-section">
-      <button class="go-btn" onclick="window.location.href='face-recognition.html'">
-        Attendance Section
-      </button>
-    </section>
-
-    <!-- Attendance Section -->
-    <section id="attendance-section" class="nav-section teacher-only">
-      <div class="section-card">
-        <h4 class="section-title"><i class="bi bi-table me-2"></i>Attendance Table</h4>
-
-        <!-- Day Navigation -->
-        <div class="row g-3 mb-3">
-          <div class="col-md-4">
-            <label class="form-label fw-bold">Select Day</label>
-            <select id="dateSelect" class="form-select" disabled>
-              <option value="">-- Select month first --</option>
-            </select>
-          </div>
-          <div class="col-md-4">
-            <label class="form-label fw-bold">Navigation</label>
-            <div class="btn-group w-100">
-              <button id="prevDayBtn" class="btn btn-outline-primary" disabled>
-                <i class="bi bi-chevron-left"></i> Previous
-              </button>
-              <button id="nextDayBtn" class="btn btn-outline-primary" disabled>
-                Next <i class="bi bi-chevron-right"></i>
-              </button>
+          <!-- Day Navigation -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-4">
+              <label class="form-label fw-bold">Select Day</label>
+              <select id="dateSelect" class="form-select" disabled>
+                <option value="">-- Select month first --</option>
+              </select>
             </div>
-          </div>
-          <div class="col-md-4"> <!-- ✅ REMOVED teacher-only from div -->
-            <label class="form-label fw-bold teacher-only">Quick Actions</label> <!-- ✅ MOVED to label -->
-            <div class="btn-group w-100 teacher-only"> <!-- ✅ MOVED to buttons container -->
-              <button id="markAllPresentBtn" class="btn btn-outline-success">All Present</button>
-              <button id="markAllAbsentBtn" class="btn btn-outline-danger">All Absent</button>
-            </div>
-          </div>
-        </div>
-        <div class="teacher-only">
-          <div class="row g-2 mb-3">
-            <div class="col-12 col-sm-6 col-md-3">
-              <div class="input-group input-group-sm">
-                <input type="text" id="searchInput" class="form-control" placeholder="Search ID/Name">
-                <button id="searchBtn" class="btn btn-outline-primary">
-                  <i class="bi bi-search"></i>
+            <div class="col-md-4">
+              <label class="form-label fw-bold">Navigation</label>
+              <div class="btn-group w-100">
+                <button id="prevDayBtn" class="btn btn-outline-primary" disabled>
+                  <i class="bi bi-chevron-left"></i> Previous
                 </button>
-                <button id="resetSearchBtn" class="btn btn-outline-secondary">
-                  <i class="bi bi-x"></i>
+                <button id="nextDayBtn" class="btn btn-outline-primary" disabled>
+                  Next <i class="bi bi-chevron-right"></i>
                 </button>
               </div>
             </div>
-            <div class="col-12 col-sm-6 col-md-3">
-              <select id="sortSelect" class="form-select form-select-sm">
-                <option value="">Sort by...</option>
-                <option value="id-asc">ID (Low→High)</option>
-                <option value="id-desc">ID (High→Low)</option>
-                <option value="name-asc">Name (A→Z)</option>
-                <option value="name-desc">Name (Z→A)</option>
-                <option value="attendance-asc">Attend % (Low→High)</option>
-                <option value="attendance-desc">Attend % (High→Low)</option>
-              </select>
-            </div>
-            <div class="col-12 col-sm-6 col-md-3">
-              <select id="filterSelect" class="form-select form-select-sm">
-                <option value="all">Show All</option>
-                <option value="present">Present Only</option>
-                <option value="absent">Absent Only</option>
-                <option value="defaulter">Defaulters Only</option>
-              </select>
-            </div>
-            <div class="col-12 col-sm-6 col-md-3">
-              <button id="refreshTableBtn" class="btn btn-outline-primary btn-sm w-100">
-                <i class="bi bi-arrow-clockwise me-1"></i>Refresh
-              </button>
+            <div class="col-md-4"> <!-- ✅ REMOVED teacher-only from div -->
+              <label class="form-label fw-bold teacher-only">Quick Actions</label> <!-- ✅ MOVED to label -->
+              <div class="btn-group w-100 teacher-only"> <!-- ✅ MOVED to buttons container -->
+                <button id="markAllPresentBtn" class="btn btn-outline-success">All Present</button>
+                <button id="markAllAbsentBtn" class="btn btn-outline-danger">All Absent</button>
+              </div>
             </div>
           </div>
-        </div>
-        <!-- Table -->
-        <div class="table-responsive table-container border rounded">
-          <table id="attendanceTable" class="table table-hover mb-0">
-            <thead class="table-light sticky-top">
-              <tr>
-                <th width="10%">ID</th>
-                <th width="25%">Name</th>
-                <th width="15%">Today</th>
-                <th width="25%">Monthly Stats</th>
-                <th width="25%" class="teacher-only">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="attendanceTableBody">
-              <tr>
-                <td colspan="5" class="text-center text-muted py-5">
-                  <i class="bi bi-inbox fs-1"></i>
-                  <p class="mt-2">No data loaded. Please select a subject, month, and upload a CSV file.</p>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Summary -->
-        <div class="d-flex justify-content-between align-items-center mt-3 p-3 bg-light rounded teacher-only">
-          <div>
-            <strong>Total:</strong> <span id="summaryTotal" class="badge bg-primary">0</span>
-            <strong class="ms-3">Present:</strong> <span id="summaryPresent" class="badge bg-success">0</span>
-            <strong class="ms-3">Absent:</strong> <span id="summaryAbsent" class="badge bg-danger">0</span>
-          </div>
-          <div>
-            <strong>Attendance Rate:</strong> <span id="summaryRate" class="badge bg-info">0%</span>
-          </div>
-        </div>
-      </div>
-    </section>
-    <div class="col-md-3 teacher-only">
-      <div class="section-card">
-        <li class="nav-item teacher-only">
-          <a class="nav-link" href="leave-applications.html">
-            <i class="bi bi-calendar-x me-1"></i>Leave Applications
-          </a>
-        </li>
-      </div>
-    </div>
-    <!-- Defaulter Section -->
-    <section id="defaulter-section" class="nav-section teacher-only">
-      <div class="section-card">
-        <h4 class="section-title"><i class="bi bi-exclamation-triangle me-2"></i>Defaulter Management</h4>
-
-        <div class="row g-3 align-items-end">
-          <div class="col-md-3">
-            <label class="form-label fw-bold">Minimum Attendance Threshold</label>
-            <div class="input-group">
-              <input type="number" id="thresholdInput" class="form-control" value="75" min="0" max="100">
-              <span class="input-group-text">%</span>
+          <div class="teacher-only">
+            <div class="row g-2 mb-3">
+              <div class="col-12 col-sm-6 col-md-3">
+                <div class="input-group input-group-sm">
+                  <input type="text" id="searchInput" class="form-control" placeholder="Search ID/Name">
+                  <button id="searchBtn" class="btn btn-outline-primary">
+                    <i class="bi bi-search"></i>
+                  </button>
+                  <button id="resetSearchBtn" class="btn btn-outline-secondary">
+                    <i class="bi bi-x"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="col-12 col-sm-6 col-md-3">
+                <select id="sortSelect" class="form-select form-select-sm">
+                  <option value="">Sort by...</option>
+                  <option value="id-asc">ID (Low→High)</option>
+                  <option value="id-desc">ID (High→Low)</option>
+                  <option value="name-asc">Name (A→Z)</option>
+                  <option value="name-desc">Name (Z→A)</option>
+                  <option value="attendance-asc">Attend % (Low→High)</option>
+                  <option value="attendance-desc">Attend % (High→Low)</option>
+                </select>
+              </div>
+              <div class="col-12 col-sm-6 col-md-3">
+                <select id="filterSelect" class="form-select form-select-sm">
+                  <option value="all">Show All</option>
+                  <option value="present">Present Only</option>
+                  <option value="absent">Absent Only</option>
+                  <option value="defaulter">Defaulters Only</option>
+                </select>
+              </div>
+              <div class="col-12 col-sm-6 col-md-3">
+                <button id="refreshTableBtn" class="btn btn-outline-primary btn-sm w-100">
+                  <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+                </button>
+              </div>
             </div>
           </div>
-          <div class="col-md-3">
-            <button id="showDefaultersBtn" class="btn btn-danger btn-action w-100">
-              <i class="bi bi-list-ul me-1"></i>Show Defaulters
-            </button>
-          </div>
-          <div class="col-md-3">
-            <button id="exportDefaultersBtn" class="btn btn-outline-danger btn-action w-100">
-              <i class="bi bi-download me-1"></i>Export Defaulters
-            </button>
-          </div>
-          <div class="col-md-3">
-            <div class="alert alert-danger mb-0 py-2 text-center">
-              <strong>Defaulters:</strong> <span id="defaulterCount">0</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Defaulter Table -->
-        <div id="defaulterTableContainer" class="mt-4" style="display: none;">
-          <h5><i class="bi bi-people me-2"></i>Defaulter List</h5>
-          <div class="table-responsive">
-            <table class="table table-striped table-hover">
-              <thead class="table-danger">
+          <!-- Table -->
+          <div class="table-responsive table-container border rounded">
+            <table id="attendanceTable" class="table table-hover mb-0">
+              <thead class="table-light sticky-top">
                 <tr>
-                  <th>ID</th>
-                  <th>Name</th>
-                  <th>Present Days</th>
-                  <th>Absent Days</th>
-                  <th>Working Days</th>
-                  <th>Attendance %</th>
+                  <th width="10%">ID</th>
+                  <th width="25%">Name</th>
+                  <th width="15%">Today</th>
+                  <th width="25%">Monthly Stats</th>
+                  <th width="25%" class="teacher-only">Actions</th>
                 </tr>
               </thead>
-              <tbody id="defaulterTableBody"></tbody>
+              <tbody id="attendanceTableBody">
+                <tr>
+                  <td colspan="5" class="text-center text-muted py-5">
+                    <i class="bi bi-inbox fs-1"></i>
+                    <p class="mt-2">No data loaded. Please select a subject, month, and upload a CSV file.</p>
+                  </td>
+                </tr>
+              </tbody>
             </table>
           </div>
+
+          <!-- Summary -->
+          <div class="d-flex justify-content-between align-items-center mt-3 p-3 bg-light rounded teacher-only">
+            <div>
+              <strong>Total:</strong> <span id="summaryTotal" class="badge bg-primary">0</span>
+              <strong class="ms-3">Present:</strong> <span id="summaryPresent" class="badge bg-success">0</span>
+              <strong class="ms-3">Absent:</strong> <span id="summaryAbsent" class="badge bg-danger">0</span>
+            </div>
+            <div>
+              <strong>Attendance Rate:</strong> <span id="summaryRate" class="badge bg-info">0%</span>
+            </div>
+          </div>
+        </div>
+      </section>
+      <div class="col-md-3 teacher-only">
+        <div class="section-card">
+          <li class="nav-item teacher-only">
+            <a class="nav-link" href="leave-applications.html">
+              <i class="bi bi-calendar-x me-1"></i>Leave Applications
+            </a>
+          </li>
         </div>
       </div>
-    </section>
-</div>
-  <!-- End of Admin Attendance Section -->
+      <!-- Defaulter Section -->
+      <section id="defaulter-section" class="nav-section teacher-only">
+        <div class="section-card">
+          <h4 class="section-title"><i class="bi bi-exclamation-triangle me-2"></i>Defaulter Management</h4>
+
+          <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+              <label class="form-label fw-bold">Minimum Attendance Threshold</label>
+              <div class="input-group">
+                <input type="number" id="thresholdInput" class="form-control" value="75" min="0" max="100">
+                <span class="input-group-text">%</span>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <button id="showDefaultersBtn" class="btn btn-danger btn-action w-100">
+                <i class="bi bi-list-ul me-1"></i>Show Defaulters
+              </button>
+            </div>
+            <div class="col-md-3">
+              <button id="exportDefaultersBtn" class="btn btn-outline-danger btn-action w-100">
+                <i class="bi bi-download me-1"></i>Export Defaulters
+              </button>
+            </div>
+            <div class="col-md-3">
+              <div class="alert alert-danger mb-0 py-2 text-center">
+                <strong>Defaulters:</strong> <span id="defaulterCount">0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Defaulter Table -->
+          <div id="defaulterTableContainer" class="mt-4" style="display: none;">
+            <h5><i class="bi bi-people me-2"></i>Defaulter List</h5>
+            <div class="table-responsive">
+              <table class="table table-striped table-hover">
+                <thead class="table-danger">
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Present Days</th>
+                    <th>Absent Days</th>
+                    <th>Working Days</th>
+                    <th>Attendance %</th>
+                  </tr>
+                </thead>
+                <tbody id="defaulterTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+    <!-- End of Admin Attendance Section -->
   </div>
 
   <!-- Defaulter Modal -->
@@ -2133,137 +2160,137 @@
       return String(key).replace(/__/g, '/');
     }
     // Save data (cloud + local hybrid)
- async function saveToStorage(key, data) {
-  let firebaseSaved = false;
-  let path;
+    async function saveToStorage(key, data) {
+      let firebaseSaved = false;
+      let path;
 
-  const globalKeys = ['departments', 'courses', 'subjects', 'threshold'];
+      const globalKeys = ['departments', 'courses', 'subjects', 'threshold'];
 
-  let firebaseData = data;
-  if (key === 'subjects' || key === 'courses') {
-    firebaseData = encodeNestedObject(data);
-  }
+      let firebaseData = data;
+      if (key === 'subjects' || key === 'courses') {
+        firebaseData = encodeNestedObject(data);
+      }
 
-  const divisionSpecificKeys = [
-    'selectedDepartment',
-    'selectedCourse',
-    'selectedSubject',
-    'selectedMonth',
-    'selectedYear',
-    'currentDay',
-    'selectedAcademicYear',
-    'selectedDivision'
-  ];
+      const divisionSpecificKeys = [
+        'selectedDepartment',
+        'selectedCourse',
+        'selectedSubject',
+        'selectedMonth',
+        'selectedYear',
+        'currentDay',
+        'selectedAcademicYear',
+        'selectedDivision'
+      ];
 
-  if (globalKeys.includes(key)) {
-    path = `mainSystem/${key}`;
-  }
-  else if (divisionSpecificKeys.includes(key)) {
-    const year = appState.selectedYear || new Date().getFullYear();
-    const dept = appState.selectedDepartment;
-    const course = appState.selectedCourse;
-    const academicYear = appState.selectedAcademicYear;
-    const division = appState.selectedDivision;
+      if (globalKeys.includes(key)) {
+        path = `mainSystem/${key}`;
+      }
+      else if (divisionSpecificKeys.includes(key)) {
+        const year = appState.selectedYear || new Date().getFullYear();
+        const dept = appState.selectedDepartment;
+        const course = appState.selectedCourse;
+        const academicYear = appState.selectedAcademicYear;
+        const division = appState.selectedDivision;
 
-    if (!dept || !course || !academicYear || !division) {
-      console.warn(`⚠️ Cannot save ${key}: division path incomplete. Saving to IndexedDB only.`);
+        if (!dept || !course || !academicYear || !division) {
+          console.warn(`⚠️ Cannot save ${key}: division path incomplete. Saving to IndexedDB only.`);
+          try {
+            await saveToDatabase(key, data);
+          } catch (error) {
+            console.warn(`⚠️ IndexedDB save failed for ${key}:`, error);
+          }
+          return;
+        }
+
+        path = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}/${key}`;
+      }
+      else if (key === 'attendanceData') {
+        // ========================================
+        // ✅ CHANGED BLOCK STARTS HERE
+        // ========================================
+        const year = appState.selectedYear || new Date().getFullYear();
+        const dept = appState.selectedDepartment;
+        const course = appState.selectedCourse;
+        const academicYear = appState.selectedAcademicYear;
+        const division = appState.selectedDivision;
+        const subject = appState.selectedSubject;  // ✅ NEW: Get current subject
+        const month = appState.selectedMonth;      // ✅ NEW: Get current month
+
+        if (!dept || !course || !academicYear || !division) {
+          console.warn(`⚠️ Cannot save attendanceData: division path incomplete`);
+          await saveToDatabase(key, data);
+          return;
+        }
+
+        // ✅ NEW: Check if subject and month are selected
+        if (!subject || month === null || month === undefined) {
+          console.warn(`⚠️ Cannot save attendanceData: subject or month not selected`);
+          await saveToDatabase(key, data);
+          return;
+        }
+
+        // ✅ NEW: Get ONLY the current subject's attendance data
+        const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+        const attendanceData = data?.[year]?.[dept]?.[course]?.[academicYear]?.[division]?.months?.[monthKey]?.subjects?.[subject]?.attendance;
+
+        if (!attendanceData) {
+          console.warn(`⚠️ No attendance data for current subject: ${subject}`);
+          await saveToDatabase(key, data);
+          return;
+        }
+
+        // ✅ NEW: Write to SPECIFIC path (same path face recognition listens to)
+        path = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}/months/${monthKey}/subjects/${subject}/attendance`;
+        firebaseData = attendanceData;
+
+        console.log(`📤 Saving current subject attendance to: ${path}`);
+        // ========================================
+        // ✅ CHANGED BLOCK ENDS HERE
+        // ========================================
+      }
+      else if (key === 'holidays') {
+        const year = appState.selectedYear || new Date().getFullYear();
+        const dept = appState.selectedDepartment;
+        const course = appState.selectedCourse;
+        const academicYear = appState.selectedAcademicYear;
+        const division = appState.selectedDivision;
+        const monthKey = getMonthKey();
+
+        if (!dept || !course || !academicYear || !division || !monthKey) {
+          console.warn(`⚠️ Cannot save holidays: path incomplete`);
+          await saveToDatabase(key, data);
+          return;
+        }
+
+        path = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}/months/${monthKey}/holidays`;
+      }
+      else {
+        path = `mainSystem/${key}`;
+      }
+
+      // Try Firebase FIRST
+      if (useCloud && firebaseDB) {
+        try {
+          await firebaseDB.ref(path).set(firebaseData);
+          console.log(`✅ Saved to Firebase: ${path}`);
+          firebaseSaved = true;
+        } catch (error) {
+          console.error(`❌ Firebase save failed for ${key}:`, error);
+        }
+      }
+
+      // Backup to IndexedDB
       try {
         await saveToDatabase(key, data);
+        console.log(`📂 Backup to IndexedDB: ${key}`);
       } catch (error) {
-        console.warn(`⚠️ IndexedDB save failed for ${key}:`, error);
+        console.warn(`⚠️ IndexedDB backup failed for ${key}:`, error);
       }
-      return;
+
+      if (!firebaseSaved && !useCloud) {
+        console.warn(`⚠️ Firebase not connected, using IndexedDB only`);
+      }
     }
-
-    path = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}/${key}`;
-  }
-  else if (key === 'attendanceData') {
-    // ========================================
-    // ✅ CHANGED BLOCK STARTS HERE
-    // ========================================
-    const year = appState.selectedYear || new Date().getFullYear();
-    const dept = appState.selectedDepartment;
-    const course = appState.selectedCourse;
-    const academicYear = appState.selectedAcademicYear;
-    const division = appState.selectedDivision;
-    const subject = appState.selectedSubject;  // ✅ NEW: Get current subject
-    const month = appState.selectedMonth;      // ✅ NEW: Get current month
-
-    if (!dept || !course || !academicYear || !division) {
-      console.warn(`⚠️ Cannot save attendanceData: division path incomplete`);
-      await saveToDatabase(key, data);
-      return;
-    }
-
-    // ✅ NEW: Check if subject and month are selected
-    if (!subject || month === null || month === undefined) {
-      console.warn(`⚠️ Cannot save attendanceData: subject or month not selected`);
-      await saveToDatabase(key, data);
-      return;
-    }
-
-    // ✅ NEW: Get ONLY the current subject's attendance data
-    const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
-    const attendanceData = data?.[year]?.[dept]?.[course]?.[academicYear]?.[division]?.months?.[monthKey]?.subjects?.[subject]?.attendance;
-
-    if (!attendanceData) {
-      console.warn(`⚠️ No attendance data for current subject: ${subject}`);
-      await saveToDatabase(key, data);
-      return;
-    }
-
-    // ✅ NEW: Write to SPECIFIC path (same path face recognition listens to)
-    path = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}/months/${monthKey}/subjects/${subject}/attendance`;
-    firebaseData = attendanceData;
-    
-    console.log(`📤 Saving current subject attendance to: ${path}`);
-    // ========================================
-    // ✅ CHANGED BLOCK ENDS HERE
-    // ========================================
-  }
-  else if (key === 'holidays') {
-    const year = appState.selectedYear || new Date().getFullYear();
-    const dept = appState.selectedDepartment;
-    const course = appState.selectedCourse;
-    const academicYear = appState.selectedAcademicYear;
-    const division = appState.selectedDivision;
-    const monthKey = getMonthKey();
-
-    if (!dept || !course || !academicYear || !division || !monthKey) {
-      console.warn(`⚠️ Cannot save holidays: path incomplete`);
-      await saveToDatabase(key, data);
-      return;
-    }
-
-    path = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}/months/${monthKey}/holidays`;
-  }
-  else {
-    path = `mainSystem/${key}`;
-  }
-
-  // Try Firebase FIRST
-  if (useCloud && firebaseDB) {
-    try {
-      await firebaseDB.ref(path).set(firebaseData);
-      console.log(`✅ Saved to Firebase: ${path}`);
-      firebaseSaved = true;
-    } catch (error) {
-      console.error(`❌ Firebase save failed for ${key}:`, error);
-    }
-  }
-
-  // Backup to IndexedDB
-  try {
-    await saveToDatabase(key, data);
-    console.log(`📂 Backup to IndexedDB: ${key}`);
-  } catch (error) {
-    console.warn(`⚠️ IndexedDB backup failed for ${key}:`, error);
-  }
-
-  if (!firebaseSaved && !useCloud) {
-    console.warn(`⚠️ Firebase not connected, using IndexedDB only`);
-  }
-}
     // Load data (FIREBASE FIRST, fallback to IndexedDB)
     async function loadFromStorage(key) {
       let path;
@@ -2375,151 +2402,155 @@
 
 
     // ==================== AUTHENTICATION CHECK ====================
-   async function checkAuthAndInit() {
-  try {
-    console.log('🔵 Step 1: Checking if user is logged in...');
-    
-    const user = await getCurrentUser();
+    async function checkAuthAndInit() {
+      try {
+        console.log('🔵 Step 1: Checking if user is logged in...');
 
-    if (!user) {
-      console.log('❌ No user - redirecting to login');
-      window.location.href = 'index.html';
-      return;
-    }
+        const user = await getCurrentUser();
 
-    console.log('✅ User logged in:', user.attributes.email);
-    console.log('🔵 Step 2: Calling signIntoFirebase()...');
-    
-    // ✅ WAIT for Firebase sign-in to complete
-    const firebaseSuccess = await signIntoFirebase();
-    
-    if (!firebaseSuccess) {
-      alert('Firebase authentication failed. Please try again.');
-      return;
-    }
-    
-    console.log('🔵 Step 3: Verifying Firebase auth...');
-    
+        if (!user) {
+          console.log('❌ No user - redirecting to login');
+          window.location.href = 'index.html';
+          return;
+        }
 
-// ✅ OPTIMIZED: Wait for Firebase currentUser (up to 3 seconds, check every 100ms)
-let attempts = 0;
-const maxAttempts = 30; // 30 × 100ms = 3 seconds max
-const checkInterval = 100; // Check every 100ms
+        console.log('✅ User logged in:', user.attributes.email);
+        console.log('🔵 Step 2: Calling signIntoFirebase()...');
 
-while (!firebase.auth().currentUser && attempts < maxAttempts) {
-  if (attempts % 5 === 0) { // Only log every 500ms to reduce console spam
-    console.log(`⏳ Waiting for Firebase auth... (${Math.floor(attempts * checkInterval / 1000)}s)`);
-  }
-  await new Promise(resolve => setTimeout(resolve, checkInterval));
-  attempts++;
-}
+        // ✅ WAIT for Firebase sign-in to complete
+        const firebaseSuccess = await signIntoFirebase();
 
-if (!firebase.auth().currentUser) {
-  console.error('❌ Firebase auth failed after 3 seconds');
-  alert('Firebase authentication timed out. Please refresh.');
-  return;
-}
+        if (!firebaseSuccess) {
+          alert('Firebase authentication failed. Please try again.');
+          return;
+        }
 
-console.log(`✅ Firebase authenticated in ${attempts * checkInterval}ms`);
-console.log('✅ Firebase currentUser:', firebase.auth().currentUser.uid);
-    
-    const role = await getUserRole();
-    console.log('✅ User role:', role);
-    
-    currentUserRole = role;
+        console.log('🔵 Step 3: Verifying Firebase auth...');
 
-    if (role === 'student') {
-      const attributes = await getUserAttributes();
-      currentStudentId = attributes['custom:studentId'];
-      
-      const department = attributes['custom:department'];
-      const course = attributes['custom:course'];
-      const academicYear = attributes['custom:academicYear'];
-      const division = attributes['custom:division'];
 
-      if (department && course && academicYear && division) {
-        appState.selectedDepartment = department;
-        appState.selectedCourse = course;
-        appState.selectedAcademicYear = academicYear;
-        appState.selectedDivision = division;
-        console.log('✅ Student division locked:', { department, course, academicYear, division });
-      } else {
-        console.warn('⚠️ Student missing division attributes');
-        alert('Your account is missing division information. Please contact admin.');
+        // ✅ OPTIMIZED: Wait for Firebase currentUser (up to 3 seconds, check every 100ms)
+        let attempts = 0;
+        const maxAttempts = 30; // 30 × 100ms = 3 seconds max
+        const checkInterval = 100; // Check every 100ms
+
+        while (!firebase.auth().currentUser && attempts < maxAttempts) {
+          if (attempts % 5 === 0) { // Only log every 500ms to reduce console spam
+            console.log(`⏳ Waiting for Firebase auth... (${Math.floor(attempts * checkInterval / 1000)}s)`);
+          }
+          await new Promise(resolve => setTimeout(resolve, checkInterval));
+          attempts++;
+        }
+
+        if (!firebase.auth().currentUser) {
+          console.error('❌ Firebase auth failed after 3 seconds');
+          alert('Firebase authentication timed out. Please refresh.');
+          return;
+        }
+
+        console.log(`✅ Firebase authenticated in ${attempts * checkInterval}ms`);
+        console.log('✅ Firebase currentUser:', firebase.auth().currentUser.uid);
+
+        const role = await getUserRole();
+        console.log('✅ User role:', role);
+
+        currentUserRole = role;
+
+        if (role === 'student') {
+          const attributes = await getUserAttributes();
+          currentStudentId = attributes['custom:studentId'];
+
+          const department = attributes['custom:department'];
+          const course = attributes['custom:course'];
+          const academicYear = attributes['custom:academicYear'];
+          const division = attributes['custom:division'];
+
+          if (department && course && academicYear && division) {
+            appState.selectedDepartment = department;
+            appState.selectedCourse = course;
+            appState.selectedAcademicYear = academicYear;
+            appState.selectedDivision = division;
+            console.log('✅ Student division locked:', { department, course, academicYear, division });
+          } else {
+            console.warn('⚠️ Student missing division attributes');
+            alert('Your account is missing division information. Please contact admin.');
+          }
+        }
+
+        if (role === 'teacher') {
+          console.log('🔄 Teacher login - Clearing session selections');
+          appState.selectedDepartment = null;
+          appState.selectedCourse = null;
+          appState.selectedSubject = null;
+          appState.selectedAcademicYear = null;
+          appState.selectedDivision = null;
+
+          await saveToStorage('selectedDepartment', null);
+          await saveToStorage('selectedCourse', null);
+          await saveToStorage('selectedSubject', null);
+          await saveToStorage('selectedAcademicYear', null);
+          await saveToStorage('selectedDivision', null);
+        }
+
+        console.log('🔵 Step 5: Calling initialize()...');
+        initialize();
+
+      } catch (error) {
+        console.error('❌ Auth check failed:', error);
+        window.location.href = 'index.html';
       }
     }
 
-    if (role === 'teacher') {
-      console.log('🔄 Teacher login - Clearing session selections');
-      appState.selectedDepartment = null;
-      appState.selectedCourse = null;
-      appState.selectedSubject = null;
-      appState.selectedAcademicYear = null;
-      appState.selectedDivision = null;
+    async function applyRoleBasedUI() {
+      try {
+        const role = await getUserRole();
+        console.log('🔵 Applying UI for role:', role);
 
-      await saveToStorage('selectedDepartment', null);
-      await saveToStorage('selectedCourse', null);
-      await saveToStorage('selectedSubject', null);
-      await saveToStorage('selectedAcademicYear', null);
-      await saveToStorage('selectedDivision', null);
+        // Apply role-specific hiding
+        if (role === 'admin') {
+          console.log('✅ Admin - Full access');
+
+        } else if (role === 'teacher') {
+          hideElements('.admin-only');
+          hideElements('.admin-only-inline');
+          console.log('✅ Teacher - Hid admin elements');
+
+        } else if (role === 'student') {
+          hideElements('.admin-only');
+          hideElements('.admin-only-inline');
+          hideElements('.teacher-only');
+          hideElements('.teacher-only-inline');
+          hideElements('.hide-for-student');
+          hideElements('.hide-for-student-inline');
+          makeTableReadOnly();
+          // ✅ Show profile button only for students
+          const profileBtn = document.getElementById('profileNavBtn');
+          if (profileBtn) profileBtn.style.display = 'inline-flex';
+
+          console.log('✅ Student - Read-only mode');
+        }
+        applySelectionSectionForRole(role);
+      } catch (error) {
+        console.error('❌ Error applying role-based UI:', error);
+      } finally {
+        // ✅ ALWAYS runs, even if there's an error
+        console.log('🔄 Removing loading overlay...');
+
+        const overlay = document.getElementById('authLoadingOverlay');
+        if (overlay) {
+          // Smooth fade out
+          overlay.style.transition = 'opacity 0.5s ease';
+          overlay.style.opacity = '0';
+
+          // Remove after fade
+          setTimeout(() => {
+            overlay.remove();
+            console.log('✅ Overlay removed successfully');
+          }, 500);
+        } else {
+          console.warn('⚠️ Overlay element not found');
+        }
+      }
     }
-
-    console.log('🔵 Step 5: Calling initialize()...');
-    initialize();
-
-  } catch (error) {
-    console.error('❌ Auth check failed:', error);
-    window.location.href = 'index.html';
-  }
-}
-
-async function applyRoleBasedUI() {
-  try {
-    const role = await getUserRole();
-    console.log('🔵 Applying UI for role:', role);
-
-    // Apply role-specific hiding
-    if (role === 'admin') {
-      console.log('✅ Admin - Full access');
-      
-    } else if (role === 'teacher') {
-      hideElements('.admin-only');
-      hideElements('.admin-only-inline');
-      console.log('✅ Teacher - Hid admin elements');
-
-    } else if (role === 'student') {
-      hideElements('.admin-only');
-      hideElements('.admin-only-inline');
-      hideElements('.teacher-only');
-      hideElements('.teacher-only-inline');
-      hideElements('.hide-for-student');
-      hideElements('.hide-for-student-inline');
-      makeTableReadOnly();
-      console.log('✅ Student - Read-only mode');
-    }
-    applySelectionSectionForRole(role);
-  } catch (error) {
-    console.error('❌ Error applying role-based UI:', error);
-  } finally {
-    // ✅ ALWAYS runs, even if there's an error
-    console.log('🔄 Removing loading overlay...');
-    
-    const overlay = document.getElementById('authLoadingOverlay');
-    if (overlay) {
-      // Smooth fade out
-      overlay.style.transition = 'opacity 0.5s ease';
-      overlay.style.opacity = '0';
-      
-      // Remove after fade
-      setTimeout(() => {
-        overlay.remove();
-        console.log('✅ Overlay removed successfully');
-      }, 500);
-    } else {
-      console.warn('⚠️ Overlay element not found');
-    }
-  }
-}
     function hideElements(selector) {
       document.querySelectorAll(selector).forEach(el => {
         el.style.display = 'none';
@@ -2680,69 +2711,69 @@ async function applyRoleBasedUI() {
     }
 
     async function saveAllData() {
-  try {
-    if (appState.selectedYear === null && elements.yearSelect.value) {
-      appState.selectedYear = parseInt(elements.yearSelect.value);
-    }
-
-    await saveToStorage("subjects", appState.subjects);
-    await saveToStorage("selectedSubject", appState.selectedSubject);
-    await saveToStorage("selectedMonth", appState.selectedMonth);
-    await saveToStorage("selectedYear", appState.selectedYear);
-    await saveToStorage("currentDay", appState.currentDay);
-    await saveToStorage("attendanceData", appState.attendanceData);
-    await saveToStorage("holidays", appState.holidays);
-    await saveToStorage("threshold", appState.threshold);
-    await saveToStorage("departments", appState.departments);
-    await saveToStorage("selectedDepartment", appState.selectedDepartment);
-    await saveToStorage("courses", appState.courses);
-    await saveToStorage("selectedCourse", appState.selectedCourse);
-    await saveToStorage("selectedAcademicYear", appState.selectedAcademicYear);
-    await saveToStorage("selectedDivision", appState.selectedDivision);
-    const currentDate = new Date().toDateString();
-    await saveToStorage("currentDate", currentDate);
-    
-    // ✅ ADD THIS BLOCK:
-    // Save teacher's current selection to their user profile
-    if (useCloud && firebaseDB && currentUserRole !== 'student') {
       try {
-        const user = await getCurrentUser();
-        const userEmail = user.attributes.email;
-        const userKey = userEmail.replace(/[@.]/g, '_');
-        
-        // Only save if all required fields are set
-        if (appState.selectedDepartment && 
-            appState.selectedCourse && 
-            appState.selectedAcademicYear && 
-            appState.selectedDivision &&
-            appState.selectedSubject &&
-            appState.selectedMonth !== null &&
-            appState.selectedYear !== null) {
-          
-          await firebaseDB.ref(`mainSystem/userPreferences/${userKey}/lastSelection`).set({
-            department: appState.selectedDepartment,
-            course: appState.selectedCourse,
-            academicYear: appState.selectedAcademicYear,
-            division: appState.selectedDivision,
-            subject: appState.selectedSubject,
-            month: appState.selectedMonth,
-            year: appState.selectedYear,
-            day: appState.currentDay,
-            timestamp: Date.now()
-          });
-          
-          console.log('✅ Saved user selection to Firebase');
+        if (appState.selectedYear === null && elements.yearSelect.value) {
+          appState.selectedYear = parseInt(elements.yearSelect.value);
         }
+
+        await saveToStorage("subjects", appState.subjects);
+        await saveToStorage("selectedSubject", appState.selectedSubject);
+        await saveToStorage("selectedMonth", appState.selectedMonth);
+        await saveToStorage("selectedYear", appState.selectedYear);
+        await saveToStorage("currentDay", appState.currentDay);
+        await saveToStorage("attendanceData", appState.attendanceData);
+        await saveToStorage("holidays", appState.holidays);
+        await saveToStorage("threshold", appState.threshold);
+        await saveToStorage("departments", appState.departments);
+        await saveToStorage("selectedDepartment", appState.selectedDepartment);
+        await saveToStorage("courses", appState.courses);
+        await saveToStorage("selectedCourse", appState.selectedCourse);
+        await saveToStorage("selectedAcademicYear", appState.selectedAcademicYear);
+        await saveToStorage("selectedDivision", appState.selectedDivision);
+        const currentDate = new Date().toDateString();
+        await saveToStorage("currentDate", currentDate);
+
+        // ✅ ADD THIS BLOCK:
+        // Save teacher's current selection to their user profile
+        if (useCloud && firebaseDB && currentUserRole !== 'student') {
+          try {
+            const user = await getCurrentUser();
+            const userEmail = user.attributes.email;
+            const userKey = userEmail.replace(/[@.]/g, '_');
+
+            // Only save if all required fields are set
+            if (appState.selectedDepartment &&
+              appState.selectedCourse &&
+              appState.selectedAcademicYear &&
+              appState.selectedDivision &&
+              appState.selectedSubject &&
+              appState.selectedMonth !== null &&
+              appState.selectedYear !== null) {
+
+              await firebaseDB.ref(`mainSystem/userPreferences/${userKey}/lastSelection`).set({
+                department: appState.selectedDepartment,
+                course: appState.selectedCourse,
+                academicYear: appState.selectedAcademicYear,
+                division: appState.selectedDivision,
+                subject: appState.selectedSubject,
+                month: appState.selectedMonth,
+                year: appState.selectedYear,
+                day: appState.currentDay,
+                timestamp: Date.now()
+              });
+
+              console.log('✅ Saved user selection to Firebase');
+            }
+          } catch (error) {
+            console.warn('Could not save user preference:', error);
+          }
+        }
+
+        console.log("All data saved (cloud + local)");
       } catch (error) {
-        console.warn('Could not save user preference:', error);
+        console.error("Failed to save data:", error);
       }
     }
-    
-    console.log("All data saved (cloud + local)");
-  } catch (error) {
-    console.error("Failed to save data:", error);
-  }
-}
     async function loadAllData() {
       try {
         // ✅ STEP 1: Load GLOBAL data first
@@ -3267,45 +3298,45 @@ async function applyRoleBasedUI() {
 
           // ✅ FOR STUDENTS: Show their personal attendance status
           // ✅ FOR STUDENTS: Show their personal attendance status
-if (studentId && subjectData && subjectData[studentId]) {
-  const status = subjectData[studentId][day];
+          if (studentId && subjectData && subjectData[studentId]) {
+            const status = subjectData[studentId][day];
 
-  if (isHoliday(day)) {
-    dayBtn.classList.add('holiday');
-    dayBtn.title = 'Holiday';
-  }
-  // ✅ NEW PRIORITY ORDER:
-  // 1. Present (teacher marked) - HIGHEST PRIORITY
-  // 2. Approved Leave (overrides Absent)
-  // 3. "On Leave" status in attendance
-  // 4. Absent (teacher marked)
-  // 5. No data
-  else if (status === 'Present') {
-    dayBtn.classList.add('student-present');
-    dayBtn.title = `Day ${day}: Present`;
-    // ✅ Show if leave was approved but teacher marked present
-    if (studentLeaveDays.has(day)) {
-      dayBtn.title += ' (Leave approved but marked present)';
-    }
-  }
-  else if (status === 'On Leave' || studentLeaveDays.has(day)) {
-    // ✅ PRIORITY: Show leave even if marked absent (leave overrides absent)
-    dayBtn.classList.add('student-leave');
-    dayBtn.title = `Day ${day}: On Approved Leave`;
-    if (status === 'Absent') {
-      dayBtn.title += ' (Marked absent but leave was approved)';
-    }
-  }
-  else if (status === 'Absent') {
-    // ✅ Only show absent if NO approved leave
-    dayBtn.classList.add('student-absent');
-    dayBtn.title = `Day ${day}: Absent`;
-  }
-  else if (status) {
-    dayBtn.classList.add('has-data');
-    dayBtn.title = `Day ${day}: ${status}`;
-  }
-}
+            if (isHoliday(day)) {
+              dayBtn.classList.add('holiday');
+              dayBtn.title = 'Holiday';
+            }
+            // ✅ NEW PRIORITY ORDER:
+            // 1. Present (teacher marked) - HIGHEST PRIORITY
+            // 2. Approved Leave (overrides Absent)
+            // 3. "On Leave" status in attendance
+            // 4. Absent (teacher marked)
+            // 5. No data
+            else if (status === 'Present') {
+              dayBtn.classList.add('student-present');
+              dayBtn.title = `Day ${day}: Present`;
+              // ✅ Show if leave was approved but teacher marked present
+              if (studentLeaveDays.has(day)) {
+                dayBtn.title += ' (Leave approved but marked present)';
+              }
+            }
+            else if (status === 'On Leave' || studentLeaveDays.has(day)) {
+              // ✅ PRIORITY: Show leave even if marked absent (leave overrides absent)
+              dayBtn.classList.add('student-leave');
+              dayBtn.title = `Day ${day}: On Approved Leave`;
+              if (status === 'Absent') {
+                dayBtn.title += ' (Marked absent but leave was approved)';
+              }
+            }
+            else if (status === 'Absent') {
+              // ✅ Only show absent if NO approved leave
+              dayBtn.classList.add('student-absent');
+              dayBtn.title = `Day ${day}: Absent`;
+            }
+            else if (status) {
+              dayBtn.classList.add('has-data');
+              dayBtn.title = `Day ${day}: ${status}`;
+            }
+          }
           // ✅ FOR TEACHERS/ADMINS: Show general data status
           else {
             let hasData = false;
@@ -5552,97 +5583,97 @@ if (studentId && subjectData && subjectData[studentId]) {
 
       // Open Leave Form Modal
       const openLeaveFormBtn = document.getElementById('openLeaveFormBtn');
-if (openLeaveFormBtn) {
-  openLeaveFormBtn.addEventListener('click', async () => {
-        // Validate division context
-        const validation = validateDivisionContext();
+      if (openLeaveFormBtn) {
+        openLeaveFormBtn.addEventListener('click', async () => {
+          // Validate division context
+          const validation = validateDivisionContext();
 
-        if (!validation.valid) {
-          showAlert(`Please select: ${validation.missing.join(', ')} before submitting leave applications!`, 'warning');
-          return;
-        }
-
-        // Reset form
-        resetLeaveForm();
-
-        // ✅ CHECK USER ROLE FIRST (before loading students)
-        const role = await getUserRole();
-        const attributes = await getUserAttributes();
-
-        if (role === 'student') {
-          // ✅ FOR STUDENTS: Only load THEIR student data
-          const studentId = attributes['custom:studentId'];
-
-          if (!studentId) {
-            showAlert('Your student ID is not configured. Please contact admin.', 'danger');
+          if (!validation.valid) {
+            showAlert(`Please select: ${validation.missing.join(', ')} before submitting leave applications!`, 'warning');
             return;
           }
 
-          // ✅ MANUALLY POPULATE DROPDOWN WITH ONLY THEIR ID
-          const studentSelect = document.getElementById('leaveStudentSelect');
-          studentSelect.innerHTML = ''; // Clear dropdown
+          // Reset form
+          resetLeaveForm();
 
-          // Get student name from current student list
-          const currentStudent = appState.studentList.find(s => s.id === studentId);
-          const studentName = currentStudent ? currentStudent.name : 'You';
+          // ✅ CHECK USER ROLE FIRST (before loading students)
+          const role = await getUserRole();
+          const attributes = await getUserAttributes();
 
-          // Add ONLY their option
-          const option = document.createElement('option');
-          option.value = studentId;
-          option.textContent = `${studentId} - ${studentName}`;
-          option.selected = true;
-          studentSelect.appendChild(option);
+          if (role === 'student') {
+            // ✅ FOR STUDENTS: Only load THEIR student data
+            const studentId = attributes['custom:studentId'];
 
-          // ✅ DISABLE THE DROPDOWN
-          studentSelect.disabled = true;
+            if (!studentId) {
+              showAlert('Your student ID is not configured. Please contact admin.', 'danger');
+              return;
+            }
 
-          // Add visual indicator
-          const selectContainer = studentSelect.parentElement;
-          const lockedMsg = document.createElement('small');
-          lockedMsg.className = 'text-info d-block mt-1';
-          lockedMsg.id = 'leaveStudentLocked';
-          lockedMsg.innerHTML = '<i class="bi bi-lock me-1"></i>You can only submit leave for yourself';
-          selectContainer.appendChild(lockedMsg);
+            // ✅ MANUALLY POPULATE DROPDOWN WITH ONLY THEIR ID
+            const studentSelect = document.getElementById('leaveStudentSelect');
+            studentSelect.innerHTML = ''; // Clear dropdown
 
-          console.log(`✅ Student dropdown restricted to: ${studentId}`);
+            // Get student name from current student list
+            const currentStudent = appState.studentList.find(s => s.id === studentId);
+            const studentName = currentStudent ? currentStudent.name : 'You';
 
-        } else {
-          // ✅ FOR TEACHERS/ADMINS: Load full student list
-          await loadStudentsForLeaveForm();
-        }
+            // Add ONLY their option
+            const option = document.createElement('option');
+            option.value = studentId;
+            option.textContent = `${studentId} - ${studentName}`;
+            option.selected = true;
+            studentSelect.appendChild(option);
 
-        // Set date range limits (current month)
-        const year = appState.selectedYear;
-        const month = appState.selectedMonth;
+            // ✅ DISABLE THE DROPDOWN
+            studentSelect.disabled = true;
 
-        if (month !== null && year !== null) {
-          const firstDay = new Date(year, month, 1);
-          const lastDay = new Date(year, month + 1, 0);
+            // Add visual indicator
+            const selectContainer = studentSelect.parentElement;
+            const lockedMsg = document.createElement('small');
+            lockedMsg.className = 'text-info d-block mt-1';
+            lockedMsg.id = 'leaveStudentLocked';
+            lockedMsg.innerHTML = '<i class="bi bi-lock me-1"></i>You can only submit leave for yourself';
+            selectContainer.appendChild(lockedMsg);
 
-          const fromInput = document.getElementById('leaveFromDate');
-          const toInput = document.getElementById('leaveToDate');
+            console.log(`✅ Student dropdown restricted to: ${studentId}`);
 
-          fromInput.min = formatDateForInput(firstDay);
-          fromInput.max = formatDateForInput(lastDay);
-          toInput.min = formatDateForInput(firstDay);
-          toInput.max = formatDateForInput(lastDay);
-
-          // Set default values to current day
-          if (appState.currentDay) {
-            const currentDate = new Date(year, month, appState.currentDay);
-            fromInput.value = formatDateForInput(currentDate);
-            toInput.value = formatDateForInput(currentDate);
-            updateLeaveDayCount();
+          } else {
+            // ✅ FOR TEACHERS/ADMINS: Load full student list
+            await loadStudentsForLeaveForm();
           }
-        }
 
-        // Show modal
-        if (!leaveModal) {
-          leaveModal = new bootstrap.Modal(document.getElementById('leaveModal'));
-        }
-        leaveModal.show();
-      });
-    }
+          // Set date range limits (current month)
+          const year = appState.selectedYear;
+          const month = appState.selectedMonth;
+
+          if (month !== null && year !== null) {
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+
+            const fromInput = document.getElementById('leaveFromDate');
+            const toInput = document.getElementById('leaveToDate');
+
+            fromInput.min = formatDateForInput(firstDay);
+            fromInput.max = formatDateForInput(lastDay);
+            toInput.min = formatDateForInput(firstDay);
+            toInput.max = formatDateForInput(lastDay);
+
+            // Set default values to current day
+            if (appState.currentDay) {
+              const currentDate = new Date(year, month, appState.currentDay);
+              fromInput.value = formatDateForInput(currentDate);
+              toInput.value = formatDateForInput(currentDate);
+              updateLeaveDayCount();
+            }
+          }
+
+          // Show modal
+          if (!leaveModal) {
+            leaveModal = new bootstrap.Modal(document.getElementById('leaveModal'));
+          }
+          leaveModal.show();
+        });
+      }
 
       // Date change listeners (update day count)
       document.getElementById('leaveFromDate').addEventListener('change', updateLeaveDayCount);
@@ -6363,7 +6394,7 @@ if (openLeaveFormBtn) {
         <br> 
       `;
         }
-         html += `
+        html += `
          <br>
       <div class="row">
         <div class="col-md-6 col-lg-4">
@@ -6443,7 +6474,7 @@ if (openLeaveFormBtn) {
       } catch (error) {
         console.error('Error displaying leave status:', error);
       }
-      
+
     }
     /**
      * Real-time listener for leave updates (for students)
@@ -6789,91 +6820,91 @@ if (openLeaveFormBtn) {
 
     // ==================== ADMIN TWO-SECTION NAVIGATION ====================
 
-async function setupAdminSectionNavigation() {
-  try {
-    const role = await getUserRole();
+    async function setupAdminSectionNavigation() {
+      try {
+        const role = await getUserRole();
 
-    const configSection = document.getElementById('adminConfigSection');
-    const attendanceSection = document.getElementById('adminAttendanceSection');
-    const continueBtn = document.getElementById('adminContinueBtn');
-    const backBtn = document.getElementById('adminBackBtn');
+        const configSection = document.getElementById('adminConfigSection');
+        const attendanceSection = document.getElementById('adminAttendanceSection');
+        const continueBtn = document.getElementById('adminContinueBtn');
+        const backBtn = document.getElementById('adminBackBtn');
 
-    if (role === 'admin') {
-      // Show continue button for admins
-      continueBtn.style.display = 'block';
-      backBtn.style.display = 'block';
+        if (role === 'admin') {
+  continueBtn.style.display = 'block';
+  backBtn.style.display = 'block';
 
-      // Initially show only config section
-      showAdminConfigSection();
+  // ✅ Restore last section instead of always showing config
+  const lastSection = localStorage.getItem('adminSection') || 'config';
+  if (lastSection === 'attendance') {
+    showAdminAttendanceSection();
+  } else {
+    showAdminConfigSection();
+  }
 
-      // Continue button click
-      continueBtn.addEventListener('click', () => {
-        showAdminAttendanceSection();
-        
-        // Scroll to top of attendance section
-        attendanceSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
+  // Continue button click
+  continueBtn.addEventListener('click', () => {
+    showAdminAttendanceSection();
+    attendanceSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
 
-      // Back button click
-      backBtn.addEventListener('click', () => {
-        showAdminConfigSection();
-        
-        // Scroll to top
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      });
+  // Back button click
+  backBtn.addEventListener('click', () => {
+    showAdminConfigSection();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
 
-    } else if (role === 'teacher') {
-      // Teachers see everything normally
-      configSection.style.display = 'block';
-      attendanceSection.style.display = 'block';
-      continueBtn.style.display = 'none';
-      backBtn.style.display = 'none';
+        } else if (role === 'teacher') {
+          // Teachers see everything normally
+          configSection.style.display = 'block';
+          attendanceSection.style.display = 'block';
+          continueBtn.style.display = 'none';
+          backBtn.style.display = 'none';
+        }
+
+      } catch (error) {
+        console.error('Error setting up admin navigation:', error);
+      }
     }
 
-  } catch (error) {
-    console.error('Error setting up admin navigation:', error);
-  }
-}
+    function showAdminConfigSection() {
+      localStorage.setItem('adminSection', 'config');
+      const configSection = document.getElementById('adminConfigSection');
+      const attendanceSection = document.getElementById('adminAttendanceSection');
 
-function showAdminConfigSection() {
-  const configSection = document.getElementById('adminConfigSection');
-  const attendanceSection = document.getElementById('adminAttendanceSection');
+      configSection.style.display = 'block';
+      attendanceSection.style.display = 'none';
 
-  configSection.style.display = 'block';
-  attendanceSection.style.display = 'none';
+      // ✅ Show/Hide navbar links
+      document.querySelectorAll('.admin-config-nav').forEach(el => {
+        el.style.display = 'block';
+      });
+      document.querySelectorAll('.admin-attendance-nav').forEach(el => {
+        el.style.display = 'none';
+      });
 
-  // ✅ Show/Hide navbar links
-  document.querySelectorAll('.admin-config-nav').forEach(el => {
-    el.style.display = 'block';
-  });
-  document.querySelectorAll('.admin-attendance-nav').forEach(el => {
-    el.style.display = 'none';
-  });
+      console.log('📋 Showing Admin Config Section (with config navbar)');
+    }
 
-  console.log('📋 Showing Admin Config Section (with config navbar)');
-}
+    function showAdminAttendanceSection() {
+      localStorage.setItem('adminSection', 'attendance');
+      const configSection = document.getElementById('adminConfigSection');
+      const attendanceSection = document.getElementById('adminAttendanceSection');
 
-function showAdminAttendanceSection() {
-  const configSection = document.getElementById('adminConfigSection');
-  const attendanceSection = document.getElementById('adminAttendanceSection');
+      configSection.style.display = 'none';
+      attendanceSection.style.display = 'block';
 
-  configSection.style.display = 'none';
-  attendanceSection.style.display = 'block';
+      // ✅ Show/Hide navbar links
+      document.querySelectorAll('.admin-config-nav').forEach(el => {
+        el.style.display = 'none';
+      });
+      document.querySelectorAll('.admin-attendance-nav').forEach(el => {
+        el.style.display = 'block';
+      });
 
-  // ✅ Show/Hide navbar links
-  document.querySelectorAll('.admin-config-nav').forEach(el => {
-    el.style.display = 'none';
-  });
-  document.querySelectorAll('.admin-attendance-nav').forEach(el => {
-    el.style.display = 'block';
-  });
+      console.log('📊 Showing Admin Attendance Section (with attendance navbar)');
+    }
 
-  console.log('📊 Showing Admin Attendance Section (with attendance navbar)');
-}
-
-// Start the application
-    initialize();
-    //start>>>>>>>>>>
+    
     let qrTimerInterval = null;
     let qrExpiryTimestamp = null; // ✅ Track actual expiry time instead of countdown
 
@@ -7067,44 +7098,44 @@ function showAdminAttendanceSection() {
     }
 
     function applySelectionSectionForRole(role) {
-  const title = document.getElementById('selectionSectionTitle');
-  const deptSelect = document.getElementById('finalDepartmentSelect');
-  const courseSelect = document.getElementById('finalCourseSelect');
-  const subjectSelect = document.getElementById('finalSubjectSelect');
-  const deptLockedNote = document.getElementById('deptLockedNote');
-  const courseLockedNote = document.getElementById('courseLockedNote');
+      const title = document.getElementById('selectionSectionTitle');
+      const deptSelect = document.getElementById('finalDepartmentSelect');
+      const courseSelect = document.getElementById('finalCourseSelect');
+      const subjectSelect = document.getElementById('finalSubjectSelect');
+      const deptLockedNote = document.getElementById('deptLockedNote');
+      const courseLockedNote = document.getElementById('courseLockedNote');
 
-  if (role === 'student') {
-    // ✅ Change title
-    title.innerHTML = '<i class="bi bi-book me-2"></i>Select Subject';
+      if (role === 'student') {
+        // ✅ Change title
+        title.innerHTML = '<i class="bi bi-book me-2"></i>Select Subject';
 
-    // ✅ Lock dept and course
-    deptSelect.disabled = true;
-    courseSelect.disabled = true;
+        // ✅ Lock dept and course
+        deptSelect.disabled = true;
+        courseSelect.disabled = true;
 
-    // ✅ Show lock indicators
-    deptLockedNote.style.display = 'block';
-    courseLockedNote.style.display = 'block';
+        // ✅ Show lock indicators
+        deptLockedNote.style.display = 'block';
+        courseLockedNote.style.display = 'block';
 
-    // ✅ Enable subject selection (students CAN pick subject)
-    subjectSelect.disabled = false;
+        // ✅ Enable subject selection (students CAN pick subject)
+        subjectSelect.disabled = false;
 
-    // ✅ Add visual lock styling
-    deptSelect.style.background = '#f0f0f0';
-    deptSelect.style.cursor = 'not-allowed';
-    courseSelect.style.background = '#f0f0f0';
-    courseSelect.style.cursor = 'not-allowed';
+        // ✅ Add visual lock styling
+        deptSelect.style.background = '#f0f0f0';
+        deptSelect.style.cursor = 'not-allowed';
+        courseSelect.style.background = '#f0f0f0';
+        courseSelect.style.cursor = 'not-allowed';
 
-    console.log('✅ Selection section: Student mode - dept/course locked, subject open');
+        console.log('✅ Selection section: Student mode - dept/course locked, subject open');
 
-  } else {
-    // Teacher / Admin - keep as-is
-    title.innerHTML = '<i class="bi bi-check-square me-2"></i>Final Selection';
-    deptLockedNote.style.display = 'none';
-    courseLockedNote.style.display = 'none';
-    console.log('✅ Selection section: Teacher/Admin mode - full access');
-  }
-}
+      } else {
+        // Teacher / Admin - keep as-is
+        title.innerHTML = '<i class="bi bi-check-square me-2"></i>Final Selection';
+        deptLockedNote.style.display = 'none';
+        courseLockedNote.style.display = 'none';
+        console.log('✅ Selection section: Teacher/Admin mode - full access');
+      }
+    }
     async function handleRefreshRequest() {
       console.log('🔄 Refreshing attendance data...');
 

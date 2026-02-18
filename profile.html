@@ -283,6 +283,20 @@
 
 <body>
   <div class="container">
+  <a href="main-system.html" style="
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #667eea;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    margin-bottom: 16px;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+  " onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">
+    ← Back to Dashboard
+  </a>
     <h1>Update Profile</h1>
     <p class="subtitle">Complete your profile information</p>
     <div class="scrollable-content">
@@ -356,7 +370,6 @@
   <script>
     let profileCurrentUser = null;
 
-    // Show error message
     function showError(message) {
       const errorEl = document.getElementById('errorMessage');
       errorEl.textContent = message;
@@ -364,7 +377,6 @@
       document.getElementById('successMessage').style.display = 'none';
     }
 
-    // Show success message
     function showSuccess(message) {
       const successEl = document.getElementById('successMessage');
       successEl.textContent = message;
@@ -372,13 +384,11 @@
       document.getElementById('errorMessage').style.display = 'none';
     }
 
-    // Clear messages
     function clearMessages() {
       document.getElementById('errorMessage').style.display = 'none';
       document.getElementById('successMessage').style.display = 'none';
     }
 
-    // Set button loading state
     function setButtonLoading(button, isLoading) {
       if (isLoading) {
         button.classList.add('loading');
@@ -389,37 +399,27 @@
       }
     }
 
-    // Load departments from Firebase
     async function loadDepartments() {
       console.log('=== LOADING DEPARTMENTS ===');
 
       try {
-        // Check if Firebase is initialized
         if (!firebase || !firebase.apps || firebase.apps.length === 0) {
           console.error('Firebase not initialized!');
           showError('Firebase not initialized. Please check firebase-config.js');
           return;
         }
 
-        console.log('Firebase initialized:', firebase.apps.length, 'apps');
-
         const db = firebase.database();
-        console.log('Database reference obtained');
-
         const departmentsRef = db.ref('mainSystem/departments');
-        console.log('Attempting to read from: mainSystem/departments');
-
         const snapshot = await departmentsRef.once('value');
         const departments = snapshot.val();
 
         console.log('Departments data:', departments);
 
         const departmentSelect = document.getElementById('department');
-
         departmentSelect.innerHTML = '<option value="">Select department</option>';
 
         if (departments && Array.isArray(departments) && departments.length > 0) {
-          console.log('Loading', departments.length, 'departments');
           departments.forEach(dept => {
             const option = document.createElement('option');
             option.value = dept;
@@ -427,8 +427,6 @@
             departmentSelect.appendChild(option);
           });
         } else if (departments && typeof departments === 'object') {
-          // If departments is an object instead of array
-          console.log('Departments is an object, converting to array');
           const deptArray = Object.values(departments);
           deptArray.forEach(dept => {
             const option = document.createElement('option');
@@ -437,7 +435,6 @@
             departmentSelect.appendChild(option);
           });
         } else {
-          console.warn('No departments found or invalid format');
           departmentSelect.innerHTML = '<option value="">No departments available</option>';
           showError('No departments configured. Please contact admin.');
         }
@@ -447,7 +444,6 @@
       }
     }
 
-    // Load courses based on department
     async function loadCourses(department) {
       console.log('=== LOADING COURSES FOR:', department, '===');
 
@@ -462,9 +458,6 @@
       try {
         const db = firebase.database();
         const coursesRef = db.ref(`mainSystem/courses/${department}`);
-
-        console.log('Attempting to read from: mainSystem/courses/' + department);
-
         const snapshot = await coursesRef.once('value');
         const courses = snapshot.val();
 
@@ -473,7 +466,6 @@
         courseSelect.innerHTML = '<option value="">Select course</option>';
 
         if (courses && Array.isArray(courses) && courses.length > 0) {
-          console.log('Loading', courses.length, 'courses');
           courses.forEach(course => {
             const option = document.createElement('option');
             option.value = course;
@@ -482,8 +474,6 @@
           });
           courseSelect.disabled = false;
         } else if (courses && typeof courses === 'object') {
-          // If courses is an object instead of array
-          console.log('Courses is an object, converting to array');
           const courseArray = Object.values(courses);
           courseArray.forEach(course => {
             const option = document.createElement('option');
@@ -493,7 +483,6 @@
           });
           courseSelect.disabled = false;
         } else {
-          console.warn('No courses found');
           courseSelect.innerHTML = '<option value="">No courses available</option>';
           courseSelect.disabled = true;
           showError('No courses available for this department.');
@@ -504,20 +493,16 @@
       }
     }
 
-    // Load current user data
     async function loadUserData() {
       console.log('=== LOADING USER DATA ===');
 
       try {
-        // Check if Cognito is initialized
         if (!window.AmazonCognitoIdentity) {
-          console.error('Cognito SDK not loaded');
           showError('Authentication system not loaded. Please refresh the page.');
           return;
         }
 
         if (!window.COGNITO_CONFIG) {
-          console.error('Cognito config not found');
           showError('Configuration error. Please check cognito-config.js');
           return;
         }
@@ -531,11 +516,11 @@
         profileCurrentUser = userPool.getCurrentUser();
 
         if (!profileCurrentUser) {
-          console.log('No user logged in, redirecting to login');
           window.location.href = 'index.html';
           return;
         }
-        await signIntoFirebase();
+
+        // ✅ REMOVED duplicate signIntoFirebase() call - already done in DOMContentLoaded
         console.log('Current user:', profileCurrentUser.getUsername());
 
         profileCurrentUser.getSession((err, session) => {
@@ -545,8 +530,6 @@
             return;
           }
 
-          console.log('Session valid:', session.isValid());
-
           profileCurrentUser.getUserAttributes((err, attributes) => {
             if (err) {
               console.error('Error getting attributes:', err);
@@ -554,60 +537,40 @@
               return;
             }
 
-            console.log('User attributes:', attributes);
-
-            // Convert to object
             const attrs = {};
             attributes.forEach(attr => {
               attrs[attr.Name] = attr.Value;
             });
 
-            console.log('Parsed attributes:', attrs);
-
-            // Fill in the form
             document.getElementById('email').value = attrs.email || '';
             document.getElementById('name').value = attrs.name || '';
             document.getElementById('studentId').value = attrs['custom:studentId'] || '';
 
-
-            // Set current values if they exist
             if (attrs['custom:department']) {
-              console.log('Setting department:', attrs['custom:department']);
               document.getElementById('department').value = attrs['custom:department'];
               loadCourses(attrs['custom:department']).then(() => {
                 if (attrs['custom:course']) {
-                  console.log('Setting course:', attrs['custom:course']);
                   document.getElementById('course').value = attrs['custom:course'];
                 }
               });
             }
 
-            if (attrs['custom:studentId']) {
-              console.log('Setting student ID:', attrs['custom:studentId']);
-              document.getElementById('studentId').value = attrs['custom:studentId'];
-            }
-
             if (attrs['custom:academicYear']) {
-              console.log('Setting academic year:', attrs['custom:academicYear']);
               document.getElementById('academicYear').value = attrs['custom:academicYear'];
             }
 
             if (attrs['custom:division']) {
-              console.log('Setting division:', attrs['custom:division']);
               document.getElementById('division').value = attrs['custom:division'];
             }
 
-            // Show current info
             const hasAllInfo = attrs['custom:department'] && attrs['custom:course'] &&
               attrs['custom:academicYear'] && attrs['custom:division'];
-
-            console.log('Has complete profile?', hasAllInfo);
 
             if (hasAllInfo) {
               document.getElementById('currentInfo').style.display = 'block';
               document.getElementById('currentInfo').innerHTML = `
                 <strong>Current Information:</strong><br>
-                Student ID: ${attrs['custom:studentId'] || 'Not set'}<br> 
+                Student ID: ${attrs['custom:studentId'] || 'Not set'}<br>
                 Department: ${attrs['custom:department']}<br>
                 Course: ${attrs['custom:course']}<br>
                 Year: ${attrs['custom:academicYear']}<br>
@@ -622,11 +585,7 @@
       }
     }
 
-    // Update user attributes
     async function updateUserAttributes(attributes) {
-      console.log('=== UPDATING USER ATTRIBUTES ===');
-      console.log('Attributes to update:', attributes);
-
       return new Promise((resolve, reject) => {
         profileCurrentUser.getSession((err, session) => {
           if (err) {
@@ -640,10 +599,8 @@
 
           profileCurrentUser.updateAttributes(attributeList, (err, result) => {
             if (err) {
-              console.error('Update error:', err);
               reject(err);
             } else {
-              console.log('Update successful:', result);
               resolve(result);
             }
           });
@@ -651,7 +608,6 @@
       });
     }
 
-    // Handle form submission
     document.getElementById('profileForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -684,9 +640,7 @@
         setButtonLoading(submitBtn, false);
         showSuccess('✓ Profile updated successfully! Redirecting...');
 
-        // Redirect after 2 seconds
         setTimeout(async () => {
-          // Use the redirectBasedOnRole from auth.js
           await redirectBasedOnRole();
         }, 2000);
 
@@ -696,12 +650,10 @@
       }
     });
 
-    // Department change handler
     document.getElementById('department').addEventListener('change', (e) => {
       loadCourses(e.target.value);
     });
 
-    // Logout handler
     document.getElementById('logoutBtn').addEventListener('click', () => {
       if (profileCurrentUser) {
         profileCurrentUser.signOut();
@@ -709,17 +661,19 @@
       window.location.href = 'index.html';
     });
 
-    // Initialize on page load
+    // ✅ CHANGED: Single auth call + parallel loading
     window.addEventListener('DOMContentLoaded', async () => {
-      console.log('=== PAGE LOADED ===');
-      console.log('Firebase available?', typeof firebase !== 'undefined');
-      console.log('Cognito available?', typeof AmazonCognitoIdentity !== 'undefined');
+      try {
+        await signIntoFirebase();
+        console.log('✅ Firebase auth ready');
 
-      // Wait a bit for Firebase to initialize
-      await new Promise(resolve => setTimeout(resolve, 300));
+        // ✅ Run both in parallel - saves ~500ms
+        await Promise.all([loadDepartments(), loadUserData()]);
 
-      await loadDepartments();
-      await loadUserData();
+        document.getElementById('studentId').focus();
+      } catch (error) {
+        console.error('Init failed:', error);
+      }
     });
   </script>
 </body>
