@@ -21,7 +21,7 @@
   <!-- Firebase SDK (Add AFTER AWS Cognito SDK) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <!-- Firebase Config (reuse same file) -->
   <script src="firebase-config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
@@ -920,6 +920,7 @@
       font-size: 0.6rem;
       opacity: 0.7;
     }
+
   </style>
 </head>
 
@@ -2122,146 +2123,137 @@
       return String(key).replace(/__/g, '/');
     }
     // Save data (cloud + local hybrid)
-    // Save data (FIREBASE FIRST, IndexedDB as backup)
-    async function saveToStorage(key, data) {
-      let firebaseSaved = false;
-      let path;
+ async function saveToStorage(key, data) {
+  let firebaseSaved = false;
+  let path;
 
-      // ✅ GLOBAL KEYS (shared by all)
-      const globalKeys = ['departments', 'courses', 'subjects', 'threshold'];
+  const globalKeys = ['departments', 'courses', 'subjects', 'threshold'];
 
-      // ✅ ENCODE DATA FOR FIREBASE (fix "/" in keys)
-      let firebaseData = data;
-      if (key === 'subjects' || key === 'courses') {
-        firebaseData = encodeNestedObject(data);
-      }
+  let firebaseData = data;
+  if (key === 'subjects' || key === 'courses') {
+    firebaseData = encodeNestedObject(data);
+  }
 
-      // ✅ DIVISION-SPECIFIC KEYS (stored in division path)
-      const divisionSpecificKeys = [
-        'selectedDepartment',
-        'selectedCourse',
-        'selectedSubject',
-        'selectedMonth',
-        'selectedYear',
-        'currentDay',
-        'selectedAcademicYear',  // Store in division path
-        'selectedDivision'       // Store in division path
-      ];
+  const divisionSpecificKeys = [
+    'selectedDepartment',
+    'selectedCourse',
+    'selectedSubject',
+    'selectedMonth',
+    'selectedYear',
+    'currentDay',
+    'selectedAcademicYear',
+    'selectedDivision'
+  ];
 
-      if (globalKeys.includes(key)) {
-        // Save to global path
-        path = `mainSystem/${key}`;
-      }
-      else if (divisionSpecificKeys.includes(key)) {
-        // Save to division-specific path
-        const year = appState.selectedYear || new Date().getFullYear();
-        const dept = appState.selectedDepartment;
-        const course = appState.selectedCourse;
-        const academicYear = appState.selectedAcademicYear;
-        const division = appState.selectedDivision;
+  if (globalKeys.includes(key)) {
+    path = `mainSystem/${key}`;
+  }
+  else if (divisionSpecificKeys.includes(key)) {
+    const year = appState.selectedYear || new Date().getFullYear();
+    const dept = appState.selectedDepartment;
+    const course = appState.selectedCourse;
+    const academicYear = appState.selectedAcademicYear;
+    const division = appState.selectedDivision;
 
-        if (!dept || !course || !academicYear || !division) {
-          console.warn(`⚠️ Cannot save ${key}: division path incomplete. Saving to IndexedDB only.`);
-          // Save to IndexedDB as fallback
-          try {
-            await saveToDatabase(key, data);
-          } catch (error) {
-            console.warn(`⚠️ IndexedDB save failed for ${key}:`, error);
-          }
-          return;
-        }
-
-        path = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}/${key}`;
-      }
-      else if (key === 'attendanceData') {
-        // Full attendance data structure saves to root
-        path = `mainSystem/attendanceData`;
-      }
-      else if (key === 'holidays') {
-        // Holidays save to current month path (shared by all divisions)
-        const year = appState.selectedYear || new Date().getFullYear();
-        const dept = appState.selectedDepartment;
-        const course = appState.selectedCourse;
-        const academicYear = appState.selectedAcademicYear;
-        const division = appState.selectedDivision;
-        const monthKey = getMonthKey();
-
-        if (!dept || !course || !academicYear || !division || !monthKey) {
-          console.warn(`⚠️ Cannot save holidays: path incomplete`);
-          await saveToDatabase(key, data);
-          return;
-        }
-
-        path = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}/months/${monthKey}/holidays`;
-      }
-      else {
-        // Default to global
-        path = `mainSystem/${key}`;
-      }
-
-      // Try Firebase FIRST
-      if (useCloud && firebaseDB) {
-        try {
-          await firebaseDB.ref(path).set(firebaseData);  // ✅ Use encoded data
-          console.log(`✅ Saved to Firebase: ${path}`);
-          firebaseSaved = true;
-        } catch (error) {
-          console.error(`❌ Firebase save failed for ${key}:`, error);
-        }
-      }
-
-      // Backup to IndexedDB
+    if (!dept || !course || !academicYear || !division) {
+      console.warn(`⚠️ Cannot save ${key}: division path incomplete. Saving to IndexedDB only.`);
       try {
         await saveToDatabase(key, data);
-        console.log(`📂 Backup to IndexedDB: ${key}`);
       } catch (error) {
-        console.warn(`⚠️ IndexedDB backup failed for ${key}:`, error);
+        console.warn(`⚠️ IndexedDB save failed for ${key}:`, error);
       }
-
-      if (!firebaseSaved && !useCloud) {
-        console.warn(`⚠️ Firebase not connected, using IndexedDB only`);
-      }
+      return;
     }
-    // After successful login, read user's division attributes
-    async function initializeMainSystemForStudent() {
-      try {
-        const user = await getCurrentUser();
-        const attributes = await getUserAttributes();
 
-        // Extract custom attributes
-        const department = attributes['custom:department'];
-        const course = attributes['custom:course'];
-        const academicYear = attributes['custom:academicYear'];
-        const division = attributes['custom:division'];
+    path = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}/${key}`;
+  }
+  else if (key === 'attendanceData') {
+    // ========================================
+    // ✅ CHANGED BLOCK STARTS HERE
+    // ========================================
+    const year = appState.selectedYear || new Date().getFullYear();
+    const dept = appState.selectedDepartment;
+    const course = appState.selectedCourse;
+    const academicYear = appState.selectedAcademicYear;
+    const division = appState.selectedDivision;
+    const subject = appState.selectedSubject;  // ✅ NEW: Get current subject
+    const month = appState.selectedMonth;      // ✅ NEW: Get current month
 
-        if (department && course && academicYear && division) {
-          // Auto-populate and LOCK the dropdowns
-          document.getElementById('departmentSelect').value = department;
-          document.getElementById('departmentSelect').disabled = true;
-
-          // Load courses for this department
-          await loadCoursesForDepartment(department);
-          document.getElementById('courseSelect').value = course;
-          document.getElementById('courseSelect').disabled = true;
-
-          document.getElementById('academicYearSelect').value = academicYear;
-          document.getElementById('academicYearSelect').disabled = true;
-
-          document.getElementById('divisionSelect').value = division;
-          document.getElementById('divisionSelect').disabled = true;
-
-          console.log('✅ Student division locked:', { department, course, academicYear, division });
-
-          // Load their attendance data
-          await loadAttendanceForDivision();
-        } else {
-          console.warn('⚠️ Student missing division attributes');
-        }
-
-      } catch (error) {
-        console.error('Error initializing student:', error);
-      }
+    if (!dept || !course || !academicYear || !division) {
+      console.warn(`⚠️ Cannot save attendanceData: division path incomplete`);
+      await saveToDatabase(key, data);
+      return;
     }
+
+    // ✅ NEW: Check if subject and month are selected
+    if (!subject || month === null || month === undefined) {
+      console.warn(`⚠️ Cannot save attendanceData: subject or month not selected`);
+      await saveToDatabase(key, data);
+      return;
+    }
+
+    // ✅ NEW: Get ONLY the current subject's attendance data
+    const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+    const attendanceData = data?.[year]?.[dept]?.[course]?.[academicYear]?.[division]?.months?.[monthKey]?.subjects?.[subject]?.attendance;
+
+    if (!attendanceData) {
+      console.warn(`⚠️ No attendance data for current subject: ${subject}`);
+      await saveToDatabase(key, data);
+      return;
+    }
+
+    // ✅ NEW: Write to SPECIFIC path (same path face recognition listens to)
+    path = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}/months/${monthKey}/subjects/${subject}/attendance`;
+    firebaseData = attendanceData;
+    
+    console.log(`📤 Saving current subject attendance to: ${path}`);
+    // ========================================
+    // ✅ CHANGED BLOCK ENDS HERE
+    // ========================================
+  }
+  else if (key === 'holidays') {
+    const year = appState.selectedYear || new Date().getFullYear();
+    const dept = appState.selectedDepartment;
+    const course = appState.selectedCourse;
+    const academicYear = appState.selectedAcademicYear;
+    const division = appState.selectedDivision;
+    const monthKey = getMonthKey();
+
+    if (!dept || !course || !academicYear || !division || !monthKey) {
+      console.warn(`⚠️ Cannot save holidays: path incomplete`);
+      await saveToDatabase(key, data);
+      return;
+    }
+
+    path = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}/months/${monthKey}/holidays`;
+  }
+  else {
+    path = `mainSystem/${key}`;
+  }
+
+  // Try Firebase FIRST
+  if (useCloud && firebaseDB) {
+    try {
+      await firebaseDB.ref(path).set(firebaseData);
+      console.log(`✅ Saved to Firebase: ${path}`);
+      firebaseSaved = true;
+    } catch (error) {
+      console.error(`❌ Firebase save failed for ${key}:`, error);
+    }
+  }
+
+  // Backup to IndexedDB
+  try {
+    await saveToDatabase(key, data);
+    console.log(`📂 Backup to IndexedDB: ${key}`);
+  } catch (error) {
+    console.warn(`⚠️ IndexedDB backup failed for ${key}:`, error);
+  }
+
+  if (!firebaseSaved && !useCloud) {
+    console.warn(`⚠️ Firebase not connected, using IndexedDB only`);
+  }
+}
     // Load data (FIREBASE FIRST, fallback to IndexedDB)
     async function loadFromStorage(key) {
       let path;
@@ -2373,81 +2365,105 @@
 
 
     // ==================== AUTHENTICATION CHECK ====================
-    async function checkAuthAndInit() {
-      try {
-        // Check if logged in
-        const user = await getCurrentUser();
+   async function checkAuthAndInit() {
+  try {
+    console.log('🔵 Step 1: Checking if user is logged in...');
+    
+    const user = await getCurrentUser();
 
-        if (!user) {
-          // Not logged in - redirect to login
-          window.location.href = 'index.html';
-          return;
-        }
+    if (!user) {
+      console.log('❌ No user - redirecting to login');
+      window.location.href = 'index.html';
+      return;
+    }
 
-        // Get role
-        const role = await getUserRole();
+    console.log('✅ User logged in:', user.attributes.email);
+    console.log('🔵 Step 2: Calling signIntoFirebase()...');
+    
+    // ✅ WAIT for Firebase sign-in to complete
+    const firebaseSuccess = await signIntoFirebase();
+    
+    if (!firebaseSuccess) {
+      alert('Firebase authentication failed. Please try again.');
+      return;
+    }
+    
+    console.log('🔵 Step 3: Verifying Firebase auth...');
+    
 
-        // Show user info
-        console.log(`Logged in as: ${user.attributes.email} (${role})`);
-        // ✅ STORE ROLE GLOBALLY
-        currentUserRole = role;
+// ✅ OPTIMIZED: Wait for Firebase currentUser (up to 3 seconds, check every 100ms)
+let attempts = 0;
+const maxAttempts = 30; // 30 × 100ms = 3 seconds max
+const checkInterval = 100; // Check every 100ms
 
-        if (role === 'student') {
-          const attributes = await getUserAttributes();
-          currentStudentId = attributes['custom:studentId'];
-        }
+while (!firebase.auth().currentUser && attempts < maxAttempts) {
+  if (attempts % 5 === 0) { // Only log every 500ms to reduce console spam
+    console.log(`⏳ Waiting for Firebase auth... (${Math.floor(attempts * checkInterval / 1000)}s)`);
+  }
+  await new Promise(resolve => setTimeout(resolve, checkInterval));
+  attempts++;
+}
 
-        // ✅ FOR STUDENTS: Auto-populate and lock division fields
-        if (role === 'student') {
-          const attributes = await getUserAttributes();
+if (!firebase.auth().currentUser) {
+  console.error('❌ Firebase auth failed after 3 seconds');
+  alert('Firebase authentication timed out. Please refresh.');
+  return;
+}
 
-          const department = attributes['custom:department'];
-          const course = attributes['custom:course'];
-          const academicYear = attributes['custom:academicYear'];
-          const division = attributes['custom:division'];
+console.log(`✅ Firebase authenticated in ${attempts * checkInterval}ms`);
+console.log('✅ Firebase currentUser:', firebase.auth().currentUser.uid);
+    
+    const role = await getUserRole();
+    console.log('✅ User role:', role);
+    
+    currentUserRole = role;
 
-          if (department && course && academicYear && division) {
-            // Set in appState
-            appState.selectedDepartment = department;
-            appState.selectedCourse = course;
-            appState.selectedAcademicYear = academicYear;
-            appState.selectedDivision = division;
+    if (role === 'student') {
+      const attributes = await getUserAttributes();
+      currentStudentId = attributes['custom:studentId'];
+      
+      const department = attributes['custom:department'];
+      const course = attributes['custom:course'];
+      const academicYear = attributes['custom:academicYear'];
+      const division = attributes['custom:division'];
 
-            console.log('✅ Student division locked:', { department, course, academicYear, division });
-          } else {
-            console.warn('⚠️ Student missing division attributes');
-            alert('Your account is missing division information. Please contact admin.');
-          }
-        }
-
-        if (role === 'teacher') {
-          console.log('🔄 Teacher login - Clearing session selections');
-
-          // Clear from appState
-          appState.selectedDepartment = null;
-          appState.selectedCourse = null;
-          appState.selectedSubject = null;
-          appState.selectedAcademicYear = null;
-          appState.selectedDivision = null;
-
-          // Clear from storage
-          await saveToStorage('selectedDepartment', null);
-          await saveToStorage('selectedCourse', null);
-          await saveToStorage('selectedSubject', null);
-          await saveToStorage('selectedAcademicYear', null);
-          await saveToStorage('selectedDivision', null);
-        }
-
-        // Continue with normal initialization
-        initialize();
-
-      } catch (error) {
-        console.error('Auth check failed:', error);
-        window.location.href = 'index.html';
+      if (department && course && academicYear && division) {
+        appState.selectedDepartment = department;
+        appState.selectedCourse = course;
+        appState.selectedAcademicYear = academicYear;
+        appState.selectedDivision = division;
+        console.log('✅ Student division locked:', { department, course, academicYear, division });
+      } else {
+        console.warn('⚠️ Student missing division attributes');
+        alert('Your account is missing division information. Please contact admin.');
       }
     }
 
-    async function applyRoleBasedUI() {
+    if (role === 'teacher') {
+      console.log('🔄 Teacher login - Clearing session selections');
+      appState.selectedDepartment = null;
+      appState.selectedCourse = null;
+      appState.selectedSubject = null;
+      appState.selectedAcademicYear = null;
+      appState.selectedDivision = null;
+
+      await saveToStorage('selectedDepartment', null);
+      await saveToStorage('selectedCourse', null);
+      await saveToStorage('selectedSubject', null);
+      await saveToStorage('selectedAcademicYear', null);
+      await saveToStorage('selectedDivision', null);
+    }
+
+    console.log('🔵 Step 5: Calling initialize()...');
+    initialize();
+
+  } catch (error) {
+    console.error('❌ Auth check failed:', error);
+    window.location.href = 'index.html';
+  }
+}
+
+async function applyRoleBasedUI() {
   try {
     const role = await getUserRole();
     console.log('🔵 Applying UI for role:', role);

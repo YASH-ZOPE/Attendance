@@ -18,7 +18,7 @@
   <!-- Firebase SDK (Add AFTER AWS Cognito, BEFORE face-api) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <!-- Firebase Config -->
   <script src="firebase-config.js"></script>
   <!-- Cloud Storage -->
@@ -1495,7 +1495,7 @@ if (document.readyState === 'loading') {
                     <button id="clearAllFacesBtn" class="btn btn-outline-danger w-100 admin-only-inline">
                       <i class="bi bi-trash me-2"></i>Clear All Faces
                     </button>
-                    <button id="forceReadBtn" class="btn btn-outline-info w-100 mb-2 teacher-only-inline">
+                    <button id="forceReadBtn" class="btn btn-outline-info w-100 mb-2">
                       <i class="bi bi-arrow-clockwise me-2"></i>Force Read Firebase Now
                     </button>
 
@@ -1789,7 +1789,7 @@ function updateConfigDisplay() {
               // Get role
               const role = await getUserRole();
               console.log(`Face Recognition - Logged in as: ${user.attributes.email} (${role})`);
-
+              await signIntoFirebase();
               // Apply role-based UI
               await applyRoleBasedUIForFaceRecognition();
 

@@ -4,10 +4,89 @@
  * Handles all authentication operations for the Smart Attendance System
  */
 
+// ADD THIS at the very top of auth.js file
+const LAMBDA_AUTH_URL = 'https://nxcqmkrqanlh34jxrq5sjlcebi0dqpoj.lambda-url.ap-south-1.on.aws/';
+
 // Global variables
 let userPool = null;
 let currentUser = null;
 
+async function signIntoFirebase() {
+  try {
+    // Get current Cognito user
+    const user = await getCurrentUser();
+    
+    if (!user) {
+      throw new Error('No user logged in');
+    }
+    
+    // ✅ FIX: Get session FIRST
+    const session = await getSession();
+    const cognitoToken = session.getIdToken().getJwtToken();
+    
+    // ✅ FIX: Get role from session token (groups)
+    const idToken = session.getIdToken();
+    const payload = idToken.decodePayload();
+    const groups = payload['cognito:groups'] || [];
+    
+    let role = 'student';  // Default
+    if (groups.includes('admin')) {
+      role = 'admin';
+    } else if (groups.includes('teacher')) {
+      role = 'teacher';
+    }
+    
+    const attributes = await getUserAttributes();
+    const email = attributes.email;
+    const studentId = attributes['custom:studentId'] || null;
+    
+    console.log('🔐 Getting Firebase token for:', email, '- Role:', role);
+    
+    // ✅ ADD DEBUG
+    console.log('📤 Sending to Lambda:', { email, role, studentId });
+    
+    // Call Lambda to get Firebase custom token
+    const response = await fetch(LAMBDA_AUTH_URL, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${cognitoToken}`
+      },
+      body: JSON.stringify({
+        email: email,
+        role: role,
+        studentId: studentId
+      })
+    });
+    
+    console.log('📥 Lambda status:', response.status);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.log('📥 Lambda error response:', errorText);
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    
+    const result = await response.json();
+    
+    console.log('🔍 Lambda response:', result);
+    
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to get Firebase token');
+    }
+    
+    // Sign into Firebase with the custom token
+    await firebase.auth().signInWithCustomToken(result.token);
+    
+    console.log('✅ Signed into Firebase with role:', role);
+    return true;
+    
+  } catch (error) {
+    console.error('❌ Firebase sign-in failed:', error);
+    alert('Authentication error. Please refresh and try again.');
+    return false;
+  }
+}
 /**
  * Initialize AWS Cognito User Pool
  */
@@ -273,6 +352,37 @@ function getCurrentUser() {
         currentUser = cognitoUser;
         resolve(userInfo);
       });
+    });
+  });
+}
+
+/**
+ * Get current Cognito session
+ * @returns {Promise} - Resolves with session object
+ */
+function getSession() {
+  return new Promise((resolve, reject) => {
+    if (!userPool) initCognito();
+
+    const cognitoUser = userPool.getCurrentUser();
+
+    if (!cognitoUser) {
+      reject(new Error('No user logged in'));
+      return;
+    }
+
+    cognitoUser.getSession((err, session) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+
+      if (!session.isValid()) {
+        reject(new Error('Session is invalid'));
+        return;
+      }
+
+      resolve(session);
     });
   });
 }
@@ -638,6 +748,7 @@ if (typeof window !== 'undefined') {
     login,
     logout,
     getCurrentUser,
+    getSession,
     getUserRole,
     getUserAttributes,
     isProfileComplete,

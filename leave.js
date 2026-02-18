@@ -821,7 +821,7 @@
           window.location.href = 'index.html';
           return;
         }
-
+        await signIntoFirebase();
         document.getElementById('userEmail').textContent = user.attributes.email;
 
         initialize();

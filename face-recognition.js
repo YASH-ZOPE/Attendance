@@ -29,6 +29,7 @@ class FaceRecognitionSystem {
 
     this.currentQRId = null;
     this.qrExpirationListener = null;
+    this.attendanceListener = null;
     // Main system database reference
     this.mainDB = null;
     this.firebaseSync = null;
@@ -46,11 +47,7 @@ class FaceRecognitionSystem {
        this.isHandlingDayChange = false;
        this.userRole = null;
   }
-//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>         version           >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  /**
-   * Initialize the system
-   */
-  async init() {
+async init() {
   try {
     // ✅ CHECK AUTHENTICATION FIRST
     const user = await getCurrentUser();
@@ -64,26 +61,27 @@ class FaceRecognitionSystem {
     // Get role
     const role = await getUserRole();
     window.currentUserRole = role; // Store globally
+    this.userRole = role; // Store in class
     
-    this.userRole = role; // ✅ WORKS - adds property to class
-  console.log(`Logged in as: ${user.attributes.email} (${role})`);
+    console.log(`Logged in as: ${user.attributes.email} (${role})`);
 
-// ✅ Get division from Cognito
-const divisionInfo = await getDivisionAttributes();
+    // ✅ Get division from Cognito
+    const divisionInfo = await getDivisionAttributes();
 
-if (divisionInfo.department && divisionInfo.course && divisionInfo.academicYear && divisionInfo.division) {
-  this.mainSystemConfig.selectedDepartment = divisionInfo.department;
-  this.mainSystemConfig.selectedCourse = divisionInfo.course;
-  this.mainSystemConfig.selectedAcademicYear = divisionInfo.academicYear;
-  this.mainSystemConfig.selectedDivision = divisionInfo.division;
-  
-  console.log('✅ Division loaded from Cognito:', divisionInfo);
-} else {
-  console.warn('⚠️ User missing division attributes');
-  this.showToast('⚠️ Your account is missing division info. Contact admin.', 'warning');
-}
+    if (divisionInfo.department && divisionInfo.course && divisionInfo.academicYear && divisionInfo.division) {
+      this.mainSystemConfig.selectedDepartment = divisionInfo.department;
+      this.mainSystemConfig.selectedCourse = divisionInfo.course;
+      this.mainSystemConfig.selectedAcademicYear = divisionInfo.academicYear;
+      this.mainSystemConfig.selectedDivision = divisionInfo.division;
+      
+      console.log('✅ Division loaded from Cognito:', divisionInfo);
+    } else {
+      console.warn('⚠️ User missing division attributes');
+      this.showToast('⚠️ Your account is missing division info. Contact admin.', 'warning');
+    }
 
-if (role === 'student') {
+    // ✅ ROLE-SPECIFIC INITIALIZATION
+    if (role === 'student') {
       console.log('🔄 Student login - Clearing saved session');
       localStorage.removeItem('faceRecDivisionConfig');
       
@@ -117,8 +115,44 @@ if (role === 'student') {
       // For admin/teacher, enable camera immediately
       this.enableCameraButton();
     }
-       // ✅ CONTINUE WITH EXISTING INITIALIZATION
+    
+    // ✅ SHOW LOADING OVERLAY
     this.showLoading();
+    
+    // ✅ ====== CRITICAL FIX: WAIT FOR FIREBASE AUTH BEFORE LOADING FACES ======
+    if (typeof signIntoFirebase === 'function') {
+      try {
+        console.log('⏳ Signing into Firebase...');
+        const authSuccess = await signIntoFirebase();
+        
+        if (authSuccess) {
+          console.log('✅ Firebase authentication complete');
+          
+          // ✅ Wait for currentUser to be populated (max 3 seconds)
+          let attempts = 0;
+          const maxAttempts = 30; // 30 × 100ms = 3 seconds
+          
+          while (!firebase.auth().currentUser && attempts < maxAttempts) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            attempts++;
+          }
+          
+          if (firebase.auth().currentUser) {
+            console.log(`✅ Firebase currentUser ready: ${firebase.auth().currentUser.uid}`);
+          } else {
+            console.warn('⚠️ Firebase currentUser timeout after 3 seconds');
+          }
+        } else {
+          console.warn('⚠️ Firebase auth returned false');
+        }
+      } catch (error) {
+        console.warn('⚠️ Firebase auth failed, continuing with offline mode:', error);
+      }
+    } else {
+      console.warn('⚠️ signIntoFirebase function not available');
+    }
+    // ✅ ====== END CRITICAL FIX ======
+    
     // ✅ INITIALIZE CLOUD STORAGE WITH FALLBACK
     try {
       await cloudStorage.init();
@@ -132,117 +166,160 @@ if (role === 'student') {
       this.storage = faceStorage;
       this.showToast('Using offline storage (cloud unavailable)', 'warning');
     }
-    // ... rest of your existing init code
 
+    // ✅ INITIALIZE FIREBASE LIVE SYNC
     try {
       this.firebaseSync = new FirebaseLiveSync();
       await this.firebaseSync.init();
+      console.log('✅ Firebase live sync initialized');
       
+      // ✅ AUTO-SETUP LISTENERS FOR STUDENTS (using ID token division)
+      if (role === 'student' && divisionInfo.department && divisionInfo.course && 
+          divisionInfo.academicYear && divisionInfo.division) {
+        
+        const currentYear = new Date().getFullYear();
+        
+        this.firebaseSync.setupLiveListeners({
+          department: divisionInfo.department,
+          course: divisionInfo.course,
+          academicYear: divisionInfo.academicYear,
+          division: divisionInfo.division,
+          year: currentYear,
+          subject: this.mainSystemConfig.selectedSubject,  
+          month: this.mainSystemConfig.selectedMonth, 
+          onSubjectChange: (newSubject, oldSubject) => this.handleFirebaseSubjectChange(newSubject, oldSubject),
+          onMonthChange: (newMonth, oldMonth) => this.handleFirebaseMonthChange(newMonth, oldMonth),
+          onYearChange: (newYear, oldYear) => this.handleFirebaseYearChange(newYear, oldYear),
+          onDayChange: (newDay, oldDay) => this.handleFirebaseDayChange(newDay, oldDay),
+          onAttendanceChange: (data) => this.handleFirebaseAttendanceChange(data)
+        });
+        
+        console.log('✅ Auto-setup Firebase listeners for student division from ID token');
+        
+        // ✅ Also check for saved config (fallback)
+        const savedConfig = localStorage.getItem('faceRecDivisionConfig');
+        if (savedConfig) {
+          const config = JSON.parse(savedConfig);
+          const configAge = Date.now() - config.scannedAt;
+          const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+          
+          if (configAge < maxAge) {
+            // Update subject/month/day from saved config
+            this.mainSystemConfig.selectedSubject = config.subject;
+            this.mainSystemConfig.selectedMonth = config.month;
+            this.mainSystemConfig.selectedYear = config.year;
+            this.mainSystemConfig.currentDay = config.day;
+            console.log('✅ Loaded subject/date from saved config');
+          } else {
+            console.log('⚠️ Saved config expired - cleared');
+            localStorage.removeItem('faceRecDivisionConfig');
+          }
+        }
+      }
       
-// Teachers/admins read directly from Firebase via forceReadFirebaseData()
-const savedConfig = localStorage.getItem('faceRecDivisionConfig');
-
-if (savedConfig && this.userRole === 'student') {
-  const config = JSON.parse(savedConfig);
-  
-  const configAge = Date.now() - config.scannedAt;
-  const maxAge = 24 * 60 * 60 * 1000; // 24 hours
-  
-  if (configAge < maxAge) {
-    // Setup listeners for students
-    this.firebaseSync.setupLiveListeners({
-      department: config.department,
-      course: config.course,
-      academicYear: config.academicYear,
-      division: config.division,
-      year: config.year,
-      onSubjectChange: (newSubject, oldSubject) => this.handleFirebaseSubjectChange(newSubject, oldSubject),
-      onMonthChange: (newMonth, oldMonth) => this.handleFirebaseMonthChange(newMonth, oldMonth),
-      onYearChange: (newYear, oldYear) => this.handleFirebaseYearChange(newYear, oldYear),
-      onDayChange: (newDay, oldDay) => this.handleFirebaseDayChange(newDay, oldDay)
-    });
-    console.log('✅ Firebase listeners attached for student');
-  } else {
-    console.log('⚠️ Saved config expired - cleared');
-    localStorage.removeItem('faceRecDivisionConfig');
-  }
-}
-
-      console.log('✅ Firebase live sync enabled');
     } catch (error) {
       console.error('⚠️ Firebase live sync failed:', error);
+      this.showToast('Warning: Live sync unavailable (offline mode)', 'warning');
     }
-
-      
-      // Show loading overlay
-      this.showLoading();
-      
-      // Connect to main system database
-      await this.connectToMainSystem();
-      // ✅ FIX 2: Only load saved config for admin/teacher
-    const savedConfig = localStorage.getItem('faceRecDivisionConfig');
-    if (savedConfig && this.userRole !== 'student') {
-      const config = JSON.parse(savedConfig);
-      
-      // ✅ FIX 5: Check if config is not too old
-      const configAge = Date.now() - config.scannedAt;
-      const maxAge = 24 * 60 * 60 * 1000; // 24 hours
-      
-      if (configAge < maxAge) {
-        this.mainSystemConfig.selectedDepartment = config.department;
-        this.mainSystemConfig.selectedCourse = config.course;
-        this.mainSystemConfig.selectedAcademicYear = config.academicYear;
-        this.mainSystemConfig.selectedDivision = config.division;
-        this.mainSystemConfig.selectedSubject = config.subject;
-        this.mainSystemConfig.selectedMonth = config.month;
-        this.mainSystemConfig.selectedYear = config.year;
-        this.mainSystemConfig.currentDay = config.day;
-        console.log('✅ Loaded saved QR config for admin/teacher:', config);
-      } else {
-        console.log('⚠️ Saved config expired - cleared');
-        localStorage.removeItem('faceRecDivisionConfig');
-      }
-    } else if (this.userRole === 'student') {
-      console.log('⏳ Student mode - Waiting for QR scan');
-    }
-      await this.checkForDayChange();
-
-      // Load face-api.js models
-      await this.loadModels();
-      
-      // Setup event listeners
-      this.setupEventListeners();
-      await this.checkForDayChange();
     
-    // ✅ CONTINUOUS READ - Every 30 seconds
+    // ✅ CONNECT TO MAIN SYSTEM DATABASE
+    await this.connectToMainSystem();
+    
+    // ✅ LOAD SAVED CONFIG (Admin/Teacher only)
+    if (this.userRole !== 'student') {
+      const savedConfig = localStorage.getItem('faceRecDivisionConfig');
+      
+      if (savedConfig) {
+        const config = JSON.parse(savedConfig);
+        const configAge = Date.now() - config.scannedAt;
+        const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+        
+        if (configAge < maxAge) {
+          this.mainSystemConfig.selectedDepartment = config.department;
+          this.mainSystemConfig.selectedCourse = config.course;
+          this.mainSystemConfig.selectedAcademicYear = config.academicYear;
+          this.mainSystemConfig.selectedDivision = config.division;
+          this.mainSystemConfig.selectedSubject = config.subject;
+          this.mainSystemConfig.selectedMonth = config.month;
+          this.mainSystemConfig.selectedYear = config.year;
+          this.mainSystemConfig.currentDay = config.day;
+          
+          console.log('✅ Loaded saved QR config for admin/teacher:', config);
+          
+          // ✅ Setup listeners for admin/teacher too
+          if (this.firebaseSync && this.firebaseSync.isConnected) {
+            this.firebaseSync.setupLiveListeners({
+              department: config.department,
+              course: config.course,
+              academicYear: config.academicYear,
+              division: config.division,
+              year: config.year,
+              subject: config.subject,  
+              month: config.month,      
+              onSubjectChange: (newSubject, oldSubject) => this.handleFirebaseSubjectChange(newSubject, oldSubject),
+              onMonthChange: (newMonth, oldMonth) => this.handleFirebaseMonthChange(newMonth, oldMonth),
+              onYearChange: (newYear, oldYear) => this.handleFirebaseYearChange(newYear, oldYear),
+              onDayChange: (newDay, oldDay) => this.handleFirebaseDayChange(newDay, oldDay),
+              onAttendanceChange: (data) => this.handleFirebaseAttendanceChange(data)
+            });
+            console.log('✅ Firebase listeners attached for admin/teacher');
+          }
+          
+        } else {
+          console.log('⚠️ Saved config expired - cleared');
+          localStorage.removeItem('faceRecDivisionConfig');
+        }
+      }
+    }
+    
+    // ✅ CHECK FOR DAY CHANGE
+    await this.checkForDayChange();
+
+    // ✅ LOAD FACE-API.JS MODELS
+    await this.loadModels();
+    
+    // ✅ SETUP EVENT LISTENERS
+    this.setupEventListeners();
+    
+    // ✅ SETUP CONTINUOUS FIREBASE READ (Every 30 seconds)
     this.continuousReadInterval = setInterval(async () => {
       console.log('⏰ Running continuous Firebase read...');
       await this.forceReadFirebaseData();
     }, 30 * 1000); // 30 seconds
     
-    // ✅ ALSO CHECK FOR DAY CHANGE EVERY 5 MINUTES
+    // ✅ SETUP DAY CHANGE CHECK (Every 5 minutes)
     this.dateCheckInterval = setInterval(() => {
       this.checkForDayChange();
-    }, 5 * 60 * 1000);
+    }, 5 * 60 * 1000); // 5 minutes
 
-      // Check for day changes
-      await this.checkForDayChange();
-
-      // Load and display registered students
-      await this.updateStudentList();
-      await this.updateStats();
-      this.updateConfigDisplay();
-      // Hide loading overlay
-      this.hideLoading();
-      
-      this.showToast('System ready! You can start using face recognition.', 'success');
-    } catch (error) {
-      console.error('Initialization error:', error);
-      this.showToast('Failed to initialize system: ' + error.message, 'danger');
-      this.hideLoading();
+    // ✅ LOAD AND DISPLAY REGISTERED STUDENTS (Now Firebase auth is complete!)
+    console.log('📥 Loading student list and stats...');
+    await this.updateStudentList();
+    await this.updateStats();
+    this.updateConfigDisplay();
+    
+    // ✅ HIDE LOADING OVERLAY
+    this.hideLoading();
+    
+    // ✅ SHOW SUCCESS MESSAGE
+    if (role === 'student') {
+      this.showToast(
+        '✅ System ready!\n\n' +
+        'Your division is locked to:\n' +
+        `${divisionInfo.department} > ${divisionInfo.course} > ${divisionInfo.academicYear} > ${divisionInfo.division}\n\n` +
+        'Scan QR code to begin.',
+        'success'
+      );
+    } else {
+      this.showToast('✅ System ready! You can start using face recognition.', 'success');
     }
+    
+  } catch (error) {
+    console.error('❌ Initialization error:', error);
+    this.showToast('Failed to initialize system: ' + error.message, 'danger');
+    this.hideLoading();
   }
-
+}
 async validateQRSession(qrId) {
   if (!this.firebaseSync || !this.firebaseSync.isConnected) {
     console.warn('⚠️ Cannot validate - Firebase offline');
@@ -381,6 +458,8 @@ async handleQRScan(qrDataString) {
       subject: qrData.subject,
       month: qrData.month,
       year: qrData.year,
+      subject: qrData.subject,
+      month: qrData.month,
       day: qrData.day,
       scannedAt: Date.now()
     };
@@ -398,7 +477,8 @@ async handleQRScan(qrDataString) {
       onSubjectChange: (newSubject, oldSubject) => this.handleFirebaseSubjectChange(newSubject, oldSubject),
       onMonthChange:   (newMonth, oldMonth)     => this.handleFirebaseMonthChange(newMonth, oldMonth),
       onYearChange:    (newYear, oldYear)       => this.handleFirebaseYearChange(newYear, oldYear),
-      onDayChange:     (newDay, oldDay)         => this.handleFirebaseDayChange(newDay, oldDay)
+      onDayChange:     (newDay, oldDay)         => this.handleFirebaseDayChange(newDay, oldDay),
+      onAttendanceChange: (data) => this.handleFirebaseAttendanceChange(data)
     });
     console.log('✅ Live listeners attached for division');
     
@@ -712,6 +792,38 @@ async handleFirebaseSubjectChange(newSubject, oldSubject) {
   if (oldSubject && oldSubject !== newSubject) {
     console.log('📚 Subject changed - resetting attendance');
     await this.handleDayChange('subject-change');
+  }
+   if (newSubject && this.mainSystemConfig.selectedMonth !== null && this.firebaseSync && this.firebaseSync.isConnected) {
+    const year = this.mainSystemConfig.selectedYear || new Date().getFullYear();
+    const dept = this.mainSystemConfig.selectedDepartment;
+    const course = this.mainSystemConfig.selectedCourse;
+    const academicYear = this.mainSystemConfig.selectedAcademicYear;
+    const division = this.mainSystemConfig.selectedDivision;
+    const month = this.mainSystemConfig.selectedMonth;
+    
+    if (dept && course && academicYear && division) {
+      const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+      const attendancePath = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}/months/${monthKey}/subjects/${newSubject}/attendance`;
+      
+      console.log(`🎯 Re-attaching attendance listener to: ${attendancePath}`);
+      
+      // Remove old listener if exists
+      if (this.attendanceListener) {
+        this.attendanceListener.off();
+      }
+      
+      // Attach new listener
+      this.attendanceListener = this.firebaseSync.firebaseDB.ref(attendancePath);
+      this.attendanceListener.on('value', (snapshot) => {
+        console.log('🔥🔥🔥 FIREBASE VALUE EVENT TRIGGERED!');
+        const data = snapshot.val();
+        if (this.handleFirebaseAttendanceChange) {
+          this.handleFirebaseAttendanceChange(data);
+        }
+      });
+      
+      console.log(`✅ Attendance listener re-attached for subject: ${newSubject}`);
+    }
   }
   
   await this.loadFaceMatcher();
@@ -1437,112 +1549,144 @@ async showFaceExistsDialog(existingFace) {
    * Update student list UI
    */
   async updateStudentList() {
-    const faces = await this.storage.getAllFaces();
+  console.log('📋 updateStudentList() called');
+  
+  const faces = await this.storage.getAllFaces();
+  console.log(`📋 Got ${faces.length} faces from storage`);
+  
+  // ✅ ALWAYS sync from Firebase if connected
+  if (this.firebaseSync && this.firebaseSync.isConnected) {
+    const day = this.mainSystemConfig.currentDay;
+    const month = this.mainSystemConfig.selectedMonth;
+    const year = this.mainSystemConfig.selectedYear;
+    const subject = this.mainSystemConfig.selectedSubject;
     
-     if (this.firebaseSync && this.firebaseSync.isConnected) {
-      const day = this.mainSystemConfig.currentDay;
-      const month = this.mainSystemConfig.selectedMonth;
-      const year = this.mainSystemConfig.selectedYear;
-      const subject = this.mainSystemConfig.selectedSubject;
+    if (day && month !== null && month !== undefined && year && subject) {
+      const dept = this.mainSystemConfig.selectedDepartment;
+      const course = this.mainSystemConfig.selectedCourse;
+      const academicYear = this.mainSystemConfig.selectedAcademicYear;
+      const division = this.mainSystemConfig.selectedDivision;
+
+      if (!dept || !course || !academicYear || !division) {
+        console.warn('⚠️ Cannot read attendance - missing config');
+        return;
+      }
+
+      const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+      const path = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}/months/${monthKey}/subjects/${subject}/attendance`;
       
-      if (day && month !== null && month !== undefined && year && subject) {
-        // ⚠️ CRITICAL FIX: Use month directly, no +1
-        const dept = this.mainSystemConfig.selectedDepartment;
-const course = this.mainSystemConfig.selectedCourse;
-const academicYear = this.mainSystemConfig.selectedAcademicYear;
-const division = this.mainSystemConfig.selectedDivision;
-
-if (!dept || !course || !academicYear || !division) {
-  console.warn('⚠️ Cannot read attendance - missing config');
-  return;
-}
-
-const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
-const path = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}/months/${monthKey}/subjects/${subject}/attendance`;
+      try {
+        console.log(`📥 Reading Firebase attendance from: ${path} for Day ${day}`);
         
-        try {
-          console.log(`📥 Reading Firebase attendance from: ${path} for Day ${day}`);
+        // ✅ READ ONCE (for initial load)
+        const snapshot = await this.firebaseSync.firebaseDB.ref(path).once('value');
+        const firebaseData = snapshot.val() || {};
+        
+        console.log('📊 Firebase data received:', Object.keys(firebaseData).length, 'students');
+        
+        // ✅ Update each face with Firebase status
+        faces.forEach(face => {
+          const studentData = firebaseData[face.id];
           
-          const snapshot = await this.firebaseSync.firebaseDB.ref(path).once('value');
-          const firebaseData = snapshot.val() || {};
-          
-          console.log('Firebase data:', firebaseData);
-          
-          // Update each face with Firebase attendance status
-          faces.forEach(face => {
-            const studentData = firebaseData[face.id];
-            if (studentData) {
-              const dayStatus = studentData[day];
-              console.log(`${face.id}: Day ${day} = ${dayStatus} (${typeof dayStatus})`);
-              
-              // ✅ Check ALL possible formats
-              const isPresent = dayStatus === 'Present' || 
-                               dayStatus === 'present' ||
-                               dayStatus === true || 
-                               dayStatus === 1 || 
-                               dayStatus === '1';
-              
-              face.attendanceToday = isPresent;
-              
-              if (isPresent) {
-                console.log(`✅ ${face.name} - PRESENT`);
-              }
-            } else {
-              face.attendanceToday = false;
-            }
-          });
-          
-          console.log(`✅ Synced ${faces.filter(f => f.attendanceToday).length}/${faces.length} from Firebase`);
-        } catch (error) {
-          console.error('❌ Failed to read Firebase attendance:', error);
-        }
+          if (studentData) {
+            const dayStatus = studentData[day];
+            const isPresent = dayStatus === 'Present' || dayStatus === 'present' || 
+                             dayStatus === true || dayStatus === 1 || dayStatus === '1';
+            
+            face.attendanceToday = isPresent;
+            
+            console.log(`  ${face.id} (${face.name}): ${dayStatus} → ${isPresent ? 'PRESENT' : 'ABSENT'}`);
+          } else {
+            face.attendanceToday = false;
+            console.log(`  ${face.id} (${face.name}): No data → ABSENT`);
+          }
+        });
+        
+        console.log(`✅ Synced ${faces.filter(f => f.attendanceToday).length}/${faces.length} present from Firebase`);
+      } catch (error) {
+        console.error('❌ Failed to read Firebase attendance:', error);
       }
     }
-
-    const listContainer = document.getElementById('studentList');
-
-    if (faces.length === 0) {
-      listContainer.innerHTML = `
-        <div class="text-center text-muted py-5">
-          <i class="bi bi-person-x fs-1"></i>
-          <p class="mt-2">No students registered yet</p>
-        </div>
-      `;
-      return;
-    }
-
-    listContainer.innerHTML = faces.map(face => `
-      <div class="student-card" data-id="${face.id}">
-        <img src="${face.imageData}" alt="${face.name}" class="face-preview">
-        <div class="flex-grow-1">
-          <h6 class="mb-1">${face.name}</h6>
-          <small class="text-muted">ID: ${face.id}</small><br>
-          <span class="badge ${face.attendanceToday ? 'bg-success' : 'bg-secondary'} mt-1">
-            ${face.attendanceToday ? '✓ Present' : 'Not Marked'}
-          </span>
-        </div>
-        <button class="btn btn-sm btn-outline-danger delete-face-btn" data-id="${face.id}">
-          <i class="bi bi-trash"></i>
-        </button>
-      </div>
-    `).join('');
-
-    // Add delete event listeners
-    document.querySelectorAll('.delete-face-btn').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        const id = btn.dataset.id;
-        if (confirm('Delete this registered face?')) {
-          await this.storage.deleteFace(id);
-          await this.loadFaceMatcher();
-          await this.updateStudentList();
-          await this.updateStats();
-          this.showToast('Face deleted', 'info');
-        }
-      });
-    });
-     await this.updateVisualAttendance();
   }
+
+  // ✅ RENDER UI
+  const listContainer = document.getElementById('studentList');
+
+  if (faces.length === 0) {
+    listContainer.innerHTML = `
+      <div class="text-center text-muted py-5">
+        <i class="bi bi-person-x fs-1"></i>
+        <p class="mt-2">No students registered yet</p>
+      </div>
+    `;
+    return;
+  }
+
+  // ✅ Build HTML
+  listContainer.innerHTML = faces.map(face => `
+    <div class="student-card" data-id="${face.id}">
+      <img src="${face.imageData}" alt="${face.name}" class="face-preview">
+      <div class="flex-grow-1">
+        <h6 class="mb-1">${face.name}</h6>
+        <small class="text-muted">ID: ${face.id}</small><br>
+        <span class="badge ${face.attendanceToday ? 'bg-success' : 'bg-secondary'} mt-1">
+          ${face.attendanceToday ? '✓ Present' : 'Not Marked'}
+        </span>
+      </div>
+      <button class="btn btn-sm btn-outline-danger delete-face-btn" data-id="${face.id}">
+        <i class="bi bi-trash"></i>
+      </button>
+    </div>
+  `).join('');
+
+  // Add delete event listeners
+  document.querySelectorAll('.delete-face-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.id;
+      if (confirm('Delete this registered face?')) {
+        await this.storage.deleteFace(id);
+        await this.loadFaceMatcher();
+        await this.updateStudentList();
+        await this.updateStats();
+        this.showToast('Face deleted', 'info');
+      }
+    });
+  });
+  
+  await this.updateVisualAttendance();
+  console.log('✅ Student list UI updated');
+}
+
+/**
+ * Handle real-time attendance changes from Firebase
+ */
+async handleFirebaseAttendanceChange(attendanceData) {
+  console.log('🔥🔥🔥 ATTENDANCE CHANGED IN FIREBASE!');
+  console.log('📊 Received data:', attendanceData ? Object.keys(attendanceData).length + ' students' : 'null');
+  
+  if (!attendanceData) {
+    console.log('⚠️ No attendance data - skipping update');
+    return;
+  }
+  
+  try {
+    console.log('🔄 Refreshing student list...');
+    await this.updateStudentList();
+    
+    console.log('🔄 Refreshing stats...');
+    await this.updateStats();
+    
+    console.log('🔄 Refreshing visual attendance...');
+    await this.updateVisualAttendance();
+    
+    console.log('✅ UI fully refreshed from Firebase');
+    
+  } catch (error) {
+    console.error('❌ Failed to refresh UI:', error);
+  }
+}
+
 updateConfigDisplay() {
   const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                       'July', 'August', 'September', 'October', 'November', 'December'];
@@ -2276,7 +2420,7 @@ const selectedMonth = data.selectedMonth;
 const selectedYear = data.selectedYear;
 const currentDay = data.currentDay;
 
-const subjectsSnapshot = await this.firebaseSync.firebaseDB.ref('subjects').once('value');
+const subjectsSnapshot = await this.firebaseSync.firebaseDB.ref('mainSystem/subjects').once('value');
 const subjects = subjectsSnapshot.val();
     console.log('=== READ COMPLETE ===');
 
@@ -2445,7 +2589,7 @@ async syncToMainSystem() {
     }
 
     // Get existing attendance data
-    const snapshot = await this.firebaseSync.firebaseDB.ref('attendanceData').once('value');
+    const snapshot = await this.firebaseSync.firebaseDB.ref('mainSystem/attendanceData').once('value');
 let allAttendanceData = snapshot.val() || {};
 
     // ⚠️ FIX: Match main system's month key format (no +1)
@@ -3168,65 +3312,104 @@ class FirebaseLiveSync {
   }
 
  setupLiveListeners(callbacks) {
-    if (!this.isConnected) return;
-
-    // ✅ Get division path from mainSystemConfig
-    const year = callbacks.year || new Date().getFullYear();
-    const dept = callbacks.department;
-    const course = callbacks.course;
-    const academicYear = callbacks.academicYear;
-    const division = callbacks.division;
-
-    if (!dept || !course || !academicYear || !division) {
-      console.warn('⚠️ Division not configured - cannot setup listeners');
-      return;
-    }
-
-    const basePath = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}`;
-
-    // Listen to selectedSubject
-    const subjectRef = this.firebaseDB.ref(`${basePath}/selectedSubject`);
-    subjectRef.on('value', (snapshot) => {
-      const newSubject = snapshot.val();
-      if (callbacks.onSubjectChange) {
-        callbacks.onSubjectChange(newSubject, null);
-      }
-    });
-    this.listeners.push(subjectRef);
-
-    // Listen to selectedMonth
-    const monthRef = this.firebaseDB.ref(`${basePath}/selectedMonth`);
-    monthRef.on('value', (snapshot) => {
-      const newMonth = snapshot.val();
-      if (callbacks.onMonthChange) {
-        callbacks.onMonthChange(newMonth, null);
-      }
-    });
-    this.listeners.push(monthRef);
-
-    // Listen to selectedYear
-    const yearRef = this.firebaseDB.ref(`${basePath}/selectedYear`);
-    yearRef.on('value', (snapshot) => {
-      const newYear = snapshot.val();
-      if (callbacks.onYearChange) {
-        callbacks.onYearChange(newYear, null);
-      }
-    });
-    this.listeners.push(yearRef);
-
-    // Listen to currentDay
-    const dayRef = this.firebaseDB.ref(`${basePath}/currentDay`);
-    dayRef.on('value', (snapshot) => {
-      const newDay = snapshot.val();
-      if (callbacks.onDayChange) {
-        callbacks.onDayChange(newDay, null);
-      }
-    });
-    this.listeners.push(dayRef);
-    
-    console.log(`✅ Firebase live listeners active for: ${basePath}`);
+  if (!this.isConnected) {
+    console.error('❌ Cannot setup listeners - not connected');
+    return;
   }
 
+  const year = callbacks.year || new Date().getFullYear();
+  const dept = callbacks.department;
+  const course = callbacks.course;
+  const academicYear = callbacks.academicYear;
+  const division = callbacks.division;
+  const subject = callbacks.subject;
+  const month = callbacks.month;
+
+  console.log('🔧 setupLiveListeners called with:', {
+    dept, course, academicYear, division, year, subject, month
+  });
+
+  if (!dept || !course || !academicYear || !division) {
+    console.warn('⚠️ Division incomplete - cannot setup listeners');
+    return;
+  }
+
+  const basePath = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}`;
+
+  // Subject listener
+  const subjectRef = this.firebaseDB.ref(`${basePath}/selectedSubject`);
+  subjectRef.on('value', (snapshot) => {
+    if (callbacks.onSubjectChange) {
+      callbacks.onSubjectChange(snapshot.val(), null);
+    }
+  });
+  this.listeners.push(subjectRef);
+
+  // Month listener
+  const monthRef = this.firebaseDB.ref(`${basePath}/selectedMonth`);
+  monthRef.on('value', (snapshot) => {
+    if (callbacks.onMonthChange) {
+      callbacks.onMonthChange(snapshot.val(), null);
+    }
+  });
+  this.listeners.push(monthRef);
+
+  // Year listener
+  const yearRef = this.firebaseDB.ref(`${basePath}/selectedYear`);
+  yearRef.on('value', (snapshot) => {
+    if (callbacks.onYearChange) {
+      callbacks.onYearChange(snapshot.val(), null);
+    }
+  });
+  this.listeners.push(yearRef);
+
+  // Day listener
+  const dayRef = this.firebaseDB.ref(`${basePath}/currentDay`);
+  dayRef.on('value', (snapshot) => {
+    if (callbacks.onDayChange) {
+      callbacks.onDayChange(snapshot.val(), null);
+    }
+  });
+  this.listeners.push(dayRef);
+  
+  // ✅ ATTENDANCE LISTENER (NEW - CRITICAL FOR LIVE UPDATES)
+  if (subject && month !== null && month !== undefined) {
+    const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+    const attendancePath = `${basePath}/months/${monthKey}/subjects/${subject}/attendance`;
+    
+    console.log(`🎯 Attaching attendance listener to: ${attendancePath}`);
+    
+    const attendanceRef = this.firebaseDB.ref(attendancePath);
+    
+    attendanceRef.on('value', (snapshot) => {
+      console.log('🔥🔥🔥 FIREBASE VALUE EVENT TRIGGERED!');
+      const data = snapshot.val();
+      
+      if (data) {
+        console.log(`📊 Received attendance data for ${Object.keys(data).length} students`);
+      } else {
+        console.log('📊 Received null/empty attendance data');
+      }
+      
+      if (callbacks.onAttendanceChange) {
+        console.log('✅ Calling onAttendanceChange callback...');
+        callbacks.onAttendanceChange(data);
+      } else {
+        console.error('❌ ERROR: onAttendanceChange callback is MISSING!');
+      }
+    });
+    
+    this.listeners.push(attendanceRef);
+    console.log(`✅ Attendance listener successfully attached`);
+    
+  } else {
+    console.error(`❌ Cannot attach attendance listener!`);
+    console.error(`   Subject: ${subject} (type: ${typeof subject})`);
+    console.error(`   Month: ${month} (type: ${typeof month})`);
+  }
+  
+  console.log(`✅ Total listeners active: ${this.listeners.length}`);
+}
   async updateCurrentDate(date) {
     if (!this.isConnected) return;
     
