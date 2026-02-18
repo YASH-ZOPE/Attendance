@@ -3012,8 +3012,32 @@
     }
 
     function showAlert(message, type = 'info') {
-      alert(message);
-    }
+  const container = document.getElementById('alertContainer');
+  if (!container) { console.log(`[${type}] ${message}`); return; }
+
+  const iconMap = {
+    'success': 'bi-check-circle-fill',
+    'danger': 'bi-exclamation-triangle-fill',
+    'warning': 'bi-exclamation-circle-fill',
+    'info': 'bi-info-circle-fill'
+  };
+
+  const alertEl = document.createElement('div');
+  alertEl.className = `alert alert-${type} alert-dismissible fade show shadow-sm mb-2`;
+  alertEl.setAttribute('role', 'alert');
+  alertEl.innerHTML = `
+    <i class="bi ${iconMap[type] || 'bi-info-circle-fill'} me-2"></i>
+    ${message}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  `;
+
+  container.appendChild(alertEl);
+
+  setTimeout(() => {
+    alertEl.classList.remove('show');
+    setTimeout(() => alertEl.remove(), 300);
+  }, 4000);
+}
 
     // ==================== SUBJECT FUNCTIONS ====================
     function populateSubjectDropdown() {
