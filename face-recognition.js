@@ -54,7 +54,7 @@ async init() {
     
     if (!user) {
       // Not logged in - redirect
-      window.location.href = '/';
+      window.location.href = '/index';
       return;
     }
     
@@ -934,28 +934,25 @@ async handleFirebaseDateChange(newDate, oldDate) {
    * Load face-api.js models
    */
   async loadModels() {
-    const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model/';
+  const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model/';
+  
+  try {
+    this.updateProgress(30, 'Loading face recognition models...');
     
-    try {
-      this.updateProgress(20, 'Loading face detection model...');
-      await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-      
-      this.updateProgress(50, 'Loading face landmarks model...');
-      await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
-      
-      this.updateProgress(80, 'Loading face recognition model...');
-      await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
-      
-      this.updateProgress(100, 'Models loaded successfully!');
-      
-      this.isModelLoaded = true;
-      console.log('All models loaded successfully');
-    } catch (error) {
-      console.error('Model loading error:', error);
-      throw new Error('Failed to load face recognition models');
-    }
+    await Promise.all([
+      faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+      faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+      faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+    ]);
+    
+    this.updateProgress(100, 'Models loaded successfully!');
+    this.isModelLoaded = true;
+    console.log('All models loaded successfully');
+  } catch (error) {
+    console.error('Model loading error:', error);
+    throw new Error('Failed to load face recognition models');
   }
-
+}
 
   async validateDateForRole() {
   const today = new Date();

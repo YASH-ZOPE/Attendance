@@ -22,7 +22,7 @@
   <!-- Firebase Config -->
   <script src="/firebase-config.js"></script>
   <!-- Cloud Storage -->
-  <script src="cloud-storage.js"></script>
+  <script src="/cloud-storage.js"></script>
   <style>
     body {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -1331,6 +1331,15 @@ if (document.readyState === 'loading') {
   updateLoadingStage();
 }
 </script>
+  <div id="alertContainer" style="
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 99999;
+    width: 320px;
+    max-width: 90vw;
+  "></div>
+
   <div class="main-card">
     <!-- Header -->
     <div class="header">
@@ -1785,7 +1794,7 @@ function updateConfigDisplay() {
 
               if (!user) {
                 // Not logged in - redirect to login
-                window.location.href = '/';
+                window.location.href = '/index';
                 return;
               }
 
@@ -1800,7 +1809,7 @@ function updateConfigDisplay() {
 
             } catch (error) {
               console.error('Auth check failed:', error);
-              window.location.href = '/';
+              window.location.href = '/index';
             }
           }
 

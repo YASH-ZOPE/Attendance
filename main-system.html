@@ -1886,11 +1886,11 @@
             <table id="attendanceTable" class="table table-hover mb-0">
               <thead class="table-light sticky-top">
                 <tr>
-                  <th width="10%">ID</th>
-                  <th width="25%">Name</th>
+                  <th width="8%">ID</th>
+                  <th width="15%">Name</th>
                   <th width="15%">Today</th>
-                  <th width="25%">Monthly Stats</th>
-                  <th width="25%" class="teacher-only">Actions</th>
+                  <th width="40%">Monthly Stats</th>
+                  <th width="22%">Actions</th>
                 </tr>
               </thead>
               <tbody id="attendanceTableBody">
@@ -2419,7 +2419,7 @@
 
         if (!user) {
           console.log('❌ No user - redirecting to login');
-          window.location.href = '/';
+          window.location.href = '/index';
           return;
         }
 
@@ -2505,7 +2505,7 @@
 
       } catch (error) {
         console.error('❌ Auth check failed:', error);
-        window.location.href = '/';
+        window.location.href = '/index';
       }
     }
 
@@ -2624,7 +2624,7 @@
     async function handleLogout() {
       if (confirm('Are you sure you want to logout?')) {
         await logout();
-        window.location.href = '/';
+        window.location.href = '/index';
       }
     }
 
@@ -4292,74 +4292,77 @@
     }
 
     function renderAttendanceTable(students) {
-      if (!students || students.length === 0) {
-        elements.attendanceTableBody.innerHTML = `
-          <tr>
-            <td colspan="5" class="text-center text-muted py-5">
-              <i class="bi bi-inbox fs-1"></i>
-              <p class="mt-2">No students found. Upload a CSV file to get started.</p>
-            </td>
-          </tr>
-        `;
-        return;
-      }
+  if (!students || students.length === 0) {
+    elements.attendanceTableBody.innerHTML = `
+      <tr>
+        <td colspan="5" class="text-center text-muted py-5">
+          <i class="bi bi-inbox fs-1"></i>
+          <p class="mt-2">No students found. Upload a CSV file to get started.</p>
+        </td>
+      </tr>
+    `;
+    return;
+  }
 
-      const isHolidayToday = isHoliday(appState.currentDay);
-      const threshold = appState.threshold;
+  const isHolidayToday = isHoliday(appState.currentDay);
+  const threshold = appState.threshold;
 
-      elements.attendanceTableBody.innerHTML = '';
+  elements.attendanceTableBody.innerHTML = '';
 
-      students.forEach(student => {
-        const stats = getStudentStats(student.id);
-        const isDefaulter = stats.percentage < threshold;
+  students.forEach(student => {
+    const stats = getStudentStats(student.id);
+    const isDefaulter = stats.percentage < threshold;
 
-        const row = document.createElement('tr');
-        row.className = student.status === 'Present' ? 'present' : 'absent';
+    const leaveSummary = getStudentLeaveSummary(student.id);
+    const hasLeaveToday = leaveSummary && leaveSummary.days.includes(appState.currentDay);
 
+    const row = document.createElement('tr');
+    row.classList.add('align-middle');
 
-
-
-        row.innerHTML = `
-          <td><strong>${escapeHtml(student.id)}</strong></td>
-            <td>${escapeHtml(student.name)}</td>
-          <td>
-            <span class="badge ${student.status === 'Present' ? 'bg-success' : 'bg-danger'}">
-                ${student.status}
-            </span>
-                ${isHolidayToday ? '<span class="holiday-badge ms-1">Holiday</span>' : ''}
-            </td>
-            <td>
-                ${stats.present}/${stats.workingDays} days
-            <span class="${isDefaulter ? 'defaulter-badge' : 'good-badge'} ms-2">
-                ${stats.percentage}%
-             </span>
-             </td>
-            <td class="teacher-only">
-             <button class="btn btn-sm btn-outline-success mark-present-btn" 
+    row.innerHTML = `
+      <td><strong>${escapeHtml(student.id)}</strong></td>
+      <td>${escapeHtml(student.name)}</td>
+      <td>
+        <span class="badge ${student.status === 'Present' ? 'bg-success' : 'bg-danger'}">
+          ${student.status}
+        </span>
+        ${isHolidayToday ? '<span class="holiday-badge ms-1">Holiday</span>' : ''}
+        ${hasLeaveToday ? '<span class="badge bg-info ms-1">📝 Leave</span>' : ''}
+      </td>
+      <td>
+        ${stats.present}/${stats.workingDays} days
+        <span class="${isDefaulter ? 'defaulter-badge' : 'good-badge'} ms-2">
+          ${stats.percentage}%
+        </span>
+        ${leaveSummary ? `<br><small class="text-muted">📝 ${leaveSummary.applications} leave app(s) - ${leaveSummary.count} days</small>` : ''}
+      </td>
+      <td>
+        <div class="btn-group btn-group-sm">
+          <button class="btn btn-outline-success mark-present-btn" 
             data-id="${escapeHtml(student.id)}" 
             ${isHolidayToday ? 'disabled' : ''}>
             <i class="bi bi-check"></i>
-            </button>
-             <button class="btn btn-sm btn-outline-danger mark-absent-btn" 
+          </button>
+          <button class="btn btn-outline-danger mark-absent-btn" 
             data-id="${escapeHtml(student.id)}" 
             ${isHolidayToday ? 'disabled' : ''}>
             <i class="bi bi-x"></i>
-            </button>
-            </td>
-        `;
+          </button>
+        </div>
+      </td>
+    `;
 
-        elements.attendanceTableBody.appendChild(row);
-      });
+    elements.attendanceTableBody.appendChild(row);
+  });
 
-      // Add event listeners for mark buttons
-      document.querySelectorAll('.mark-present-btn').forEach(btn => {
-        btn.addEventListener('click', () => markAttendance(btn.dataset.id, 'Present'));
-      });
+  document.querySelectorAll('.mark-present-btn').forEach(btn => {
+    btn.addEventListener('click', () => markAttendance(btn.dataset.id, 'Present'));
+  });
 
-      document.querySelectorAll('.mark-absent-btn').forEach(btn => {
-        btn.addEventListener('click', () => markAttendance(btn.dataset.id, 'Absent'));
-      });
-    }
+  document.querySelectorAll('.mark-absent-btn').forEach(btn => {
+    btn.addEventListener('click', () => markAttendance(btn.dataset.id, 'Absent'));
+  });
+}
 
     function markAttendance(studentId, status) {
       const monthKey = getMonthKey();
@@ -6653,78 +6656,7 @@
       );
     }
     */
-    function renderAttendanceTable(students) {
-      if (!students || students.length === 0) {
-        elements.attendanceTableBody.innerHTML = `
-      <tr>
-        <td colspan="5" class="text-center text-muted py-5">
-          <i class="bi bi-inbox fs-1"></i>
-          <p class="mt-2">No students found. Upload a CSV file to get started.</p>
-        </td>
-      </tr>
-    `;
-        return;
-      }
-
-      const isHolidayToday = isHoliday(appState.currentDay);
-      const threshold = appState.threshold;
-
-      elements.attendanceTableBody.innerHTML = '';
-
-      students.forEach(student => {
-        const stats = getStudentStats(student.id);
-        const isDefaulter = stats.percentage < threshold;
-
-        // ✅ CHECK IF STUDENT HAS APPROVED LEAVE
-        const leaveSummary = getStudentLeaveSummary(student.id);
-        const hasLeaveToday = leaveSummary && leaveSummary.days.includes(appState.currentDay);
-
-        const row = document.createElement('tr');
-        row.className = student.status === 'Present' ? 'present' : 'absent';
-
-        row.innerHTML = `
-      <td><strong>${escapeHtml(student.id)}</strong></td>
-      <td>${escapeHtml(student.name)}</td>
-      <td>
-        <span class="badge ${student.status === 'Present' ? 'bg-success' : 'bg-danger'}">
-          ${student.status}
-        </span>
-        ${isHolidayToday ? '<span class="holiday-badge ms-1">Holiday</span>' : ''}
-        ${hasLeaveToday ? '<span class="badge bg-info ms-1" title="Approved leave application exists for today">📝 Leave App</span>' : ''}
-      </td>
-      <td>
-        ${stats.present}/${stats.workingDays} days
-        <span class="${isDefaulter ? 'defaulter-badge' : 'good-badge'} ms-2">
-          ${stats.percentage}%
-        </span>
-        ${leaveSummary ? `<br><small class="text-muted">📝 ${leaveSummary.applications} leave app(s) - ${leaveSummary.count} days</small>` : ''}
-      </td>
-      <td class="teacher-only">
-        <button class="btn btn-sm btn-outline-success mark-present-btn" 
-          data-id="${escapeHtml(student.id)}" 
-          ${isHolidayToday ? 'disabled' : ''}>
-          <i class="bi bi-check"></i>
-        </button>
-        <button class="btn btn-sm btn-outline-danger mark-absent-btn" 
-          data-id="${escapeHtml(student.id)}" 
-          ${isHolidayToday ? 'disabled' : ''}>
-          <i class="bi bi-x"></i>
-        </button>
-      </td>
-    `;
-
-        elements.attendanceTableBody.appendChild(row);
-      });
-
-      // Add event listeners for mark buttons
-      document.querySelectorAll('.mark-present-btn').forEach(btn => {
-        btn.addEventListener('click', () => markAttendance(btn.dataset.id, 'Present'));
-      });
-
-      document.querySelectorAll('.mark-absent-btn').forEach(btn => {
-        btn.addEventListener('click', () => markAttendance(btn.dataset.id, 'Absent'));
-      });
-    }
+    
 
 
     // ==================== INITIALIZATION ====================

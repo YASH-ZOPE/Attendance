@@ -585,7 +585,7 @@ async function redirectBasedOnRole() {
     console.error('Redirect error:', error);
     
     // If there's an error, redirect to login
-    window.location.href = '/';
+    window.location.href = '/index';
   }
 }
 /**
@@ -621,7 +621,7 @@ function forgotPassword(email) {
     async function handleLogout() {
       if (confirm('Are you sure you want to logout?')) {
         await logout();
-        window.location.href = '/';
+        window.location.href = '/index';
       }
     }
 

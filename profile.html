@@ -516,7 +516,7 @@
         profileCurrentUser = userPool.getCurrentUser();
 
         if (!profileCurrentUser) {
-          window.location.href = '/';
+          window.location.href = '/index';
           return;
         }
 
@@ -526,7 +526,7 @@
         profileCurrentUser.getSession((err, session) => {
           if (err) {
             console.error('Session error:', err);
-            window.location.href = '/';
+            window.location.href = '/index';
             return;
           }
 
@@ -658,7 +658,7 @@
       if (profileCurrentUser) {
         profileCurrentUser.signOut();
       }
-      window.location.href = '/';
+      window.location.href = '/index';
     });
 
     // ✅ CHANGED: Single auth call + parallel loading
