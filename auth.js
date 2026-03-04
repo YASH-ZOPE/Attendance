@@ -5,84 +5,84 @@
  */
 
 // ADD THIS at the very top of auth.js file
-const LAMBDA_AUTH_URL = 'https://nxcqmkrqanlh34jxrq5sjlcebi0dqpoj.lambda-url.ap-south-1.on.aws/';
-
+//const BACKEND_URL = 'https://attendance-backend-p7uk.onrender.com';
+fetch('https://attendance-backend-p7uk.onrender.com/').catch(() => {});
 // Global variables
 let userPool = null;
 let currentUser = null;
 
 async function signIntoFirebase() {
   try {
-    // Get current Cognito user
     const user = await getCurrentUser();
+    if (!user) throw new Error('No user logged in');
     
-    if (!user) {
-      throw new Error('No user logged in');
-    }
-    
-    // ✅ FIX: Get session FIRST
     const session = await getSession();
     const cognitoToken = session.getIdToken().getJwtToken();
-    
-    // ✅ FIX: Get role from session token (groups)
     const idToken = session.getIdToken();
     const payload = idToken.decodePayload();
     const groups = payload['cognito:groups'] || [];
     
-    let role = 'student';  // Default
-    if (groups.includes('admin')) {
-      role = 'admin';
-    } else if (groups.includes('teacher')) {
-      role = 'teacher';
-    }
+    let role = 'student';
+    if (groups.includes('admin')) role = 'admin';
+    else if (groups.includes('teacher')) role = 'teacher';
     
     const attributes = await getUserAttributes();
     const email = attributes.email;
     const studentId = attributes['custom:studentId'] || null;
+
+    // ✅ Cache check karo
+    const cachedToken = sessionStorage.getItem('fbToken');
+    const cachedTime = sessionStorage.getItem('fbTokenTime');
+    const cachedRole = sessionStorage.getItem('fbTokenRole');
     
-    console.log('🔐 Getting Firebase token for:', email, '- Role:', role);
+    let firebaseToken;
     
-    // ✅ ADD DEBUG
-    console.log('📤 Sending to Lambda:', { email, role, studentId });
-    
-    // Call Lambda to get Firebase custom token
-    const response = await fetch(LAMBDA_AUTH_URL, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${cognitoToken}`
-      },
-      body: JSON.stringify({
-        email: email,
-        role: role,
-        studentId: studentId
-      })
-    });
-    
-    console.log('📥 Lambda status:', response.status);
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.log('📥 Lambda error response:', errorText);
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    if (cachedToken && cachedTime && cachedRole === role &&
+        (Date.now() - Number(cachedTime)) < 50 * 60 * 1000) {
+      console.log('⚡ Using cached Firebase token');
+      firebaseToken = cachedToken;
+    } else {
+      console.log('🔐 Getting Firebase token for:', email, '- Role:', role);
+      console.log('📤 Sending to Lambda:', { email, role, studentId });
+      
+      const response = await fetch(`https://attendance-backend-p7uk.onrender.com/api/firebase-token`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${cognitoToken}`
+        },
+        body: JSON.stringify({ email, role, studentId })
+      });
+      
+      console.log('📥 Lambda status:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      console.log('🔍 Lambda response:', result);
+      
+      if (!result.success) throw new Error(result.error || 'Failed to get Firebase token');
+      
+      // ✅ Cache karo
+      firebaseToken = result.token;
+      sessionStorage.setItem('fbToken', firebaseToken);
+      sessionStorage.setItem('fbTokenTime', Date.now().toString());
+      sessionStorage.setItem('fbTokenRole', role);
     }
     
-    const result = await response.json();
-    
-    console.log('🔍 Lambda response:', result);
-    
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to get Firebase token');
-    }
-    
-    // Sign into Firebase with the custom token
-    await firebase.auth().signInWithCustomToken(result.token);
-    
+    await firebase.auth().signInWithCustomToken(firebaseToken);
     console.log('✅ Signed into Firebase with role:', role);
     return true;
     
   } catch (error) {
     console.error('❌ Firebase sign-in failed:', error);
+    // Cache clear karo agar error aaye
+    sessionStorage.removeItem('fbToken');
+    sessionStorage.removeItem('fbTokenTime');
+    sessionStorage.removeItem('fbTokenRole');
     alert('Authentication error. Please refresh and try again.');
     return false;
   }
@@ -107,6 +107,8 @@ function initCognito() {
   };
 
   userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+  // Global expose karo
+window.userPool = userPool;
   console.log('✓ Cognito initialized successfully');
   return true;
 }
@@ -559,33 +561,34 @@ async function redirectBasedOnRole() {
     const role = await getUserRole();
     console.log('User role:', role);
     
-    // Admin and teachers skip profile check
-    if (role === 'admin' || role === 'teacher') {
-      console.log('Admin/Teacher - redirecting to main-system');
-      window.location.href = '/main-system';
-      return;
-    }
-    
+    // Admin seedha main-system
+if (role === 'admin'||role === 'teacher') {
+  console.log('Admin - redirecting to main-system');
+  window.location.href = 'main-system.html';
+  return;
+}
+
+  
     // For students, check if profile is complete
     const profileComplete = await isProfileComplete();
     console.log('Student profile complete?', profileComplete);
     
     if (!profileComplete) {
       console.log('Profile incomplete, redirecting to profile page');
-      window.location.href = '/profile';
+      window.location.href = 'profile.html';
       return;
     }
 
     // Profile complete - redirect to face recognition
     console.log('Redirecting to main-system');
-    window.location.href = '/main-system';
+    window.location.href = 'main-system.html';
     
     console.log('=== REDIRECT DEBUG END ===');
   } catch (error) {
     console.error('Redirect error:', error);
     
     // If there's an error, redirect to login
-    window.location.href = '/index';
+    window.location.href = 'index.html';
   }
 }
 /**
@@ -621,7 +624,7 @@ function forgotPassword(email) {
     async function handleLogout() {
       if (confirm('Are you sure you want to logout?')) {
         await logout();
-        window.location.href = '/index';
+        window.location.href = 'index.html';
       }
     }
 

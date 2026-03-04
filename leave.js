@@ -185,31 +185,49 @@
 
     // ==================== CONTEXT LOADING ====================
     async function loadContext() {
-      try {
-        // Load from IndexedDB
-        const dept = await loadFromDatabase('selectedDepartment');
-        const course = await loadFromDatabase('selectedCourse');
-        const acYear = await loadFromDatabase('selectedAcademicYear');
-        const division = await loadFromDatabase('selectedDivision');
-        const month = await loadFromDatabase('selectedMonth');
-        const year = await loadFromDatabase('selectedYear');
-        const subject = await loadFromDatabase('selectedSubject');
+  try {
 
-        if (dept) appState.selectedDepartment = dept;
-        if (course) appState.selectedCourse = course;
-        if (acYear) appState.selectedAcademicYear = acYear;
-        if (division) appState.selectedDivision = division;
-        if (month !== null) appState.selectedMonth = month;
-        if (year !== null) appState.selectedYear = year;
-        if (subject) appState.selectedSubject = subject;
+    if (useCloud && firebaseDB) {
+      const currentFirebaseUser = firebase.auth().currentUser;
+      if (currentFirebaseUser) {
+        const uid = currentFirebaseUser.uid;
+        const snapshot = await firebaseDB.ref(`mainSystem/userPreferences/${uid}/lastSelection`).once('value');
+        const prefs = snapshot.val() || {};
 
-        updateContextDisplay();
-
-        console.log('✅ Context loaded:', appState);
-      } catch (error) {
-        console.error('Error loading context:', error);
+        if (prefs.department) appState.selectedDepartment = prefs.department;
+        if (prefs.course) appState.selectedCourse = prefs.course;
+        if (prefs.academicYear) appState.selectedAcademicYear = prefs.academicYear;
+        if (prefs.division) appState.selectedDivision = prefs.division;
+        if (prefs.subject) appState.selectedSubject = prefs.subject;
+        if (prefs.month !== undefined && prefs.month !== null) appState.selectedMonth = prefs.month;
+        if (prefs.year !== undefined && prefs.year !== null) appState.selectedYear = prefs.year;
       }
     }
+
+    // Load from IndexedDB
+    const dept = await loadFromDatabase('selectedDepartment');
+    const course = await loadFromDatabase('selectedCourse');
+    const acYear = await loadFromDatabase('selectedAcademicYear');
+    const division = await loadFromDatabase('selectedDivision');
+    const month = await loadFromDatabase('selectedMonth');
+    const year = await loadFromDatabase('selectedYear');
+    const subject = await loadFromDatabase('selectedSubject');
+
+    if (dept) appState.selectedDepartment = dept;
+    if (course) appState.selectedCourse = course;
+    if (acYear) appState.selectedAcademicYear = acYear;
+    if (division) appState.selectedDivision = division;
+    if (month !== null) appState.selectedMonth = month;
+    if (year !== null) appState.selectedYear = year;
+    if (subject) appState.selectedSubject = subject;
+
+    updateContextDisplay();
+
+    console.log('✅ Context loaded:', appState);
+  } catch (error) {
+    console.error('Error loading context:', error);
+  }
+}
 
     function updateContextDisplay() {
       document.getElementById('contextDept').textContent = `Department: ${appState.selectedDepartment || '--'}`;
@@ -316,115 +334,107 @@
 
     // ==================== SUBMIT LEAVE ====================
     async function submitLeaveApplication() {
-      const studentId = document.getElementById('leaveStudentSelect').value;
-      const fromDate = document.getElementById('leaveFromDate').value;
-      const toDate = document.getElementById('leaveToDate').value;
-      const reason = document.getElementById('leaveReason').value.trim();
+  const studentId = document.getElementById('leaveStudentSelect').value;
+  const fromDate = document.getElementById('leaveFromDate').value;
+  const toDate = document.getElementById('leaveToDate').value;
+  const reason = document.getElementById('leaveReason').value.trim();
 
-      const validationAlert = document.getElementById('leaveValidationAlert');
-      const validationMsg = document.getElementById('leaveValidationMsg');
+  const validationAlert = document.getElementById('leaveValidationAlert');
+  const validationMsg = document.getElementById('leaveValidationMsg');
+  const role = await getUserRole();
+  const attributes = await getUserAttributes();
 
-      // Validate context
-      const contextValidation = validateDivisionContext();
-      if (!contextValidation.valid) {
-        validationMsg.textContent = `Please select: ${contextValidation.missing.join(', ')}`;
-        validationAlert.style.display = 'block';
-        return;
-      }
-
-      // Validate form
-      if (!studentId) {
-        validationMsg.textContent = 'Please select a student';
-        validationAlert.style.display = 'block';
-        return;
-      }
-
-      if (!fromDate || !toDate) {
-        validationMsg.textContent = 'Please select both From and To dates';
-        validationAlert.style.display = 'block';
-        return;
-      }
-
-      if (new Date(fromDate) > new Date(toDate)) {
-        validationMsg.textContent = 'From date cannot be after To date';
-        validationAlert.style.display = 'block';
-        return;
-      }
-
-      if (!reason) {
-        validationMsg.textContent = 'Please provide a reason for leave';
-        validationAlert.style.display = 'block';
-        return;
-      }
-
-      const days = getDaysBetweenDates(fromDate, toDate);
-
-      if (days.length === 0) {
-        validationMsg.textContent = 'Invalid date range';
-        validationAlert.style.display = 'block';
-        return;
-      }
-
-      // Get student name
-      const studentSelect = document.getElementById('leaveStudentSelect');
-      const studentName = studentSelect.options[studentSelect.selectedIndex].text.split(' - ')[1] || studentId;
-
-      // Get current user
-      let submittedBy = 'unknown';
-      try {
-        const user = await getCurrentUser();
-        submittedBy = user.attributes.email;
-      } catch (error) {
-        console.warn('Could not get current user:', error);
-      }
-
-      const leaveId = `leave_${Date.now()}`;
-
-      const leaveData = {
-        studentId: studentId,
-        studentName: studentName,
-        fromDate: fromDate,
-        toDate: toDate,
-        days: days,
-        month: new Date(fromDate).getMonth(),
-        year: new Date(fromDate).getFullYear(),
-        reason: reason,
-        status: 'pending',
-        submittedBy: submittedBy,
-        submittedAt: Date.now()
-      };
-
-      const leavePath = getLeaveApplicationsPath();
-
-      if (!leavePath) {
-        showAlert('Cannot save leave: division context incomplete', 'danger');
-        return;
-      }
-
-      try {
-        if (useCloud && firebaseDB) {
-          await firebaseDB.ref(`${leavePath}/${leaveId}`).set(leaveData);
-          console.log(`✅ Leave submitted: ${leaveId}`);
-        } else {
-          const allLeaves = await loadFromDatabase('leaveApplications') || {};
-          allLeaves[leaveId] = leaveData;
-          await saveToDatabase('leaveApplications', allLeaves);
-        }
-
-        if (leaveModal) {
-          leaveModal.hide();
-        }
-
-        resetLeaveForm();
-        await loadLeaveApplications();
-
-        showAlert(`Leave application submitted for ${studentName} (${days.length} days)`, 'success');
-
-      } catch (error) {
-        console.error('Error submitting leave:', error);
-        showAlert('Failed to submit leave application. Please try again.', 'danger');
-      }
+  if (role === 'student') {
+    const authenticatedStudentId = attributes['custom:studentId'];
+    if (studentId !== authenticatedStudentId) {
+      validationMsg.textContent = '⚠️ Security Error: You can only submit leave for yourself!';
+      validationAlert.style.display = 'block';
+      return;
     }
+  }
+
+  const contextValidation = validateDivisionContext();
+  if (!contextValidation.valid) {
+    validationMsg.textContent = `Please select: ${contextValidation.missing.join(', ')}`;
+    validationAlert.style.display = 'block';
+    return;
+  }
+
+  if (!studentId) {
+    validationMsg.textContent = 'Please select a student';
+    validationAlert.style.display = 'block';
+    return;
+  }
+
+  if (!fromDate || !toDate) {
+    validationMsg.textContent = 'Please select both From and To dates';
+    validationAlert.style.display = 'block';
+    return;
+  }
+
+  if (new Date(fromDate) > new Date(toDate)) {
+    validationMsg.textContent = 'From date cannot be after To date';
+    validationAlert.style.display = 'block';
+    return;
+  }
+
+  if (!reason) {
+    validationMsg.textContent = 'Please provide a reason for leave';
+    validationAlert.style.display = 'block';
+    return;
+  }
+
+  const days = getDaysBetweenDates(fromDate, toDate);
+
+  if (days.length === 0) {
+    validationMsg.textContent = 'Invalid date range';
+    validationAlert.style.display = 'block';
+    return;
+  }
+
+  const studentSelect = document.getElementById('leaveStudentSelect');
+  const studentName = studentSelect.options[studentSelect.selectedIndex].text.split(' - ')[1] || studentId;
+
+  try {
+    // Get Cognito token
+    const session = await getSession();
+    const cognitoToken = session.getIdToken().getJwtToken();
+
+    const response = await fetch('https://attendance-backend-p7uk.onrender.com/api/leave/submit', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${cognitoToken}`
+      },
+      body: JSON.stringify({
+        studentId,
+        studentName,
+        fromDate,
+        toDate,
+        days,
+        reason,
+        month: new Date(fromDate).getMonth(),
+        year: new Date(fromDate).getFullYear()
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      showAlert(result.error || 'Failed to submit leave', 'danger');
+      return;
+    }
+
+    if (leaveModal) leaveModal.hide();
+    resetLeaveForm();
+    await loadLeaveApplications();
+    showAlert(`Leave submitted for ${studentName} (${days.length} days)`, 'success');
+
+  } catch (error) {
+    console.error('Error submitting leave:', error);
+    showAlert('Failed to submit leave. Please try again.', 'danger');
+  }
+}
 
     // ==================== RESET FORM ====================
     function resetLeaveForm() {
@@ -598,158 +608,152 @@
 
     // ==================== APPROVE LEAVE ====================
     async function approveLeave(leaveId) {
-      const leave = leaveState.applications.find(l => l.id === leaveId);
+  const leave = leaveState.applications.find(l => l.id === leaveId);
 
-      if (!leave) {
-        showAlert('Leave application not found', 'danger');
-        return;
-      }
+  if (!leave) {
+    showAlert('Leave application not found', 'danger');
+    return;
+  }
 
-      const confirmMsg = `✅ APPROVE LEAVE?\n\nStudent: ${leave.studentName}\nDates: ${leave.fromDate} to ${leave.toDate}\nDays: ${leave.days.length}\nReason: ${leave.reason}`;
+  const confirmMsg = `✅ APPROVE LEAVE?\n\nStudent: ${leave.studentName}\nDates: ${leave.fromDate} to ${leave.toDate}\nDays: ${leave.days.length}\nReason: ${leave.reason}`;
 
-      if (!confirm(confirmMsg)) return;
+  if (!confirm(confirmMsg)) return;
 
-      try {
-        let approvedBy = 'unknown';
-        try {
-          const user = await getCurrentUser();
-          approvedBy = user.attributes.email;
-        } catch (error) {
-          console.warn('Could not get current user:', error);
-        }
+  try {
+    const session = await getSession();
+    const cognitoToken = session.getIdToken().getJwtToken();
 
-        const leavePath = getLeaveApplicationsPath();
+    const response = await fetch('https://attendance-backend-p7uk.onrender.com/api/leave/update-status', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${cognitoToken}`
+      },
+      body: JSON.stringify({
+  leaveId,
+  action: 'approved',
+  year: leave.year,
+  department: leave.department,
+  course: leave.course,
+  academicYear: leave.academicYear,
+  division: leave.division
+})
+    });
 
-        if (!leavePath) {
-          showAlert('Cannot approve leave: division context incomplete', 'danger');
-          return;
-        }
+    const result = await response.json();
 
-        const updates = {
-          status: 'approved',
-          approvedBy: approvedBy,
-          approvedAt: Date.now()
-        };
-
-        if (useCloud && firebaseDB) {
-          await firebaseDB.ref(`${leavePath}/${leaveId}`).update(updates);
-        } else {
-          const allLeaves = await loadFromDatabase('leaveApplications') || {};
-          if (allLeaves[leaveId]) {
-            allLeaves[leaveId] = { ...allLeaves[leaveId], ...updates };
-            await saveToDatabase('leaveApplications', allLeaves);
-          }
-        }
-
-        console.log(`✅ Leave approved: ${leaveId}`);
-
-        await loadLeaveApplications();
-
-        showAlert(`Leave approved for ${leave.studentName}`, 'success');
-
-      } catch (error) {
-        console.error('Error approving leave:', error);
-        showAlert('Failed to approve leave. Please try again.', 'danger');
-      }
+    if (!response.ok) {
+      showAlert(result.error || 'Failed to approve leave', 'danger');
+      return;
     }
+
+    await loadLeaveApplications();
+    showAlert(`Leave approved for ${leave.studentName}`, 'success');
+
+  } catch (error) {
+    console.error('Error approving leave:', error);
+    showAlert('Failed to approve leave. Please try again.', 'danger');
+  }
+}
 
     // ==================== REJECT LEAVE ====================
     async function rejectLeave(leaveId) {
-      const leave = leaveState.applications.find(l => l.id === leaveId);
+  const leave = leaveState.applications.find(l => l.id === leaveId);
 
-      if (!leave) {
-        showAlert('Leave application not found', 'danger');
-        return;
-      }
+  if (!leave) {
+    showAlert('Leave application not found', 'danger');
+    return;
+  }
 
-      const confirmMsg = `⚠️ REJECT LEAVE?\n\nStudent: ${leave.studentName}\nDates: ${leave.fromDate} to ${leave.toDate}\nReason: ${leave.reason}`;
+  const confirmMsg = `⚠️ REJECT LEAVE?\n\nStudent: ${leave.studentName}\nDates: ${leave.fromDate} to ${leave.toDate}\nReason: ${leave.reason}`;
 
-      if (!confirm(confirmMsg)) return;
+  if (!confirm(confirmMsg)) return;
 
-      try {
-        let rejectedBy = 'unknown';
-        try {
-          const user = await getCurrentUser();
-          rejectedBy = user.attributes.email;
-        } catch (error) {
-          console.warn('Could not get current user:', error);
-        }
+  try {
+    const session = await getSession();
+    const cognitoToken = session.getIdToken().getJwtToken();
 
-        const leavePath = getLeaveApplicationsPath();
+    const response = await fetch('https://attendance-backend-p7uk.onrender.com/api/leave/update-status', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${cognitoToken}`
+      },
+      body: JSON.stringify({
+  leaveId,
+  action: 'rejected',
+  year: leave.year,
+  department: leave.department,
+  course: leave.course,
+  academicYear: leave.academicYear,
+  division: leave.division
+})
+    });
 
-        if (!leavePath) {
-          showAlert('Cannot reject leave: division context incomplete', 'danger');
-          return;
-        }
+    const result = await response.json();
 
-        const updates = {
-          status: 'rejected',
-          rejectedBy: rejectedBy,
-          rejectedAt: Date.now()
-        };
-
-        if (useCloud && firebaseDB) {
-          await firebaseDB.ref(`${leavePath}/${leaveId}`).update(updates);
-        } else {
-          const allLeaves = await loadFromDatabase('leaveApplications') || {};
-          if (allLeaves[leaveId]) {
-            allLeaves[leaveId] = { ...allLeaves[leaveId], ...updates };
-            await saveToDatabase('leaveApplications', allLeaves);
-          }
-        }
-
-        console.log(`❌ Leave rejected: ${leaveId}`);
-
-        await loadLeaveApplications();
-
-        showAlert(`Leave rejected for ${leave.studentName}`, 'info');
-
-      } catch (error) {
-        console.error('Error rejecting leave:', error);
-        showAlert('Failed to reject leave. Please try again.', 'danger');
-      }
+    if (!response.ok) {
+      showAlert(result.error || 'Failed to reject leave', 'danger');
+      return;
     }
+
+    await loadLeaveApplications();
+    showAlert(`Leave rejected for ${leave.studentName}`, 'info');
+
+  } catch (error) {
+    console.error('Error rejecting leave:', error);
+    showAlert('Failed to reject leave. Please try again.', 'danger');
+  }
+}
 
     // ==================== DELETE LEAVE ====================
     async function deleteLeave(leaveId) {
-      const leave = leaveState.applications.find(l => l.id === leaveId);
+  const leave = leaveState.applications.find(l => l.id === leaveId);
 
-      if (!leave) {
-        showAlert('Leave application not found', 'danger');
-        return;
-      }
+  if (!leave) {
+    showAlert('Leave application not found', 'danger');
+    return;
+  }
 
-      const confirmMsg = `🗑️ DELETE LEAVE APPLICATION?\n\nStudent: ${leave.studentName}\nDates: ${leave.fromDate} to ${leave.toDate}\n\nThis action cannot be undone.`;
+  const confirmMsg = `🗑️ DELETE LEAVE APPLICATION?\n\nStudent: ${leave.studentName}\nDates: ${leave.fromDate} to ${leave.toDate}\n\nThis action cannot be undone.`;
 
-      if (!confirm(confirmMsg)) return;
+  if (!confirm(confirmMsg)) return;
 
-      try {
-        const leavePath = getLeaveApplicationsPath();
+  try {
+    const session = await getSession();
+    const cognitoToken = session.getIdToken().getJwtToken();
 
-        if (!leavePath) {
-          showAlert('Cannot delete leave: division context incomplete', 'danger');
-          return;
-        }
+    const response = await fetch('https://attendance-backend-p7uk.onrender.com/api/leave/delete', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${cognitoToken}`
+      },
+      body: JSON.stringify({
+  leaveId,
+  year: leave.year,
+  department: leave.department,
+  course: leave.course,
+  academicYear: leave.academicYear,
+  division: leave.division
+})
+    });
 
-        if (useCloud && firebaseDB) {
-          await firebaseDB.ref(`${leavePath}/${leaveId}`).remove();
-        } else {
-          const allLeaves = await loadFromDatabase('leaveApplications') || {};
-          delete allLeaves[leaveId];
-          await saveToDatabase('leaveApplications', allLeaves);
-        }
+    const result = await response.json();
 
-        console.log(`🗑️ Leave deleted: ${leaveId}`);
-
-        await loadLeaveApplications();
-
-        showAlert('Leave application deleted', 'info');
-
-      } catch (error) {
-        console.error('Error deleting leave:', error);
-        showAlert('Failed to delete leave. Please try again.', 'danger');
-      }
+    if (!response.ok) {
+      showAlert(result.error || 'Failed to delete leave', 'danger');
+      return;
     }
+
+    await loadLeaveApplications();
+    showAlert('Leave application deleted', 'info');
+
+  } catch (error) {
+    console.error('Error deleting leave:', error);
+    showAlert('Failed to delete leave. Please try again.', 'danger');
+  }
+}
 
     // ==================== EVENT LISTENERS ====================
     function initializeEventListeners() {
@@ -818,7 +822,7 @@
         const user = await getCurrentUser();
 
         if (!user) {
-          window.location.href = '/index';
+          window.location.href = 'index.html';
           return;
         }
         await signIntoFirebase();
@@ -828,7 +832,7 @@
 
       } catch (error) {
         console.error('Auth check failed:', error);
-        window.location.href = '/index';
+        window.location.href = 'index.html';
       }
     }
 

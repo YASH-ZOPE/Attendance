@@ -54,7 +54,7 @@ async init() {
     
     if (!user) {
       // Not logged in - redirect
-      window.location.href = '/index';
+      window.location.href = 'index.html';
       return;
     }
     
@@ -272,11 +272,10 @@ async init() {
       }
     }
     
-    // ✅ CHECK FOR DAY CHANGE
-    await this.checkForDayChange();
-
-    // ✅ LOAD FACE-API.JS MODELS
-    await this.loadModels();
+    await Promise.all([
+      this.checkForDayChange(),
+      this.loadModels()
+    ]);
     
     // ✅ SETUP EVENT LISTENERS
     this.setupEventListeners();
@@ -292,14 +291,15 @@ async init() {
       this.checkForDayChange();
     }, 5 * 60 * 1000); // 5 minutes
 
+    // ✅ HIDE LOADING OVERLAY
+    this.hideLoading();
+
     // ✅ LOAD AND DISPLAY REGISTERED STUDENTS (Now Firebase auth is complete!)
     console.log('📥 Loading student list and stats...');
     await this.updateStudentList();
     await this.updateStats();
     this.updateConfigDisplay();
     
-    // ✅ HIDE LOADING OVERLAY
-    this.hideLoading();
     
     // ✅ SHOW SUCCESS MESSAGE
     if (role === 'student') {
@@ -347,7 +347,7 @@ async validateQRSession(qrId) {
     
   } catch (error) {
     console.error('❌ Validation error:', error);
-    return true; // ✅ On error, allow (fail open)
+    return false; // ✅ On error, allow (fail open)
   }
 }
 
@@ -1302,53 +1302,63 @@ getMonthName(monthIndex) {
 }
 
 async saveAttendanceToFirebase(studentId, studentName, dateValidation) {
-  if (!this.firebaseSync || !this.firebaseSync.isConnected) {
-    console.warn('⚠️ Firebase not connected - skipping auto-sync');
-    return;
-  }
-  
   const subject = this.mainSystemConfig.selectedSubject;
   const month = this.mainSystemConfig.selectedMonth;
   const year = this.mainSystemConfig.selectedYear;
   const day = dateValidation.targetDay;
-  
+
   if (!subject || month === null || year === null) {
-    console.warn('⚠️ Cannot sync to Firebase - incomplete config');
+    console.warn('⚠️ Cannot sync - incomplete config');
     return;
   }
-  
-  // ✅ GET FULL PATH COMPONENTS
-const dept = this.mainSystemConfig.selectedDepartment;
-const course = this.mainSystemConfig.selectedCourse;
-const academicYear = this.mainSystemConfig.selectedAcademicYear;
-const division = this.mainSystemConfig.selectedDivision;
 
-if (!dept || !course || !academicYear || !division) {
-  console.warn('⚠️ Cannot sync - missing department/course/academic year/division');
-  return;
-}
+  const dept = this.mainSystemConfig.selectedDepartment;
+  const course = this.mainSystemConfig.selectedCourse;
+  const academicYear = this.mainSystemConfig.selectedAcademicYear;
+  const division = this.mainSystemConfig.selectedDivision;
 
-const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+  if (!dept || !course || !academicYear || !division) {
+    console.warn('⚠️ Cannot sync - missing division info');
+    return;
+  }
 
-// ✅ USE 8-LEVEL PATH
-const path = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}/months/${monthKey}/subjects/${subject}/attendance/${studentId}`;
-  
   try {
-    // Add timeout to prevent hanging
-    const syncPromise = this.firebaseSync.firebaseDB.ref(path).update({
-      _name: studentName,
-      [day]: 'Present'
+    // Get Cognito token using existing getSession function
+    const session = await getSession();
+    const cognitoToken = session.getIdToken().getJwtToken();
+
+    const response = await fetch('https://attendance-backend-p7uk.onrender.com/api/mark-attendance', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${cognitoToken}`
+      },
+      body: JSON.stringify({
+        studentId,
+        studentName,
+        day,
+        month,
+        year,
+        subject,
+        department: dept,
+        course,
+        academicYear,
+        division,
+        qrId: this.currentQRId
+      })
     });
-    
-    await Promise.race([
-      syncPromise,
-      new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
-    ]);
-    
-    console.log(`✅ Auto-synced ${studentName} to Firebase`);
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      console.error('⚠️ Backend attendance failed:', result.error);
+      return;
+    }
+
+    console.log(`✅ Attendance marked via backend: ${studentName}`);
+
   } catch (error) {
-    console.error('⚠️ Firebase auto-sync failed:', error.message);
-    // Don't throw - just log and continue
+    console.error('⚠️ Backend sync failed:', error.message);
   }
 }
   /**
@@ -3199,47 +3209,38 @@ if (verifyBtn && codeInput) {
 
   //>>>>>>>>>>> NEW: Verify dynamic code from Firebase
 async verifyDynamicCode(userEnteredCode) {
-  if (!this.firebaseSync || !this.firebaseSync.isConnected) {
-    console.warn('⚠️ Firebase not connected, allowing offline mode');
-    return { valid: true }; // Allow if offline
-  }
-
   try {
-    const snapshot = await this.firebaseSync.firebaseDB
-      .ref('mainSystem/dynamicCode').once('value');
-    const data = snapshot.val();
-    
-    if (!data) {
-      return { 
-        valid: false, 
-        reason: 'No active code found. Ask teacher to generate a new QR code.' 
+    // Get Cognito token
+    const session = await getSession();
+    const cognitoToken = session.getIdToken().getJwtToken();
+
+    const response = await fetch('https://attendance-backend-p7uk.onrender.com/api/verify-code', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${cognitoToken}`
+      },
+      body: JSON.stringify({
+        code: userEnteredCode
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      return {
+        valid: false,
+        reason: result.error || 'Verification failed'
       };
     }
-    
-    const now = Date.now();
-    
-    // Check if expired
-    if (now > data.expiresAt) {
-      return { 
-        valid: false, 
-        reason: 'Code expired. Get the new code from the teacher\'s screen.' 
-      };
-    }
-    
-    // Check if code matches
-    if (data.code !== userEnteredCode) {
-      return { 
-        valid: false, 
-        reason: 'Wrong code. Check the number on the teacher\'s screen.' 
-      };
-    }
-    
+
     return { valid: true };
+
   } catch (error) {
     console.error('Error verifying code:', error);
-    return { 
-      valid: false, 
-      reason: 'Connection error. Please try again.' 
+    return {
+      valid: false,
+      reason: 'Connection error. Please try again.'
     };
   }
 }
