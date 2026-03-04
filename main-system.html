@@ -13,17 +13,17 @@
     src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.3.7/dist/amazon-cognito-identity.min.js"></script>
 
   <!-- Cognito Config -->
-  <script src="/cognito-config.js"></script>
+  <script src="cognito-config.js"></script>
 
   <!-- Auth Functions -->
-  <script src="/auth.js"></script>
+  <script src="auth.js"></script>
 
   <!-- Firebase SDK (Add AFTER AWS Cognito SDK) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <!-- Firebase Config (reuse same file) -->
-  <script src="/firebase-config.js"></script>
+  <script src="firebase-config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 
   <style>
@@ -1204,7 +1204,7 @@
       border-width: 2px;
     }
   </style>
-<div id="alertContainer" style="
+  <div id="alertContainer" style="
   position: fixed;
   top: 80px;
   right: 20px;
@@ -1255,7 +1255,7 @@
         <div class="d-flex align-items-center gap-2">
           <span class="badge bg-light text-dark" id="navSubjectBadge">No Subject</span>
           <span class="badge bg-warning text-dark" id="navMonthBadge">No Month</span>
-          <a href="/profile" id="profileNavBtn" class="btn btn-outline-light btn-sm ms-1" style="display:none;">
+          <a href="profile.html" id="profileNavBtn" class="btn btn-outline-light btn-sm ms-1" style="display:none;">
             <i class="bi bi-person-circle me-1"></i>Profile
           </a>
           <button onclick="handleLogout()" class="btn btn-outline-light btn-sm ms-1">
@@ -1805,7 +1805,7 @@
       </div>
 
       <section id="camera-section" class="nav-section">
-        <button class="go-btn" onclick="window.location.href='/face-recognition'">
+        <button class="go-btn" onclick="window.location.href='face-recognition.html'">
           Attendance Section
         </button>
       </section>
@@ -1920,7 +1920,7 @@
       <div class="col-md-3 teacher-only">
         <div class="section-card">
           <li class="nav-item teacher-only">
-            <a class="nav-link" href="/leave-applications">
+            <a class="nav-link" href="leave-applications.html">
               <i class="bi bi-calendar-x me-1"></i>Leave Applications
             </a>
           </li>
@@ -2419,7 +2419,7 @@
 
         if (!user) {
           console.log('❌ No user - redirecting to login');
-          window.location.href = '/index';
+          window.location.href = 'index.html';
           return;
         }
 
@@ -2505,7 +2505,7 @@
 
       } catch (error) {
         console.error('❌ Auth check failed:', error);
-        window.location.href = '/index';
+        window.location.href = 'index.html';
       }
     }
 
@@ -2624,7 +2624,7 @@
     async function handleLogout() {
       if (confirm('Are you sure you want to logout?')) {
         await logout();
-        window.location.href = '/index';
+        window.location.href = 'index.html';
       }
     }
 
@@ -3021,32 +3021,32 @@
     }
 
     function showAlert(message, type = 'info') {
-  const container = document.getElementById('alertContainer');
-  if (!container) { console.log(`[${type}] ${message}`); return; }
+      const container = document.getElementById('alertContainer');
+      if (!container) { console.log(`[${type}] ${message}`); return; }
 
-  const iconMap = {
-    'success': 'bi-check-circle-fill',
-    'danger': 'bi-exclamation-triangle-fill',
-    'warning': 'bi-exclamation-circle-fill',
-    'info': 'bi-info-circle-fill'
-  };
+      const iconMap = {
+        'success': 'bi-check-circle-fill',
+        'danger': 'bi-exclamation-triangle-fill',
+        'warning': 'bi-exclamation-circle-fill',
+        'info': 'bi-info-circle-fill'
+      };
 
-  const alertEl = document.createElement('div');
-  alertEl.className = `alert alert-${type} alert-dismissible fade show shadow-sm mb-2`;
-  alertEl.setAttribute('role', 'alert');
-  alertEl.innerHTML = `
+      const alertEl = document.createElement('div');
+      alertEl.className = `alert alert-${type} alert-dismissible fade show shadow-sm mb-2`;
+      alertEl.setAttribute('role', 'alert');
+      alertEl.innerHTML = `
     <i class="bi ${iconMap[type] || 'bi-info-circle-fill'} me-2"></i>
     ${message}
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
   `;
 
-  container.appendChild(alertEl);
+      container.appendChild(alertEl);
 
-  setTimeout(() => {
-    alertEl.classList.remove('show');
-    setTimeout(() => alertEl.remove(), 300);
-  }, 4000);
-}
+      setTimeout(() => {
+        alertEl.classList.remove('show');
+        setTimeout(() => alertEl.remove(), 300);
+      }, 4000);
+    }
 
     // ==================== SUBJECT FUNCTIONS ====================
     function populateSubjectDropdown() {
@@ -4292,8 +4292,8 @@
     }
 
     function renderAttendanceTable(students) {
-  if (!students || students.length === 0) {
-    elements.attendanceTableBody.innerHTML = `
+      if (!students || students.length === 0) {
+        elements.attendanceTableBody.innerHTML = `
       <tr>
         <td colspan="5" class="text-center text-muted py-5">
           <i class="bi bi-inbox fs-1"></i>
@@ -4301,25 +4301,25 @@
         </td>
       </tr>
     `;
-    return;
-  }
+        return;
+      }
 
-  const isHolidayToday = isHoliday(appState.currentDay);
-  const threshold = appState.threshold;
+      const isHolidayToday = isHoliday(appState.currentDay);
+      const threshold = appState.threshold;
 
-  elements.attendanceTableBody.innerHTML = '';
+      elements.attendanceTableBody.innerHTML = '';
 
-  students.forEach(student => {
-    const stats = getStudentStats(student.id);
-    const isDefaulter = stats.percentage < threshold;
+      students.forEach(student => {
+        const stats = getStudentStats(student.id);
+        const isDefaulter = stats.percentage < threshold;
 
-    const leaveSummary = getStudentLeaveSummary(student.id);
-    const hasLeaveToday = leaveSummary && leaveSummary.days.includes(appState.currentDay);
+        const leaveSummary = getStudentLeaveSummary(student.id);
+        const hasLeaveToday = leaveSummary && leaveSummary.days.includes(appState.currentDay);
 
-    const row = document.createElement('tr');
-    row.classList.add('align-middle');
+        const row = document.createElement('tr');
+        row.classList.add('align-middle');
 
-    row.innerHTML = `
+        row.innerHTML = `
       <td><strong>${escapeHtml(student.id)}</strong></td>
       <td>${escapeHtml(student.name)}</td>
       <td>
@@ -4352,69 +4352,74 @@
       </td>
     `;
 
-    elements.attendanceTableBody.appendChild(row);
-  });
+        elements.attendanceTableBody.appendChild(row);
+      });
 
-  document.querySelectorAll('.mark-present-btn').forEach(btn => {
-    btn.addEventListener('click', () => markAttendance(btn.dataset.id, 'Present'));
-  });
+      document.querySelectorAll('.mark-present-btn').forEach(btn => {
+        btn.addEventListener('click', () => markAttendance(btn.dataset.id, 'Present'));
+      });
 
-  document.querySelectorAll('.mark-absent-btn').forEach(btn => {
-    btn.addEventListener('click', () => markAttendance(btn.dataset.id, 'Absent'));
-  });
-}
-
-    function markAttendance(studentId, status) {
-      const monthKey = getMonthKey();
-      const year = appState.selectedYear;
-      const dept = appState.selectedDepartment;
-      const course = appState.selectedCourse;
-      const academicYear = appState.selectedAcademicYear;
-      const division = appState.selectedDivision;
-      const subject = appState.selectedSubject;
-
-      if (!monthKey || !year || !dept || !course || !academicYear || !division || !subject) {
-        console.error('❌ Missing required fields for marking attendance');
-        return;
-      }
-
-      // ✅ CREATE PATH IF DOESN'T EXIST
-      if (!appState.attendanceData[year]) {
-        appState.attendanceData[year] = {};
-      }
-      if (!appState.attendanceData[year][dept]) {
-        appState.attendanceData[year][dept] = {};
-      }
-      if (!appState.attendanceData[year][dept][course]) {
-        appState.attendanceData[year][dept][course] = {};
-      }
-      if (!appState.attendanceData[year][dept][course][academicYear]) {
-        appState.attendanceData[year][dept][course][academicYear] = {};
-      }
-      if (!appState.attendanceData[year][dept][course][academicYear][division]) {
-        appState.attendanceData[year][dept][course][academicYear][division] = { months: {} };
-      }
-      if (!appState.attendanceData[year][dept][course][academicYear][division].months[monthKey]) {
-        appState.attendanceData[year][dept][course][academicYear][division].months[monthKey] = { subjects: {} };
-      }
-      if (!appState.attendanceData[year][dept][course][academicYear][division].months[monthKey].subjects[subject]) {
-        appState.attendanceData[year][dept][course][academicYear][division].months[monthKey].subjects[subject] = { attendance: {} };
-      }
-
-      const attendanceRef = appState.attendanceData[year][dept][course][academicYear][division].months[monthKey].subjects[subject].attendance;
-
-      if (!attendanceRef[studentId]) {
-        console.error('❌ Student not found:', studentId);
-        return;
-      }
-
-      attendanceRef[studentId][appState.currentDay] = status;
-
-      refreshAttendanceTable();
-      renderCalendarGrid();
-      saveAllData();
+      document.querySelectorAll('.mark-absent-btn').forEach(btn => {
+        btn.addEventListener('click', () => markAttendance(btn.dataset.id, 'Absent'));
+      });
     }
-    function markAllAttendance(status) {
+
+    async function markAttendance(studentId, status) {
+      try {
+        const session = await getSession();
+        const cognitoToken = session.getIdToken().getJwtToken();
+
+        const response = await fetch('https://attendance-backend-p7uk.onrender.com/api/mark-attendance-manual', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${cognitoToken}`
+          },
+          body: JSON.stringify({
+            studentId,
+            status,
+            day: appState.currentDay,
+            month: appState.selectedMonth,
+            year: appState.selectedYear,
+            subject: appState.selectedSubject,
+            department: appState.selectedDepartment,
+            course: appState.selectedCourse,
+            academicYear: appState.selectedAcademicYear,
+            division: appState.selectedDivision
+          })
+        });
+
+        const result = await response.json();
+        if (!response.ok) {
+          showAlert(result.error || 'Failed to mark attendance', 'danger');
+          return;
+        }
+
+        // Local state update for immediate UI
+        const monthKey = getMonthKey();
+        const attendanceRef = appState.attendanceData
+          ?.[appState.selectedYear]
+          ?.[appState.selectedDepartment]
+          ?.[appState.selectedCourse]
+          ?.[appState.selectedAcademicYear]
+          ?.[appState.selectedDivision]
+          ?.months?.[monthKey]
+          ?.subjects?.[appState.selectedSubject]
+          ?.attendance;
+
+        if (attendanceRef && attendanceRef[studentId]) {
+          attendanceRef[studentId][appState.currentDay] = status;
+        }
+
+        refreshAttendanceTable();
+        renderCalendarGrid();
+
+      } catch (error) {
+        console.error('Error marking attendance:', error);
+        showAlert('Failed to mark attendance', 'danger');
+      }
+    }
+    async function markAllAttendance(status) {
       if (isHoliday(appState.currentDay)) {
         showAlert('Cannot mark attendance on a holiday!', 'warning');
         return;
@@ -4423,16 +4428,48 @@
       const subjectData = getSubjectData();
       if (!subjectData) return;
 
-      for (const studentId in subjectData) {
-        if (studentId.startsWith('_')) continue;
-        subjectData[studentId][appState.currentDay] = status;
+      try {
+        const session = await getSession();
+        const cognitoToken = session.getIdToken().getJwtToken();
+
+        const students = Object.keys(subjectData).filter(id => !id.startsWith('_'));
+
+        await Promise.all(students.map(studentId =>
+          fetch('https://attendance-backend-p7uk.onrender.com/api/mark-attendance-manual', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${cognitoToken}`
+            },
+            body: JSON.stringify({
+              studentId,
+              status,
+              day: appState.currentDay,
+              month: appState.selectedMonth,
+              year: appState.selectedYear,
+              subject: appState.selectedSubject,
+              department: appState.selectedDepartment,
+              course: appState.selectedCourse,
+              academicYear: appState.selectedAcademicYear,
+              division: appState.selectedDivision
+            })
+          })
+        ));
+
+        // Local state update
+        for (const studentId in subjectData) {
+          if (studentId.startsWith('_')) continue;
+          subjectData[studentId][appState.currentDay] = status;
+        }
+
+        refreshAttendanceTable();
+        renderCalendarGrid();
+        showAlert(`All students marked as ${status}!`, 'success');
+
+      } catch (error) {
+        console.error('Error marking all attendance:', error);
+        showAlert('Failed to mark attendance', 'danger');
       }
-
-      refreshAttendanceTable();
-      renderCalendarGrid();
-      saveAllData();
-
-      showAlert(`All students marked as ${status}!`, 'success');
     }
 
     function updateSummary(students) {
@@ -5425,7 +5462,7 @@
               // Find and delete any QR for this division
               for (const id in allQRs) {
                 const qrData = allQRs[id];
-                if (qrData.division === divisionKey) {
+                if (qrData.divisionKey === divisionKey) {
                   console.log(`🗑️ Deleting old QR: ${id}`);
                   await firebaseDB.ref(`mainSystem/activeQRs/${id}`).remove();
                 }
@@ -5437,7 +5474,9 @@
           }
 
           // ✅ STEP 2: CREATE NEW QR ID (always fresh)
-          const qrId = Math.random().toString(36).substring(2, 10).toUpperCase();
+          const array = new Uint8Array(8);
+          window.crypto.getRandomValues(array);
+          const qrId = Array.from(array, b => b.toString(36)).join('').toUpperCase().substring(0, 10);
           console.log(`🆕 Generated NEW QR ID: ${qrId}`);
 
           const payload = JSON.stringify({
@@ -5464,7 +5503,9 @@
               await firebaseDB.ref(`mainSystem/activeQRs/${qrId}`).set({
                 createdAt: Date.now(),
                 expiresAt: Date.now() + 600000,
-                division: divisionKey,
+                division: appState.selectedDivision,        // ← "Division A" (sirf division)
+                department: appState.selectedDepartment,    // ← "Computer"
+                divisionKey: divisionKey,                   // ← pura key (purane logic ke liye)
                 data: JSON.parse(payload)
               });
               console.log(`✅ Saved NEW QR to Firebase: ${qrId}`);
@@ -5916,7 +5957,6 @@
     // ===== SUBMIT LEAVE APPLICATION =====
 
     async function submitLeaveApplication() {
-      // Get form values
       const studentId = document.getElementById('leaveStudentSelect').value;
       const fromDate = document.getElementById('leaveFromDate').value;
       const toDate = document.getElementById('leaveToDate').value;
@@ -5929,16 +5969,13 @@
 
       if (role === 'student') {
         const authenticatedStudentId = attributes['custom:studentId'];
-
         if (studentId !== authenticatedStudentId) {
           validationMsg.textContent = '⚠️ Security Error: You can only submit leave for yourself!';
           validationAlert.style.display = 'block';
-          console.error('❌ Student tried to submit leave for different ID');
           return;
         }
       }
 
-      // Validate division context
       const contextValidation = validateDivisionContext();
       if (!contextValidation.valid) {
         validationMsg.textContent = `Please select: ${contextValidation.missing.join(', ')}`;
@@ -5946,7 +5983,6 @@
         return;
       }
 
-      // Validate form fields
       if (!studentId) {
         validationMsg.textContent = 'Please select a student';
         validationAlert.style.display = 'block';
@@ -5971,7 +6007,6 @@
         return;
       }
 
-      // Calculate days
       const days = getDaysBetweenDates(fromDate, toDate);
 
       if (days.length === 0) {
@@ -5980,71 +6015,47 @@
         return;
       }
 
-      // Get student name
       const studentSelect = document.getElementById('leaveStudentSelect');
       const studentName = studentSelect.options[studentSelect.selectedIndex].text.split(' - ')[1] || studentId;
 
-      // Get current user
-      let submittedBy = 'unknown';
       try {
-        const user = await getCurrentUser();
-        submittedBy = user.attributes.email;
-      } catch (error) {
-        console.warn('Could not get current user:', error);
-      }
+        // Get Cognito token
+        const session = await getSession();
+        const cognitoToken = session.getIdToken().getJwtToken();
 
-      // Generate leave ID
-      const leaveId = `leave_${Date.now()}`;
+        const response = await fetch('https://attendance-backend-p7uk.onrender.com/api/leave/submit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${cognitoToken}`
+          },
+          body: JSON.stringify({
+            studentId,
+            studentName,
+            fromDate,
+            toDate,
+            days,
+            reason,
+            month: new Date(fromDate).getMonth(),
+            year: new Date(fromDate).getFullYear()
+          })
+        });
 
-      // Create leave data
-      const leaveData = {
-        studentId: studentId,
-        studentName: studentName,
-        fromDate: fromDate,
-        toDate: toDate,
-        days: days,
-        month: new Date(fromDate).getMonth(),
-        year: new Date(fromDate).getFullYear(),
-        reason: reason,
-        status: 'pending',
-        submittedBy: submittedBy,
-        submittedAt: Date.now()
-      };
+        const result = await response.json();
 
-      // Save to Firebase
-      const leavePath = getLeaveApplicationsPath();
-
-      if (!leavePath) {
-        showAlert('Cannot save leave: division context incomplete', 'danger');
-        return;
-      }
-
-      try {
-        if (useCloud && firebaseDB) {
-          await firebaseDB.ref(`${leavePath}/${leaveId}`).set(leaveData);
-          console.log(`✅ Leave application submitted: ${leaveId}`);
-        } else {
-          // Fallback to IndexedDB
-          const allLeaves = await loadFromDatabase('leaveApplications') || {};
-          allLeaves[leaveId] = leaveData;
-          await saveToDatabase('leaveApplications', allLeaves);
+        if (!response.ok) {
+          showAlert(result.error || 'Failed to submit leave', 'danger');
+          return;
         }
 
-        // Close modal
-        if (leaveModal) {
-          leaveModal.hide();
-        }
-
-        // Reset form
+        if (leaveModal) leaveModal.hide();
         resetLeaveForm();
-
-
-
-        showAlert(`Leave application submitted for ${studentName} (${days.length} days)`, 'success');
+        await loadLeaveApplications();
+        showAlert(`Leave submitted for ${studentName} (${days.length} days)`, 'success');
 
       } catch (error) {
         console.error('Error submitting leave:', error);
-        showAlert('Failed to submit leave application. Please try again.', 'danger');
+        showAlert('Failed to submit leave. Please try again.', 'danger');
       }
     }
 
@@ -6237,7 +6248,7 @@
 
       if (!leavePath) {
         console.warn('Cannot load leaves: division context incomplete');
-        leaveState.applications = {};
+        leaveState.applications = [];
         return;
       }
 
@@ -6257,12 +6268,11 @@
 
         } else {
           // Fallback to IndexedDB
-          const localLeaves = await loadFromDatabase('leaveApplications') || {};
+          const localLeaves = await loadFromDatabase('leaveApplications') || [];
 
-          leaveState.applications = Object.keys(localLeaves).map(key => ({
-            id: key,
-            ...localLeaves[key]
-          }));
+          leaveState.applications = Array.isArray(localLeaves)
+            ? localLeaves
+            : Object.keys(localLeaves).map(key => ({ id: key, ...localLeaves[key] }));
 
           console.log(`✅ Loaded ${leaveState.applications.length} leave applications from IndexedDB`);
         }
@@ -6656,7 +6666,7 @@
       );
     }
     */
-    
+
 
 
     // ==================== INITIALIZATION ====================
@@ -6795,28 +6805,28 @@
         const backBtn = document.getElementById('adminBackBtn');
 
         if (role === 'admin') {
-  continueBtn.style.display = 'block';
-  backBtn.style.display = 'block';
+          continueBtn.style.display = 'block';
+          backBtn.style.display = 'block';
 
-  // ✅ Restore last section instead of always showing config
-  const lastSection = localStorage.getItem('adminSection') || 'config';
-  if (lastSection === 'attendance') {
-    showAdminAttendanceSection();
-  } else {
-    showAdminConfigSection();
-  }
+          // ✅ Restore last section instead of always showing config
+          const lastSection = localStorage.getItem('adminSection') || 'config';
+          if (lastSection === 'attendance') {
+            showAdminAttendanceSection();
+          } else {
+            showAdminConfigSection();
+          }
 
-  // Continue button click
-  continueBtn.addEventListener('click', () => {
-    showAdminAttendanceSection();
-    attendanceSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
+          // Continue button click
+          continueBtn.addEventListener('click', () => {
+            showAdminAttendanceSection();
+            attendanceSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          });
 
-  // Back button click
-  backBtn.addEventListener('click', () => {
-    showAdminConfigSection();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
+          // Back button click
+          backBtn.addEventListener('click', () => {
+            showAdminConfigSection();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          });
 
         } else if (role === 'teacher') {
           // Teachers see everything normally
@@ -6869,7 +6879,7 @@
       console.log('📊 Showing Admin Attendance Section (with attendance navbar)');
     }
 
-    
+
     let qrTimerInterval = null;
     let qrExpiryTimestamp = null; // ✅ Track actual expiry time instead of countdown
 
