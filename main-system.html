@@ -10,15 +10,15 @@
   <script
     src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.3.7/dist/amazon-cognito-identity.min.js"></script>
   <!-- Cognito Config -->
-  <script src="cognito-config.js"></script>
+  <script src="/cognito-config.js"></script>
   <!-- Auth Functions -->
-  <script src="auth.js"></script>
+  <script src="/auth.js"></script>
   <!-- Firebase SDK (Add AFTER AWS Cognito SDK) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <!-- Firebase Config (reuse same file) -->
-  <script src="firebase-config.js"></script>
+  <script src="/firebase-config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
   <style>
     :root {
@@ -1011,7 +1011,7 @@
         <div class="d-flex align-items-center gap-2">
           <span class="badge bg-light text-dark" id="navSubjectBadge">No Subject</span>
           <span class="badge bg-warning text-dark" id="navMonthBadge">No Month</span>
-          <a href="profile.html" id="profileNavBtn" class="btn btn-outline-light btn-sm ms-1" style="display:none;">
+          <a href="/profile" id="profileNavBtn" class="btn btn-outline-light btn-sm ms-1" style="display:none;">
             <i class="bi bi-person-circle me-1"></i>Profile
           </a>
           <button onclick="handleLogout()" class="btn btn-outline-light btn-sm ms-1">
@@ -1495,7 +1495,7 @@
         </button>
       </div>
       <section id="camera-section" class="nav-section">
-        <button class="go-btn" onclick="window.location.href='face-recognition.html'">
+        <button class="go-btn" onclick="window.location.href='/face-recognition'">
           Attendance Section
         </button>
       </section>
@@ -1607,7 +1607,7 @@
       <div class="col-md-3 teacher-only">
         <div class="section-card">
           <li class="nav-item teacher-only">
-            <a class="nav-link" href="leave-applications.html">
+            <a class="nav-link" href="/leave-applications">
               <i class="bi bi-calendar-x me-1"></i>Leave Applications
             </a>
           </li>
@@ -1996,7 +1996,7 @@
       try {
         const user = await getCurrentUser();
         if (!user) {
-          window.location.href = 'index.html';
+          window.location.href = '/index';
           return;
         }
         const firebaseSuccess = await signIntoFirebase();
@@ -2049,7 +2049,7 @@
         }
         initialize();
       } catch (error) {
-        window.location.href = 'index.html';
+        window.location.href = '/index';
       }
     }
     async function applyRoleBasedUI() {
@@ -2128,7 +2128,7 @@
     async function handleLogout() {
       if (confirm('Are you sure you want to logout?')) {
         await logout();
-        window.location.href = 'index.html';
+        window.location.href = '/index';
       }
     }
     window.addEventListener('DOMContentLoaded', checkAuthAndInit);
