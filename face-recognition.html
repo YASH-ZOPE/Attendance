@@ -33,10 +33,10 @@
   display: none;
 }
 
-/* Hide scrollbar for IE, Edge and Firefox */
+
 * {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;  
+  scrollbar-width: none;  
 }
     .main-card {
       background: white;
@@ -229,7 +229,7 @@
       font-size: 0.85rem;
     }
 
-    /* ✅ FIXED: Role-based visibility with proper specificity */
+    
     .admin-only,
     .teacher-only {
       display: block;
@@ -239,13 +239,13 @@
       display: none;
     }
 
-    /* For inline elements */
+    
     .admin-only-inline,
     .teacher-only-inline {
       display: inline-block;
     }
 
-    /* Responsive fixes */
+    
     @media (max-width: 768px) {
       .main-card {
         margin: 10px;
@@ -301,7 +301,7 @@
       }
     }
 
-    /* ✅ FIXED: Proper flexbox layout with role support */
+    
     .parent-container {
       display: flex;
       gap: 15px;
@@ -309,38 +309,38 @@
       margin-top: 20px;
     }
 
-    /* Default layout (Admin/Teacher) - 60/40 split */
+    
     .child-container {
       min-width: 280px;
       flex: 1 1 calc(40% - 7.5px);
-      /* Default to smaller size */
+      
     }
 
-    /* First container (video) - 60% width */
+    
     .child-container:nth-child(1) {
       flex: 1 1 calc(60% - 7.5px);
     }
 
-    /* Third container (attendance) - 40% width */
+    
     .child-container:nth-child(3) {
       flex: 1 1 calc(40% - 7.5px);
     }
 
-    /* ✅ FIXED: Student role - proper layout with higher specificity */
+    
     body.student-role .parent-container {
-      /* Force 60/40 layout for only 2 containers */
+      
       display: flex;
       gap: 15px;
       flex-wrap: wrap;
     }
 
-    /* Hide teacher-only containers completely */
+    
     body.student-role .child-container:nth-child(2),
     body.student-role .child-container:nth-child(4) {
       display: none !important;
     }
 
-    /* Make remaining containers fill properly */
+    
     body.student-role .child-container:nth-child(1) {
       flex: 1 1 calc(60% - 7.5px) !important;
       max-width: calc(60% - 7.5px);
@@ -351,7 +351,7 @@
       max-width: calc(40% - 7.5px);
     }
 
-    /* ✅ FIXED: Hide teacher/admin elements in student role */
+    
     body.student-role .admin-only,
     body.student-role .teacher-only {
       display: none !important;
@@ -362,19 +362,19 @@
       display: none !important;
     }
 
-    /* Bootstrap column width fix */
+    
     .parent-container .child-container .col-11 {
       width: 100% !important;
       max-width: 100% !important;
       flex: none !important;
     }
 
-    /* Adjust student list height for side-by-side */
+    
     .parent-container .student-list {
       max-height: 400px;
     }
 
-    /* Quick Stats height reduction */
+    
     .row.mt-4 {
       margin-top: 1rem !important;
       margin-bottom: 0rem !important;
@@ -393,12 +393,12 @@
       font-size: 0.7rem;
     }
 
-    /* Spacing above Main Dashboard button */
+    
     .d-flex.justify-content-center {
       margin-top: 1.5rem;
     }
 
-    /* Attendance blocks styling */
+    
     .attendance-blocks {
       display: grid;
       grid-template-columns: repeat(10, 1fr);
@@ -435,7 +435,7 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
 
-    /* Tooltip */
+    
     .attendance-block .tooltip-text {
       visibility: hidden;
       background-color: rgba(0, 0, 0, 0.9);
@@ -471,7 +471,7 @@
       opacity: 1;
     }
 
-    /* Responsive */
+    
     @media (max-width: 1200px) {
       .attendance-blocks {
         grid-template-columns: repeat(8, 1fr);
@@ -488,7 +488,7 @@
         min-height: 40px;
       }
 
-      /* ✅ FIXED: Student role stacks vertically on mobile */
+      
       body.student-role .child-container:nth-child(1),
       body.student-role .child-container:nth-child(3) {
         flex: 1 1 100% !important;
@@ -496,7 +496,7 @@
       }
     }
 
-    /* QR Scanner Overlay */
+    
     .qr-scanner-overlay {
       display: none;
       position: fixed;
@@ -556,9 +556,7 @@
       font-size: 0.9rem;
     }
 
-    /* ===============================
-   CONFIG DISPLAY CONTAINER
-   =============================== */
+    
 
     .config-display-container {
       background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
@@ -566,9 +564,7 @@
       border-bottom: 2px solid #dee2e6;
     }
 
-    /* ===============================
-   CONFIG CARD (FULL CLICKABLE)
-   =============================== */
+    
 
     .config-card {
       max-width: 1200px;
@@ -581,14 +577,14 @@
       transition: all 0.3s ease;
     }
 
-    /* Hover Effect */
+    
     .config-card:hover {
       box-shadow: 0 6px 25px rgba(102, 126, 234, 0.25);
       transform: translateY(-2px);
       border: 2px solid #667eea;
     }
 
-    /* Click Ripple Effect */
+    
     @keyframes ripple {
       0% {
         box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4);
@@ -603,9 +599,7 @@
       animation: ripple 0.5s ease-out;
     }
 
-    /* ===============================
-   TITLE
-   =============================== */
+    
 
     .config-title {
       color: #6A4A5A;
@@ -617,9 +611,7 @@
       align-items: center;
     }
 
-    /* ===============================
-   GRID LAYOUT
-   =============================== */
+    
 
     .config-grid {
       display: grid;
@@ -627,9 +619,7 @@
       gap: 12px;
     }
 
-    /* ===============================
-   GRID ITEMS
-   =============================== */
+    
 
     .config-item {
       display: flex;
@@ -668,9 +658,7 @@
       font-style: italic;
     }
 
-    /* ===============================
-   TABLET RESPONSIVE
-   =============================== */
+    
 
     @media (max-width: 992px) {
       .config-grid {
@@ -678,9 +666,7 @@
       }
     }
 
-    /* ===============================
-   MOBILE RESPONSIVE (COMPACT)
-   =============================== */
+    
 
     @media (max-width: 576px) {
 
@@ -711,7 +697,7 @@
         font-size: 0.9rem;
       }
 
-      /* ADD TO YOUR <style> SECTION */
+      
       .section-card {
         background: #FFFEF9;
         border-radius: 10px;
@@ -721,12 +707,9 @@
       }
     }
 
-    /* ===============================
-   SECURITY VERIFICATION SECTION - MINIMAL
-   (Matches Current Configuration Style)
-   =============================== */
+    
 
-/* Section Card Container */
+
 #securityCodeSection.section-card {
   background: #ffffff;
   border-radius: 16px;
@@ -736,14 +719,14 @@
   overflow: hidden;
 }
 
-/* Card Wrapper */
+
 #securityCodeSection .card {
   border: none;
   background: transparent;
   box-shadow: none;
 }
 
-/* Card Header */
+
 #securityCodeSection .card-header {
   background: #f8f9fa !important;
   border-bottom: 1px solid #e1e4e8;
@@ -761,7 +744,7 @@
   color: #667eea;
 }
 
-/* Card Body */
+
 #securityCodeSection .card-body {
   padding: 20px;
 }
@@ -772,7 +755,7 @@
   margin-bottom: 16px;
 }
 
-/* Security Code Input */
+
 #securityCodeInput {
   height: 50px;
   background: #f8f9fa;
@@ -800,7 +783,7 @@
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
 }
 
-/* Status Icons */
+
 #codeLoadingSpinner,
 #codeSuccessIcon {
   position: absolute;
@@ -814,7 +797,7 @@
   font-size: 1.5rem;
 }
 
-/* Helper Text */
+
 #securityCodeSection small.text-muted {
   color: #666666 !important;
   font-size: 0.75rem;
@@ -825,7 +808,7 @@
   color: #667eea;
 }
 
-/* Validation Message */
+
 #codeValidationMsg {
   padding: 10px 16px;
   border-radius: 8px;
@@ -857,7 +840,7 @@
   color: #721c24;
 }
 
-/* Responsive */
+
 @media (max-width: 768px) {
   #securityCodeSection.section-card {
     border-radius: 12px;
@@ -1231,7 +1214,7 @@
 
 <!-- ✅ Minimal Styles -->
 <style>
-/* Shimmer Wave Effect */
+
 .shimmer-wave {
   position: absolute;
   top: 0;
@@ -1252,7 +1235,7 @@
   100% { left: 100%; }
 }
 
-/* Skeleton Lines */
+
 .skeleton-line {
   background: rgba(224, 224, 224, 0.5);
   border-radius: 4px;
@@ -1264,7 +1247,7 @@
   50% { opacity: 0.8; }
 }
 
-/* Skeleton Card Animation */
+
 .skeleton-card {
   animation: fadeIn 0.6s ease;
 }
@@ -1274,7 +1257,7 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Loading Message Animation */
+
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -1286,13 +1269,13 @@
   }
 }
 
-/* Rotate Animation */
+
 @keyframes rotate {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
 
-/* Skeleton Shimmer */
+
 .skeleton-shimmer {
   background: rgba(232, 232, 232, 0.5);
 }
@@ -1300,7 +1283,7 @@
 
 <!-- ✅ Simplified JavaScript (No Progress Bar) -->
 <script>
-// Update loading stage text only
+
 function updateLoadingStage() {
   const stages = [
     'Loading face detection...',
@@ -1324,7 +1307,6 @@ function updateLoadingStage() {
   }, 1200);
 }
 
-// Start when page loads
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', updateLoadingStage);
 } else {
@@ -1692,38 +1674,34 @@ if (document.readyState === 'loading') {
         <script src="face-recognition.js"></script>
 
         <script>
-          // ==================== ROLE-BASED UI HIDING ====================
+
           async function applyRoleBasedUIForFaceRecognition() {
             try {
               const role = await getUserRole();
-              console.log('Applying Face Recognition UI for role:', role);
 
               if (role === 'admin') {
-                // Admin sees everything - no changes needed
+
                 return;
               }
 
               if (role === 'teacher') {
-                // Hide admin-only elements
+
                 hideElements('.admin-only');
                 hideElements('.admin-only-inline');
 
               } else if (role === 'student') {
-                // ✅ FIXED: Add student-role class to body FIRST
+
                 document.body.classList.add('student-role');
 
-                // Then hide elements (CSS will handle the layout)
                 hideElements('.admin-only');
                 hideElements('.admin-only-inline');
                 hideElements('.teacher-only');
                 hideElements('.teacher-only-inline');
 
-                // Hide delete buttons in student list
                 hideDeleteButtonsForStudents();
               }
 
             } catch (error) {
-              console.error('Error applying role-based UI:', error);
             }
           }
 
@@ -1734,7 +1712,7 @@ if (document.readyState === 'loading') {
           }
 
           function hideDeleteButtonsForStudents() {
-            // Add CSS to hide delete buttons
+
             const style = document.createElement('style');
             style.id = 'student-role-style';
             style.textContent = `
@@ -1742,7 +1720,6 @@ if (document.readyState === 'loading') {
           `;
             document.head.appendChild(style);
 
-            // Also observe for dynamically added delete buttons
             const observer = new MutationObserver(() => {
               document.querySelectorAll('.student-card .btn-danger').forEach(btn => {
                 btn.style.display = 'none';
@@ -1755,11 +1732,9 @@ if (document.readyState === 'loading') {
             }
           }
 
-          // Add this function to update the simplified display
 function updateConfigDisplay() {
   const config = JSON.parse(localStorage.getItem('attendanceConfig') || '{}');
-  
-  // Field 1: Department - Academic year - Course - Div.
+
   const classInfo = [
     config.department,
     config.academicYear,
@@ -1769,8 +1744,7 @@ function updateConfigDisplay() {
   
   document.getElementById('displayClassInfo').textContent = classInfo;
   document.getElementById('displayClassInfo').classList.toggle('not-set', classInfo === 'Not Set');
-  
-  // Field 2: Date (day - month - year)
+
   let dateStr = 'Not Set';
   if (config.day && config.month && config.year) {
     const shortYear = config.year.toString().slice(-2);
@@ -1779,41 +1753,34 @@ function updateConfigDisplay() {
   
   document.getElementById('displayDate').textContent = dateStr;
   document.getElementById('displayDate').classList.toggle('not-set', dateStr === 'Not Set');
-  
-  // Field 3: Subject (keeping original behavior)
+
   const subject = config.subject || 'Not Set';
   document.getElementById('displaySubject').textContent = subject;
   document.getElementById('displaySubject').classList.toggle('not-set', subject === 'Not Set');
 }
 
-          // ==================== AUTHENTICATION CHECK ====================
           async function checkAuthAndInitFaceRecognition() {
             try {
-              // Check if logged in
+
               const user = await getCurrentUser();
 
               if (!user) {
-                // Not logged in - redirect to login
+
                 window.location.href = 'index.html';
                 return;
               }
 
-              // Get role
               const role = await getUserRole();
-              console.log(`Face Recognition - Logged in as: ${user.attributes.email} (${role})`);
               await signIntoFirebase();
-              // Apply role-based UI
+
               await applyRoleBasedUIForFaceRecognition();
 
-              console.log('Face Recognition UI initialized for role:', role);
 
             } catch (error) {
-              console.error('Auth check failed:', error);
               window.location.href = 'index.html';
             }
           }
 
-          // Sync button handler
           document.getElementById('syncToMainBtn').addEventListener('click', async () => {
             try {
               const btn = document.getElementById('syncToMainBtn');
@@ -1834,14 +1801,11 @@ function updateConfigDisplay() {
             }
           });
 
-          // Call on page load (after models are loaded)
           window.addEventListener('DOMContentLoaded', () => {
-            // Wait a bit for face-api models to start loading
+
             setTimeout(checkAuthAndInitFaceRecognition, 500);
           });
-          
-          
-          // ==================== QR SCANNER ====================
+
           let qrVideo = null;
           let qrStream = null;
           let qrAnimationFrame = null;
@@ -1906,7 +1870,6 @@ function updateConfigDisplay() {
                 scanLoop();
               } catch (err) {
                 setQRStatus('❌ Camera access denied. Please allow camera.');
-                console.error('QR camera error:', err);
               }
             }
           }
@@ -1947,27 +1910,23 @@ function updateConfigDisplay() {
               const code = jsQR(imageData.data, imageData.width, imageData.height);
 
               if (code) {
-                // Stop scanning immediately
+
                 if (qrAnimationFrame) {
                   cancelAnimationFrame(qrAnimationFrame);
                   qrAnimationFrame = null;
                 }
 
-                // Close scanner first
                 closeQRScanner();
 
-                // Then process the QR code
                 if (window.faceSystem) {
                   await window.faceSystem.handleQRScan(code.data);
                 } else {
-                  console.error('❌ Face system not initialized yet');
                   alert('System not ready. Please refresh and try again.');
                 }
 
                 return;
               }
             } catch (e) {
-              console.error('jsQR scan error:', e);
             }
 
             qrAnimationFrame = requestAnimationFrame(scanLoop);
@@ -1982,13 +1941,10 @@ function updateConfigDisplay() {
 
             if (configCard) {
               configCard.addEventListener('click', () => {
-                console.log('Config card clicked - opening QR scanner');
                 document.getElementById('scanQRBtn').click();
               });
 
-              console.log('✅ Config card click handler attached');
             } else {
-              console.warn('⚠️ Config card not found');
             }
           });
         </script>
@@ -1996,3 +1952,4 @@ function updateConfigDisplay() {
 </body>
 
 </html>
+

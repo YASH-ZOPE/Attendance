@@ -386,35 +386,33 @@ class CloudStorage {
    * ✅ UPDATED: Now uses division-specific path
    */
   async markAttendance(studentId) {
-    if (!this.isInitialized) {
-      throw new Error('Cloud storage not initialized');
-    }
+  if (!this.isInitialized) {
+    throw new Error('Cloud storage not initialized');
+  }
 
-    const facesRef = this.getFacesRef();
-    if (!facesRef) {
+  const facesRef = this.getFacesRef();
+  if (!facesRef) {
+    return false;
+  }
+
+  try {
+    const snapshot = await facesRef.child(studentId).once('value');
+    const face = snapshot.val();
+
+    if (!face) {
       return false;
     }
 
-    try {
-      const snapshot = await facesRef.child(studentId).once('value');
-      const face = snapshot.val();
+    // ✅ Local tracking only - no Firebase write
+    // Actual attendance marking happens via backend in saveAttendanceToFirebase()
+    console.log(`✅ Attendance noted locally: ${face.name}`);
+    return true;
 
-      if (!face) {
-        return false;
-      }
-
-      await facesRef.child(studentId).update({
-        attendanceToday: true,
-        lastSeen: Date.now()
-      });
-
-      console.log(`✅ Attendance marked in cloud: ${face.name}`);
-      return true;
-    } catch (error) {
-      console.error('❌ Failed to mark attendance in cloud:', error);
-      throw error;
-    }
+  } catch (error) {
+    console.error('❌ Failed to get face data:', error);
+    return false;
   }
+}
 
   /**
    * Reset all attendance to "Not Present"
