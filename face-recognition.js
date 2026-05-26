@@ -46,6 +46,8 @@ class FaceRecognitionSystem {
 };
        this.isHandlingDayChange = false;
        this.userRole = null;
+       this.monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                          'July', 'August', 'September', 'October', 'November', 'December'];
   }
 async init() {
   try {
@@ -54,7 +56,7 @@ async init() {
     
     if (!user) {
       // Not logged in - redirect
-      window.location.href = '/index';
+      window.location.href = 'index.html';
       return;
     }
     
@@ -810,10 +812,19 @@ async handleFirebaseSubjectChange(newSubject, oldSubject) {
       // Remove old listener if exists
       if (this.attendanceListener) {
         this.attendanceListener.off();
+        if (this.firebaseSync && this.firebaseSync.listeners) {
+          const index = this.firebaseSync.listeners.indexOf(this.attendanceListener);
+          if (index > -1) {
+            this.firebaseSync.listeners.splice(index, 1);
+          }
+        }
       }
       
       // Attach new listener
       this.attendanceListener = this.firebaseSync.firebaseDB.ref(attendancePath);
+      if (this.firebaseSync && typeof this.firebaseSync.trackListener === 'function') {
+        this.firebaseSync.trackListener(this.attendanceListener);
+      }
       this.attendanceListener.on('value', (snapshot) => {
         console.log('🔥🔥🔥 FIREBASE VALUE EVENT TRIGGERED!');
         const data = snapshot.val();
@@ -839,11 +850,8 @@ async handleFirebaseMonthChange(newMonth, oldMonth) {
   this.mainSystemConfig.selectedMonth = newMonth;
    this.updateConfigDisplay();
   
-  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                     'July', 'August', 'September', 'October', 'November', 'December'];
-  
   if (newMonth !== null && newMonth !== undefined) {
-    this.showToast(`📅 Month changed to: ${monthNames[newMonth]}`, 'info');
+    this.showToast(`📅 Month changed to: ${this.monthNames[newMonth]}`, 'info');
     
     // Reset attendance when month changes
     if (oldMonth !== null && oldMonth !== newMonth) {
@@ -959,9 +967,6 @@ async handleFirebaseDateChange(newDate, oldDate) {
   const todayDay = today.getDate();
   const todayMonth = today.getMonth();
   const todayYear = today.getFullYear();
-  
-  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                      'July', 'August', 'September', 'October', 'November', 'December'];
 
   if (!this.firebaseSync || !this.firebaseSync.isConnected) {
     return {
@@ -989,8 +994,8 @@ async handleFirebaseDateChange(newDate, oldDate) {
       return {
         valid: false,
         message: `⚠️ STUDENTS CAN ONLY MARK ATTENDANCE FOR TODAY!\n\n` +
-                 `Today is: ${todayDay} ${monthNames[todayMonth]} ${todayYear}\n` +
-                 `Main system shows: ${selectedDay} ${monthNames[selectedMonth]} ${selectedYear}\n\n` +
+                 `Today is: ${todayDay} ${this.monthNames[todayMonth]} ${todayYear}\n` +
+                 `Main system shows: ${selectedDay} ${this.monthNames[selectedMonth]} ${selectedYear}\n\n` +
                  `You can view other dates in the main system, but face recognition only works for today.`
       };
     }
@@ -1000,7 +1005,7 @@ async handleFirebaseDateChange(newDate, oldDate) {
       targetDay: todayDay,
       targetMonth: todayMonth,
       targetYear: todayYear,
-      message: `✅ Marking attendance for TODAY (${todayDay} ${monthNames[todayMonth]} ${todayYear})`
+      message: `✅ Marking attendance for TODAY (${todayDay} ${this.monthNames[todayMonth]} ${todayYear})`
     };
     
   } else {
@@ -1009,7 +1014,7 @@ async handleFirebaseDateChange(newDate, oldDate) {
       targetDay: selectedDay,
       targetMonth: selectedMonth,
       targetYear: selectedYear,
-      message: `✅ Marking attendance for: ${selectedDay} ${monthNames[selectedMonth]} ${selectedYear}`
+      message: `✅ Marking attendance for: ${selectedDay} ${this.monthNames[selectedMonth]} ${selectedYear}`
     };
   }
 };
@@ -1695,9 +1700,6 @@ async handleFirebaseAttendanceChange(attendanceData) {
 }
 
 updateConfigDisplay() {
-  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                      'July', 'August', 'September', 'October', 'November', 'December'];
-  
   const config = this.mainSystemConfig;
   
   // Field 1: Department - Academic year - Course - Div.
@@ -1718,7 +1720,7 @@ updateConfigDisplay() {
   let dateStr = 'Not Set';
   if (config.currentDay && config.selectedMonth !== null && config.selectedYear) {
     const shortYear = config.selectedYear.toString().slice(-2);
-    dateStr = `${config.currentDay} - ${monthNames[config.selectedMonth]} - ${shortYear}`;
+    dateStr = `${config.currentDay} - ${this.monthNames[config.selectedMonth]} - ${shortYear}`;
   }
   
   const dateEl = document.getElementById('displayDate');
@@ -2431,9 +2433,6 @@ const subjectsSnapshot = await this.firebaseSync.firebaseDB.ref('mainSystem/subj
 const subjects = subjectsSnapshot.val();
     console.log('=== READ COMPLETE ===');
 
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                        'July', 'August', 'September', 'October', 'November', 'December'];
-
     let report = '🔍 MAIN SYSTEM CONNECTION TEST\n\n';
     
     if (this.mainDB) {
@@ -2446,7 +2445,7 @@ const subjects = subjectsSnapshot.val();
 
     report += '\n📊 CURRENT CONFIGURATION:\n';
     report += `Subject: ${selectedSubject || '❌ NOT SET'}\n`;
-    report += `Month: ${selectedMonth !== null && selectedMonth !== undefined ? `${monthNames[selectedMonth]} (index: ${selectedMonth})` : '❌ NOT SET'}\n`;
+    report += `Month: ${selectedMonth !== null && selectedMonth !== undefined ? `${this.monthNames[selectedMonth]} (index: ${selectedMonth})` : '❌ NOT SET'}\n`;
     report += `Year: ${selectedYear || '❌ NOT SET'}\n`;
     report += `Current Day: ${currentDay || '❌ NOT SET'}\n`;
     report += `Available Subjects: ${subjects?.length || 0}\n`;
@@ -2500,13 +2499,10 @@ async refreshMainSystemStatus() {
     const selectedYear = await this.getFromMainDB('selectedYear');
     const currentDay = await this.getFromMainDB('currentDay');
     
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                        'July', 'August', 'September', 'October', 'November', 'December'];
-    
     // Update UI or show status
     let statusMsg = '📊 MAIN SYSTEM STATUS (REFRESHED)\n\n';
     statusMsg += `Subject: ${selectedSubject || '❌ NOT SET'}\n`;
-    statusMsg += `Month: ${selectedMonth !== null && selectedMonth !== undefined ? monthNames[selectedMonth] : '❌ NOT SET'}\n`;
+    statusMsg += `Month: ${selectedMonth !== null && selectedMonth !== undefined ? this.monthNames[selectedMonth] : '❌ NOT SET'}\n`;
     statusMsg += `Year: ${selectedYear || '❌ NOT SET'}\n`;
     statusMsg += `Day: ${currentDay || '❌ NOT SET'}\n\n`;
     
@@ -2654,11 +2650,8 @@ await this.firebaseSync.firebaseDB
 
 console.log(`✅ Saved to Firebase: ${savePath}`);
 
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                        'July', 'August', 'September', 'October', 'November', 'December'];
-    
     this.showToast(
-      `✅ SUCCESS! Synced ${syncedCount} students to ${monthNames[selectedMonth]} ${selectedYear}, Day ${currentDay}`, 
+      `✅ SUCCESS! Synced ${syncedCount} students to ${this.monthNames[selectedMonth]} ${selectedYear}, Day ${currentDay}`, 
       'success'
     );
     
@@ -3281,6 +3274,48 @@ disableCameraButton() {
   btn.classList.add('btn-secondary');
   btn.innerHTML = '<i class="bi bi-lock me-2"></i>Locked - Verify Code First';
 }
+
+destroy() {
+  console.log('🧹 Destroying FaceRecognitionSystem instance...');
+  
+  // Clear intervals
+  if (this.continuousReadInterval) {
+    clearInterval(this.continuousReadInterval);
+    this.continuousReadInterval = null;
+  }
+  if (this.dateCheckInterval) {
+    clearInterval(this.dateCheckInterval);
+    this.dateCheckInterval = null;
+  }
+  
+  // Stop camera if running
+  if (this.isCameraRunning) {
+    this.stopCamera();
+  }
+  
+  // Detach all Firebase Live Sync listeners
+  if (this.firebaseSync) {
+    this.firebaseSync.detachListeners();
+  }
+  
+  // Detach QR Expiration watcher
+  if (this.qrExpirationListener) {
+    this.qrExpirationListener.off();
+    this.qrExpirationListener = null;
+  }
+  
+  // Clear old attendance listener reference explicitly
+  if (this.attendanceListener) {
+    this.attendanceListener.off();
+    this.attendanceListener = null;
+  }
+  
+  // Clear student session config
+  if (this.userRole === 'student') {
+    localStorage.removeItem('faceRecDivisionConfig');
+    console.log('🧹 Cleared student session config');
+  }
+}
 }
 
 class FirebaseLiveSync {
@@ -3419,6 +3454,12 @@ class FirebaseLiveSync {
     }
   }
 
+  trackListener(ref) {
+    if (ref && !this.listeners.includes(ref)) {
+      this.listeners.push(ref);
+    }
+  }
+
   detachListeners() {
     this.listeners.forEach(ref => ref.off());
     this.listeners = [];
@@ -3432,33 +3473,15 @@ class FirebaseLiveSync {
 let faceSystem;
 
 window.addEventListener('DOMContentLoaded', async () => {
-  window.faceSystem = new FaceRecognitionSystem(); // ✅ Make it global
-  await window.faceSystem.init();
+  faceSystem = new FaceRecognitionSystem();
+  window.faceSystem = faceSystem; // ✅ Make it global
+  await faceSystem.init();
 });
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-// ✅ CLEANUP ON PAGE UNLOAD
+// ✅ CLEANUP ON PAGE UNLOAD OR LOGOUT
 window.addEventListener('beforeunload', () => {
   if (faceSystem) {
-    // Clear intervals
-    if (faceSystem.continuousReadInterval) {
-      clearInterval(faceSystem.continuousReadInterval);
-    }
-    if (faceSystem.dateCheckInterval) {
-      clearInterval(faceSystem.dateCheckInterval);
-    }
-    
-    // Detach Firebase listeners
-    if (faceSystem.firebaseSync) {
-      faceSystem.firebaseSync.detachListeners();
-    }
-    
-    // ✅✅✅ ADD THIS: Clear student session data
-    if (faceSystem.userRole === 'student') {
-      localStorage.removeItem('faceRecDivisionConfig');
-      console.log('🧹 Cleared student session data');
-    }
-    
-    console.log('✅ Cleaned up intervals and listeners');
+    faceSystem.destroy();
   }
 });
