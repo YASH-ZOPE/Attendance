@@ -26,9 +26,8 @@ async function signIntoFirebase() {
     if (groups.includes('admin')) role = 'admin';
     else if (groups.includes('teacher')) role = 'teacher';
     
-    const attributes = await getUserAttributes();
-    const email = attributes.email;
-    const studentId = attributes['custom:studentId'] || null;
+    const email = payload.email;
+    const studentId = payload['custom:studentId'] || null;
 
     // ✅ Cache check karo
     const cachedToken = sessionStorage.getItem('fbToken');
@@ -337,8 +336,27 @@ function getCurrentUser() {
 
       cognitoUser.getUserAttributes((err, attributes) => {
         if (err) {
-          console.error('Get attributes error:', err);
-          reject(err);
+          console.warn('⚠️ getUserAttributes failed, falling back to ID token claims:', err.message);
+          try {
+            const idToken = session.getIdToken();
+            const payload = idToken.decodePayload();
+            const userInfo = {
+              username: cognitoUser.getUsername(),
+              attributes: {
+                email: payload.email || '',
+                name: payload.name || '',
+                'custom:studentId': payload['custom:studentId'] || '',
+                'custom:department': payload['custom:department'] || '',
+                'custom:course': payload['custom:course'] || '',
+                'custom:academicYear': payload['custom:academicYear'] || '',
+                'custom:division': payload['custom:division'] || ''
+              }
+            };
+            currentUser = cognitoUser;
+            resolve(userInfo);
+          } catch (payloadErr) {
+            reject(payloadErr);
+          }
           return;
         }
 
@@ -562,26 +580,20 @@ async function redirectBasedOnRole() {
     console.log('User role:', role);
     
     // Admin seedha main-system
-if (role === 'admin'||role === 'teacher') {
-  console.log('Admin - redirecting to main-system');
-  window.location.href = 'main-system.html';
-  return;
-}
-
-  
-    // For students, check if profile is complete
-    const profileComplete = await isProfileComplete();
-    console.log('Student profile complete?', profileComplete);
-    
-    if (!profileComplete) {
-      console.log('Profile incomplete, redirecting to profile page');
-      window.location.href = 'profile.html';
+    // Role-based routing
+    if (role === 'admin') {
+      console.log('Admin - redirecting to admin.html');
+      window.location.href = 'admin.html';
+      return;
+    } else if (role === 'teacher') {
+      console.log('Teacher - redirecting to teacher.html');
+      window.location.href = 'teacher.html';
+      return;
+    } else if (role === 'student') {
+      console.log('Student - redirecting to student.html');
+      window.location.href = 'student.html';
       return;
     }
-
-    // Profile complete - redirect to face recognition
-    console.log('Redirecting to main-system');
-    window.location.href = 'main-system.html';
     
     console.log('=== REDIRECT DEBUG END ===');
   } catch (error) {

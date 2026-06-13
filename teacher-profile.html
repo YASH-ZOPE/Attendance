@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher Profile - Smart Attendance System</title>
+
+  <!-- Google Fonts & Styles -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- AWS Cognito SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.3.7/dist/amazon-cognito-identity.min.js"></script>
+  <script src="cognito-config.js"></script>
+  <script src="auth.js"></script>
+
+  <!-- Firebase SDK Compat -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
+  <style>
+    :root {
+      --primary-color: #E8C4D8;
+      --success-color: #D4E8D4;
+      --danger-color: #F5D6D6;
+      --warning-color: #F9E8D9;
+      --text-dark: #6A4A5A;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Outfit', -apple-system, sans-serif;
+    }
+    
+    *::-webkit-scrollbar {
+      display: none;
+    }
+    * {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    body {
+      background: #F8F6F4;
+      padding-top: 85px;
+      min-height: 100vh;
+      padding-bottom: 5mm;
+    }
+
+    .navbar-custom {
+      background: var(--bs-primary); /* Uses standard bootstrap blue for navbar consistency */
+    }
+
+    .dashboard-card {
+      background: #FFFEF9;
+      border-radius: 10px;
+      padding: 24px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+      border: 1px solid #F0EDE8;
+      margin-bottom: 24px;
+    }
+
+    .profile-field {
+      padding: 12px 16px;
+      background: #FBF8FA;
+      border: 1px solid rgba(232, 196, 216, 0.2);
+      border-radius: 10px;
+    }
+
+    .profile-field span.uppercase {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 700;
+      color: #9A8A9A;
+      margin-bottom: 3px;
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: #6A4A5A;
+    }
+
+    .status-badge-pending {
+      background: var(--warning-color);
+      color: #8A6A4A;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: 1px solid rgba(0,0,0,0.05);
+      white-space: nowrap;
+    }
+
+    .status-badge-approved {
+      background: var(--success-color);
+      color: #4A6A4A;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: 1px solid rgba(0,0,0,0.05);
+      white-space: nowrap;
+    }
+
+    .status-badge-none {
+      background: #F3F4F6;
+      color: #4B5563;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: 1px solid rgba(0,0,0,0.05);
+      white-space: nowrap;
+    }
+
+    .nav-pills .nav-link {
+      color: #6A4A5A;
+      font-weight: 500;
+      border: 1px solid rgba(232, 196, 216, 0.3);
+      background: #FFFEF9;
+      margin: 0 5px;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-pills .nav-link.active {
+      background: var(--bs-primary) !important;
+      color: white !important;
+      box-shadow: 0 4px 10px rgba(13, 110, 253, 0.15);
+    }
+
+    .nav-pills .nav-link:hover:not(.active) {
+      background: #FBF8FA;
+      border-color: rgba(232, 196, 216, 0.6);
+    }
+
+    .transition-all {
+      transition: all 0.3s ease-in-out;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loading Overlay -->
+  <div id="authLoadingOverlay" style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #F8F6F4;
+    z-index: 99999;
+  ">
+    <nav class="navbar navbar-dark bg-primary shadow-sm" style="
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    ">
+      <div class="container">
+        <span class="navbar-brand" style="opacity: 0.7;">
+          <i class="bi bi-person-fill-gear me-2"></i>Smart Attendance
+        </span>
+      </div>
+    </nav>
+    <div style="
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: white;
+      padding: 15px 25px;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    ">
+      <div class="d-flex align-items-center">
+        <div class="spinner-border spinner-border-sm text-primary me-2" style="width: 20px; height: 20px;"></div>
+        <span style="color: #6A4A5A; font-weight: 500;">Authenticating...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top shadow">
+    <div class="container-fluid px-md-5">
+      <span class="navbar-brand mb-0 h1">
+        <i class="bi bi-person-badge-fill me-2"></i>Teacher Profile
+      </span>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="teacher.html"><i class="bi bi-arrow-left-circle me-1"></i>Back to Dashboard</a>
+          </li>
+        </ul>
+        <div class="d-flex align-items-center gap-2">
+          <span class="text-white-50 small me-2" id="teacherNavEmail">Loading...</span>
+          <button id="logoutBtn" class="btn btn-outline-light btn-sm">
+            <i class="bi bi-box-arrow-right me-1"></i>Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container-fluid py-4 px-md-5">
+    <div class="row g-4 justify-content-center align-items-stretch" id="profileGridRow">
+      <!-- Left Column: Profile Card -->
+      <div class="col-lg-5 transition-all" id="profileCol">
+        <div class="dashboard-card h-100 mb-0">
+          <div id="profileErrorMessage" class="alert alert-danger" style="display: none;"></div>
+          <div id="profileSuccessMessage" class="alert alert-success" style="display: none;"></div>
+
+          <!-- View Mode: Shows static info -->
+          <div id="profileViewMode">
+            <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+              <h5 class="mb-0 text-dark"><i class="bi bi-person-circle me-2 text-primary"></i>Profile Details</h5>
+              <button id="editProfileBtn" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-pencil-square me-1"></i>Edit Profile
+              </button>
+            </div>
+
+            <div class="profile-field mb-3">
+              <span class="text-muted d-block small uppercase">Full Name</span>
+              <span id="viewName" class="fs-5 fw-semibold text-dark">—</span>
+            </div>
+
+            <div class="profile-field mb-3">
+              <span class="text-muted d-block small uppercase">Email Address</span>
+              <span id="viewEmail" class="text-dark">—</span>
+            </div>
+
+            <div class="profile-field mb-3">
+              <span class="text-muted d-block small uppercase">Allocation Status</span>
+              <div>
+                <span id="viewStatus" class="status-badge-none">No active request</span>
+              </div>
+            </div>
+
+            <div class="profile-field mb-3" id="viewDepartmentField">
+              <span class="text-muted d-block small uppercase">Department</span>
+              <span id="viewDepartment" class="text-dark fw-bold">—</span>
+            </div>
+
+            <div class="profile-field mb-3">
+              <span class="text-muted d-block small uppercase">Approved Class Allocation</span>
+              <span id="viewApprovedAllocation" class="text-dark fw-bold">—</span>
+            </div>
+
+            <div class="profile-field mb-3">
+              <span class="text-muted d-block small uppercase">Requested Class (Pending Approval)</span>
+              <span id="viewRequestedAllocation" class="text-dark fw-medium">—</span>
+            </div>
+          </div>
+
+          <!-- Edit Mode: Form inputs (hidden by default) -->
+          <div id="profileEditMode" style="display: none;">
+            <h5 class="mb-3 border-bottom pb-2 text-dark" id="editFormTitle"><i class="bi bi-person-gear me-2 text-primary"></i>Edit Profile Details</h5>
+            
+            <form id="profileForm">
+              <div class="mb-3">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" id="email" class="form-control" required>
+              </div>
+
+              <div class="mb-3">
+                <label for="name" class="form-label">Full Name</label>
+                <input type="text" id="name" class="form-control" required>
+              </div>
+
+              <div class="mb-3">
+                <label for="department" class="form-label">Department</label>
+                <select id="department" class="form-select" required>
+                  <option value="">Loading departments...</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label for="course" class="form-label">Course</label>
+                <select id="course" class="form-select" required disabled>
+                  <option value="">Select department first</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label for="academicYear" class="form-label">Academic Year</label>
+                <select id="academicYear" class="form-select" required>
+                  <option value="">Select year</option>
+                  <option value="FY">First Year (FY)</option>
+                  <option value="SY">Second Year (SY)</option>
+                  <option value="TY">Third Year (TY)</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label for="division" class="form-label">Division</label>
+                <select id="division" class="form-select" required>
+                  <option value="">Select division</option>
+                  <option value="Division A">Division A</option>
+                  <option value="Division B">Division B</option>
+                  <option value="Division C">Division C</option>
+                </select>
+              </div>
+
+              <div class="row g-2">
+                <div class="col-6">
+                  <button type="submit" class="btn btn-primary w-100" id="updateProfileBtn">
+                    <i class="bi bi-check-circle me-2"></i>Save Details
+                  </button>
+                </div>
+                <div class="col-6">
+                  <button type="button" class="btn btn-outline-secondary w-100" id="cancelEditBtn">
+                    <i class="bi bi-x-circle me-2"></i>Cancel
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Approved Features (Tabbed Layout) -->
+      <div class="col-lg-9" id="approvedFeaturesCol" style="display: none;">
+        <div class="dashboard-card h-100 shadow-sm border p-4 bg-white rounded-4 mb-0">
+          <!-- Tab Navigation -->
+          <ul class="nav nav-pills mb-4 justify-content-center" id="featureTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="leaves-tab" data-bs-toggle="pill" data-bs-target="#leaves-section" type="button" role="tab" aria-controls="leaves-section" aria-selected="true">
+                <i class="bi bi-calendar-check me-2"></i>Leave Applications
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="defaulters-tab" data-bs-toggle="pill" data-bs-target="#defaulters-section" type="button" role="tab" aria-controls="defaulters-section" aria-selected="false">
+                <i class="bi bi-exclamation-triangle me-2"></i>Defaulters List
+              </button>
+            </li>
+          </ul>
+
+          <div class="tab-content" id="featureTabContent">
+            <!-- Leave Applications Pane -->
+            <div class="tab-pane fade show active" id="leaves-section" role="tabpanel" aria-labelledby="leaves-tab">
+              <h5 class="mb-3 border-bottom pb-2 text-dark"><i class="bi bi-calendar2-range me-2 text-primary"></i>Manage Leave Applications</h5>
+              <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                <table class="table table-hover align-middle" style="font-size: 0.92rem;">
+                  <thead class="table-light sticky-top" style="z-index: 1;">
+                    <tr>
+                      <th>Roll ID</th>
+                      <th>Name</th>
+                      <th>Dates</th>
+                      <th>Days</th>
+                      <th>Reason</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="leavesTableBody">
+                    <tr>
+                      <td colspan="7" class="text-center py-4 text-muted">Loading leave applications...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Defaulters List Pane -->
+            <div class="tab-pane fade" id="defaulters-section" role="tabpanel" aria-labelledby="defaulters-tab">
+              <h5 class="mb-3 border-bottom pb-2 text-dark"><i class="bi bi-exclamation-octagon me-2 text-danger"></i>Class Defaulters List</h5>
+              
+              <!-- Filter Controls -->
+              <div class="row g-3 mb-3 align-items-end">
+                <div class="col-md-3">
+                  <label for="defaulterSubject" class="form-label small fw-bold text-muted mb-1">Subject</label>
+                  <select id="defaulterSubject" class="form-select">
+                    <option value="">Choose Subject</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label for="defaulterMonth" class="form-label small fw-bold text-muted mb-1">Month</label>
+                  <select id="defaulterMonth" class="form-select">
+                    <option value="">Choose Month</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label for="thresholdInput" class="form-label small fw-bold text-muted mb-1">Minimum Threshold</label>
+                  <div class="input-group">
+                    <input type="number" id="thresholdInput" class="form-control" value="75" min="0" max="100">
+                    <span class="input-group-text">%</span>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <button type="button" class="btn btn-danger w-100 animate-btn" id="checkDefaultersBtn" style="height: 38px;">
+                    <i class="bi bi-search me-1"></i>Check
+                  </button>
+                </div>
+              </div>
+
+              <!-- Defaulter Table -->
+              <div class="table-responsive" id="defaulterTableContainer" style="display: none; max-height: 350px; overflow-y: auto;">
+                <div class="alert alert-danger py-2 mb-2 d-flex justify-content-between align-items-center" style="font-size: 0.85rem;">
+                  <span>
+                    <i class="bi bi-info-circle me-1"></i>
+                    <strong>Defaulters:</strong> <span id="defaulterCount" class="badge bg-danger ms-1">0</span>
+                  </span>
+                  <button class="btn btn-sm btn-outline-danger py-0" id="exportDefaultersBtn" style="font-size: 0.8rem;">
+                    <i class="bi bi-download me-1"></i>Export
+                  </button>
+                </div>
+                <table class="table table-hover align-middle" style="font-size: 0.88rem;">
+                  <thead class="table-danger sticky-top" style="z-index: 1;">
+                    <tr>
+                      <th>Roll ID</th>
+                      <th>Name</th>
+                      <th>Present</th>
+                      <th>Absent</th>
+                      <th>Leave</th>
+                      <th>Total</th>
+                      <th>%</th>
+                    </tr>
+                  </thead>
+                  <tbody id="defaultersTableBody">
+                    <tr>
+                      <td colspan="7" class="text-center py-4 text-muted">No defaulters listed.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              
+              <!-- No Defaulters Alerts -->
+              <div id="noDefaultersAlert" class="alert alert-success text-center py-3" style="display: none;">
+                <i class="bi bi-emoji-smile fs-3 text-success d-block mb-1"></i>
+                <h6 class="fw-bold mb-1" style="font-size: 0.95rem;">All Students Above Threshold!</h6>
+                <p class="text-muted small mb-0">No student is defaulting requirements.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function formatClassName(alloc) {
+      if (!alloc) return '—';
+      let year = String(alloc.academicYear || '').trim();
+      if (year.toLowerCase().includes('fy') || year.toLowerCase().includes('first')) year = 'FY';
+      else if (year.toLowerCase().includes('sy') || year.toLowerCase().includes('second')) year = 'SY';
+      else if (year.toLowerCase().includes('ty') || year.toLowerCase().includes('third')) year = 'TY';
+      
+      const course = String(alloc.course || '').trim();
+      let div = String(alloc.division || '').trim();
+      if (div.toLowerCase().startsWith('division')) {
+        div = div.substring('division'.length).trim();
+      }
+      
+      return `${year}-${course}-${div}`.toUpperCase();
+    }
+
+    function parseLocalDate(dateStr) {
+      if (!dateStr) return null;
+      const parts = String(dateStr).split('-');
+      if (parts.length === 3) {
+        const y = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10) - 1;
+        const d = parseInt(parts[2], 10);
+        return new Date(y, m, d);
+      }
+      return new Date(dateStr);
+    }
+
+    let currentDefaulterLeaves = {};
+    let teacherCurrentUser = null;
+    let teacherAttrs = {};
+    let firebaseDB = null;
+    let currentTeacherRecord = null;
+    let currentLeaves = [];
+    let currentDefaulters = [];
+
+    function showProfileError(msg) {
+      const el = document.getElementById('profileErrorMessage');
+      el.textContent = msg;
+      el.style.display = 'block';
+      document.getElementById('profileSuccessMessage').style.display = 'none';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showProfileSuccess(msg) {
+      const el = document.getElementById('profileSuccessMessage');
+      el.textContent = msg;
+      el.style.display = 'block';
+      document.getElementById('profileErrorMessage').style.display = 'none';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Toggle View/Edit Mode
+    function toggleMode(edit) {
+      if (edit) {
+        document.getElementById('profileViewMode').style.display = 'none';
+        document.getElementById('profileEditMode').style.display = 'block';
+      } else {
+        document.getElementById('profileViewMode').style.display = 'block';
+        document.getElementById('profileEditMode').style.display = 'none';
+        document.getElementById('profileErrorMessage').style.display = 'none';
+        document.getElementById('profileSuccessMessage').style.display = 'none';
+      }
+    }
+
+    // Load departments
+    async function loadDepartments() {
+      try {
+        const snapshot = await firebaseDB.ref('mainSystem/departments').once('value');
+        const departments = snapshot.val() || {};
+        const departmentSelect = document.getElementById('department');
+        departmentSelect.innerHTML = '<option value="">Select department</option>';
+
+        const deptArray = Array.isArray(departments) ? departments : Object.values(departments);
+        deptArray.forEach(dept => {
+          const option = document.createElement('option');
+          option.value = dept;
+          option.textContent = dept;
+          departmentSelect.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Error loading departments:', error);
+      }
+    }
+
+    // Load courses
+    async function loadCourses(department) {
+      const courseSelect = document.getElementById('course');
+      if (!department) {
+        courseSelect.disabled = true;
+        courseSelect.innerHTML = '<option value="">Select department first</option>';
+        return;
+      }
+
+      try {
+        const snapshot = await firebaseDB.ref(`mainSystem/courses/${department}`).once('value');
+        const courses = snapshot.val() || {};
+        courseSelect.innerHTML = '<option value="">Select course</option>';
+
+        const courseArray = Array.isArray(courses) ? courses : Object.values(courses);
+        courseArray.forEach(course => {
+          const option = document.createElement('option');
+          option.value = course;
+          option.textContent = course;
+          courseSelect.appendChild(option);
+        });
+        courseSelect.disabled = false;
+      } catch (error) {
+        console.error('Error loading courses:', error);
+      }
+    }
+
+    // Load User Data & Request status
+    async function loadUserData() {
+      try {
+        let userUid = null;
+        let cognitoEmail = '';
+        let cognitoName = '';
+
+        // Get user from Cognito session first (to get defaults if available)
+        try {
+          const user = await getCurrentUser();
+          if (user) {
+            userUid = user.username;
+            cognitoEmail = user.attributes.email || '';
+            cognitoName = user.attributes.name || '';
+          }
+        } catch (e) {
+          console.warn('Cognito session attributes not loaded:', e);
+        }
+
+        // Fallback to Firebase currentUser UID if available
+        if (firebase.auth().currentUser) {
+          userUid = firebase.auth().currentUser.uid;
+        }
+
+        if (!userUid && teacherCurrentUser) {
+          userUid = teacherCurrentUser.getUsername();
+        }
+
+        if (!userUid) {
+          window.location.href = 'index.html';
+          return;
+        }
+
+        // Make UID safe for Firebase
+        userUid = String(userUid).replace(/[\.\#\$\/\[\]]/g, '_');
+
+        // Fetch profile details from Firebase Realtime Database
+        const snapshot = await firebaseDB.ref(`mainSystem/teachers/${userUid}`).once('value');
+        const data = snapshot.val() || {};
+        currentTeacherRecord = data;
+
+        // Use name/email from Firebase, fallback to Cognito payload, fallback to empty
+        const email = data.email || cognitoEmail || '';
+        const name = data.name || cognitoName || '';
+
+        document.getElementById('teacherNavEmail').textContent = email;
+        document.getElementById('name').value = name;
+        document.getElementById('email').value = email;
+
+        document.getElementById('viewName').textContent = name || '—';
+        document.getElementById('viewEmail').textContent = email || '—';
+
+        // Update dynamic button label
+        const editProfileBtn = document.getElementById('editProfileBtn');
+        const editFormTitle = document.getElementById('editFormTitle');
+        const isRegistered = data.name && data.email;
+        if (isRegistered) {
+          editProfileBtn.innerHTML = '<i class="bi bi-pencil-square me-1"></i>Edit Profile';
+          if (editFormTitle) editFormTitle.innerHTML = '<i class="bi bi-person-gear me-2 text-primary"></i>Edit Profile Details';
+        } else {
+          editProfileBtn.innerHTML = '<i class="bi bi-pencil-square me-1"></i>Register Profile';
+          if (editFormTitle) editFormTitle.innerHTML = '<i class="bi bi-person-gear me-2 text-primary"></i>Register Profile Details';
+          // Auto toggle to edit mode if not registered (like a login/register page)
+          toggleMode(true);
+        }
+
+        const yearMap = {
+          'FY': 'First Year (FY)',
+          'SY': 'Second Year (SY)',
+          'TY': 'Third Year (TY)'
+        };
+
+        // Status badge
+        const status = data.status || 'none';
+        const badgeEl = document.getElementById('viewStatus');
+        if (status === 'pending') {
+          badgeEl.className = 'status-badge-pending';
+          badgeEl.textContent = '⏱ Pending Approval';
+        } else if (status === 'approved') {
+          badgeEl.className = 'status-badge-approved';
+          badgeEl.textContent = '✅ Approved & Allocated';
+        } else {
+          badgeEl.className = 'status-badge-none';
+          badgeEl.textContent = '❌ No active request';
+        }
+
+        let displayDept = '—';
+
+        // Approved allocation
+        if (data.approvedAllocation) {
+          displayDept = data.approvedAllocation.department || '—';
+
+          // Format class using helper function
+          document.getElementById('viewApprovedAllocation').textContent = formatClassName(data.approvedAllocation);
+          
+          // Pre-populate selects in edit form
+          document.getElementById('department').value = data.approvedAllocation.department || '';
+          await loadCourses(data.approvedAllocation.department);
+          document.getElementById('course').value = data.approvedAllocation.course || '';
+          document.getElementById('academicYear').value = data.approvedAllocation.academicYear || '';
+          document.getElementById('division').value = data.approvedAllocation.division || '';
+        } else {
+          document.getElementById('viewApprovedAllocation').textContent = '—';
+        }
+
+        // Requested allocation
+        if (data.requestedAllocation) {
+          if (!data.approvedAllocation) {
+            displayDept = data.requestedAllocation.department || '—';
+          }
+
+          // Format class using helper function
+          document.getElementById('viewRequestedAllocation').textContent = formatClassName(data.requestedAllocation);
+          
+          // Pre-populate selects in edit form if not approved yet
+          if (!data.approvedAllocation) {
+            document.getElementById('department').value = data.requestedAllocation.department || '';
+            await loadCourses(data.requestedAllocation.department);
+            document.getElementById('course').value = data.requestedAllocation.course || '';
+            document.getElementById('academicYear').value = data.requestedAllocation.academicYear || '';
+            document.getElementById('division').value = data.requestedAllocation.division || '';
+          }
+        } else {
+          document.getElementById('viewRequestedAllocation').textContent = '—';
+        }
+
+        // Display department separately
+        document.getElementById('viewDepartment').textContent = displayDept;
+
+        // Toggle approved features visibility
+        if (status === 'approved' && data.approvedAllocation) {
+          document.getElementById('profileCol').className = 'col-lg-3 transition-all';
+          document.getElementById('approvedFeaturesCol').className = 'col-lg-9';
+          document.getElementById('approvedFeaturesCol').style.display = 'block';
+          populateMonthsDropdown();
+          await loadSubjectsDropdown(data.approvedAllocation.department, data.approvedAllocation.course);
+          await loadLeavesList();
+        } else {
+          document.getElementById('profileCol').className = 'col-lg-5 transition-all';
+          document.getElementById('approvedFeaturesCol').style.display = 'none';
+        }
+
+      } catch (error) {
+        console.error('Error loading teacher data:', error);
+        showProfileError('Failed to load credentials from database.');
+      }
+    }
+
+    // Submit Request
+    document.getElementById('profileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nameVal = document.getElementById('name').value.trim();
+      const emailVal = document.getElementById('email').value.trim();
+      const dept = document.getElementById('department').value;
+      const course = document.getElementById('course').value;
+      const year = document.getElementById('academicYear').value;
+      const div = document.getElementById('division').value;
+
+      document.getElementById('updateProfileBtn').disabled = true;
+
+      try {
+        let userUid = null;
+        if (firebase.auth().currentUser) {
+          userUid = firebase.auth().currentUser.uid;
+        } else if (teacherCurrentUser) {
+          userUid = teacherCurrentUser.getUsername();
+        }
+
+        if (!userUid) {
+          throw new Error('No active user session found.');
+        }
+
+        // Make UID safe for Firebase
+        userUid = String(userUid).replace(/[\.\#\$\/\[\]]/g, '_');
+
+        const record = currentTeacherRecord || {};
+        let statusVal = record.status || 'pending';
+        let requestedAllocationVal = null;
+        let approvedAllocationVal = record.approvedAllocation || null;
+
+        // Check if allocation selection matches the already approved allocation
+        const matchesApproved = approvedAllocationVal &&
+                                approvedAllocationVal.department === dept &&
+                                approvedAllocationVal.course === course &&
+                                approvedAllocationVal.academicYear === year &&
+                                approvedAllocationVal.division === div;
+
+        if (matchesApproved) {
+          statusVal = 'approved';
+        } else {
+          // If the teacher has changed their class details, or had none, it goes to pending approval
+          statusVal = 'pending';
+          requestedAllocationVal = {
+            department: dept,
+            course: course,
+            academicYear: year,
+            division: div
+          };
+          // Clear approvedAllocation until admin approves the new request
+          approvedAllocationVal = null;
+        }
+
+        const teacherData = {
+          name: nameVal,
+          email: emailVal,
+          status: statusVal,
+          requestedAllocation: requestedAllocationVal,
+          approvedAllocation: approvedAllocationVal
+        };
+
+        await firebaseDB.ref(`mainSystem/teachers/${userUid}`).set(teacherData);
+        showProfileSuccess('✓ Profile details saved successfully.');
+        await loadUserData();
+        setTimeout(() => toggleMode(false), 800);
+      } catch (error) {
+        showProfileError(error.message || 'Failed to save profile details.');
+      } finally {
+        document.getElementById('updateProfileBtn').disabled = false;
+      }
+    });
+
+    // ==================== LEAVE APPROVAL FUNCTIONS ====================
+    async function loadLeavesList() {
+      const tbody = document.getElementById('leavesTableBody');
+      if (!currentTeacherRecord || currentTeacherRecord.status !== 'approved' || !currentTeacherRecord.approvedAllocation) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Approved class allocation required.</td></tr>';
+        return;
+      }
+
+      const approved = currentTeacherRecord.approvedAllocation;
+      const year = new Date().getFullYear();
+      const path = `mainSystem/attendanceData/${year}/${approved.department}/${approved.course}/${approved.academicYear}/${approved.division}/leaveApplications`;
+
+      try {
+        const snapshot = await firebaseDB.ref(path).once('value');
+        const leaves = snapshot.val() || {};
+        currentLeaves = Object.keys(leaves).map(key => ({ id: key, ...leaves[key] }));
+
+        if (currentLeaves.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">No leave applications found.</td></tr>';
+          return;
+        }
+
+        // Sort by submittedAt desc
+        currentLeaves.sort((a, b) => (b.submittedAt || 0) - (a.submittedAt || 0));
+
+        tbody.innerHTML = currentLeaves.map(leave => {
+          const fromDate = new Date(leave.fromDate).toLocaleDateString(undefined, {month: 'short', day: 'numeric', year: 'numeric'});
+          const toDate = new Date(leave.toDate).toLocaleDateString(undefined, {month: 'short', day: 'numeric', year: 'numeric'});
+          
+          let statusBadge = '';
+          if (leave.status === 'pending') {
+            statusBadge = '<span class="status-badge-pending">Pending</span>';
+          } else if (leave.status === 'approved') {
+            statusBadge = '<span class="status-badge-approved">Approved</span>';
+          } else if (leave.status === 'rejected') {
+            statusBadge = '<span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-1 rounded-pill">Rejected</span>';
+          }
+
+          let actions = '';
+          if (leave.status === 'pending') {
+            actions = `
+              <button class="btn btn-sm btn-success me-1" onclick="updateLeaveStatus('${leave.id}', 'approved')">
+                <i class="bi bi-check-circle"></i> Approve
+              </button>
+              <button class="btn btn-sm btn-outline-danger" onclick="updateLeaveStatus('${leave.id}', 'rejected')">
+                <i class="bi bi-x-circle"></i> Reject
+              </button>
+            `;
+          } else {
+            actions = '<span class="text-muted small">No actions available</span>';
+          }
+
+          return `
+            <tr>
+              <td><strong>${escapeHtml(leave.studentId)}</strong></td>
+              <td>${escapeHtml(leave.studentName)}</td>
+              <td>${fromDate} to ${toDate}</td>
+              <td><span class="badge bg-secondary">${leave.days ? leave.days.length : 0} days</span></td>
+              <td><span class="text-muted small">${escapeHtml(leave.reason)}</span></td>
+              <td>${statusBadge}</td>
+              <td>${actions}</td>
+            </tr>
+          `;
+        }).join('');
+
+      } catch (error) {
+        console.error('Error loading leaves:', error);
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-danger">Failed to load leave applications.</td></tr>';
+      }
+    }
+
+    window.updateLeaveStatus = async function(leaveId, action) {
+      if (!currentTeacherRecord || !currentTeacherRecord.approvedAllocation) return;
+      const approved = currentTeacherRecord.approvedAllocation;
+      const year = new Date().getFullYear();
+      
+      const confirmMsg = `Are you sure you want to mark this leave request as ${action}?`;
+      if (!confirm(confirmMsg)) return;
+
+      const path = `mainSystem/attendanceData/${year}/${approved.department}/${approved.course}/${approved.academicYear}/${approved.division}/leaveApplications/${leaveId}`;
+
+      try {
+        await firebaseDB.ref(path).update({
+          status: action,
+          updatedBy: document.getElementById('teacherNavEmail').textContent,
+          updatedAt: Date.now()
+        });
+        showProfileSuccess(`✓ Leave application successfully ${action}.`);
+        await loadLeavesList();
+      } catch (error) {
+        console.error('Error updating leave status:', error);
+        showProfileError('Failed to update leave status.');
+      }
+    };
+
+    // ==================== DEFAULTER FUNCTIONS ====================
+    async function loadSubjectsDropdown(dept, course) {
+      const select = document.getElementById('defaulterSubject');
+      select.innerHTML = '<option value="">Choose Subject</option>';
+      try {
+        const snapshot = await firebaseDB.ref('mainSystem/subjects').once('value');
+        const allSubjects = snapshot.val() || {};
+        
+        // Structure is subjects[dept][course]
+        const deptSubjects = allSubjects[dept] || {};
+        const courseSubjects = deptSubjects[course] || [];
+        
+        const subjectsArray = Array.isArray(courseSubjects) ? courseSubjects : Object.values(courseSubjects);
+        
+        subjectsArray.forEach(sub => {
+          const option = document.createElement('option');
+          option.value = sub;
+          option.textContent = sub;
+          select.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Error loading subjects for dropdown:', error);
+      }
+    }
+
+    function populateMonthsDropdown() {
+      const select = document.getElementById('defaulterMonth');
+      select.innerHTML = '<option value="">Choose Month</option>';
+      const monthNames = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+      ];
+      monthNames.forEach((name, idx) => {
+        const option = document.createElement('option');
+        option.value = idx; // 0-indexed month
+        option.textContent = name;
+        select.appendChild(option);
+      });
+      
+      // Select current month by default
+      const currentMonthIdx = new Date().getMonth();
+      select.value = currentMonthIdx;
+    }
+
+    function calculateDefaulters(subjectData, thresholdVal, leavesData, selectedMonth, selectedYear) {
+      const defaulters = [];
+      if (!subjectData) return defaulters;
+
+      // Get all lecture days in the month (days where any student has data)
+      const allLectureDays = new Set();
+      const studentIds = [];
+
+      for (const sid in subjectData) {
+        if (sid.startsWith('_')) continue;
+        studentIds.push(sid);
+        const attendance = subjectData[sid];
+        // Check days 1 to 31
+        for (let day = 1; day <= 31; day++) {
+          if (attendance[day] !== undefined) {
+            allLectureDays.add(day);
+          }
+        }
+      }
+
+      // Compute leaves count for each student in the selected month
+      const studentLeavesCount = {};
+      studentIds.forEach(sid => {
+        studentLeavesCount[sid] = 0;
+      });
+
+      if (leavesData) {
+        Object.values(leavesData).forEach(leave => {
+          if (leave.status === 'approved' && leave.studentId) {
+            const sid = leave.studentId;
+            if (studentLeavesCount[sid] !== undefined) {
+              const start = parseLocalDate(leave.fromDate);
+              const end = parseLocalDate(leave.toDate);
+
+              if (start && end && start <= end) {
+                const current = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+                const finalEnd = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+                while (current <= finalEnd) {
+                  if (current.getMonth() === selectedMonth && current.getFullYear() === selectedYear) {
+                    studentLeavesCount[sid]++;
+                  }
+                  current.setDate(current.getDate() + 1);
+                }
+              }
+            }
+          }
+        });
+      }
+
+      // Compute stats for each student
+      studentIds.forEach(sid => {
+        const student = subjectData[sid];
+        let present = 0;
+        let absent = 0;
+
+        allLectureDays.forEach(day => {
+          if (student[day] === 'Present') {
+            present++;
+          } else if (student[day] === 'Absent') {
+            absent++;
+          } else {
+            absent++;
+          }
+        });
+
+        const workingDays = present + absent;
+        const percentage = workingDays > 0 ? Math.round((present / workingDays) * 100) : 0;
+        const leaveDays = studentLeavesCount[sid] || 0;
+
+        if (percentage < thresholdVal) {
+          defaulters.push({
+            id: sid,
+            name: student._name || sid,
+            present,
+            absent,
+            leaveDays,
+            workingDays,
+            percentage
+          });
+        }
+      });
+
+      // Sort by percentage ascending
+      defaulters.sort((a, b) => a.percentage - b.percentage);
+      return defaulters;
+    }
+
+    async function checkDefaulters() {
+      const subject = document.getElementById('defaulterSubject').value;
+      const monthVal = document.getElementById('defaulterMonth').value;
+      const tableBody = document.getElementById('defaultersTableBody');
+      const tableContainer = document.getElementById('defaulterTableContainer');
+      const noDefaultersAlert = document.getElementById('noDefaultersAlert');
+
+      if (!subject) {
+        alert('Please select a subject.');
+        return;
+      }
+      if (monthVal === '') {
+        alert('Please select a month.');
+        return;
+      }
+
+      tableContainer.style.display = 'none';
+      noDefaultersAlert.style.display = 'none';
+      tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 "><span class="spinner-border spinner-border-sm me-2"></span>Calculating defaulters...</td></tr>';
+
+      try {
+        const approved = currentTeacherRecord.approvedAllocation;
+        const year = new Date().getFullYear();
+        const monthKey = `${year}-${String(Number(monthVal) + 1).padStart(2, '0')}`;
+        
+        // Use UI threshold value
+        const thresholdVal = Number(document.getElementById('thresholdInput').value) || 75;
+
+        // Fetch attendance path
+        const path = `mainSystem/attendanceData/${year}/${approved.department}/${approved.course}/${approved.academicYear}/${approved.division}/months/${monthKey}/subjects/${subject}/attendance`;
+        const snapshot = await firebaseDB.ref(path).once('value');
+        const subjectData = snapshot.val();
+
+        if (!subjectData) {
+          tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-warning"><i class="bi bi-exclamation-triangle me-2"></i>No attendance data found for this subject and month.</td></tr>';
+          tableContainer.style.display = 'block';
+          return;
+        }
+
+        // Fetch leaves
+        const leavesPath = `mainSystem/attendanceData/${year}/${approved.department}/${approved.course}/${approved.academicYear}/${approved.division}/leaveApplications`;
+        const leavesSnap = await firebaseDB.ref(leavesPath).once('value');
+        const leavesData = leavesSnap.val() || {};
+        currentDefaulterLeaves = leavesData;
+
+        currentDefaulters = calculateDefaulters(subjectData, thresholdVal, leavesData, Number(monthVal), year);
+        document.getElementById('defaulterCount').textContent = currentDefaulters.length;
+
+        if (currentDefaulters.length === 0) {
+          noDefaultersAlert.style.display = 'block';
+          return;
+        }
+
+        tableBody.innerHTML = currentDefaulters.map(d => {
+          let leaveColContent = '';
+          if (d.leaveDays > 0) {
+            leaveColContent = `<button class="btn btn-sm btn-outline-info py-0 px-2 rounded-pill fw-semibold" style="font-size: 0.8rem;" onclick="showStudentLeavesModal('${d.id}', '${escapeHtml(d.name)}')">Leave</button>`;
+          }
+          return `
+            <tr>
+              <td><strong>${escapeHtml(d.id)}</strong></td>
+              <td>${escapeHtml(d.name)}</td>
+              <td><span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 rounded">${d.present}</span></td>
+              <td><span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 rounded">${d.absent}</span></td>
+              <td>${leaveColContent}</td>
+              <td><span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1 rounded">${d.workingDays}</span></td>
+              <td>
+                <span class="text-danger fw-bold fs-6">${d.percentage}%</span>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        tableContainer.style.display = 'block';
+
+      } catch (error) {
+        console.error('Error checking defaulters:', error);
+        tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-danger">Failed to calculate defaulters.</td></tr>';
+        tableContainer.style.display = 'block';
+      }
+    }
+
+    function exportDefaultersToCSV() {
+      if (currentDefaulters.length === 0) {
+        alert('No defaulters to export.');
+        return;
+      }
+
+      const subject = document.getElementById('defaulterSubject').value;
+      const monthSelect = document.getElementById('defaulterMonth');
+      const monthName = monthSelect.options[monthSelect.selectedIndex].text;
+
+      let csv = 'Student ID,Name,Present,Absent,Leave,Total Working Days,Attendance Percentage\n';
+      currentDefaulters.forEach(d => {
+        const leaveText = d.leaveDays > 0 ? 'Leave' : '';
+        csv += `"${d.id}","${d.name}",${d.present},${d.absent},"${leaveText}",${d.workingDays},${d.percentage}%\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `defaulters_${subject}_${monthName}_${new Date().getFullYear()}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    document.getElementById('editProfileBtn').addEventListener('click', () => toggleMode(true));
+    document.getElementById('cancelEditBtn').addEventListener('click', () => toggleMode(false));
+
+    document.getElementById('department').addEventListener('change', (e) => {
+      loadCourses(e.target.value);
+    });
+
+    document.getElementById('checkDefaultersBtn').addEventListener('click', checkDefaulters);
+    document.getElementById('exportDefaultersBtn').addEventListener('click', exportDefaultersToCSV);
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      if (teacherCurrentUser) {
+        teacherCurrentUser.signOut();
+      }
+      window.location.href = 'index.html';
+    });
+
+    window.showStudentLeavesModal = function(studentId, studentName) {
+      document.getElementById('modalStudentName').textContent = studentName;
+      document.getElementById('modalStudentId').textContent = studentId;
+      
+      const container = document.getElementById('modalLeavesContainer');
+      container.innerHTML = '';
+
+      const monthVal = Number(document.getElementById('defaulterMonth').value);
+      const year = new Date().getFullYear();
+
+      // Filter approved leaves for this student in the selected month
+      const studentLeaves = Object.values(currentDefaulterLeaves).filter(leave => {
+        if (leave.status !== 'approved' || leave.studentId !== studentId) return false;
+        
+        const start = parseLocalDate(leave.fromDate);
+        const end = parseLocalDate(leave.toDate);
+        if (!start || !end) return false;
+
+        let overlaps = false;
+        const current = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+        const finalEnd = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+        while (current <= finalEnd) {
+          if (current.getMonth() === monthVal && current.getFullYear() === year) {
+            overlaps = true;
+            break;
+          }
+          current.setDate(current.getDate() + 1);
+        }
+        return overlaps;
+      });
+
+      if (studentLeaves.length === 0) {
+        container.innerHTML = '<div class="text-center py-3 text-muted">No approved leaves found for this month.</div>';
+      } else {
+        container.innerHTML = studentLeaves.map(leave => {
+          const from = parseLocalDate(leave.fromDate).toLocaleDateString(undefined, {month: 'short', day: 'numeric', year: 'numeric'});
+          const to = parseLocalDate(leave.toDate).toLocaleDateString(undefined, {month: 'short', day: 'numeric', year: 'numeric'});
+          const totalDays = leave.days ? leave.days.length : 0;
+          return `
+            <div class="card p-3 mb-2 bg-light border-0" style="border-radius: 8px;">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="fw-semibold text-dark small">${from} to ${to}</span>
+                <span class="badge bg-primary">${totalDays} days</span>
+              </div>
+              <div class="text-muted small" style="font-style: italic;">Reason: "${escapeHtml(leave.reason)}"</div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      const myModal = new bootstrap.Modal(document.getElementById('studentLeavesModal'));
+      myModal.show();
+    };
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      try {
+        // Auth role check guard
+        const role = await getUserRole();
+        if (role !== 'teacher' && role !== 'admin') {
+          window.location.href = 'index.html';
+          return;
+        }
+
+        await signIntoFirebase();
+        firebaseDB = firebase.database();
+        await loadDepartments();
+        await loadUserData();
+
+        // Load initial threshold value from database
+        try {
+          const thresholdSnap = await firebaseDB.ref('mainSystem/threshold').once('value');
+          const thresholdVal = thresholdSnap.val() !== null ? Number(thresholdSnap.val()) : 75;
+          const inputEl = document.getElementById('thresholdInput');
+          if (inputEl) inputEl.value = thresholdVal;
+        } catch (e) {
+          console.warn('Failed to load threshold from Firebase:', e);
+        }
+        
+        // Hide loader overlay
+        const overlay = document.getElementById('authLoadingOverlay');
+        if (overlay) {
+          overlay.style.transition = 'opacity 0.5s ease';
+          overlay.style.opacity = '0';
+          setTimeout(() => overlay.remove(), 500);
+        }
+      } catch (error) {
+        console.error('Initialization failed:', error);
+      }
+    });
+  </script>
+
+  <!-- Student Leaves Modal -->
+  <div class="modal fade" id="studentLeavesModal" tabindex="-1" aria-labelledby="studentLeavesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="background: #FFFEF9; border-radius: 12px; border: 1px solid #F0EDE8;">
+        <div class="modal-header border-bottom pb-2">
+          <h5 class="modal-title text-dark" id="studentLeavesModalLabel">
+            <i class="bi bi-calendar-check-fill text-primary me-2"></i>Approved Leaves Details
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-2">
+            <strong class="text-secondary small uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">Student Name:</strong>
+            <span id="modalStudentName" class="fs-6 fw-bold text-dark ms-2">—</span>
+          </div>
+          <div class="mb-3">
+            <strong class="text-secondary small uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">Student ID / Roll ID:</strong>
+            <span id="modalStudentId" class="fs-6 fw-medium text-dark ms-2">—</span>
+          </div>
+          <hr>
+          <div id="modalLeavesContainer" style="max-height: 250px; overflow-y: auto;">
+            <!-- Leaves list will be injected here -->
+          </div>
+        </div>
+        <div class="modal-footer border-top pt-2">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

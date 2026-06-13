@@ -825,6 +825,18 @@
           window.location.href = 'index.html';
           return;
         }
+
+        const role = await getUserRole();
+        if (role !== 'teacher' && role !== 'admin') {
+          console.warn(`Unauthorized role: ${role}. Redirecting...`);
+          if (role === 'student') {
+            window.location.href = 'student.html';
+          } else {
+            window.location.href = 'index.html';
+          }
+          return;
+        }
+
         await signIntoFirebase();
         document.getElementById('userEmail').textContent = user.attributes.email;
 

@@ -1255,7 +1255,10 @@
         <div class="d-flex align-items-center gap-2">
           <span class="badge bg-light text-dark" id="navSubjectBadge">No Subject</span>
           <span class="badge bg-warning text-dark" id="navMonthBadge">No Month</span>
-          <a href="profile.html" id="profileNavBtn" class="btn btn-outline-light btn-sm ms-1" style="display:none;">
+          <a href="student.html" id="profileNavBtn" class="btn btn-outline-light btn-sm ms-1" style="display:none;">
+            <i class="bi bi-person-circle me-1"></i>Profile
+          </a>
+          <a href="teacher-profile.html" id="teacherProfileNavBtn" class="btn btn-outline-light btn-sm ms-1" style="display:none;">
             <i class="bi bi-person-circle me-1"></i>Profile
           </a>
           <button onclick="handleLogout()" class="btn btn-outline-light btn-sm ms-1">
@@ -1284,6 +1287,25 @@
   </div>
 
   <div class="container py-4">
+    <!-- Allocation Required Warning Overlay -->
+    <div id="unauthorizedAllocationWarning" style="display: none; border-radius: 10px; background-color: #FFFEF9; border: 1px solid #F0EDE8;" class="card border-0 shadow-sm p-5 text-center mt-5">
+      <div class="card-body">
+        <div class="mb-4">
+          <i class="bi bi-exclamation-triangle-fill" style="font-size: 4rem; color: #8A6A4A;"></i>
+        </div>
+        <h3 class="card-title fw-bold mb-3" style="color: #6A4A5A;">Class Allocation Required</h3>
+        <p class="card-text text-muted mb-4 fs-5 mx-auto" style="max-width: 600px;">
+          You need an approved class allocation to access the Attendance System features. Please configure your profile and request class allocation.
+        </p>
+        <div class="d-flex justify-content-center gap-3">
+          <a href="teacher-profile.html" class="btn btn-primary btn-lg" style="background-color: #E8C4D8; border-color: #E8C4D8; color: #6A4A5A; font-weight: 600; box-shadow: 0 4px 10px rgba(232, 196, 216, 0.3);">
+            <i class="bi bi-person-badge-fill me-2"></i>Go to Profile & Request Allocation
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div id="mainTeacherContent">
 
 
     <!-- Info Box -->
@@ -1979,6 +2001,7 @@
       </section>
     </div>
     <!-- End of Admin Attendance Section -->
+    </div> <!-- End of mainTeacherContent -->
   </div>
 
   <!-- Defaulter Modal -->
@@ -2423,6 +2446,18 @@
           return;
         }
 
+        // Auth role check guard for teacher.html
+        const role = await getUserRole();
+        if (role !== 'teacher' && role !== 'admin') {
+          console.warn(`Unauthorized role: ${role}. Redirecting...`);
+          if (role === 'student') {
+            window.location.href = 'student.html';
+          } else {
+            window.location.href = 'index.html';
+          }
+          return;
+        }
+
         console.log('✅ User logged in:', user.attributes.email);
         console.log('🔵 Step 2: Calling signIntoFirebase()...');
 
@@ -2459,7 +2494,7 @@
         console.log(`✅ Firebase authenticated in ${attempts * checkInterval}ms`);
         console.log('✅ Firebase currentUser:', firebase.auth().currentUser.uid);
 
-        const role = await getUserRole();
+        // Reuse the role fetched above
         console.log('✅ User role:', role);
 
         currentUserRole = role;
@@ -2517,11 +2552,112 @@
         // Apply role-specific hiding
         if (role === 'admin') {
           console.log('✅ Admin - Full access');
+          document.getElementById('unauthorizedAllocationWarning').style.display = 'none';
+          document.getElementById('mainTeacherContent').style.display = 'block';
 
         } else if (role === 'teacher') {
           hideElements('.admin-only');
           hideElements('.admin-only-inline');
-          console.log('✅ Teacher - Hid admin elements');
+
+          // Show teacher profile button
+          const teacherProfileBtn = document.getElementById('teacherProfileNavBtn');
+          if (teacherProfileBtn) teacherProfileBtn.style.display = 'inline-flex';
+
+          console.log('✅ Teacher - Hid admin elements & showed profile button');
+
+          // Fetch allocation status
+          const user = await getCurrentUser();
+          if (!user) {
+            console.warn('⚠️ Teacher profile not found in Cognito session');
+            window.location.href = 'index.html';
+            return;
+          }
+
+          const userUid = firebase.auth().currentUser.uid;
+          console.log('📡 Fetching allocation for teacher UID:', userUid);
+          const snapshot = await firebaseDB.ref(`mainSystem/teachers/${userUid}`).once('value');
+          const teacherData = snapshot.val() || {};
+
+          const status = teacherData.status || 'none';
+          if (status !== 'approved') {
+            console.warn('⚠️ Teacher is NOT approved yet. Status:', status);
+            document.getElementById('unauthorizedAllocationWarning').style.display = 'block';
+            document.getElementById('mainTeacherContent').style.display = 'none';
+          } else {
+            console.log('✅ Teacher is approved. Allocating class...');
+            document.getElementById('unauthorizedAllocationWarning').style.display = 'none';
+            document.getElementById('mainTeacherContent').style.display = 'block';
+
+            const approved = teacherData.approvedAllocation;
+            if (approved) {
+              appState.selectedDepartment = approved.department;
+              appState.selectedCourse = approved.course;
+              appState.selectedAcademicYear = approved.academicYear;
+              appState.selectedDivision = approved.division;
+
+              // Pre-select and disable dropdown selectors
+              const deptSelect = document.getElementById('finalDepartmentSelect');
+              const courseSelect = document.getElementById('finalCourseSelect');
+              const academicYearSelect = document.getElementById('academicYearLevelSelect');
+              const divisionSelect = document.getElementById('divisionSelect');
+
+              if (deptSelect) {
+                deptSelect.value = approved.department;
+                deptSelect.disabled = true;
+                deptSelect.style.background = '#f5f5f5';
+                deptSelect.style.cursor = 'not-allowed';
+              }
+              
+              populateCourseDropdown();
+
+              if (courseSelect) {
+                courseSelect.value = approved.course;
+                courseSelect.disabled = true;
+                courseSelect.style.background = '#f5f5f5';
+                courseSelect.style.cursor = 'not-allowed';
+              }
+              if (academicYearSelect) {
+                academicYearSelect.value = approved.academicYear;
+                academicYearSelect.disabled = true;
+                academicYearSelect.style.background = '#f5f5f5';
+                academicYearSelect.style.cursor = 'not-allowed';
+              }
+              if (divisionSelect) {
+                divisionSelect.value = approved.division;
+                divisionSelect.disabled = true;
+                divisionSelect.style.background = '#f5f5f5';
+                divisionSelect.style.cursor = 'not-allowed';
+              }
+
+              // Update displays
+              populateSubjectDropdown();
+              renderSubjectTags();
+
+              updateDepartmentDisplay();
+              updateCourseDisplay();
+              updateAcademicYearDisplay();
+              updateSubjectDisplay();
+              updateFinalSelectionDropdowns();
+              updateFinalSelectionBadges();
+
+              // Refresh calendar and attendance table for this locked division
+              if (appState.selectedMonth !== null && appState.selectedYear !== null) {
+                appState.daysInMonth = getDaysInMonth(appState.selectedMonth, appState.selectedYear);
+                updateMonthDisplay();
+                populateDayDropdown();
+                renderCalendarGrid();
+                updateHolidayDisplay();
+                const calendarContainer = document.getElementById('calendarContainer');
+                if (calendarContainer) {
+                  calendarContainer.style.display = 'block';
+                }
+                refreshAttendanceTable();
+              }
+              updateStats();
+              updateDefaulterCount();
+              console.log('🔒 Selection section locked to approved class:', approved);
+            }
+          }
 
         } else if (role === 'student') {
           hideElements('.admin-only');
@@ -2531,7 +2667,7 @@
           hideElements('.hide-for-student');
           hideElements('.hide-for-student-inline');
           makeTableReadOnly();
-          // ✅ Show profile button only for students
+          // Show profile button only for students
           const profileBtn = document.getElementById('profileNavBtn');
           if (profileBtn) profileBtn.style.display = 'inline-flex';
 
@@ -2541,7 +2677,7 @@
       } catch (error) {
         console.error('❌ Error applying role-based UI:', error);
       } finally {
-        // ✅ ALWAYS runs, even if there's an error
+        // ALWAYS runs, even if there's an error
         console.log('🔄 Removing loading overlay...');
 
         const overlay = document.getElementById('authLoadingOverlay');

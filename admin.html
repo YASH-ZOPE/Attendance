@@ -1,0 +1,1587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Smart Attendance System</title>
+
+  <!-- Google Fonts & Styles -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- AWS Cognito SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.3.7/dist/amazon-cognito-identity.min.js"></script>
+  <script src="cognito-config.js"></script>
+  <script src="auth.js"></script>
+
+  <!-- Firebase SDK Compat -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="cloud-storage.js"></script>
+
+  <!-- Face API -->
+  <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+  <style>
+    :root {
+      --primary-color: #E8C4D8;
+      --success-color: #D4E8D4;
+      --danger-color: #F5D6D6;
+      --warning-color: #F9E8D9;
+      --text-dark: #6A4A5A;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Outfit', -apple-system, sans-serif;
+    }
+    
+    *::-webkit-scrollbar {
+      display: none;
+    }
+    * {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    body {
+      background: #F8F6F4;
+      padding-top: 85px;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: #FFFEF9;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+      border: 1px solid #F0EDE8;
+      padding: 20px;
+    }
+
+    .nav-pills .nav-link {
+      color: #7A7A7A;
+      font-weight: 500;
+      border-radius: 8px;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+      margin-bottom: 5px;
+    }
+
+    .nav-pills .nav-link:hover {
+      background: #F7F0F5;
+      color: #8B5A7A;
+      border-color: #E8C4D8;
+    }
+
+    .nav-pills .nav-link.active {
+      background: #E8C4D8;
+      color: #6A4A5A;
+      border-color: #E8C4D8;
+      box-shadow: 0 4px 10px rgba(232, 196, 216, 0.3);
+    }
+
+    .admin-card {
+      background: #FFFEF9;
+      border-radius: 10px;
+      padding: 24px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+      border: 1px solid #F0EDE8;
+      margin-bottom: 24px;
+    }
+
+    .tag-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 10px 0;
+    }
+
+    .custom-tag {
+      display: inline-flex;
+      align-items: center;
+      background: #F7F0F5;
+      border: 1px solid #E8C4D8;
+      padding: 6px 14px;
+      border-radius: 50px;
+      margin: 3px;
+      font-size: 0.9rem;
+      color: #8B5A7A;
+      font-weight: 500;
+    }
+
+    .custom-tag .delete-btn {
+      cursor: pointer;
+      margin-left: 8px;
+      color: #D89AA8;
+      font-weight: bold;
+    }
+
+    .custom-tag .delete-btn:hover {
+      color: #9A6A7A;
+    }
+
+    .video-container {
+      position: relative;
+      background: #1a1a1a;
+      border-radius: 12px;
+      overflow: hidden;
+      aspect-ratio: 4/3;
+      margin-bottom: 15px;
+      border: 2px solid #E8C4D8;
+    }
+
+    #video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
+
+    #canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+      transform: scaleX(-1);
+    }
+
+    .toast-container-custom {
+      position: fixed;
+      top: 90px;
+      right: 20px;
+      z-index: 9999;
+      width: 320px;
+      max-width: 90vw;
+    }
+
+    .student-card {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 12px;
+      background: #FBF8FA;
+      border: 1px solid #E8C4D8;
+      border-radius: 10px;
+      margin-bottom: 12px;
+    }
+
+    .face-preview {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #E8C4D8;
+    }
+
+    .file-drop {
+      border: 2px dashed #E8C4D8;
+      padding: 30px;
+      text-align: center;
+      border-radius: 10px;
+      background: #FBF8FA;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .file-drop:hover,
+    .file-drop.dragover {
+      border-color: #D9A8C4;
+      background: #F7F0F5;
+    }
+
+    /* Skeleton Styles matching main-system */
+    .shimmer-wave {
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg,
+          transparent 0%,
+          rgba(255, 255, 255, 0.6) 50%,
+          transparent 100%);
+      animation: shimmerMove 2s infinite;
+    }
+
+    @keyframes shimmerMove {
+      0% {
+        left: -100%;
+      }
+      100% {
+        left: 100%;
+      }
+    }
+
+    .skeleton-line {
+      background: linear-gradient(90deg,
+          #e0e0e0 25%,
+          #f0f0f0 50%,
+          #e0e0e0 75%);
+      background-size: 200% 100%;
+      border-radius: 4px;
+      animation: skeletonPulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes skeletonPulse {
+      0% {
+        background-position: 200% 0;
+      }
+      100% {
+        background-position: -200% 0;
+      }
+    }
+
+    .skeleton-card {
+      animation: fadeIn 0.6s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .skeleton-shimmer {
+      background: #e8e8e8;
+    }
+
+    .spinner-border {
+      border-width: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loading Overlay matching main-system -->
+  <div id="authLoadingOverlay" style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #F8F6F4;
+    z-index: 99999;
+    overflow: auto;
+  ">
+    <!-- Skeleton Navbar -->
+    <nav class="navbar navbar-dark bg-primary shadow-sm" style="
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    ">
+      <div class="container">
+        <span class="navbar-brand" style="opacity: 0.7;">
+          <i class="bi bi-shield-lock-fill me-2"></i>Administration Panel
+        </span>
+        <div class="skeleton-shimmer" style="
+          width: 200px; 
+          height: 30px; 
+          background: rgba(255,255,255,0.2); 
+          border-radius: 6px;
+          position: relative;
+          overflow: hidden;
+        ">
+          <div class="shimmer-wave"></div>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container py-4">
+      <div class="row g-3 mb-4">
+        <div class="col-lg-3">
+          <div class="card border-0 shadow-sm skeleton-card" style="height: 250px; border-radius: 10px; background: white; position: relative; overflow: hidden;">
+            <div class="shimmer-wave"></div>
+            <div class="card-body">
+              <div class="skeleton-line mb-3" style="width: 80%; height: 20px;"></div>
+              <div class="skeleton-line mb-2" style="width: 60%; height: 16px;"></div>
+              <div class="skeleton-line" style="width: 40%; height: 16px;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-9">
+          <div class="card border-0 shadow-sm skeleton-card" style="height: 400px; border-radius: 10px; background: white; position: relative; overflow: hidden;">
+            <div class="shimmer-wave"></div>
+            <div class="card-body">
+              <div class="skeleton-line mb-3" style="width: 40%; height: 24px;"></div>
+              <div class="skeleton-line mb-2" style="width: 90%; height: 16px;"></div>
+              <div class="skeleton-line mb-2" style="width: 85%; height: 16px;"></div>
+              <div class="skeleton-line" style="width: 70%; height: 16px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading message -->
+    <div style="
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: white;
+      padding: 15px 25px;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      animation: fadeInUp 0.5s ease;
+    ">
+      <div class="d-flex align-items-center">
+        <div class="spinner-border spinner-border-sm text-primary me-2" style="width: 20px; height: 20px;"></div>
+        <span style="color: #6A4A5A; font-weight: 500;">Authenticating...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Toasts -->
+  <div class="toast-container-custom" id="toastContainer"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top shadow">
+    <div class="container">
+      <span class="navbar-brand mb-0 h1"><i class="bi bi-shield-lock-fill me-2"></i>Administration Panel</span>
+      <div class="d-flex align-items-center gap-2">
+        <span class="text-white-50 small me-2" id="adminNavEmail">Loading Admin...</span>
+        <button id="logoutBtn" class="btn btn-outline-light btn-sm"><i class="bi bi-box-arrow-right me-1"></i>Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container pb-5">
+    <div class="row">
+      <!-- Sidebar Navigation -->
+      <div class="col-lg-3 mb-4">
+        <div class="sidebar">
+          <div class="text-center mb-4">
+            <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 60px; height: 60px;">
+              <i class="bi bi-person-fill-lock fs-2"></i>
+            </div>
+            <h6 class="mb-0" id="adminNameDisplay">System Admin</h6>
+            <small class="text-muted">Smart Attendance Manager</small>
+          </div>
+          <div class="nav flex-column nav-pills" id="adminTabs" role="tablist">
+            <button class="nav-link active text-start mb-2" id="setup-tab" data-bs-toggle="pill" data-bs-target="#tab-setup" type="button"><i class="bi bi-gear-wide-connected me-2"></i>Course Setup</button>
+            <button class="nav-link text-start mb-2" id="registration-tab" data-bs-toggle="pill" data-bs-target="#tab-registration" type="button"><i class="bi bi-camera me-2"></i>Biometric Setup</button>
+            <button class="nav-link text-start mb-2" id="allocations-tab" data-bs-toggle="pill" data-bs-target="#tab-allocations" type="button"><i class="bi bi-people me-2"></i>Teacher Allocations</button>
+            <button class="nav-link text-start mb-2" id="profile-tab" data-bs-toggle="pill" data-bs-target="#tab-profile" type="button"><i class="bi bi-lock me-2"></i>Admin Profile</button>
+            <a href="teacher.html" class="nav-link text-start text-primary"><i class="bi bi-box-arrow-up-right me-2"></i>Teacher Portal <i class="bi bi-arrow-right ms-1"></i></a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Panels -->
+      <div class="col-lg-9">
+        <div class="tab-content" id="adminTabsContent">
+          
+          <!-- TAB 1: Setup Configurations -->
+          <div class="tab-pane fade show active" id="tab-setup" role="tabpanel">
+            <!-- Departments Setup -->
+            <div class="admin-card">
+              <h5 class="mb-3 border-bottom pb-2"><i class="bi bi-building me-2 text-primary"></i>Department Management</h5>
+              <div class="row g-3 align-items-end">
+                <div class="col-md-8">
+                  <label for="newDeptInput" class="form-label">Add Department</label>
+                  <input type="text" id="newDeptInput" class="form-control" placeholder="e.g. Computer Engineering">
+                </div>
+                <div class="col-md-4">
+                  <button id="addDeptBtn" class="btn btn-primary w-100"><i class="bi bi-plus-lg me-1"></i>Add Department</button>
+                </div>
+              </div>
+              <div class="mt-4">
+                <label class="form-label d-block fw-bold">Available Departments:</label>
+                <div id="deptTags" class="tag-container">
+                  <span class="text-muted">Loading departments...</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Courses Setup -->
+            <div class="admin-card">
+              <h5 class="mb-3 border-bottom pb-2"><i class="bi bi-journal-bookmark me-2 text-primary"></i>Course Management</h5>
+              <div class="mb-3">
+                <label for="courseDeptSelect" class="form-label">Select Department first</label>
+                <select id="courseDeptSelect" class="form-select">
+                  <option value="">-- Select Department --</option>
+                </select>
+              </div>
+              <div class="row g-3 align-items-end">
+                <div class="col-md-8">
+                  <label for="newCourseInput" class="form-label">Add Course</label>
+                  <input type="text" id="newCourseInput" class="form-control" placeholder="e.g. B.Tech Computer Science" disabled>
+                </div>
+                <div class="col-md-4">
+                  <button id="addCourseBtn" class="btn btn-primary w-100" disabled><i class="bi bi-plus-lg me-1"></i>Add Course</button>
+                </div>
+              </div>
+              <div class="mt-4">
+                <label class="form-label d-block fw-bold">Available Courses:</label>
+                <div id="courseTags" class="tag-container">
+                  <span class="text-muted">Select a department to view courses</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Subjects Setup -->
+            <div class="admin-card">
+              <h5 class="mb-3 border-bottom pb-2"><i class="bi bi-book me-2 text-primary"></i>Subject Management</h5>
+              <div class="row mb-3 g-3">
+                <div class="col-md-6">
+                  <label for="subjectDeptSelect" class="form-label">Select Department</label>
+                  <select id="subjectDeptSelect" class="form-select">
+                    <option value="">-- Select Department --</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label for="subjectCourseSelect" class="form-label">Select Course</label>
+                  <select id="subjectCourseSelect" class="form-select" disabled>
+                    <option value="">-- Select Course --</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row g-3 align-items-end">
+                <div class="col-md-8">
+                  <label for="newSubjectInput" class="form-label">Add Subject</label>
+                  <input type="text" id="newSubjectInput" class="form-control" placeholder="e.g. Java Programming" disabled>
+                </div>
+                <div class="col-md-4">
+                  <button id="addSubjectBtn" class="btn btn-primary w-100" disabled><i class="bi bi-plus-lg me-1"></i>Add Subject</button>
+                </div>
+              </div>
+              <div class="mt-4">
+                <label class="form-label d-block fw-bold">Available Subjects:</label>
+                <div id="subjectTags" class="tag-container">
+                  <span class="text-muted">Select department and course first</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 2: Biometric Setup -->
+          <div class="tab-pane fade" id="tab-registration" role="tabpanel">
+            <!-- Select Division Profile -->
+            <div class="admin-card">
+              <h5 class="mb-3 border-bottom pb-2"><i class="bi bi-mortarboard me-2 text-primary"></i>1. Select Target Class</h5>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label for="faceDeptSelect" class="form-label">Department</label>
+                  <select id="faceDeptSelect" class="form-select">
+                    <option value="">-- Select Department --</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label for="faceCourseSelect" class="form-label">Course</label>
+                  <select id="faceCourseSelect" class="form-select" disabled>
+                    <option value="">-- Select Department first --</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label for="faceYearSelect" class="form-label">Academic Year</label>
+                  <select id="faceYearSelect" class="form-select">
+                    <option value="">-- Select Year --</option>
+                    <option value="FY">First Year (FY)</option>
+                    <option value="SY">Second Year (SY)</option>
+                    <option value="TY">Third Year (TY)</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label for="faceDivisionSelect" class="form-label">Division</label>
+                  <select id="faceDivisionSelect" class="form-select">
+                    <option value="">-- Select Division --</option>
+                    <option value="Division A">Division A</option>
+                    <option value="Division B">Division B</option>
+                    <option value="Division C">Division C</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Single Student Camera capture -->
+            <div class="row">
+              <div class="col-md-6">
+                <div class="admin-card">
+                  <h5 class="mb-3 border-bottom pb-2"><i class="bi bi-camera-fill me-2 text-primary"></i>2a. Register Student Face</h5>
+                  
+                  <div class="video-container">
+                    <video id="video" autoplay muted playsinline></video>
+                    <canvas id="canvas"></canvas>
+                  </div>
+
+                  <div class="d-flex gap-2 mb-3">
+                    <button id="startCamBtn" class="btn btn-outline-primary flex-grow-1"><i class="bi bi-camera-video me-1"></i>Start Camera</button>
+                    <button id="stopCamBtn" class="btn btn-outline-danger flex-grow-1" style="display: none;"><i class="bi bi-camera-video-off me-1"></i>Stop Camera</button>
+                  </div>
+
+                  <div class="mb-2">
+                    <input type="text" id="regStudentId" class="form-control mb-2" placeholder="Enter Student ID / Roll Number">
+                    <input type="text" id="regStudentName" class="form-control" placeholder="Enter Student Name">
+                  </div>
+
+                  <button id="captureFaceBtn" class="btn btn-success w-100" disabled><i class="bi bi-person-check me-2"></i>Capture & Register Face</button>
+                </div>
+              </div>
+
+              <!-- Bulk Folder Import -->
+              <div class="col-md-6">
+                <div class="admin-card">
+                  <h5 class="mb-3 border-bottom pb-2"><i class="bi bi-folder-fill me-2 text-primary"></i>2b. Bulk Face Import</h5>
+                  <div class="alert alert-warning small py-2">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    Folder layout: <strong>Dataset/StudentID/image.jpg</strong>
+                  </div>
+                  <div class="mb-3">
+                    <input type="file" id="bulkFolderInput" webkitdirectory directory multiple class="form-control">
+                  </div>
+                  <button id="startBulkBtn" class="btn btn-info w-100 text-white" disabled><i class="bi bi-upload me-2"></i>Process Folder Upload</button>
+                  
+                  <!-- Progress Bar -->
+                  <div id="bulkProgressWrapper" class="mt-3" style="display: none;">
+                    <div class="progress mb-2" style="height: 25px;">
+                      <div id="bulkProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: 0%;">0%</div>
+                    </div>
+                    <small id="bulkProgressText" class="text-muted d-block text-center">Reading folder contents...</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- List of registered students in division -->
+            <div class="admin-card">
+              <h5 class="mb-3 border-bottom pb-2"><i class="bi bi-people-fill me-2 text-primary"></i>Registered Students</h5>
+              <div id="registeredStudentsList" class="row g-3">
+                <div class="col-12 text-center text-muted py-3">Select a target class division to query registered faces.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: Teacher Allocations -->
+          <div class="tab-pane fade" id="tab-allocations" role="tabpanel">
+            <div class="admin-card">
+              <h5 class="mb-3 border-bottom pb-2"><i class="bi bi-people-fill me-2 text-primary"></i>Teacher Class Allocations</h5>
+              
+              <!-- Pending Requests -->
+              <h6 class="fw-bold mb-3"><i class="bi bi-hourglass-split me-1 text-warning"></i>Pending Allocation Requests</h6>
+              <div class="table-responsive mb-4">
+                <table class="table table-hover align-middle">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Teacher Name</th>
+                      <th>Email</th>
+                      <th>Department</th>
+                      <th>Requested Class</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="pendingAllocationsTableBody">
+                    <tr>
+                      <td colspan="5" class="text-center py-3 text-muted">No pending requests</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Approved Allocations -->
+              <h6 class="fw-bold mb-3"><i class="bi bi-check-circle-fill me-1 text-success"></i>Approved Allocations</h6>
+              <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Teacher Name</th>
+                      <th>Email</th>
+                      <th>Department</th>
+                      <th>Allocated Class</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="approvedAllocationsTableBody">
+                    <tr>
+                      <td colspan="5" class="text-center py-3 text-muted">No approved allocations yet</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 3: Admin Profile Settings -->
+          <div class="tab-pane fade" id="tab-profile" role="tabpanel">
+            <div class="admin-card">
+              <h5 class="mb-3 border-bottom pb-2"><i class="bi bi-lock-fill me-2 text-primary"></i>Security Credentials</h5>
+              
+              <div id="profileError" class="alert alert-danger" style="display: none;"></div>
+              <div id="profileSuccess" class="alert alert-success" style="display: none;"></div>
+
+              <div class="mb-3">
+                <label class="form-label">Email Address</label>
+                <input type="text" id="profileEmail" class="form-control" disabled>
+              </div>
+
+              <hr>
+
+              <h6 class="mb-3 text-secondary">Change Password</h6>
+              <div class="mb-3">
+                <label for="oldPassword" class="form-label">Current Password</label>
+                <input type="password" id="oldPassword" class="form-control">
+              </div>
+              <div class="mb-3">
+                <label for="newPassword" class="form-label">New Password</label>
+                <input type="password" id="newPassword" class="form-control">
+              </div>
+              <button id="updatePasswordBtn" class="btn btn-primary"><i class="bi bi-shield-check me-2"></i>Change Admin Password</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    function formatClassName(alloc) {
+      if (!alloc) return '—';
+      let year = String(alloc.academicYear || '').trim();
+      if (year.toLowerCase().includes('fy') || year.toLowerCase().includes('first')) year = 'FY';
+      else if (year.toLowerCase().includes('sy') || year.toLowerCase().includes('second')) year = 'SY';
+      else if (year.toLowerCase().includes('ty') || year.toLowerCase().includes('third')) year = 'TY';
+      
+      const course = String(alloc.course || '').trim();
+      let div = String(alloc.division || '').trim();
+      if (div.toLowerCase().startsWith('division')) {
+        div = div.substring('division'.length).trim();
+      }
+      
+      return `${year}-${course}-${div}`.toUpperCase();
+    }
+
+    // System Configurations
+    let firebaseDB = null;
+    let adminCurrentUser = null;
+    let selectedFilesData = {}; // For bulk import files map
+
+    // Application state caching (cloud only)
+    const appState = {
+      departments: [],
+      courses: {},
+      subjects: {},
+      selectedDepartment: null,
+      selectedCourse: null,
+      selectedSubject: null,
+      selectedAcademicYear: null,
+      selectedDivision: null
+    };
+
+    // Toast Alert Helper
+    function showToast(msg, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toastId = `toast-${Date.now()}`;
+      const bg = type === 'success' ? 'bg-success' : type === 'danger' ? 'bg-danger' : type === 'warning' ? 'bg-warning' : 'bg-info';
+      
+      const toastHtml = `
+        <div id="${toastId}" class="toast align-items-center text-white border-0 ${bg} mb-2" role="alert">
+          <div class="d-flex">
+            <div class="toast-body">${msg.replace(/\n/g, '<br>')}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+          </div>
+        </div>
+      `;
+      container.insertAdjacentHTML('beforeend', toastHtml);
+      const toastNode = document.getElementById(toastId);
+      const bToast = new bootstrap.Toast(toastNode, { delay: 4000 });
+      bToast.show();
+      toastNode.addEventListener('hidden.bs.toast', () => toastNode.remove());
+    }
+
+    function encodeFirebaseKey(key) {
+      if (!key) return key;
+      return String(key).replace(/\//g, '__');
+    }
+
+    function decodeFirebaseKey(key) {
+      if (!key) return key;
+      return String(key).replace(/__/g, '/');
+    }
+
+    function encodeNestedObject(obj) {
+      if (!obj || typeof obj !== 'object') return obj;
+      if (Array.isArray(obj)) return obj;
+      const encoded = {};
+      for (const key in obj) {
+        const encodedKey = encodeFirebaseKey(key);
+        const value = obj[key];
+        if (value && typeof value === 'object') {
+          encoded[encodedKey] = encodeNestedObject(value);
+        } else {
+          encoded[encodedKey] = value;
+        }
+      }
+      return encoded;
+    }
+
+    function decodeNestedObject(obj) {
+      if (!obj || typeof obj !== 'object') return obj;
+      if (Array.isArray(obj)) return obj;
+      const decoded = {};
+      for (const key in obj) {
+        const decodedKey = decodeFirebaseKey(key);
+        const value = obj[key];
+        if (value && typeof value === 'object') {
+          decoded[decodedKey] = decodeNestedObject(value);
+        } else {
+          decoded[decodedKey] = value;
+        }
+      }
+      return decoded;
+    }
+
+    // Load setup configurations from Firebase
+    async function loadConfigData() {
+      try {
+        const snapDepts = await firebaseDB.ref('mainSystem/departments').once('value');
+        appState.departments = snapDepts.val() || [];
+        
+        const snapCourses = await firebaseDB.ref('mainSystem/courses').once('value');
+        const rawCourses = snapCourses.val() || {};
+        appState.courses = decodeNestedObject(rawCourses);
+
+        const snapSubjects = await firebaseDB.ref('mainSystem/subjects').once('value');
+        const rawSubjects = snapSubjects.val() || {};
+        appState.subjects = decodeNestedObject(rawSubjects);
+
+        renderDepartments();
+        populateDeptDropdowns();
+      } catch (error) {
+        console.error('Error loading config from Firebase:', error);
+      }
+    }
+
+    // Populate Department dropdown selectors
+    function populateDeptDropdowns() {
+      const dropdowns = ['courseDeptSelect', 'subjectDeptSelect', 'faceDeptSelect'];
+      dropdowns.forEach(id => {
+        const select = document.getElementById(id);
+        if (!select) return;
+        select.innerHTML = '<option value="">-- Select Department --</option>';
+        appState.departments.forEach(dept => {
+          const opt = document.createElement('option');
+          opt.value = dept;
+          opt.textContent = dept;
+          select.appendChild(opt);
+        });
+      });
+    }
+
+    // Load courses for selected department
+    async function loadCoursesForSelect(dept, targetSelectId, targetInputId, targetBtnId, callback) {
+      const select = document.getElementById(targetSelectId);
+      const input = document.getElementById(targetInputId);
+      const btn = document.getElementById(targetBtnId);
+
+      if (input) input.disabled = !dept;
+      if (btn) btn.disabled = !dept;
+
+      if (!dept) {
+        select.innerHTML = '<option value="">-- Select Department first --</option>';
+        select.disabled = true;
+        return;
+      }
+
+      const courses = appState.courses[dept] || [];
+      select.innerHTML = '<option value="">-- Select Course --</option>';
+      courses.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.textContent = c;
+        select.appendChild(opt);
+      });
+      select.disabled = false;
+      if (callback) callback();
+    }
+
+    // Render Departments tags
+    function renderDepartments() {
+      const container = document.getElementById('deptTags');
+      if (appState.departments.length === 0) {
+        container.innerHTML = '<span class="text-muted">No departments configured yet.</span>';
+        return;
+      }
+      container.innerHTML = appState.departments.map(dept => `
+        <span class="custom-tag">
+          ${dept}
+          <i class="bi bi-x-circle-fill delete-btn" onclick="deleteDept('${dept}')"></i>
+        </span>
+      `).join('');
+    }
+
+    // Add Department
+    async function addDept() {
+      const input = document.getElementById('newDeptInput');
+      const deptName = input.value.trim();
+      if (!deptName) return showToast('Please enter department name', 'warning');
+      if (appState.departments.includes(deptName)) return showToast('Department already exists', 'warning');
+
+      appState.departments.push(deptName);
+      await firebaseDB.ref('mainSystem/departments').set(appState.departments);
+      input.value = '';
+      showToast('✓ Department added successfully', 'success');
+      await loadConfigData();
+    }
+
+    // Delete Department
+    window.deleteDept = async function(deptName) {
+      if (!confirm(`Are you sure you want to delete ${deptName}?`)) return;
+      appState.departments = appState.departments.filter(d => d !== deptName);
+      delete appState.courses[deptName];
+      delete appState.subjects[deptName];
+
+      await firebaseDB.ref('mainSystem/departments').set(appState.departments);
+      await firebaseDB.ref('mainSystem/courses').set(encodeNestedObject(appState.courses));
+      await firebaseDB.ref('mainSystem/subjects').set(encodeNestedObject(appState.subjects));
+      
+      showToast('✓ Department deleted', 'success');
+      await loadConfigData();
+    };
+
+    // Load courses tags
+    function renderCourses(dept) {
+      const container = document.getElementById('courseTags');
+      if (!dept) {
+        container.innerHTML = '<span class="text-muted">Select a department to view courses</span>';
+        return;
+      }
+      const courses = appState.courses[dept] || [];
+      if (courses.length === 0) {
+        container.innerHTML = '<span class="text-muted">No courses configured in this department.</span>';
+        return;
+      }
+      container.innerHTML = courses.map(c => `
+        <span class="custom-tag">
+          ${c}
+          <i class="bi bi-x-circle-fill delete-btn" onclick="deleteCourse('${dept}', '${c}')"></i>
+        </span>
+      `).join('');
+    }
+
+    // Add Course
+    async function addCourse() {
+      const dept = document.getElementById('courseDeptSelect').value;
+      const input = document.getElementById('newCourseInput');
+      const name = input.value.trim();
+      if (!name || !dept) return;
+
+      if (!appState.courses[dept]) appState.courses[dept] = [];
+      if (appState.courses[dept].includes(name)) return showToast('Course already exists', 'warning');
+
+      appState.courses[dept].push(name);
+      await firebaseDB.ref('mainSystem/courses').set(encodeNestedObject(appState.courses));
+      input.value = '';
+      showToast('✓ Course added successfully', 'success');
+      await loadConfigData();
+      renderCourses(dept);
+    }
+
+    // Delete Course
+    window.deleteCourse = async function(dept, name) {
+      if (!confirm(`Are you sure you want to delete ${name}?`)) return;
+      appState.courses[dept] = appState.courses[dept].filter(c => c !== name);
+      if (appState.subjects[dept]) {
+        delete appState.subjects[dept][name];
+      }
+
+      await firebaseDB.ref('mainSystem/courses').set(encodeNestedObject(appState.courses));
+      await firebaseDB.ref('mainSystem/subjects').set(encodeNestedObject(appState.subjects));
+      
+      showToast('✓ Course deleted', 'success');
+      await loadConfigData();
+      renderCourses(dept);
+    };
+
+    // Render Subject tags
+    function renderSubjects(dept, course) {
+      const container = document.getElementById('subjectTags');
+      if (!dept || !course) {
+        container.innerHTML = '<span class="text-muted">Select department and course first</span>';
+        return;
+      }
+      const subjects = (appState.subjects[dept] && appState.subjects[dept][course]) ? appState.subjects[dept][course] : [];
+      if (subjects.length === 0) {
+        container.innerHTML = '<span class="text-muted">No subjects added for this course yet.</span>';
+        return;
+      }
+      container.innerHTML = subjects.map(s => `
+        <span class="custom-tag">
+          ${s}
+          <i class="bi bi-x-circle-fill delete-btn" onclick="deleteSubject('${dept}', '${course}', '${s}')"></i>
+        </span>
+      `).join('');
+    }
+
+    // Add Subject
+    async function addSubject() {
+      const dept = document.getElementById('subjectDeptSelect').value;
+      const course = document.getElementById('subjectCourseSelect').value;
+      const input = document.getElementById('newSubjectInput');
+      const name = input.value.trim();
+
+      if (!dept || !course || !name) return;
+
+      if (!appState.subjects[dept]) appState.subjects[dept] = {};
+      if (!appState.subjects[dept][course]) appState.subjects[dept][course] = [];
+      if (appState.subjects[dept][course].includes(name)) return showToast('Subject already exists', 'warning');
+
+      appState.subjects[dept][course].push(name);
+      await firebaseDB.ref('mainSystem/subjects').set(encodeNestedObject(appState.subjects));
+      input.value = '';
+      showToast('✓ Subject added successfully', 'success');
+      await loadConfigData();
+      renderSubjects(dept, course);
+    }
+
+    // Delete Subject
+    window.deleteSubject = async function(dept, course, name) {
+      if (!confirm(`Are you sure you want to delete ${name}?`)) return;
+      appState.subjects[dept][course] = appState.subjects[dept][course].filter(s => s !== name);
+      await firebaseDB.ref('mainSystem/subjects').set(encodeNestedObject(appState.subjects));
+      
+      showToast('✓ Subject deleted', 'success');
+      await loadConfigData();
+      renderSubjects(dept, course);
+    };
+
+    // ==================== BIOMETRICS (FACE APP SECTION) ====================
+    let isCameraRunning = false;
+    let videoStream = null;
+    let modelsLoaded = false;
+
+    async function loadFaceModels() {
+      const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model/';
+      try {
+        await Promise.all([
+          faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+          faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+          faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+        ]);
+        modelsLoaded = true;
+        console.log('✓ FaceAPI models loaded successfully');
+      } catch (error) {
+        console.error('Error loading face-api models:', error);
+      }
+    }
+
+    // Start Camera
+    async function startCamera() {
+      if (!modelsLoaded) return showToast('Face models are loading, please wait.', 'warning');
+      const video = document.getElementById('video');
+      try {
+        videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+        video.srcObject = videoStream;
+        isCameraRunning = true;
+        document.getElementById('startCamBtn').style.display = 'none';
+        document.getElementById('stopCamBtn').style.display = 'block';
+        document.getElementById('captureFaceBtn').disabled = false;
+      } catch (error) {
+        console.error('Camera access error:', error);
+        showToast('Failed to access camera: ' + error.message, 'danger');
+      }
+    }
+
+    // Stop Camera
+    function stopCamera() {
+      if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+        videoStream = null;
+      }
+      document.getElementById('video').srcObject = null;
+      isCameraRunning = false;
+      document.getElementById('startCamBtn').style.display = 'block';
+      document.getElementById('stopCamBtn').style.display = 'none';
+      document.getElementById('captureFaceBtn').disabled = true;
+    }
+
+    // Capture Face
+    async function captureFace() {
+      const dept = document.getElementById('faceDeptSelect').value;
+      const course = document.getElementById('faceCourseSelect').value;
+      const year = document.getElementById('faceYearSelect').value;
+      const div = document.getElementById('faceDivisionSelect').value;
+      const studentId = document.getElementById('regStudentId').value.trim();
+      const studentName = document.getElementById('regStudentName').value.trim();
+
+      if (!dept || !course || !year || !div || !studentId || !studentName) {
+        return showToast('Complete division attributes & student credentials first.', 'warning');
+      }
+
+      const video = document.getElementById('video');
+      const captureBtn = document.getElementById('captureFaceBtn');
+      captureBtn.disabled = true;
+      captureBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Processing...';
+
+      try {
+        // Detect single face
+        const detection = await faceapi
+          .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+          .withFaceLandmarks()
+          .withFaceDescriptor();
+
+        if (!detection) {
+          showToast('❌ No face detected. Adjust lighting and face the camera.', 'warning');
+          return;
+        }
+
+        // Capture canvas base64 image
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = video.videoWidth;
+        tempCanvas.height = video.videoHeight;
+        const ctx = tempCanvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
+        const imageData = tempCanvas.toDataURL('image/jpeg', 0.8);
+
+        // Save directly to Firebase Realtime Database
+        const path = `faces/${dept}/${course}/${year}/${div}/${studentId}`;
+        const faceData = {
+          id: studentId,
+          name: studentName,
+          descriptors: [Array.from(detection.descriptor)],
+          imageData: imageData,
+          timestamp: Date.now(),
+          attendanceToday: false,
+          lastSeen: null,
+          department: dept,
+          course: course,
+          academicYear: year,
+          division: div
+        };
+
+        await firebaseDB.ref(path).set(faceData);
+        showToast(`✓ Face registered successfully for ${studentName}`, 'success');
+        document.getElementById('regStudentId').value = '';
+        document.getElementById('regStudentName').value = '';
+        await queryRegisteredStudents();
+
+      } catch (error) {
+        console.error('Face registration error:', error);
+        showToast('Registration failed: ' + error.message, 'danger');
+      } finally {
+        captureBtn.disabled = false;
+        captureBtn.innerHTML = '<i class="bi bi-person-check me-2"></i>Capture & Register Face';
+      }
+    }
+
+    // Query registered students for selected division
+    async function queryRegisteredStudents() {
+      const dept = document.getElementById('faceDeptSelect').value;
+      const course = document.getElementById('faceCourseSelect').value;
+      const year = document.getElementById('faceYearSelect').value;
+      const div = document.getElementById('faceDivisionSelect').value;
+      const listContainer = document.getElementById('registeredStudentsList');
+
+      if (!dept || !course || !year || !div) {
+        listContainer.innerHTML = '<div class="col-12 text-center text-muted py-3">Select a target class division to query registered faces.</div>';
+        return;
+      }
+
+      try {
+        const path = `faces/${dept}/${course}/${year}/${div}`;
+        const snapshot = await firebaseDB.ref(path).once('value');
+        const facesData = snapshot.val() || {};
+
+        const faceList = Object.values(facesData);
+        if (faceList.length === 0) {
+          listContainer.innerHTML = '<div class="col-12 text-center text-muted py-4">No registered student faces found in this division.</div>';
+          return;
+        }
+
+        listContainer.innerHTML = faceList.map(face => `
+          <div class="col-md-6">
+            <div class="student-card shadow-sm">
+              <img src="${face.imageData}" class="face-preview" alt="Student preview">
+              <div class="flex-grow-1">
+                <h6 class="mb-0">${face.name}</h6>
+                <small class="text-muted">ID: ${face.id}</small>
+              </div>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteFaceRecord('${dept}','${course}','${year}','${div}','${face.id}')">
+                <i class="bi-trash"></i>
+              </button>
+            </div>
+          </div>
+        `).join('');
+
+      } catch (error) {
+        console.error('Error fetching registered students:', error);
+        listContainer.innerHTML = '<div class="col-12 text-center text-danger py-3">Failed to load student profiles.</div>';
+      }
+    }
+
+    // Delete Face record
+    window.deleteFaceRecord = async function(dept, course, year, div, sId) {
+      if (!confirm(`Are you sure you want to delete registration for Student ID ${sId}?`)) return;
+      const path = `faces/${dept}/${course}/${year}/${div}/${sId}`;
+      try {
+        await firebaseDB.ref(path).remove();
+        showToast('✓ Face record deleted successfully', 'success');
+        await queryRegisteredStudents();
+      } catch (error) {
+        console.error('Error deleting face:', error);
+      }
+    };
+
+    // Bulk File processing helper
+    document.getElementById('bulkFolderInput').addEventListener('change', (e) => {
+      const files = Array.from(e.target.files);
+      selectedFilesData = {};
+
+      files.forEach(file => {
+        const pathParts = file.webkitRelativePath.split('/');
+        if (pathParts.length < 2) return; // Must have StudentID_StudentName/imageName layout
+        
+        const folderName = pathParts[pathParts.length - 2];
+        let studentId, studentName;
+
+        if (folderName.includes('_')) {
+          const parts = folderName.split('_');
+          studentId = parts[0].trim();
+          studentName = parts.slice(1).join('_').trim();
+        } else {
+          studentId = folderName.trim();
+          studentName = folderName.trim();
+        }
+
+        if (!selectedFilesData[studentId]) {
+          selectedFilesData[studentId] = {
+            name: studentName,
+            files: []
+          };
+        }
+        selectedFilesData[studentId].files.push(file);
+      });
+
+      const count = Object.keys(selectedFilesData).length;
+      document.getElementById('startBulkBtn').disabled = count === 0;
+      if (count > 0) {
+        showToast(`✓ Found ${count} student folders ready for processing`, 'success');
+      }
+    });
+
+    // Extract face descriptor from file (bulk upload helper)
+    async function extractDescriptorFromFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          try {
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            await new Promise(res => img.onload = res);
+            const detection = await faceapi
+              .detectSingleFace(img, new faceapi.TinyFaceDetectorOptions())
+              .withFaceLandmarks()
+              .withFaceDescriptor();
+
+            if (!detection) {
+              reject(new Error('No face detected'));
+              return;
+            }
+            resolve({
+              descriptor: Array.from(detection.descriptor),
+              dataUrl: e.target.result
+            });
+          } catch (err) {
+            reject(err);
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Process Bulk Import
+    async function processBulkImport() {
+      const dept = document.getElementById('faceDeptSelect').value;
+      const course = document.getElementById('faceCourseSelect').value;
+      const year = document.getElementById('faceYearSelect').value;
+      const div = document.getElementById('faceDivisionSelect').value;
+
+      if (!dept || !course || !year || !div) {
+        return showToast('Select destination class attributes first.', 'warning');
+      }
+
+      const ids = Object.keys(selectedFilesData);
+      const progressBar = document.getElementById('bulkProgressBar');
+      const progressText = document.getElementById('bulkProgressText');
+      const progressWrapper = document.getElementById('bulkProgressWrapper');
+
+      progressWrapper.style.display = 'block';
+      document.getElementById('startBulkBtn').disabled = true;
+
+      let successCount = 0;
+      let failCount = 0;
+
+      for (let i = 0; i < ids.length; i++) {
+        const sId = ids[i];
+        const record = selectedFilesData[sId];
+        const progressPercent = Math.round(((i + 1) / ids.length) * 100);
+        
+        progressBar.style.width = `${progressPercent}%`;
+        progressBar.textContent = `${progressPercent}%`;
+        progressText.textContent = `Processing student ID: ${sId} (${i + 1}/${ids.length})...`;
+
+        try {
+          // Process first valid image to generate descriptor and base64 template preview
+          let processed = null;
+          for (const file of record.files) {
+            try {
+              processed = await extractDescriptorFromFile(file);
+              if (processed) break; // Use first image that detects a face successfully
+            } catch (err) {
+              console.warn(`Skipped image for student ${sId}:`, err.message);
+            }
+          }
+
+          if (!processed) {
+            throw new Error('No valid face found in any folder images');
+          }
+
+          const path = `faces/${dept}/${course}/${year}/${div}/${sId}`;
+          const faceData = {
+            id: sId,
+            name: record.name, // Use extracted student name
+            descriptors: [processed.descriptor],
+            imageData: processed.dataUrl,
+            timestamp: Date.now(),
+            attendanceToday: false,
+            lastSeen: null,
+            department: dept,
+            course: course,
+            academicYear: year,
+            division: div
+          };
+
+          await firebaseDB.ref(path).set(faceData);
+          successCount++;
+        } catch (error) {
+          console.error(`Failed bulk processing for ${sId}:`, error);
+          failCount++;
+        }
+      }
+
+      showToast(`✓ Bulk Import Complete!\nSuccess: ${successCount}\nFailed: ${failCount}`, 'success');
+      progressWrapper.style.display = 'none';
+      document.getElementById('bulkFolderInput').value = '';
+      selectedFilesData = {};
+      await queryRegisteredStudents();
+    }
+
+    // ==================== TEACHER CLASS ALLOCATIONS ====================
+    async function loadTeacherAllocations() {
+      try {
+        const snapshot = await firebaseDB.ref('mainSystem/teachers').once('value');
+        const teachers = snapshot.val() || {};
+
+        const pendingBody = document.getElementById('pendingAllocationsTableBody');
+        const approvedBody = document.getElementById('approvedAllocationsTableBody');
+
+        pendingBody.innerHTML = '';
+        approvedBody.innerHTML = '';
+
+        let pendingCount = 0;
+        let approvedCount = 0;
+
+        const yearMap = {
+          'FY': 'First Year (FY)',
+          'SY': 'Second Year (SY)',
+          'TY': 'Third Year (TY)'
+        };
+
+        Object.keys(teachers).forEach(uid => {
+          const teacher = teachers[uid];
+          
+          if (teacher.status === 'pending' && teacher.requestedAllocation) {
+            pendingCount++;
+            const req = teacher.requestedAllocation;
+            const deptText = req.department || '—';
+            const classText = formatClassName(req);
+
+            pendingBody.insertAdjacentHTML('beforeend', `
+              <tr>
+                <td><strong>${teacher.name || 'Teacher'}</strong></td>
+                <td>${teacher.email}</td>
+                <td><span class="badge bg-light text-dark border p-2">${deptText}</span></td>
+                <td><span class="badge bg-light text-dark border p-2">${classText}</span></td>
+                <td>
+                  <button class="btn btn-sm btn-success me-1" onclick="approveAllocation('${uid}')">
+                    <i class="bi bi-check-circle me-1"></i>Verify & Allocate
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger" onclick="rejectAllocation('${uid}')">
+                    <i class="bi bi-x-circle"></i> Reject
+                  </button>
+                </td>
+              </tr>
+            `);
+          }
+
+          if (teacher.approvedAllocation) {
+            approvedCount++;
+            const app = teacher.approvedAllocation;
+            const deptText = app.department || '—';
+            const classText = formatClassName(app);
+
+            approvedBody.insertAdjacentHTML('beforeend', `
+              <tr>
+                <td><strong>${teacher.name || 'Teacher'}</strong></td>
+                <td>${teacher.email}</td>
+                <td><span class="badge bg-light text-dark border p-2">${deptText}</span></td>
+                <td><span class="badge bg-light text-dark border p-2">${classText}</span></td>
+                <td>
+                  <button class="btn btn-sm btn-outline-danger" onclick="revokeAllocation('${uid}')">
+                    <i class="bi bi-trash me-1"></i>Revoke
+                  </button>
+                </td>
+              </tr>
+            `);
+          }
+        });
+
+        if (pendingCount === 0) {
+          pendingBody.innerHTML = '<tr><td colspan="5" class="text-center py-3 text-muted">No pending requests</td></tr>';
+        }
+        if (approvedCount === 0) {
+          approvedBody.innerHTML = '<tr><td colspan="5" class="text-center py-3 text-muted">No approved allocations yet</td></tr>';
+        }
+
+      } catch (error) {
+        console.error('Error loading teacher allocations:', error);
+        showToast('Failed to load teacher allocations.', 'danger');
+      }
+    }
+
+    window.approveAllocation = async function(uid) {
+      if (!confirm('Are you sure you want to approve this class allocation?')) return;
+      try {
+        const snapshot = await firebaseDB.ref(`mainSystem/teachers/${uid}`).once('value');
+        const teacher = snapshot.val() || {};
+
+        if (!teacher.requestedAllocation) return;
+
+        const updatedData = {
+          approvedAllocation: teacher.requestedAllocation,
+          requestedAllocation: null,
+          status: 'approved'
+        };
+
+        await firebaseDB.ref(`mainSystem/teachers/${uid}`).update(updatedData);
+        showToast('✓ Class allocated successfully.', 'success');
+        await loadTeacherAllocations();
+      } catch (error) {
+        console.error('Error approving allocation:', error);
+        showToast('Failed to allocate class.', 'danger');
+      }
+    };
+
+    window.rejectAllocation = async function(uid) {
+      if (!confirm('Are you sure you want to reject this request?')) return;
+      try {
+        const updatedData = {
+          requestedAllocation: null,
+          status: 'none'
+        };
+        await firebaseDB.ref(`mainSystem/teachers/${uid}`).update(updatedData);
+        showToast('✓ Allocation request rejected.', 'warning');
+        await loadTeacherAllocations();
+      } catch (error) {
+        console.error('Error rejecting allocation:', error);
+        showToast('Failed to reject allocation.', 'danger');
+      }
+    };
+
+    window.revokeAllocation = async function(uid) {
+      if (!confirm('Are you sure you want to revoke this class allocation? The teacher will lose access to this class.')) return;
+      try {
+        const updatedData = {
+          approvedAllocation: null,
+          status: 'none'
+        };
+        await firebaseDB.ref(`mainSystem/teachers/${uid}`).update(updatedData);
+        showToast('✓ Allocation revoked successfully.', 'warning');
+        await loadTeacherAllocations();
+      } catch (error) {
+        console.error('Error revoking allocation:', error);
+        showToast('Failed to revoke allocation.', 'danger');
+      }
+    };
+
+    // ==================== ADMIN PROFILE (SECURITY SETTINGS) ====================
+    async function loadAdminProfile() {
+      try {
+        const poolData = {
+          UserPoolId: window.COGNITO_CONFIG.userPoolId,
+          ClientId: window.COGNITO_CONFIG.clientId
+        };
+        const userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+        adminCurrentUser = userPool.getCurrentUser();
+
+        if (!adminCurrentUser) {
+          window.location.href = 'index.html';
+          return;
+        }
+
+        adminCurrentUser.getSession((err, session) => {
+          if (err) {
+            window.location.href = 'index.html';
+            return;
+          }
+
+          adminCurrentUser.getUserAttributes((err, attributes) => {
+            if (err) {
+              console.error(err);
+              return;
+            }
+            const attrs = {};
+            attributes.forEach(a => attrs[a.Name] = a.Value);
+            
+            document.getElementById('adminNavEmail').textContent = attrs.email || 'Admin';
+            document.getElementById('adminNameDisplay').textContent = attrs.name || 'System Admin';
+            document.getElementById('profileEmail').value = attrs.email || '';
+          });
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    // Password reset
+    async function changeAdminPassword() {
+      const oldPass = document.getElementById('oldPassword').value;
+      const newPass = document.getElementById('newPassword').value;
+      const errEl = document.getElementById('profileError');
+      const succEl = document.getElementById('profileSuccess');
+
+      errEl.style.display = 'none';
+      succEl.style.display = 'none';
+
+      if (!oldPass || !newPass) {
+        errEl.textContent = 'Please enter both current and new passwords';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      adminCurrentUser.getSession((err, session) => {
+        if (err) {
+          errEl.textContent = 'Session invalid, please log in again';
+          errEl.style.display = 'block';
+          return;
+        }
+
+        adminCurrentUser.changePassword(oldPass, newPass, (err, result) => {
+          if (err) {
+            errEl.textContent = err.message || 'Failed to update password';
+            errEl.style.display = 'block';
+          } else {
+            succEl.textContent = '✓ Password changed successfully!';
+            succEl.style.display = 'block';
+            document.getElementById('oldPassword').value = '';
+            document.getElementById('newPassword').value = '';
+          }
+        });
+      });
+    }
+
+    // Event Bindings
+    document.getElementById('addDeptBtn').addEventListener('click', addDept);
+    document.getElementById('addCourseBtn').addEventListener('click', addCourse);
+    document.getElementById('addSubjectBtn').addEventListener('click', addSubject);
+
+    document.getElementById('courseDeptSelect').addEventListener('change', (e) => {
+      const dept = e.target.value;
+      loadCoursesForSelect(dept, 'courseSelect', 'newCourseInput', 'addCourseBtn', () => renderCourses(dept));
+    });
+
+    document.getElementById('subjectDeptSelect').addEventListener('change', (e) => {
+      const dept = e.target.value;
+      loadCoursesForSelect(dept, 'subjectCourseSelect', 'newSubjectInput', 'addSubjectBtn');
+    });
+
+    document.getElementById('subjectCourseSelect').addEventListener('change', (e) => {
+      const dept = document.getElementById('subjectDeptSelect').value;
+      const course = e.target.value;
+      renderSubjects(dept, course);
+    });
+
+    document.getElementById('faceDeptSelect').addEventListener('change', (e) => {
+      const dept = e.target.value;
+      loadCoursesForSelect(dept, 'faceCourseSelect', '', '', () => queryRegisteredStudents());
+    });
+    
+    document.getElementById('faceCourseSelect').addEventListener('change', queryRegisteredStudents);
+    document.getElementById('faceYearSelect').addEventListener('change', queryRegisteredStudents);
+    document.getElementById('faceDivisionSelect').addEventListener('change', queryRegisteredStudents);
+
+    document.getElementById('startCamBtn').addEventListener('click', startCamera);
+    document.getElementById('stopCamBtn').addEventListener('click', stopCamera);
+    document.getElementById('captureFaceBtn').addEventListener('click', captureFace);
+    document.getElementById('startBulkBtn').addEventListener('click', processBulkImport);
+
+    document.getElementById('updatePasswordBtn').addEventListener('click', changeAdminPassword);
+    document.getElementById('allocations-tab').addEventListener('click', loadTeacherAllocations);
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      if (adminCurrentUser) adminCurrentUser.signOut();
+      window.location.href = 'index.html';
+    });
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      try {
+        // Auth role check guard
+        const role = await getUserRole();
+        if (role !== 'admin') {
+          console.warn(`Unauthorized role: ${role}. Redirecting...`);
+          if (role === 'teacher') {
+            window.location.href = 'teacher.html';
+          } else if (role === 'student') {
+            window.location.href = 'student.html';
+          } else {
+            window.location.href = 'index.html';
+          }
+          return;
+        }
+
+        await signIntoFirebase();
+        firebaseDB = firebase.database();
+        
+        await loadConfigData();
+        await loadAdminProfile();
+        await loadFaceModels();
+        await loadTeacherAllocations();
+      } catch (error) {
+        console.error('Initialization failed:', error);
+      } finally {
+        // Remove loading overlay
+        console.log('🔄 Removing loading overlay...');
+        const overlay = document.getElementById('authLoadingOverlay');
+        if (overlay) {
+          overlay.style.transition = 'opacity 0.5s ease';
+          overlay.style.opacity = '0';
+          setTimeout(() => {
+            overlay.remove();
+            console.log('✅ Overlay removed successfully');
+          }, 500);
+        }
+      }
+    });
+  </script>
+</body>
+</html>
