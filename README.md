@@ -56,6 +56,12 @@ Attendance/
 ```
 
 ---
+## 🌐 Live Demo
+
+**Deployed Application:**
+https://main.d37taywsxgqmhw.amplifyapp.com/
+
+> Experience the Smart Attendance System frontend portal with role-based dashboards, biometric attendance workflows, QR-based session validation, and leave management features.
 
 ## ⚙️ Configuration Setup
 
