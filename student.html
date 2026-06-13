@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard - Smart Attendance System</title>
+
+  <!-- Bootstrap & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- AWS Cognito SDK -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.3.7/dist/amazon-cognito-identity.min.js"></script>
+  <script src="cognito-config.js"></script>
+  <script src="auth.js"></script>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
+  <style>
+    :root {
+      --primary-color: #667eea;
+      --secondary-color: #764ba2;
+    }
+
+    *::-webkit-scrollbar {
+      display: none;
+    }
+
+    * {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    body {
+      background: #f4f6fa;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      padding-bottom: 5mm;
+    }
+
+    .navbar-custom {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    }
+
+    .dashboard-card {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      border: 1px solid rgba(102, 126, 234, 0.08);
+      margin-bottom: 24px;
+    }
+
+    .status-badge-pending {
+      background: #ffeeb3;
+      color: #856404;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .status-badge-approved {
+      background: #d4edda;
+      color: #155724;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .status-badge-rejected {
+      background: #f8d7da;
+      color: #721c24;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: #495057;
+    }
+
+    .profile-field {
+      padding: 10px 14px;
+      background: #fafbfe;
+      border: 1px solid rgba(102, 126, 234, 0.06);
+      border-radius: 10px;
+    }
+
+    .profile-field span.uppercase {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 700;
+      color: #8A9AAB;
+      margin-bottom: 2px;
+    }
+
+    /* ==================== STUDENT ATTENDANCE CALENDAR STYLES ==================== */
+    .day-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+      margin-top: 10px;
+    }
+
+    .day-btn {
+      padding: 10px 5px;
+      text-align: center;
+      border: 1px solid #EFEAE5;
+      border-radius: 6px;
+      cursor: pointer;
+      background: #FFFEF9;
+      transition: all 0.2s;
+      font-weight: 500;
+      color: #7A7A7A;
+      position: relative;
+    }
+
+    .day-btn:hover {
+      background: #F7F0F5;
+      border-color: var(--primary-color);
+      transform: scale(1.05);
+    }
+
+    .day-btn.active {
+      background: #E8C4D8;
+      color: #8B5A7A;
+      border-color: #E8C4D8;
+    }
+
+    .day-header {
+      font-weight: bold;
+      text-align: center;
+      padding: 8px;
+      background: #F5F3F0;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      color: #8A8A8A;
+    }
+
+    .day-btn.holiday {
+      background: #FDF5F5 !important;
+      border-color: #F5D6D6 !important;
+      color: #B08080;
+    }
+
+    /* Student Present - Green */
+    .day-btn.student-present {
+      background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%) !important;
+      border-color: #28a745 !important;
+      color: #155724 !important;
+      font-weight: 600;
+    }
+
+    .day-btn.student-present:hover {
+      background: linear-gradient(135deg, #c3e6cb 0%, #b1dfbb 100%) !important;
+      transform: scale(1.05);
+    }
+
+    /* Student Absent - Red */
+    .day-btn.student-absent {
+      background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%) !important;
+      border-color: #dc3545 !important;
+      color: #721c24 !important;
+      font-weight: 600;
+    }
+
+    .day-btn.student-absent:hover {
+      background: linear-gradient(135deg, #f5c6cb 0%, #f1b0b7 100%) !important;
+      transform: scale(1.05);
+    }
+
+    /* Student On Leave - Yellow/Amber */
+    .day-btn.student-leave {
+      background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%) !important;
+      border-color: #ffc107 !important;
+      color: #856404 !important;
+      font-weight: 600;
+    }
+
+    .day-btn.student-leave:hover {
+      background: linear-gradient(135deg, #ffeaa7 0%, #ffe082 100%) !important;
+      transform: scale(1.05);
+    }
+
+    /* Add indicators */
+    .day-btn.student-present::before {
+      content: '✓';
+      position: absolute;
+      top: 2px;
+      right: 3px;
+      font-size: 0.7rem;
+      opacity: 0.6;
+    }
+
+    .day-btn.student-absent::before {
+      content: '✗';
+      position: absolute;
+      top: 2px;
+      right: 3px;
+      font-size: 0.7rem;
+      opacity: 0.6;
+    }
+
+    .day-btn.student-leave::before {
+      content: '📝';
+      position: absolute;
+      top: 2px;
+      right: 3px;
+      font-size: 0.6rem;
+      opacity: 0.7;
+    }
+
+    /* Stats Cards Styles */
+    .stats-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+    }
+
+    .stats-card.success {
+      background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+      color: #155724;
+    }
+
+    .stats-card.danger {
+      background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+      color: #721c24;
+    }
+
+    .stats-card.warning {
+      background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+      color: #856404;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark navbar-custom shadow-sm mb-4">
+    <div class="container">
+      <span class="navbar-brand mb-0 h1">
+        <i class="bi bi-mortarboard-fill me-2"></i>Student Portal
+      </span>
+      <div class="d-flex align-items-center gap-2">
+        <span class="text-white-50 small me-2" id="studentWelcomeName">Loading...</span>
+        <button id="logoutBtn" class="btn btn-outline-light btn-sm">
+          <i class="bi bi-box-arrow-right me-1"></i>Sign Out
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <!-- Quick Actions Info -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="dashboard-card d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+          <div>
+            <h5 class="mb-1 text-primary">Need to mark attendance?</h5>
+            <p class="text-muted mb-0 small">Launch the camera session to scan your face against the classroom QR code.
+            </p>
+          </div>
+          <a href="face-recognition.html" class="btn btn-primary px-4 py-2 shadow-sm"
+            style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); border: none;">
+            <i class="bi bi-camera-fill me-2"></i>Open Face Scanner
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="row align-items-stretch">
+      <!-- Left Column: Profile Update -->
+      <div class="col-lg-5 mb-4 mb-lg-0">
+        <div class="dashboard-card h-100 mb-0">
+          <div id="profileErrorMessage" class="alert alert-danger" style="display: none;"></div>
+          <div id="profileSuccessMessage" class="alert alert-success" style="display: none;"></div>
+
+          <!-- View Mode: Shows static info -->
+          <div id="profileViewMode">
+            <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+              <h5 class="mb-0 text-dark"><i class="bi bi-person-circle me-2 text-primary"></i>Profile Details</h5>
+              <button id="editProfileBtn" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-pencil-square me-1"></i>Edit Profile
+              </button>
+            </div>
+
+            <div class="profile-field mb-3">
+              <span class="text-muted d-block small uppercase">Full Name</span>
+              <span id="viewName" class="fs-5 fw-semibold text-dark">—</span>
+            </div>
+
+            <div class="profile-field mb-3">
+              <span class="text-muted d-block small uppercase">Email Address</span>
+              <span id="viewEmail" class="text-dark">—</span>
+            </div>
+
+            <div class="profile-field mb-3">
+              <span class="text-muted d-block small uppercase">Department</span>
+              <span id="viewDepartment" class="text-dark fw-medium">—</span>
+            </div>
+
+            <div class="profile-field mb-3">
+              <span class="text-muted d-block small uppercase">Class Details (Year - Course - Div)</span>
+              <span id="viewClassDetails" class="text-dark fw-medium">—</span>
+            </div>
+
+            <div class="profile-field mb-3">
+              <span class="text-muted d-block small uppercase">Student ID / Roll No</span>
+              <span id="viewStudentId" class="fw-bold text-dark fs-6">—</span>
+            </div>
+          </div>
+
+          <!-- Edit Mode: Form inputs (hidden by default) -->
+          <div id="profileEditMode" style="display: none;">
+            <h5 class="mb-3 border-bottom pb-2 text-dark"><i class="bi bi-person-gear me-2 text-primary"></i>Edit
+              Profile</h5>
+
+            <form id="profileForm">
+              <div class="mb-3">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" id="email" class="form-control" disabled>
+              </div>
+
+              <div class="mb-3">
+                <label for="name" class="form-label">Full Name</label>
+                <input type="text" id="name" class="form-control" disabled>
+              </div>
+
+              <div class="mb-3">
+                <label for="studentId" class="form-label">Student ID / Roll Number</label>
+                <input type="text" id="studentId" class="form-control" required>
+                <small class="text-muted">Unique roll or ID number assigned by college</small>
+              </div>
+
+              <div class="mb-3">
+                <label for="department" class="form-label">Department</label>
+                <select id="department" class="form-select" required>
+                  <option value="">Loading departments...</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label for="course" class="form-label">Course</label>
+                <select id="course" class="form-select" required disabled>
+                  <option value="">Select department first</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label for="academicYear" class="form-label">Academic Year</label>
+                <select id="academicYear" class="form-select" required>
+                  <option value="">Select year</option>
+                  <option value="FY">First Year (FY)</option>
+                  <option value="SY">Second Year (SY)</option>
+                  <option value="TY">Third Year (TY)</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label for="division" class="form-label">Division</label>
+                <select id="division" class="form-select" required>
+                  <option value="">Select division</option>
+                  <option value="Division A">Division A</option>
+                  <option value="Division B">Division B</option>
+                  <option value="Division C">Division C</option>
+                </select>
+              </div>
+
+              <div class="row g-2">
+                <div class="col-6">
+                  <button type="submit" class="btn btn-primary w-100" id="updateProfileBtn">
+                    <i class="bi bi-check-circle me-2"></i>Save Details
+                  </button>
+                </div>
+                <div class="col-6">
+                  <button type="button" class="btn btn-outline-secondary w-100" id="cancelEditBtn">
+                    <i class="bi bi-x-circle me-2"></i>Cancel
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Attendance & Leaves (Tabbed Layout) -->
+      <div class="col-lg-7">
+        <div class="dashboard-card h-100 shadow-sm border p-4 bg-white rounded-4 mb-0">
+          <!-- Tab Navigation -->
+          <ul class="nav nav-pills mb-4 justify-content-center" id="studentTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="attendance-tab" data-bs-toggle="pill"
+                data-bs-target="#attendance-section" type="button" role="tab" aria-controls="attendance-section"
+                aria-selected="true">
+                <i class="bi bi-calendar-check me-2"></i>My Attendance
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="leaves-tab" data-bs-toggle="pill" data-bs-target="#leaves-section"
+                type="button" role="tab" aria-controls="leaves-section" aria-selected="false">
+                <i class="bi bi-calendar-plus me-2"></i>Leave Requests
+              </button>
+            </li>
+          </ul>
+
+          <div class="tab-content" id="studentTabContent">
+            <!-- Attendance Pane -->
+            <div class="tab-pane fade show active" id="attendance-section" role="tabpanel"
+              aria-labelledby="attendance-tab">
+              <h5 class="mb-3 border-bottom pb-2 text-dark"><i class="bi bi-calendar3 me-2 text-primary"></i>My
+                Attendance Tracker</h5>
+
+              <!-- Selection Controls -->
+              <div class="row g-2 mb-3 align-items-end">
+                <div class="col-md-5">
+                  <label for="attendanceSubjectSelect" class="form-label small fw-bold text-muted mb-1">Subject</label>
+                  <select id="attendanceSubjectSelect" class="form-select select-sm">
+                    <option value="">-- Choose Subject --</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label for="attendanceMonthSelect" class="form-label small fw-bold text-muted mb-1">Month</label>
+                  <select id="attendanceMonthSelect" class="form-select select-sm">
+                    <option value="0">Jan</option>
+                    <option value="1">Feb</option>
+                    <option value="2">Mar</option>
+                    <option value="3">Apr</option>
+                    <option value="4">May</option>
+                    <option value="5">Jun</option>
+                    <option value="6">Jul</option>
+                    <option value="7">Aug</option>
+                    <option value="8">Sep</option>
+                    <option value="9">Oct</option>
+                    <option value="10">Nov</option>
+                    <option value="11">Dec</option>
+                  </select>
+                </div>
+                <div class="col-md-2">
+                  <label for="attendanceYearSelect" class="form-label small fw-bold text-muted mb-1">Year</label>
+                  <select id="attendanceYearSelect" class="form-select select-sm"></select>
+                </div>
+                <div class="col-md-2">
+                  <button type="button" class="btn btn-success w-100" id="viewAttendanceBtn" style="height: 38px;">
+                    <i class="bi bi-search"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Selection Alert Info -->
+              <div id="attendanceSelectedDisplay" class="alert alert-info py-2 mb-3"
+                style="display: none; font-size: 0.9rem;">
+                <strong>Selected context:</strong> <span id="attendanceContextText">None</span>
+              </div>
+
+              <!-- Stats Section -->
+              <div class="row g-2 mb-4" id="attendanceStatsRow" style="display: none;">
+                <div class="col-3">
+                  <div class="stats-card success text-center py-2 px-1">
+                    <h6 class="text-uppercase small mb-1" style="font-size: 0.65rem; font-weight: 700;">Present</h6>
+                    <h4 id="studentStatsPresent" class="mb-0 fw-bold">0</h4>
+                  </div>
+                </div>
+                <div class="col-3">
+                  <div class="stats-card danger text-center py-2 px-1">
+                    <h6 class="text-uppercase small mb-1" style="font-size: 0.65rem; font-weight: 700;">Absent</h6>
+                    <h4 id="studentStatsAbsent" class="mb-0 fw-bold">0</h4>
+                  </div>
+                </div>
+                <div class="col-3">
+                  <div class="stats-card warning text-center py-2 px-1">
+                    <h6 class="text-uppercase small mb-1" style="font-size: 0.65rem; font-weight: 700;">Leaves</h6>
+                    <h4 id="studentStatsLeaves" class="mb-0 fw-bold">0</h4>
+                  </div>
+                </div>
+                <div class="col-3">
+                  <div class="stats-card text-center py-2 px-1"
+                    style="background: linear-gradient(135deg, #E8C4D8 0%, #DDB8CC 100%); color: #6A4A5A;">
+                    <h6 class="text-uppercase small mb-1" style="font-size: 0.65rem; font-weight: 700;">Ratio</h6>
+                    <h4 id="studentStatsRatio" class="mb-0 fw-bold">0%</h4>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Calendar Grid -->
+              <div id="studentCalendarContainer"
+                style="display: none; background: #fafafa; padding: 15px; border-radius: 10px;">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h6 class="mb-0 fw-bold text-secondary"><i class="bi bi-calendar-week me-2"></i>Monthly Days</h6>
+                  <span class="badge bg-light text-secondary border" id="studentCurrentMonthYearText">None</span>
+                </div>
+
+                <div class="day-grid mb-2">
+                  <div class="day-header">Sun</div>
+                  <div class="day-header">Mon</div>
+                  <div class="day-header">Tue</div>
+                  <div class="day-header">Wed</div>
+                  <div class="day-header">Thu</div>
+                  <div class="day-header">Fri</div>
+                  <div class="day-header">Sat</div>
+                </div>
+                <div id="studentDayGrid" class="day-grid"></div>
+
+                <!-- Legend & Holiday Lists -->
+                <div class="row mt-3 g-2">
+                  <div class="col-md-6">
+                    <div class="alert alert-warning mb-0 py-2" style="font-size: 0.82rem;">
+                      <strong><i class="bi bi-sun me-1"></i>Holidays:</strong>
+                      <span id="studentHolidayList">None</span>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="alert alert-light border mb-0 py-2" style="font-size: 0.82rem;">
+                      <div class="d-flex flex-wrap gap-2 justify-content-center mt-1">
+                        <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>P</span>
+                        <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>A</span>
+                        <span class="badge bg-warning text-dark"><i class="bi bi-file-earmark-medical me-1"></i>L</span>
+                        <span class="badge bg-light text-dark border"><i class="bi bi-sun me-1"></i>H</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Leave Requests Pane -->
+            <div class="tab-pane fade" id="leaves-section" role="tabpanel" aria-labelledby="leaves-tab">
+              <!-- Leave Submission Form -->
+              <div class="mb-4">
+                <h5 class="mb-3 border-bottom pb-2 text-dark"><i
+                    class="bi bi-calendar-plus me-2 text-primary"></i>Request Leave</h5>
+
+                <div id="leaveValidationAlert" class="alert alert-warning" style="display: none;"></div>
+
+                <form id="leaveForm">
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label for="leaveFromDate" class="form-label">From Date</label>
+                      <input type="date" id="leaveFromDate" class="form-control" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label for="leaveToDate" class="form-label">To Date</label>
+                      <input type="date" id="leaveToDate" class="form-control" required>
+                    </div>
+                  </div>
+
+                  <!-- Day Count Alert -->
+                  <div class="alert alert-info py-2 mb-3" id="leaveDayCountAlert"
+                    style="display: none; font-size: 0.9rem;">
+                    <strong>Total Leave Days:</strong> <span id="totalLeaveDays">0</span> day(s)
+                    <div id="leaveDaysList" class="small mt-1 text-muted"></div>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="leaveReason" class="form-label">Reason for Leave</label>
+                    <textarea id="leaveReason" class="form-control" rows="3"
+                      placeholder="e.g. Sick - High Fever, Family function" required></textarea>
+                  </div>
+
+                  <button type="button" id="submitLeaveBtn" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-send-fill me-2"></i>Submit Leave Request
+                  </button>
+                </form>
+              </div>
+
+              <!-- Leave History Table -->
+              <div>
+                <h5 class="mb-3 border-bottom pb-2 text-dark"><i class="bi bi-clock-history me-2 text-primary"></i>Leave
+                  History</h5>
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle" style="font-size: 0.9rem;">
+                    <thead class="table-light">
+                      <tr>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Days</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody id="leaveHistoryTableBody">
+                      <tr>
+                        <td colspan="5" class="text-center py-4 text-muted">No leave applications found.</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    let studentCurrentUser = null;
+    let studentAttrs = {};
+    let firebaseDB = null;
+
+    function showProfileError(msg) {
+      const el = document.getElementById('profileErrorMessage');
+      el.textContent = msg;
+      el.style.display = 'block';
+      document.getElementById('profileSuccessMessage').style.display = 'none';
+    }
+
+    function showProfileSuccess(msg) {
+      const el = document.getElementById('profileSuccessMessage');
+      el.textContent = msg;
+      el.style.display = 'block';
+      document.getElementById('profileErrorMessage').style.display = 'none';
+    }
+
+    // Helper: Days between dates
+    function getDaysBetweenDates(from, to) {
+      const days = [];
+      const start = new Date(from);
+      const end = new Date(to);
+      if (start > end) return [];
+      const current = new Date(start);
+      while (current <= end) {
+        days.push(current.getDate());
+        current.setDate(current.getDate() + 1);
+      }
+      return days;
+    }
+
+    function updateLeaveDayCount() {
+      const from = document.getElementById('leaveFromDate').value;
+      const to = document.getElementById('leaveToDate').value;
+      const alertDiv = document.getElementById('leaveDayCountAlert');
+      const spanCount = document.getElementById('totalLeaveDays');
+      const listDiv = document.getElementById('leaveDaysList');
+
+      if (!from || !to) {
+        alertDiv.style.display = 'none';
+        return;
+      }
+
+      const days = getDaysBetweenDates(from, to);
+      if (days.length === 0) {
+        alertDiv.style.display = 'none';
+        return;
+      }
+
+      spanCount.textContent = days.length;
+      listDiv.textContent = `Days: ${days.join(', ')}`;
+      alertDiv.style.display = 'block';
+    }
+
+    // Load leave history
+    async function loadLeaveHistory() {
+      const tbody = document.getElementById('leaveHistoryTableBody');
+      const year = new Date().getFullYear();
+      const dept = studentAttrs['custom:department'];
+      const course = studentAttrs['custom:course'];
+      const academicYear = studentAttrs['custom:academicYear'];
+      const division = studentAttrs['custom:division'];
+      const studentId = studentAttrs['custom:studentId'];
+
+      if (!dept || !course || !academicYear || !division || !studentId) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-3 text-muted">Complete your profile to load leave history.</td></tr>`;
+        return;
+      }
+
+      const path = `mainSystem/attendanceData/${year}/${dept}/${course}/${academicYear}/${division}/leaveApplications`;
+
+      try {
+        const snapshot = await firebaseDB.ref(path).once('value');
+        const leavesData = snapshot.val() || {};
+
+        // Filter applications belonging to this student
+        const studentLeaves = Object.keys(leavesData)
+          .map(key => ({ id: key, ...leavesData[key] }))
+          .filter(leave => leave.studentId === studentId)
+          .sort((a, b) => b.submittedAt - a.submittedAt);
+
+        if (studentLeaves.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted">No leaves requested yet.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = studentLeaves.map(leave => {
+          const fromDate = new Date(leave.fromDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+          const toDate = new Date(leave.toDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+          let statusBadge = '';
+          if (leave.status === 'pending') statusBadge = `<span class="status-badge-pending">Pending</span>`;
+          else if (leave.status === 'approved') statusBadge = `<span class="status-badge-approved">Approved</span>`;
+          else if (leave.status === 'rejected') statusBadge = `<span class="status-badge-rejected">Rejected</span>`;
+
+          return `
+            <tr>
+              <td>${fromDate}</td>
+              <td>${toDate}</td>
+              <td><span class="badge bg-secondary">${leave.days.length}</span></td>
+              <td>${leave.reason}</td>
+              <td>${statusBadge}</td>
+            </tr>
+          `;
+        }).join('');
+
+      } catch (error) {
+        console.error('Error loading leaves:', error);
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-3 text-danger">Failed to load leave history.</td></tr>`;
+      }
+    }
+
+    // Submit Leave
+    async function submitLeave() {
+      const fromDate = document.getElementById('leaveFromDate').value;
+      const toDate = document.getElementById('leaveToDate').value;
+      const reason = document.getElementById('leaveReason').value.trim();
+      const validationAlert = document.getElementById('leaveValidationAlert');
+
+      validationAlert.style.display = 'none';
+
+      const studentId = studentAttrs['custom:studentId'];
+      const studentName = studentAttrs.name;
+
+      if (!studentId || !studentName) {
+        validationAlert.textContent = '⚠️ Please complete your profile details first.';
+        validationAlert.style.display = 'block';
+        return;
+      }
+
+      if (!fromDate || !toDate || !reason) {
+        validationAlert.textContent = '⚠️ All leave fields are required.';
+        validationAlert.style.display = 'block';
+        return;
+      }
+
+      if (new Date(fromDate) > new Date(toDate)) {
+        validationAlert.textContent = '⚠️ From date cannot be after To date.';
+        validationAlert.style.display = 'block';
+        return;
+      }
+
+      const days = getDaysBetweenDates(fromDate, toDate);
+
+      try {
+        const userPool = new AmazonCognitoIdentity.CognitoUserPool({
+          UserPoolId: window.COGNITO_CONFIG.userPoolId,
+          ClientId: window.COGNITO_CONFIG.clientId
+        });
+        const cognitoUser = userPool.getCurrentUser();
+
+        cognitoUser.getSession(async (err, session) => {
+          if (err) {
+            alert('Session expired. Please log in again.');
+            window.location.href = 'index.html';
+            return;
+          }
+          const cognitoToken = session.getIdToken().getJwtToken();
+
+          const response = await fetch('https://attendance-backend-p7uk.onrender.com/api/leave/submit', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${cognitoToken}`
+            },
+            body: JSON.stringify({
+              studentId,
+              studentName,
+              fromDate,
+              toDate,
+              days,
+              reason,
+              month: new Date(fromDate).getMonth(),
+              year: new Date(fromDate).getFullYear()
+            })
+          });
+
+          const result = await response.json();
+
+          if (!response.ok) {
+            alert(result.error || 'Failed to submit leave');
+            return;
+          }
+
+          alert(`✓ Leave application submitted successfully for ${days.length} days.`);
+          document.getElementById('leaveForm').reset();
+          document.getElementById('leaveDayCountAlert').style.display = 'none';
+          await loadLeaveHistory();
+        });
+
+      } catch (error) {
+        console.error('Error submitting leave:', error);
+        alert('Failed to submit leave. Please try again.');
+      }
+    }
+
+    // Helper to encode Firebase path keys containing slashes
+    function encodeFirebaseKey(key) {
+      if (!key) return '';
+      return key.replace(/\//g, '__');
+    }
+
+    // Load dynamic subjects for the student based on department and course
+    async function loadStudentSubjects(dept, course) {
+      if (!dept || !course) return;
+      const encodedDept = encodeFirebaseKey(dept);
+      const encodedCourse = encodeFirebaseKey(course);
+      const subjectSelect = document.getElementById('attendanceSubjectSelect');
+      subjectSelect.innerHTML = '<option value="">-- Choose Subject --</option>';
+
+      try {
+        const snapshot = await firebaseDB.ref(`mainSystem/subjects/${encodedDept}/${encodedCourse}`).once('value');
+        const subjects = snapshot.val() || {};
+        const subjectArray = Array.isArray(subjects) ? subjects : Object.values(subjects);
+
+        subjectArray.forEach(subject => {
+          const option = document.createElement('option');
+          option.value = subject;
+          option.textContent = subject;
+          subjectSelect.appendChild(option);
+        });
+        console.log(`Loaded ${subjectArray.length} subjects for student.`);
+      } catch (error) {
+        console.error('Error loading subjects for student:', error);
+      }
+    }
+
+    // Populate Year selection for student attendance
+    function populateYearSelect() {
+      const yearSelect = document.getElementById('attendanceYearSelect');
+      if (!yearSelect) return;
+      yearSelect.innerHTML = '';
+      const currentYear = new Date().getFullYear();
+      for (let y = currentYear - 1; y <= currentYear + 1; y++) {
+        const option = document.createElement('option');
+        option.value = y;
+        option.textContent = y;
+        if (y === currentYear) {
+          option.selected = true;
+        }
+        yearSelect.appendChild(option);
+      }
+    }
+
+    // Query and view student attendance logs
+    async function viewStudentAttendance() {
+      const subject = document.getElementById('attendanceSubjectSelect').value;
+      const month = document.getElementById('attendanceMonthSelect').value;
+      const year = document.getElementById('attendanceYearSelect').value;
+
+      if (!subject) {
+        // Hide elements silently if no subject is selected
+        const statsRow = document.getElementById('attendanceStatsRow');
+        const calContainer = document.getElementById('studentCalendarContainer');
+        const selDisplay = document.getElementById('attendanceSelectedDisplay');
+        if (statsRow) statsRow.style.display = 'none';
+        if (calContainer) calContainer.style.display = 'none';
+        if (selDisplay) selDisplay.style.display = 'none';
+        return;
+      }
+
+      const dept = studentAttrs['custom:department'];
+      const course = studentAttrs['custom:course'];
+      const academicYear = studentAttrs['custom:academicYear'];
+      const division = studentAttrs['custom:division'];
+      const studentId = studentAttrs['custom:studentId'];
+
+      if (!dept || !course || !academicYear || !division || !studentId) {
+        alert('Please complete your profile details first.');
+        return;
+      }
+
+      const encodedDept = encodeFirebaseKey(dept);
+      const encodedCourse = encodeFirebaseKey(course);
+
+      // Construct Firebase paths
+      const monthKey = `${year}-${String(parseInt(month) + 1).padStart(2, '0')}`;
+      const basePath = `mainSystem/attendanceData/${year}/${encodedDept}/${encodedCourse}/${academicYear}/${division}`;
+      const attendancePath = `${basePath}/months/${monthKey}/subjects/${subject}/attendance`;
+      const holidaysPath = `${basePath}/months/${monthKey}/holidays`;
+      const leavesPath = `${basePath}/leaveApplications`;
+
+      // Update selection banner text
+      const displayDiv = document.getElementById('attendanceSelectedDisplay');
+      const textSpan = document.getElementById('attendanceContextText');
+      textSpan.textContent = `Subject: ${subject} | Month: ${document.getElementById('attendanceMonthSelect').options[month].text} ${year} | Class: ${academicYear} - ${division}`;
+      displayDiv.style.display = 'block';
+
+      try {
+        // Fetch data
+        const [attendanceSnap, holidaysSnap, leavesSnap] = await Promise.all([
+          firebaseDB.ref(attendancePath).once('value'),
+          firebaseDB.ref(holidaysPath).once('value'),
+          firebaseDB.ref(leavesPath).once('value')
+        ]);
+
+        const attendanceData = attendanceSnap.val() || {};
+        const holidays = holidaysSnap.val() || [];
+        const leavesData = leavesSnap.val() || {};
+
+        // Parse student's approved leave days for this month
+        const approvedLeaveDays = new Set();
+        Object.values(leavesData).forEach(leave => {
+          if (leave.studentId === studentId && leave.status === 'approved') {
+            const start = new Date(leave.fromDate);
+            const end = new Date(leave.toDate);
+
+            const current = new Date(start);
+            while (current <= end) {
+              if (current.getMonth() == parseInt(month) && current.getFullYear() == parseInt(year)) {
+                approvedLeaveDays.add(current.getDate());
+              }
+              current.setDate(current.getDate() + 1);
+            }
+          }
+        });
+
+        renderStudentCalendar(parseInt(month), parseInt(year), attendanceData, holidays, approvedLeaveDays, studentId);
+
+      } catch (error) {
+        console.error('Error fetching attendance data:', error);
+        alert('Failed to fetch attendance records. Please try again.');
+      }
+    }
+
+    // Render monthly calendar grid and statistics cards
+    function renderStudentCalendar(month, year, attendanceData, holidays, approvedLeaveDays, studentId) {
+      const grid = document.getElementById('studentDayGrid');
+      grid.innerHTML = '';
+
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      // Empty cells before start of month
+      for (let i = 0; i < firstDay; i++) {
+        const empty = document.createElement('div');
+        empty.style.visibility = 'hidden';
+        grid.appendChild(empty);
+      }
+
+      const studentData = attendanceData[studentId] || {};
+      let presentCount = 0;
+      let absentCount = 0;
+      let leaveCount = 0;
+
+      // Populate holiday list displays
+      const holidaySpan = document.getElementById('studentHolidayList');
+      if (Array.isArray(holidays) && holidays.length > 0) {
+        holidaySpan.textContent = holidays.join(', ');
+      } else {
+        holidaySpan.textContent = 'None';
+      }
+
+      // Populate calendar day cells
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dayBtn = document.createElement('div');
+        dayBtn.className = 'day-btn';
+        dayBtn.textContent = day;
+        dayBtn.setAttribute('data-day', day);
+
+        const status = studentData[day];
+        const isDayHoliday = Array.isArray(holidays) && holidays.includes(day);
+
+        if (isDayHoliday) {
+          dayBtn.classList.add('holiday');
+          dayBtn.title = `Day ${day}: Holiday`;
+        } else if (status === 'Present') {
+          dayBtn.classList.add('student-present');
+          dayBtn.title = `Day ${day}: Present`;
+          presentCount++;
+        } else if (status === 'On Leave' || approvedLeaveDays.has(day)) {
+          dayBtn.classList.add('student-leave');
+          dayBtn.title = `Day ${day}: Approved Leave`;
+          leaveCount++;
+        } else if (status === 'Absent') {
+          dayBtn.classList.add('student-absent');
+          dayBtn.title = `Day ${day}: Absent`;
+          absentCount++;
+        } else if (status) {
+          dayBtn.title = `Day ${day}: ${status}`;
+        }
+
+        grid.appendChild(dayBtn);
+      }
+
+      // Calculate total ratio (Present / (Present + Absent))
+      const totalLectures = presentCount + absentCount;
+      const ratio = totalLectures > 0 ? Math.round((presentCount / totalLectures) * 100) : 0;
+
+      document.getElementById('studentStatsPresent').textContent = presentCount;
+      document.getElementById('studentStatsAbsent').textContent = absentCount;
+      document.getElementById('studentStatsLeaves').textContent = leaveCount;
+      document.getElementById('studentStatsRatio').textContent = `${ratio}%`;
+
+      document.getElementById('studentCurrentMonthYearText').textContent = `${new Date(year, month).toLocaleString('default', { month: 'long' })} ${year}`;
+      document.getElementById('attendanceStatsRow').style.display = 'flex';
+      document.getElementById('studentCalendarContainer').style.display = 'block';
+    }
+
+    // Load departments
+    async function loadDepartments() {
+      try {
+        const db = firebase.database();
+        const snapshot = await db.ref('mainSystem/departments').once('value');
+        const departments = snapshot.val() || {};
+        const departmentSelect = document.getElementById('department');
+        departmentSelect.innerHTML = '<option value="">Select department</option>';
+
+        const deptArray = Array.isArray(departments) ? departments : Object.values(departments);
+        deptArray.forEach(dept => {
+          const option = document.createElement('option');
+          option.value = dept;
+          option.textContent = dept;
+          departmentSelect.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Error loading departments:', error);
+      }
+    }
+
+    // Load courses
+    async function loadCourses(department) {
+      const courseSelect = document.getElementById('course');
+      if (!department) {
+        courseSelect.disabled = true;
+        courseSelect.innerHTML = '<option value="">Select department first</option>';
+        return;
+      }
+
+      try {
+        const db = firebase.database();
+        const snapshot = await db.ref(`mainSystem/courses/${department}`).once('value');
+        const courses = snapshot.val() || {};
+        courseSelect.innerHTML = '<option value="">Select course</option>';
+
+        const courseArray = Array.isArray(courses) ? courses : Object.values(courses);
+        courseArray.forEach(course => {
+          const option = document.createElement('option');
+          option.value = course;
+          option.textContent = course;
+          courseSelect.appendChild(option);
+        });
+        courseSelect.disabled = false;
+      } catch (error) {
+        console.error('Error loading courses:', error);
+      }
+    }
+
+    // Load User Settings
+    async function loadUserData() {
+      try {
+        const poolData = {
+          UserPoolId: window.COGNITO_CONFIG.userPoolId,
+          ClientId: window.COGNITO_CONFIG.clientId
+        };
+        const userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+        studentCurrentUser = userPool.getCurrentUser();
+
+        if (!studentCurrentUser) {
+          window.location.href = 'index.html';
+          return;
+        }
+
+        studentCurrentUser.getSession((err, session) => {
+          if (err) {
+            window.location.href = 'index.html';
+            return;
+          }
+
+          studentCurrentUser.getUserAttributes((err, attributes) => {
+            if (err) {
+              showProfileError('Failed to load user credentials.');
+              return;
+            }
+
+            studentAttrs = {};
+            attributes.forEach(attr => {
+              studentAttrs[attr.Name] = attr.Value;
+            });
+
+            document.getElementById('studentWelcomeName').textContent = studentAttrs.name || studentAttrs.email;
+            document.getElementById('email').value = studentAttrs.email || '';
+            document.getElementById('name').value = studentAttrs.name || '';
+            document.getElementById('studentId').value = studentAttrs['custom:studentId'] || '';
+
+            // Populate static view elements
+            document.getElementById('viewName').textContent = studentAttrs.name || '—';
+            document.getElementById('viewEmail').textContent = studentAttrs.email || '—';
+            document.getElementById('viewStudentId').textContent = studentAttrs['custom:studentId'] || '—';
+
+            // Helper to dynamically render Year - Course - Division details
+            function updateClassDetailsView() {
+              const yearMap = {
+                'FY': 'First Year (FY)',
+                'SY': 'Second Year (SY)',
+                'TY': 'Third Year (TY)'
+              };
+              const rawYear = studentAttrs['custom:academicYear'];
+              const yearText = yearMap[rawYear] || rawYear || '';
+              const courseText = studentAttrs['custom:course'] || '';
+              const divisionText = studentAttrs['custom:division'] || '';
+
+              const parts = [];
+              if (yearText) parts.push(yearText);
+              if (courseText) parts.push(courseText);
+              if (divisionText) parts.push(divisionText);
+
+              document.getElementById('viewClassDetails').textContent = parts.length > 0 ? parts.join(' - ') : '—';
+            }
+
+            if (studentAttrs['custom:department']) {
+              document.getElementById('department').value = studentAttrs['custom:department'];
+              document.getElementById('viewDepartment').textContent = studentAttrs['custom:department'];
+              loadCourses(studentAttrs['custom:department']).then(() => {
+                if (studentAttrs['custom:course']) {
+                  document.getElementById('course').value = studentAttrs['custom:course'];
+                  updateClassDetailsView();
+                }
+              });
+            } else {
+              document.getElementById('viewDepartment').textContent = '—';
+            }
+
+            if (studentAttrs['custom:academicYear']) {
+              document.getElementById('academicYear').value = studentAttrs['custom:academicYear'];
+            }
+
+            if (studentAttrs['custom:division']) {
+              document.getElementById('division').value = studentAttrs['custom:division'];
+            }
+
+            updateClassDetailsView();
+
+            // Load leave applications list
+            loadLeaveHistory();
+
+            // Load subject selections and year select for attendance tracking
+            if (studentAttrs['custom:department'] && studentAttrs['custom:course']) {
+              loadStudentSubjects(studentAttrs['custom:department'], studentAttrs['custom:course']);
+            }
+            populateYearSelect();
+          });
+        });
+
+      } catch (error) {
+        console.error('Error loading user attributes:', error);
+      }
+    }
+
+    // Update Attributes
+    async function updateAttributes(attrsArray) {
+      return new Promise((resolve, reject) => {
+        studentCurrentUser.getSession((err, session) => {
+          if (err) return reject(err);
+          const cogAttrs = attrsArray.map(attr => new AmazonCognitoIdentity.CognitoUserAttribute(attr));
+          studentCurrentUser.updateAttributes(cogAttrs, (err, result) => {
+            if (err) reject(err);
+            else resolve(result);
+          });
+        });
+      });
+    }
+
+    // Event listeners
+    document.getElementById('profileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const dept = document.getElementById('department').value;
+      const course = document.getElementById('course').value;
+      const year = document.getElementById('academicYear').value;
+      const div = document.getElementById('division').value;
+      const sId = document.getElementById('studentId').value.trim();
+
+      document.getElementById('updateProfileBtn').disabled = true;
+
+      try {
+        await updateAttributes([
+          { Name: 'custom:studentId', Value: sId },
+          { Name: 'custom:department', Value: dept },
+          { Name: 'custom:course', Value: course },
+          { Name: 'custom:academicYear', Value: year },
+          { Name: 'custom:division', Value: div }
+        ]);
+
+        showProfileSuccess('✓ Profile updated successfully.');
+        await loadUserData();
+        setTimeout(() => toggleMode(false), 800);
+      } catch (error) {
+        showProfileError(error.message || 'Failed to update profile attributes.');
+      } finally {
+        document.getElementById('updateProfileBtn').disabled = false;
+      }
+    });
+
+    // Toggle View/Edit Mode
+    function toggleMode(edit) {
+      if (edit) {
+        document.getElementById('profileViewMode').style.display = 'none';
+        document.getElementById('profileEditMode').style.display = 'block';
+      } else {
+        document.getElementById('profileViewMode').style.display = 'block';
+        document.getElementById('profileEditMode').style.display = 'none';
+        document.getElementById('profileErrorMessage').style.display = 'none';
+        document.getElementById('profileSuccessMessage').style.display = 'none';
+      }
+    }
+
+    document.getElementById('editProfileBtn').addEventListener('click', () => toggleMode(true));
+    document.getElementById('cancelEditBtn').addEventListener('click', () => toggleMode(false));
+
+    document.getElementById('department').addEventListener('change', (e) => {
+      loadCourses(e.target.value);
+    });
+
+    document.getElementById('leaveFromDate').addEventListener('change', updateLeaveDayCount);
+    document.getElementById('leaveToDate').addEventListener('change', updateLeaveDayCount);
+    document.getElementById('submitLeaveBtn').addEventListener('click', submitLeave);
+    document.getElementById('viewAttendanceBtn').addEventListener('click', viewStudentAttendance);
+    document.getElementById('attendanceSubjectSelect').addEventListener('change', viewStudentAttendance);
+    document.getElementById('attendanceMonthSelect').addEventListener('change', viewStudentAttendance);
+    document.getElementById('attendanceYearSelect').addEventListener('change', viewStudentAttendance);
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      if (studentCurrentUser) {
+        studentCurrentUser.signOut();
+      }
+      window.location.href = 'index.html';
+    });
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      try {
+        // Auth role check guard
+        const role = await getUserRole();
+        if (role !== 'student') {
+          console.warn(`Unauthorized role: ${role}. Redirecting...`);
+          if (role === 'admin') {
+            window.location.href = 'admin.html';
+          } else if (role === 'teacher') {
+            window.location.href = 'teacher.html';
+          } else {
+            window.location.href = 'index.html';
+          }
+          return;
+        }
+
+        await signIntoFirebase();
+        firebaseDB = firebase.database();
+        await loadDepartments();
+        await loadUserData();
+      } catch (error) {
+        console.error('Initialization error:', error);
+      }
+    });
+  </script>
+</body>
+
+</html>
