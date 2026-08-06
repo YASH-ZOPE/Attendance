@@ -505,6 +505,7 @@ class FaceRecognitionSystem {
         if (successIcon) successIcon.style.display = 'none';
         if (loadingSpinner) loadingSpinner.style.display = 'none';
         if (validationMsg) validationMsg.style.display = 'none';
+        this.isVerifyingCode = false;
 
         // ✅ SHOW security code input section
         const codeSection = document.getElementById('securityCodeSection');
@@ -3042,16 +3043,18 @@ class FaceRecognitionSystem {
 
       // ✅ AUTO-VERIFY on input (when 4 digits entered)
       codeInput.addEventListener('input', async (e) => {
-        const enteredCode = e.target.value.trim();
+        const cleanVal = codeInput.value.replace(/[^0-9]/g, '');
 
-        // Only allow numbers
-        e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        if (codeInput.value !== cleanVal) {
+          codeInput.value = cleanVal;
+        }
 
         // Hide success icon when typing
         if (successIcon) successIcon.style.display = 'none';
 
         // Auto-verify when 4 digits entered
-        if (e.target.value.length === 4) {
+        if (cleanVal.length === 4 && !this.isVerifyingCode) {
+          this.isVerifyingCode = true;
           console.log('✅ 4 digits entered - auto-verifying...');
 
           // Show loading spinner
@@ -3064,7 +3067,7 @@ class FaceRecognitionSystem {
           await new Promise(resolve => setTimeout(resolve, 300));
 
           // Verify code from Firebase
-          const verification = await this.verifyDynamicCode(e.target.value);
+          const verification = await this.verifyDynamicCode(cleanVal);
 
           // Hide loading spinner
           if (loadingSpinner) loadingSpinner.style.display = 'none';
@@ -3093,6 +3096,7 @@ class FaceRecognitionSystem {
               codeInput.value = '';
               codeInput.disabled = false;
               if (successIcon) successIcon.style.display = 'none';
+              this.isVerifyingCode = false;
               codeInput.focus();
               return;
             }
@@ -3101,6 +3105,7 @@ class FaceRecognitionSystem {
             setTimeout(() => {
               codeInput.value = '';
               codeInput.disabled = false;
+              this.isVerifyingCode = false;
             }, 1000);
           } else {
             // ❌ Code is invalid - allow retry
@@ -3109,6 +3114,7 @@ class FaceRecognitionSystem {
             // Clear input and re-enable for retry
             codeInput.value = '';
             codeInput.disabled = false;
+            this.isVerifyingCode = false;
 
             // Focus back on input
             codeInput.focus();
