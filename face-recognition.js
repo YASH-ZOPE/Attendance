@@ -211,7 +211,23 @@ class FaceRecognitionSystem {
               this.mainSystemConfig.selectedMonth = config.month;
               this.mainSystemConfig.selectedYear = config.year;
               this.mainSystemConfig.currentDay = config.day;
-              console.log('✅ Loaded subject/date from saved config');
+              
+              // Restore QR ID and start watching it
+              if (config.qrId) {
+                this.currentQRId = config.qrId;
+                this.watchQRExpiration(config.qrId);
+
+                // Show security code entry screen on reload if QR is active
+                const codeSection = document.getElementById('securityCodeSection');
+                if (codeSection) {
+                  codeSection.style.display = 'block';
+                  const codeInput = document.getElementById('securityCodeInput');
+                  if (codeInput) {
+                    codeInput.focus();
+                  }
+                }
+              }
+              console.log('✅ Loaded subject/date and QR ID from saved config');
             } else {
               console.log('⚠️ Saved config expired - cleared');
               localStorage.removeItem('faceRecDivisionConfig');
@@ -245,6 +261,11 @@ class FaceRecognitionSystem {
             this.mainSystemConfig.selectedMonth = config.month;
             this.mainSystemConfig.selectedYear = config.year;
             this.mainSystemConfig.currentDay = config.day;
+
+            if (config.qrId) {
+              this.currentQRId = config.qrId;
+              this.watchQRExpiration(config.qrId);
+            }
 
             console.log('✅ Loaded saved QR config for admin/teacher:', config);
 
@@ -1289,6 +1310,11 @@ class FaceRecognitionSystem {
       return;
     }
 
+    const backendSuccess = await this.saveAttendanceToFirebase(studentId, studentName, dateValidation);
+    if (!backendSuccess) {
+      return;
+    }
+
     const success = await this.storage.markAttendance(studentId);
 
     if (success) {
@@ -1303,7 +1329,6 @@ class FaceRecognitionSystem {
 
         await this.updateStudentList();
       }
-      await this.saveAttendanceToFirebase(studentId, studentName, dateValidation);
     }
   }
 
@@ -1315,7 +1340,7 @@ class FaceRecognitionSystem {
 
     if (!subject || month === null || year === null) {
       console.warn('⚠️ Cannot sync - incomplete config');
-      return;
+      return false;
     }
 
     const dept = this.mainSystemConfig.selectedDepartment;
@@ -1325,7 +1350,7 @@ class FaceRecognitionSystem {
 
     if (!dept || !course || !academicYear || !division) {
       console.warn('⚠️ Cannot sync - missing division info');
-      return;
+      return false;
     }
 
     try {
@@ -1333,38 +1358,67 @@ class FaceRecognitionSystem {
       const session = await getSession();
       const cognitoToken = session.getIdToken().getJwtToken();
 
-      const response = await fetch('https://attendance-backend-p7uk.onrender.com/api/mark-attendance', {
+      // Check if we need to call manual mark endpoint (Teacher/Admin fallback when no active QR exists)
+      const isManual = this.userRole !== 'student' && !this.currentQRId;
+      const endpoint = isManual 
+        ? 'https://attendance-backend-p7uk.onrender.com/api/mark-attendance-manual'
+        : 'https://attendance-backend-p7uk.onrender.com/api/mark-attendance';
+
+      const requestBody = isManual 
+        ? {
+            studentId,
+            status: 'Present',
+            day,
+            month,
+            year,
+            subject,
+            department: dept,
+            course,
+            academicYear,
+            division
+          }
+        : {
+            studentId,
+            studentName,
+            day,
+            month,
+            year,
+            subject,
+            department: dept,
+            course,
+            academicYear,
+            division,
+            qrId: this.currentQRId
+          };
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${cognitoToken}`
         },
-        body: JSON.stringify({
-          studentId,
-          studentName,
-          day,
-          month,
-          year,
-          subject,
-          department: dept,
-          course,
-          academicYear,
-          division,
-          qrId: this.currentQRId
-        })
+        body: JSON.stringify(requestBody)
       });
 
       const result = await response.json();
 
       if (!response.ok) {
         console.error('⚠️ Backend attendance failed:', result.error);
-        return;
+        this.showToast(`❌ Attendance Failed: ${result.error || 'Unknown error'}`, 'danger');
+        return false;
       }
 
       console.log(`✅ Attendance marked via backend: ${studentName}`);
+      return true;
 
     } catch (error) {
       console.error('⚠️ Backend sync failed:', error.message);
+      if (!navigator.onLine || !this.firebaseSync || !this.firebaseSync.isConnected) {
+        console.warn('⚠️ Offline - marking locally as fallback');
+        return true;
+      }
+      this.showToast(`❌ Network Error: Failed to connect to server`, 'danger');
+      return false;
     }
   }
   /**
@@ -2869,6 +2923,16 @@ class FaceRecognitionSystem {
     );
 
     this.currentQRId = null;
+    localStorage.removeItem('faceRecDivisionConfig');
+
+    // Hide security code input section on expiration
+    const codeSection = document.getElementById('securityCodeSection');
+    if (codeSection) {
+      codeSection.style.display = 'none';
+    }
+    
+    // Disable camera button as QR is no longer valid
+    this.disableCameraButton();
   }
   /**
    * Show detailed sync help

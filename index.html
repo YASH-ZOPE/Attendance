@@ -886,7 +886,7 @@
 
       try {
         // Call signup with all parameters
-        const result = await signup(email, name, password, department, course, academicYear, division, studentId);
+        const result = await signup(email, name, password, studentId, department, course, academicYear, division);
         
         setButtonLoading(submitBtn, false);
         
