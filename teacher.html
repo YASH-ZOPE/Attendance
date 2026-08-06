@@ -5636,7 +5636,13 @@
           // ✅ STEP 4: SAVE TO FIREBASE (new QR)
           if (useCloud && firebaseDB) {
             try {
-              await firebaseDB.ref(`mainSystem/activeQRs/${qrId}`).set({
+              // Cancel any previous onDisconnect listener to be clean
+              if (currentActiveQRId) {
+                firebaseDB.ref(`mainSystem/activeQRs/${currentActiveQRId}`).onDisconnect().cancel();
+              }
+
+              const qrRef = firebaseDB.ref(`mainSystem/activeQRs/${qrId}`);
+              await qrRef.set({
                 createdAt: Date.now(),
                 expiresAt: Date.now() + 600000,
                 division: appState.selectedDivision,        // ← "Division A" (sirf division)
@@ -5644,6 +5650,11 @@
                 divisionKey: divisionKey,                   // ← pura key (purane logic ke liye)
                 data: JSON.parse(payload)
               });
+
+              // Register onDisconnect to remove QR code if teacher's page/connection is closed
+              await qrRef.onDisconnect().remove();
+
+              currentActiveQRId = qrId;
               console.log(`✅ Saved NEW QR to Firebase: ${qrId}`);
             } catch (error) {
               console.error('Error saving QR to Firebase:', error);
@@ -5767,10 +5778,24 @@
       const qrModal = document.getElementById('qrModal');
 
       qrModal.addEventListener('hidden.bs.modal', () => {
-        console.log('🔒 QR Modal closed - stopping code rotation');
+        console.log('🔒 QR Modal closed - stopping code rotation and timer, deleting QR');
         stopDynamicCodeRotation();
-        // ✅ DON'T stop the countdown timer - QR is still valid in Firebase
-        // Timer continues running in background to show accurate time remaining
+        stopQRCountdown();
+
+        // ✅ Delete QR from Firebase when modal is closed
+        if (useCloud && firebaseDB && currentActiveQRId) {
+          console.log(`🗑️ Deleting closed QR: ${currentActiveQRId}`);
+          const qrRef = firebaseDB.ref(`mainSystem/activeQRs/${currentActiveQRId}`);
+          try {
+            qrRef.onDisconnect().cancel();
+          } catch (e) {
+            console.warn('Failed to cancel onDisconnect on modal close:', e);
+          }
+          qrRef.remove()
+            .then(() => console.log('✅ Closed QR deleted successfully'))
+            .catch(error => console.error('Error deleting closed QR:', error));
+          currentActiveQRId = null;
+        }
       });
 
       // ✅ When modal opens, sync the timer display
@@ -7018,6 +7043,7 @@
 
     let qrTimerInterval = null;
     let qrExpiryTimestamp = null; // ✅ Track actual expiry time instead of countdown
+    let currentActiveQRId = null; // Track current active QR ID
 
     function startQRCountdown(seconds) {
       // Clear previous timer
@@ -7070,6 +7096,21 @@
 
         // ✅ Stop dynamic code rotation when expired
         stopDynamicCodeRotation();
+
+        // ✅ Delete expired QR from Firebase
+        if (useCloud && firebaseDB && currentActiveQRId) {
+          console.log(`🗑️ Deleting expired QR from Firebase: ${currentActiveQRId}`);
+          const expiredRef = firebaseDB.ref(`mainSystem/activeQRs/${currentActiveQRId}`);
+          try {
+            expiredRef.onDisconnect().cancel();
+          } catch (e) {
+            console.warn('Failed to cancel onDisconnect on expiry:', e);
+          }
+          expiredRef.remove()
+            .then(() => console.log('✅ Expired QR deleted successfully'))
+            .catch(error => console.error('Error deleting expired QR:', error));
+          currentActiveQRId = null;
+        }
       } else {
         // ✅ Still valid - ensure proper styling
         if (statusElement) {
