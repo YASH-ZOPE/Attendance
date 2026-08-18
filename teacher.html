@@ -1530,6 +1530,26 @@
             <i class="bi bi-check-square me-2"></i>Final Selection
           </h4>
 
+          <!-- Timetable Auto-Detect Banner & Quick Selector -->
+          <div id="timetableBanner" class="alert alert-secondary d-flex flex-wrap align-items-center justify-content-between p-3 mb-3 border-0 rounded-3 shadow-sm" style="background: linear-gradient(135deg, #f0f4fd 0%, #e6edfd 100%);">
+            <div class="d-flex align-items-center gap-2 mb-2 mb-md-0">
+              <span id="timetableStatusBadge" class="badge bg-secondary px-3 py-2 fs-6">
+                <i class="bi bi-clock-history me-1"></i> Timetable Standby
+              </span>
+              <span id="timetableDetailText" class="text-secondary fw-semibold small">Select Year and Division to auto-sync schedule</span>
+            </div>
+            
+            <div class="d-flex align-items-center gap-2">
+              <select id="todayScheduleSelect" class="form-select form-select-sm" style="max-width: 260px; display: none;">
+                <option value="">-- Today's Scheduled Classes --</option>
+              </select>
+
+              <button id="resetTimetableBtn" class="btn btn-sm btn-outline-primary fw-semibold" style="display: none;" title="Re-sync with current timetable schedule">
+                <i class="bi bi-arrow-counterclockwise me-1"></i> Reset to Timetable
+              </button>
+            </div>
+          </div>
+
           <div class="row g-3">
             <!-- Department - locked for students -->
             <div class="col-md-4" id="selectionDeptCol">
@@ -5420,15 +5440,22 @@
         if (course) {
           selectCourse(course);
           updateFinalSelectionDropdowns();
+          checkAndSubscribeTimetable();
         }
       });
 
       // Final Subject Select
       elements.finalSubjectSelect.addEventListener('change', () => {
+        if (window.isProgrammaticChange) return;
         const subject = elements.finalSubjectSelect.value;
         if (subject) {
           selectSubject(subject);
           updateFinalSelectionDropdowns();
+        }
+        if (window.timetableState.currentState === 'AUTO_ACTIVE' || window.timetableState.currentState === 'AUTO_NO_ACTIVE') {
+          window.timetableState.isManualOverride = true;
+          window.timetableState.currentState = 'MANUAL_OVERRIDE';
+          updateTimetableUIState(window.timetableState);
         }
       });
 
@@ -5439,6 +5466,7 @@
         updateAcademicYearDisplay();
         saveAllData();
         setupLeaveStatusListener();
+        checkAndSubscribeTimetable();
       });
 
       // Division Select
@@ -5447,7 +5475,169 @@
         updateAcademicYearDisplay();
         saveAllData();
         setupLeaveStatusListener();
+        checkAndSubscribeTimetable();
       });
+
+      // ==================== TIMETABLE INTEGRATION LOGIC ====================
+      window.isProgrammaticChange = false;
+
+      function checkAndSubscribeTimetable() {
+        const year = appState.selectedAcademicYear || elements.academicYearLevelSelect?.value;
+        const course = appState.selectedCourse || elements.finalCourseSelect?.value;
+        const div = appState.selectedDivision || elements.divisionSelect?.value;
+
+        if (year && course && div) {
+          const classId = deriveClassId(year, course, div);
+          if (window.timetableState.classId !== classId) {
+            subscribeToClassSchedule(classId, updateTimetableUIState);
+          }
+        }
+      }
+
+      function updateTimetableUIState(state) {
+        const banner = document.getElementById('timetableBanner');
+        const badge = document.getElementById('timetableStatusBadge');
+        const detailText = document.getElementById('timetableDetailText');
+        const todaySelect = document.getElementById('todayScheduleSelect');
+        const resetBtn = document.getElementById('resetTimetableBtn');
+
+        if (!banner || !badge) return;
+
+        banner.style.display = 'flex';
+
+        // Populate Today's Schedule Selector
+        if (todaySelect) {
+          const slots = state.timetableSlots || [];
+          const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+          const currentDay = days[new Date().getDay()];
+          const todaySlots = slots.filter(s => s[currentDay] && (s[currentDay].subjectId || s[currentDay].subjectName));
+
+          todaySelect.innerHTML = '<option value="">-- Today\'s Scheduled Classes --</option>';
+          if (todaySlots.length > 0) {
+            todaySelect.style.display = 'block';
+            todaySlots.forEach((slot, idx) => {
+              const dayData = slot[currentDay];
+              const subName = dayData.subjectName || dayData.subjectId || dayData.subject;
+              const timeStr = `${slot.timeStart} - ${slot.timeEnd}`;
+              const opt = document.createElement('option');
+              opt.value = idx;
+              opt.textContent = `${timeStr} : ${subName}`;
+              todaySelect.appendChild(opt);
+            });
+          } else {
+            todaySelect.style.display = 'none';
+          }
+        }
+
+        // Handle UX States
+        if (state.currentState === 'AUTO_ACTIVE' && state.activeSlot) {
+          badge.className = 'badge bg-success px-3 py-2 fs-6';
+          badge.innerHTML = `<i class="bi bi-lightning-charge-fill me-1"></i> Active Slot: ${state.activeSlot.subjectName}`;
+          detailText.textContent = `(${state.activeSlot.timeStart} - ${state.activeSlot.timeEnd}${state.activeSlot.teacherName ? ' | ' + state.activeSlot.teacherName : ''})`;
+          if (resetBtn) resetBtn.style.display = 'none';
+
+          // Auto-fill subject if not manual override
+          if (!state.isManualOverride && elements.finalSubjectSelect) {
+            const targetSub = state.activeSlot.subjectName || state.activeSlot.subjectId;
+            let matchedValue = null;
+            for (let i = 0; i < elements.finalSubjectSelect.options.length; i++) {
+              if (elements.finalSubjectSelect.options[i].value.toLowerCase() === targetSub.toLowerCase()) {
+                matchedValue = elements.finalSubjectSelect.options[i].value;
+                break;
+              }
+            }
+            
+            window.isProgrammaticChange = true;
+            if (matchedValue) {
+              elements.finalSubjectSelect.value = matchedValue;
+              selectSubject(matchedValue);
+            } else {
+              const newOpt = document.createElement('option');
+              newOpt.value = targetSub;
+              newOpt.textContent = targetSub;
+              elements.finalSubjectSelect.appendChild(newOpt);
+              elements.finalSubjectSelect.value = targetSub;
+              selectSubject(targetSub);
+            }
+            window.isProgrammaticChange = false;
+          }
+
+        } else if (state.currentState === 'AUTO_NO_ACTIVE') {
+          badge.className = 'badge bg-info text-dark px-3 py-2 fs-6';
+          badge.innerHTML = `<i class="bi bi-info-circle-fill me-1"></i> No Active Lecture Scheduled`;
+          detailText.textContent = `for current time. Select from Today's Schedule or pick manually.`;
+          if (resetBtn) resetBtn.style.display = 'none';
+
+        } else if (state.currentState === 'MANUAL_OVERRIDE') {
+          badge.className = 'badge bg-warning text-dark px-3 py-2 fs-6';
+          badge.innerHTML = `<i class="bi bi-lock-fill me-1"></i> Manual Override Mode`;
+          detailText.textContent = `Using custom selections. Click reset to auto-sync with timetable.`;
+          if (resetBtn) resetBtn.style.display = 'inline-block';
+
+        } else {
+          // UNAVAILABLE
+          badge.className = 'badge bg-secondary px-3 py-2 fs-6';
+          badge.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i> Timetable Integration Unavailable`;
+          detailText.textContent = `Select parameters manually.`;
+          if (resetBtn) resetBtn.style.display = 'none';
+        }
+      }
+
+      // Today's Schedule Quick Selector Listener
+      const todaySelect = document.getElementById('todayScheduleSelect');
+      if (todaySelect) {
+        todaySelect.addEventListener('change', () => {
+          const idx = todaySelect.value;
+          if (idx !== '' && window.timetableState.timetableSlots) {
+            const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            const currentDay = days[new Date().getDay()];
+            const todaySlots = window.timetableState.timetableSlots.filter(s => s[currentDay] && (s[currentDay].subjectId || s[currentDay].subjectName));
+            const selectedSlot = todaySlots[idx];
+            if (selectedSlot) {
+              const dayData = selectedSlot[currentDay];
+              const targetSub = dayData.subjectName || dayData.subjectId || dayData.subject;
+              window.timetableState.isManualOverride = true;
+              window.timetableState.currentState = 'MANUAL_OVERRIDE';
+              updateTimetableUIState(window.timetableState);
+
+              if (elements.finalSubjectSelect) {
+                let matchedValue = null;
+                for (let i = 0; i < elements.finalSubjectSelect.options.length; i++) {
+                  if (elements.finalSubjectSelect.options[i].value.toLowerCase() === targetSub.toLowerCase()) {
+                    matchedValue = elements.finalSubjectSelect.options[i].value;
+                    break;
+                  }
+                }
+                
+                window.isProgrammaticChange = true;
+                if (matchedValue) {
+                  elements.finalSubjectSelect.value = matchedValue;
+                  selectSubject(matchedValue);
+                } else {
+                  const newOpt = document.createElement('option');
+                  newOpt.value = targetSub;
+                  newOpt.textContent = targetSub;
+                  elements.finalSubjectSelect.appendChild(newOpt);
+                  elements.finalSubjectSelect.value = targetSub;
+                  selectSubject(targetSub);
+                }
+                window.isProgrammaticChange = false;
+              }
+            }
+          }
+        });
+      }
+
+      // Reset to Timetable Button Listener
+      const resetBtn = document.getElementById('resetTimetableBtn');
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+          window.timetableState.isManualOverride = false;
+          if (window.timetableState.classId) {
+            subscribeToClassSchedule(window.timetableState.classId, updateTimetableUIState);
+          }
+        });
+      }
 
       // Subject events
       elements.addSubjectBtn.addEventListener('click', () => {

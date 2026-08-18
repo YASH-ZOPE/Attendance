@@ -699,3 +699,202 @@ class CloudStorage {
 
 // Create global instance
 const cloudStorage = new CloudStorage();
+
+// ==================== TIMETABLE INTEGRATION MODULE ====================
+
+// Global Timetable State Container
+window.timetableState = {
+  classId: null,
+  timetableSlots: [],
+  activeSlot: null,
+  isManualOverride: false,
+  currentState: 'UNAVAILABLE', // 'AUTO_ACTIVE' | 'AUTO_NO_ACTIVE' | 'MANUAL_OVERRIDE' | 'UNAVAILABLE'
+  unsubscribeListener: null,
+  minuteTimerId: null
+};
+
+/**
+ * Initialize Timetable Firebase Database Instance
+ * Strictly requires TIMETABLE_FIREBASE_DB_URL without silent fallback to Attendance DB
+ */
+function initTimetableDB() {
+  if (window.timetableDB) return window.timetableDB;
+
+  const TIMETABLE_DB_URL = window.TIMETABLE_FIREBASE_DB_URL;
+  if (!TIMETABLE_DB_URL) {
+    console.warn("⚠️ TIMETABLE_FIREBASE_DB_URL is not configured. Falling back to manual selection mode.");
+    window.timetableDB = null;
+    return null;
+  }
+
+  try {
+    const timetableApp = (typeof firebase !== 'undefined' && firebase.apps)
+      ? (firebase.apps.find(app => app.name === 'timetableApp') || firebase.initializeApp({ databaseURL: TIMETABLE_DB_URL }, 'timetableApp'))
+      : null;
+      
+    if (timetableApp) {
+      window.timetableDB = timetableApp.database();
+      console.log('✅ Secondary Timetable Firebase Database initialized successfully');
+    } else {
+      window.timetableDB = null;
+    }
+  } catch (error) {
+    console.error('❌ Failed to initialize Timetable Firebase DB:', error);
+    window.timetableDB = null;
+  }
+  
+  return window.timetableDB;
+}
+
+/**
+ * Encode string for Firebase key safety (matches timetable-management-system)
+ */
+function encodeFirebaseKey(key) {
+  if (!key) return key;
+  return String(key).replace(/\//g, '__');
+}
+
+/**
+ * Derive standard classId from year, course, division
+ * Example: FY-B.Tech-DivA -> FY-B.TECH-DIVA
+ */
+function deriveClassId(year, course, division) {
+  let y = String(year || '').trim();
+  if (y.toLowerCase().includes('fy') || y.toLowerCase().includes('first')) y = 'FY';
+  else if (y.toLowerCase().includes('sy') || y.toLowerCase().includes('second')) y = 'SY';
+  else if (y.toLowerCase().includes('ty') || y.toLowerCase().includes('third')) y = 'TY';
+  
+  let div = String(division || '').trim();
+  if (div.toLowerCase().startsWith('division')) {
+    div = div.substring('division'.length).trim();
+  }
+  const cleanCourse = String(course || '').trim();
+  return `${y}-${cleanCourse}-${div}`.toUpperCase();
+}
+
+/**
+ * Calculate active slot for a given slots array, day of week, and local HH:mm time
+ * Interval rule: includes start boundary (>=), excludes end boundary (<)
+ */
+function calculateActiveSlot(slots, currentDay, currentTime) {
+  if (!slots || !Array.isArray(slots) || slots.length === 0) return null;
+  
+  const dayKey = String(currentDay || '').toLowerCase(); // 'monday'..'saturday'
+  const nowTime = currentTime || new Date().toTimeString().slice(0, 5); // '10:20'
+  
+  for (const slot of slots) {
+    const start = slot.timeStart;
+    const end = slot.timeEnd;
+    
+    if (start && end && nowTime >= start && nowTime < end) {
+      const dayData = slot[dayKey];
+      if (dayData && (dayData.subjectId || dayData.subjectName)) {
+        return {
+          timeStart: start,
+          timeEnd: end,
+          subjectId: dayData.subjectId || dayData.subjectName,
+          subjectName: dayData.subjectName || dayData.subjectId || dayData.subject,
+          teacherId: dayData.teacherId || '',
+          teacherName: dayData.teacherName || '',
+          type: dayData.type || 'Theory'
+        };
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Schedule minute-boundary aligned timer
+ * Triggers callback right at 00 seconds of every minute (e.g. 10:50:00)
+ */
+function scheduleMinuteBoundaryTimer(callback) {
+  if (window.timetableState.minuteTimerId) {
+    clearTimeout(window.timetableState.minuteTimerId);
+    clearInterval(window.timetableState.minuteTimerId);
+    window.timetableState.minuteTimerId = null;
+  }
+  
+  const now = new Date();
+  const delay = (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
+  
+  window.timetableState.minuteTimerId = setTimeout(() => {
+    callback();
+    // Schedule repeating 60s timer starting at exact minute boundary
+    window.timetableState.minuteTimerId = setInterval(callback, 60000);
+  }, Math.max(delay, 500));
+}
+
+/**
+ * Subscribe to Class Schedule Real-time Listener
+ */
+function subscribeToClassSchedule(classId, onUpdateCallback) {
+  // 1. Cleanup existing listener and timer
+  if (window.timetableState.unsubscribeListener) {
+    window.timetableState.unsubscribeListener();
+    window.timetableState.unsubscribeListener = null;
+  }
+  if (window.timetableState.minuteTimerId) {
+    clearTimeout(window.timetableState.minuteTimerId);
+    clearInterval(window.timetableState.minuteTimerId);
+    window.timetableState.minuteTimerId = null;
+  }
+
+  window.timetableState.classId = classId;
+  window.timetableState.isManualOverride = false;
+
+  const db = initTimetableDB();
+  if (!db || !classId) {
+    window.timetableState.currentState = 'UNAVAILABLE';
+    if (onUpdateCallback) onUpdateCallback(window.timetableState);
+    return;
+  }
+
+  const encodedClassId = encodeFirebaseKey(classId);
+  const classRef = db.ref(`classTimetables/${encodedClassId}`);
+
+  const handleDataUpdate = (snapshot) => {
+    const data = snapshot.exists() ? snapshot.val() : null;
+    const slots = data?.slots || [];
+    window.timetableState.timetableSlots = slots;
+
+    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const currentDay = days[new Date().getDay()];
+    const currentTime = new Date().toTimeString().slice(0, 5);
+
+    const activeSlot = calculateActiveSlot(slots, currentDay, currentTime);
+    window.timetableState.activeSlot = activeSlot;
+
+    if (!window.timetableState.isManualOverride) {
+      window.timetableState.currentState = activeSlot ? 'AUTO_ACTIVE' : (slots.length > 0 ? 'AUTO_NO_ACTIVE' : 'UNAVAILABLE');
+    }
+
+    if (onUpdateCallback) onUpdateCallback(window.timetableState);
+  };
+
+  classRef.on('value', handleDataUpdate, (error) => {
+    console.error(`❌ Timetable subscription error for ${classId}:`, error);
+    window.timetableState.currentState = 'UNAVAILABLE';
+    if (onUpdateCallback) onUpdateCallback(window.timetableState);
+  });
+
+  window.timetableState.unsubscribeListener = () => {
+    classRef.off('value', handleDataUpdate);
+  };
+
+  // Schedule minute-boundary timer for active slot re-evaluation
+  scheduleMinuteBoundaryTimer(() => {
+    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const currentDay = days[new Date().getDay()];
+    const currentTime = new Date().toTimeString().slice(0, 5);
+
+    const activeSlot = calculateActiveSlot(window.timetableState.timetableSlots, currentDay, currentTime);
+    window.timetableState.activeSlot = activeSlot;
+
+    if (!window.timetableState.isManualOverride) {
+      window.timetableState.currentState = activeSlot ? 'AUTO_ACTIVE' : (window.timetableState.timetableSlots.length > 0 ? 'AUTO_NO_ACTIVE' : 'UNAVAILABLE');
+    }
+
+    if (onUpdateCallback) onUpdateCallback(window.timetableState);
+  });
+}
