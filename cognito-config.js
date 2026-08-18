@@ -1,16 +1,10 @@
 // ==================== COGNITO CONFIGURATION ====================
-// Loaded dynamically at runtime from .env (window.ENV) or AWS Amplify build injection
-const getEnvVar = (key) => {
-    if (typeof window !== 'undefined' && window.ENV && window.ENV[key]) {
-        return window.ENV[key];
-    }
-    return "";
-};
+// Environment values injected via window.ENV_CONFIG or build environment variables
 
 const COGNITO_CONFIG = {
-    region: getEnvVar('COGNITO_REGION'),
-    userPoolId: getEnvVar('COGNITO_USER_POOL_ID'),
-    clientId: getEnvVar('COGNITO_CLIENT_ID')
+    region: (typeof window !== 'undefined' && window.ENV_CONFIG && window.ENV_CONFIG.COGNITO_REGION) || (typeof process !== 'undefined' && process.env && process.env.COGNITO_REGION) || "",
+    userPoolId: (typeof window !== 'undefined' && window.ENV_CONFIG && window.ENV_CONFIG.COGNITO_USER_POOL_ID) || (typeof process !== 'undefined' && process.env && process.env.COGNITO_USER_POOL_ID) || "",
+    clientId: (typeof window !== 'undefined' && window.ENV_CONFIG && window.ENV_CONFIG.COGNITO_CLIENT_ID) || (typeof process !== 'undefined' && process.env && process.env.COGNITO_CLIENT_ID) || ""
 };
 
 // Export for use in other files
