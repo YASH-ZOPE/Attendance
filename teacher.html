@@ -2615,7 +2615,7 @@
               appState.selectedAcademicYear = approved.academicYear;
               appState.selectedDivision = approved.division;
 
-              // Pre-select and disable dropdown selectors
+              // Pre-select dropdown selectors (KEEP ENABLED for manual changes)
               const deptSelect = document.getElementById('finalDepartmentSelect');
               const courseSelect = document.getElementById('finalCourseSelect');
               const academicYearSelect = document.getElementById('academicYearLevelSelect');
@@ -2623,31 +2623,37 @@
 
               if (deptSelect) {
                 deptSelect.value = approved.department;
-                deptSelect.disabled = true;
-                deptSelect.style.background = '#f5f5f5';
-                deptSelect.style.cursor = 'not-allowed';
+                deptSelect.disabled = false;
+                deptSelect.style.background = '';
+                deptSelect.style.cursor = '';
               }
               
               populateCourseDropdown();
 
               if (courseSelect) {
                 courseSelect.value = approved.course;
-                courseSelect.disabled = true;
-                courseSelect.style.background = '#f5f5f5';
-                courseSelect.style.cursor = 'not-allowed';
+                courseSelect.disabled = false;
+                courseSelect.style.background = '';
+                courseSelect.style.cursor = '';
               }
               if (academicYearSelect) {
                 academicYearSelect.value = approved.academicYear;
-                academicYearSelect.disabled = true;
-                academicYearSelect.style.background = '#f5f5f5';
-                academicYearSelect.style.cursor = 'not-allowed';
+                academicYearSelect.disabled = false;
+                academicYearSelect.style.background = '';
+                academicYearSelect.style.cursor = '';
               }
               if (divisionSelect) {
                 divisionSelect.value = approved.division;
-                divisionSelect.disabled = true;
-                divisionSelect.style.background = '#f5f5f5';
-                divisionSelect.style.cursor = 'not-allowed';
+                divisionSelect.disabled = false;
+                divisionSelect.style.background = '';
+                divisionSelect.style.cursor = '';
               }
+
+              // ✅ AUTO-SELECT TODAY'S DATE
+              const now = new Date();
+              appState.selectedYear = now.getFullYear();
+              appState.selectedMonth = now.getMonth();
+              appState.currentDay = now.getDate();
 
               // Update displays
               populateSubjectDropdown();
@@ -2660,7 +2666,27 @@
               updateFinalSelectionDropdowns();
               updateFinalSelectionBadges();
 
-              // Refresh calendar and attendance table for this locked division
+              // ✅ AUTO-FETCH TIMETABLE SUBJECT FOR TODAY
+              if (typeof deriveClassId === 'function' && typeof subscribeToClassSchedule === 'function') {
+                const classId = deriveClassId(approved.academicYear, approved.course, approved.division);
+                console.log(`📡 Fetching active timetable for class: ${classId}`);
+                subscribeToClassSchedule(classId, (state) => {
+                  if (state && state.activeSlot && state.activeSlot.subjectName) {
+                    const scheduledSub = state.activeSlot.subjectName;
+                    console.log(`📅 Timetable active subject detected for today: ${scheduledSub}`);
+                    if (!appState.selectedSubject || appState.selectedSubject !== scheduledSub) {
+                      appState.selectedSubject = scheduledSub;
+                      const subSelect = document.getElementById('finalSubjectSelect') || document.getElementById('subjectSelect');
+                      if (subSelect) subSelect.value = scheduledSub;
+                      updateSubjectDisplay();
+                      updateFinalSelectionBadges();
+                      refreshAttendanceTable();
+                    }
+                  }
+                });
+              }
+
+              // Refresh calendar and attendance table for this division
               if (appState.selectedMonth !== null && appState.selectedYear !== null) {
                 appState.daysInMonth = getDaysInMonth(appState.selectedMonth, appState.selectedYear);
                 updateMonthDisplay();
@@ -2675,7 +2701,7 @@
               }
               updateStats();
               updateDefaulterCount();
-              console.log('🔒 Selection section locked to approved class:', approved);
+              console.log('✅ Approved class pre-selected (editable by teacher):', approved);
             }
           }
 

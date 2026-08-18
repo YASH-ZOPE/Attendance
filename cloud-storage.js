@@ -722,7 +722,11 @@ function initTimetableDB() {
 
   const TIMETABLE_DB_URL = window.TIMETABLE_FIREBASE_DB_URL;
   if (!TIMETABLE_DB_URL) {
-    console.warn("⚠️ TIMETABLE_FIREBASE_DB_URL is not configured. Falling back to manual selection mode.");
+    if (typeof firebase !== 'undefined' && firebase.database) {
+      window.timetableDB = firebase.database();
+      return window.timetableDB;
+    }
+    console.warn("⚠️ Firebase DB is not configured.");
     window.timetableDB = null;
     return null;
   }
