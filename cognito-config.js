@@ -1,10 +1,16 @@
 // ==================== COGNITO CONFIGURATION ====================
-// Placeholder values — real values injected at build time via AWS Amplify
+// Loaded dynamically at runtime from .env (window.ENV) or AWS Amplify build injection
+const getEnvVar = (key) => {
+    if (typeof window !== 'undefined' && window.ENV && window.ENV[key]) {
+        return window.ENV[key];
+    }
+    return "";
+};
 
 const COGNITO_CONFIG = {
-    region: 'YOUR_AWS_REGION',                    // REPLACE with your region
-    userPoolId: 'YOUR_USER_POOL_ID',              // REPLACE with your User Pool ID
-    clientId: 'YOUR_CLIENT_ID'                    // REPLACE with your Client ID
+    region: getEnvVar('COGNITO_REGION'),
+    userPoolId: getEnvVar('COGNITO_USER_POOL_ID'),
+    clientId: getEnvVar('COGNITO_CLIENT_ID')
 };
 
 // Export for use in other files
