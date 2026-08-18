@@ -23,6 +23,7 @@ class FaceRecognitionSystem {
     this.MATCH_THRESHOLD = 0.6; // Lower = stricter matching
     this.ATTENDANCE_COOLDOWN = 3000; // ms cooldown after marking attendance
     this.lastAttendanceTime = {};
+    this.isMarkingInFlight = {};
 
     // Bulk import properties
     this.selectedFiles = null;
@@ -1298,6 +1299,16 @@ class FaceRecognitionSystem {
    * Mark attendance with cooldown to prevent duplicate marking
    */
   async markAttendanceWithCooldown(studentId, studentName) {
+    // ✅ Skip if attendance was already marked in this session
+    if (this.recognizedToday.has(studentId)) {
+      return;
+    }
+
+    // ✅ Skip if a network request is currently in-flight for this student
+    if (this.isMarkingInFlight && this.isMarkingInFlight[studentId]) {
+      return;
+    }
+
     const now = Date.now();
     const lastTime = this.lastAttendanceTime[studentId] || 0;
 
@@ -1320,7 +1331,6 @@ class FaceRecognitionSystem {
       }
     }
 
-    // ✅ ADD THIS BLOCK:
     const dateValidation = await this.validateDateForRole();
 
     if (!dateValidation.valid) {
@@ -1332,25 +1342,32 @@ class FaceRecognitionSystem {
       return;
     }
 
-    const backendSuccess = await this.saveAttendanceToFirebase(studentId, studentName, dateValidation);
-    if (!backendSuccess) {
-      return;
-    }
+    // Set lock to prevent concurrent HTTP requests while in-flight
+    if (!this.isMarkingInFlight) this.isMarkingInFlight = {};
+    this.isMarkingInFlight[studentId] = true;
 
-    const success = await this.storage.markAttendance(studentId);
-
-    if (success) {
-      this.lastAttendanceTime[studentId] = now;
-
-      if (!this.recognizedToday.has(studentId)) {
-        this.recognizedToday.add(studentId);
-
-        // ✅ CHANGE THIS LINE:
-        const dateStr = `${dateValidation.targetDay} ${this.getMonthName(dateValidation.targetMonth)}`;
-        this.showToast(`✓ Attendance marked for ${studentName}\nDate: ${dateStr}`, 'success');
-
-        await this.updateStudentList();
+    try {
+      const backendSuccess = await this.saveAttendanceToFirebase(studentId, studentName, dateValidation);
+      if (!backendSuccess) {
+        return;
       }
+
+      const success = await this.storage.markAttendance(studentId);
+
+      if (success) {
+        this.lastAttendanceTime[studentId] = Date.now();
+
+        if (!this.recognizedToday.has(studentId)) {
+          this.recognizedToday.add(studentId);
+
+          const dateStr = `${dateValidation.targetDay} ${this.getMonthName(dateValidation.targetMonth)}`;
+          this.showToast(`✓ Attendance marked for ${studentName}\nDate: ${dateStr}`, 'success');
+
+          await this.updateStudentList();
+        }
+      }
+    } finally {
+      this.isMarkingInFlight[studentId] = false;
     }
   }
 
@@ -1425,6 +1442,11 @@ class FaceRecognitionSystem {
       const result = await response.json();
 
       if (!response.ok) {
+        if (response.status === 409 || (result.error && result.error.includes('already marked'))) {
+          console.log(`ℹ️ Attendance already marked for ${studentName} today.`);
+          this.recognizedToday.add(studentId);
+          return true;
+        }
         console.error('⚠️ Backend attendance failed:', result.error);
         this.showToast(`❌ Attendance Failed: ${result.error || 'Unknown error'}`, 'danger');
         return false;
