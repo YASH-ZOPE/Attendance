@@ -859,7 +859,7 @@ function subscribeToClassSchedule(classId, onUpdateCallback) {
 
   const handleDataUpdate = (snapshot) => {
     const data = snapshot.exists() ? snapshot.val() : null;
-    const slots = data?.slots || [];
+    const slots = Array.isArray(data) ? data : (data?.slots || (data && typeof data === 'object' ? Object.values(data) : []));
     window.timetableState.timetableSlots = slots;
 
     const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];

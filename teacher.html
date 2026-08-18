@@ -24,6 +24,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <!-- Firebase Config (reuse same file) -->
   <script src="firebase-config.js"></script>
+  <script src="cloud-storage.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 
   <style>
@@ -2666,21 +2667,70 @@
               updateFinalSelectionDropdowns();
               updateFinalSelectionBadges();
 
-              // ✅ AUTO-FETCH TIMETABLE SUBJECT FOR TODAY
+              // ✅ AUTO-FETCH TIMETABLE SUBJECT FOR TODAY & UPDATE BADGE
               if (typeof deriveClassId === 'function' && typeof subscribeToClassSchedule === 'function') {
                 const classId = deriveClassId(approved.academicYear, approved.course, approved.division);
                 console.log(`📡 Fetching active timetable for class: ${classId}`);
+
                 subscribeToClassSchedule(classId, (state) => {
+                  const badge = document.getElementById('timetableStatusBadge');
+                  const detailText = document.getElementById('timetableDetailText');
+
                   if (state && state.activeSlot && state.activeSlot.subjectName) {
                     const scheduledSub = state.activeSlot.subjectName;
-                    console.log(`📅 Timetable active subject detected for today: ${scheduledSub}`);
-                    if (!appState.selectedSubject || appState.selectedSubject !== scheduledSub) {
-                      appState.selectedSubject = scheduledSub;
+                    console.log(`📅 Timetable active lecture detected for today: ${scheduledSub}`);
+
+                    if (badge) {
+                      badge.className = 'badge bg-success px-3 py-2 fs-6';
+                      badge.innerHTML = `<i class="bi bi-play-circle me-1"></i> Active Lecture: ${scheduledSub}`;
+                    }
+                    if (detailText) {
+                      detailText.textContent = `Scheduled slot (${state.activeSlot.timeStart} - ${state.activeSlot.timeEnd})`;
+                    }
+
+                    appState.selectedSubject = scheduledSub;
+                    const subSelect = document.getElementById('finalSubjectSelect') || document.getElementById('subjectSelect');
+                    if (subSelect) subSelect.value = scheduledSub;
+                    updateSubjectDisplay();
+                    updateFinalSelectionBadges();
+                    refreshAttendanceTable();
+
+                  } else if (state && state.timetableSlots && state.timetableSlots.length > 0) {
+                    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+                    const currentDay = days[new Date().getDay()];
+                    const todaySlots = state.timetableSlots.filter(s => s[currentDay] && (s[currentDay].subjectId || s[currentDay].subjectName));
+
+                    if (todaySlots.length > 0) {
+                      const firstTodaySub = todaySlots[0][currentDay].subjectName || todaySlots[0][currentDay].subjectId;
+                      if (badge) {
+                        badge.className = 'badge bg-info text-dark px-3 py-2 fs-6';
+                        badge.innerHTML = `<i class="bi bi-calendar-check me-1"></i> Today's Schedule: ${firstTodaySub}`;
+                      }
+                      if (detailText) {
+                        detailText.textContent = `Today (${currentDay.toUpperCase()}) - ${todaySlots.length} lecture(s) scheduled`;
+                      }
+                      appState.selectedSubject = firstTodaySub;
                       const subSelect = document.getElementById('finalSubjectSelect') || document.getElementById('subjectSelect');
-                      if (subSelect) subSelect.value = scheduledSub;
+                      if (subSelect) subSelect.value = firstTodaySub;
                       updateSubjectDisplay();
                       updateFinalSelectionBadges();
                       refreshAttendanceTable();
+                    } else {
+                      if (badge) {
+                        badge.className = 'badge bg-warning text-dark px-3 py-2 fs-6';
+                        badge.innerHTML = `<i class="bi bi-calendar-x me-1"></i> No Lectures Today`;
+                      }
+                      if (detailText) {
+                        detailText.textContent = `No scheduled lectures for ${currentDay.toUpperCase()}`;
+                      }
+                    }
+                  } else {
+                    if (badge) {
+                      badge.className = 'badge bg-secondary px-3 py-2 fs-6';
+                      badge.innerHTML = `<i class="bi bi-exclamation-circle me-1"></i> No Timetable Found`;
+                    }
+                    if (detailText) {
+                      detailText.textContent = `No published timetable found for class ${classId}`;
                     }
                   }
                 });
