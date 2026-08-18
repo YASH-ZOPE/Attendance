@@ -67,8 +67,15 @@ class FaceRecognitionSystem {
 
       console.log(`Logged in as: ${user.attributes.email} (${role})`);
 
-      // ✅ Get division from Cognito
+      // ✅ Get division & user attributes from Cognito
       const divisionInfo = await getDivisionAttributes();
+      try {
+        const userAttrs = await getUserAttributes();
+        this.loggedInStudentId = userAttrs['custom:studentId'] || null;
+        this.loggedInStudentName = userAttrs['name'] || null;
+      } catch (attrErr) {
+        console.warn('⚠️ Could not load user profile attributes:', attrErr);
+      }
 
       if (divisionInfo.department && divisionInfo.course && divisionInfo.academicYear && divisionInfo.division) {
         this.mainSystemConfig.selectedDepartment = divisionInfo.department;
@@ -1298,6 +1305,21 @@ class FaceRecognitionSystem {
       return;
     }
 
+    // ✅ STUDENT ROLE IDENTITY VERIFICATION
+    if (this.userRole === 'student' && this.loggedInStudentId) {
+      if (String(studentId) !== String(this.loggedInStudentId)) {
+        console.warn(`⚠️ Identity mismatch: Recognized ${studentName} (ID: ${studentId}), but logged in as ${this.loggedInStudentName || 'Student'} (ID: ${this.loggedInStudentId})`);
+        this.showToast(
+          `⚠️ Face Mismatch!\n` +
+          `Recognized face: ${studentName} (ID: ${studentId})\n` +
+          `Logged in account: ${this.loggedInStudentName || 'Student'} (ID: ${this.loggedInStudentId})\n\n` +
+          `You cannot mark attendance for another student's account.`,
+          'warning'
+        );
+        return;
+      }
+    }
+
     // ✅ ADD THIS BLOCK:
     const dateValidation = await this.validateDateForRole();
 
@@ -1438,20 +1460,31 @@ class FaceRecognitionSystem {
 
     if (dept && course && academicYear && division) {
       // Filter faces that belong to current division
-      const divisionFaces = allFaces.filter(face =>
+      let divisionFaces = allFaces.filter(face =>
         face.department === dept &&
         face.course === course &&
         face.academicYear === academicYear &&
         face.division === division
       );
 
-      console.log(`✅ Filtered ${divisionFaces.length}/${allFaces.length} faces for division: ${dept}/${course}/${academicYear}/${division}`);
+      // ✅ STUDENT ROLE: ONLY LOAD LOGGED IN STUDENT'S FACE (Strict 1-to-1 matching)
+      if (this.userRole === 'student' && this.loggedInStudentId) {
+        const studentOnlyFaces = divisionFaces.filter(face => String(face.id) === String(this.loggedInStudentId));
+        console.log(`🎓 Student mode: Restricting Face Matcher exclusively to logged-in student ID: ${this.loggedInStudentId} (${studentOnlyFaces.length} face record found)`);
+        divisionFaces = studentOnlyFaces;
+      } else {
+        console.log(`✅ Filtered ${divisionFaces.length}/${allFaces.length} faces for division: ${dept}/${course}/${academicYear}/${division}`);
+      }
 
       labeledDescriptors = await this.storage.getLabeledDescriptors(divisionFaces);
     } else {
       // No division selected - use all faces (fallback)
       console.warn('⚠️ No division selected - loading all faces');
-      labeledDescriptors = await this.storage.getLabeledDescriptors(allFaces);
+      let fallbackFaces = allFaces;
+      if (this.userRole === 'student' && this.loggedInStudentId) {
+        fallbackFaces = allFaces.filter(face => String(face.id) === String(this.loggedInStudentId));
+      }
+      labeledDescriptors = await this.storage.getLabeledDescriptors(fallbackFaces);
     }
 
     if (labeledDescriptors.length === 0) {

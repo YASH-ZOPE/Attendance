@@ -627,8 +627,8 @@ async saveBulkFaces(studentId, studentName, descriptors, sampleFile) {
   /**
    * Get labeled face descriptors for face-api.js
    */
-  async getLabeledDescriptors() {
-    const faces = await this.getAllFaces();
+  async getLabeledDescriptors(facesList) {
+    const faces = facesList || await this.getAllFaces();
     
     return faces.map(face => ({
       label: `${face.id}|${face.name}`, // Combined label for easy splitting

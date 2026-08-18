@@ -623,13 +623,13 @@ class CloudStorage {
    * Get labeled face descriptors for face-api.js
    * ✅ UPDATED: Now uses division-specific path
    */
-  async getLabeledDescriptors() {
+  async getLabeledDescriptors(facesList) {
     if (!this.isInitialized) {
       throw new Error('Cloud storage not initialized');
     }
 
     try {
-      const faces = await this.getAllFaces();
+      const faces = facesList || await this.getAllFaces();
 
       return faces.map(face => ({
         label: `${face.id}|${face.name}`,
