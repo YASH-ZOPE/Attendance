@@ -2667,6 +2667,33 @@
               updateFinalSelectionDropdowns();
               updateFinalSelectionBadges();
 
+              // ✅ Helper function to sync active selection to Firebase Realtime Database
+              function syncSelectionToFirebase() {
+                if (useCloud && firebaseDB && appState.selectedDepartment && appState.selectedCourse && appState.selectedAcademicYear && appState.selectedDivision) {
+                  const year = appState.selectedYear || new Date().getFullYear();
+                  const month = appState.selectedMonth !== null ? appState.selectedMonth : new Date().getMonth();
+                  const day = appState.currentDay || new Date().getDate();
+                  const subject = appState.selectedSubject;
+
+                  const path = `mainSystem/attendanceData/${year}/${appState.selectedDepartment}/${appState.selectedCourse}/${appState.selectedAcademicYear}/${appState.selectedDivision}`;
+
+                  const updates = {
+                    selectedYear: year,
+                    selectedMonth: month,
+                    currentDay: day
+                  };
+                  if (subject) {
+                    updates.selectedSubject = subject;
+                  }
+
+                  firebaseDB.ref(path).update(updates).then(() => {
+                    console.log(`📡 Auto-synced active selection to Firebase: ${path} (Subject: ${subject}, Date: ${day}-${month + 1}-${year})`);
+                  }).catch(err => {
+                    console.warn('⚠️ Could not sync active selection to Firebase:', err);
+                  });
+                }
+              }
+
               // ✅ AUTO-FETCH TIMETABLE SUBJECT FOR TODAY & UPDATE BADGE
               if (typeof deriveClassId === 'function' && typeof subscribeToClassSchedule === 'function') {
                 const classId = deriveClassId(approved.academicYear, approved.course, approved.division);
@@ -2694,6 +2721,7 @@
                     updateSubjectDisplay();
                     updateFinalSelectionBadges();
                     refreshAttendanceTable();
+                    syncSelectionToFirebase();
 
                   } else if (state && state.timetableSlots && state.timetableSlots.length > 0) {
                     const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
@@ -2715,6 +2743,7 @@
                       updateSubjectDisplay();
                       updateFinalSelectionBadges();
                       refreshAttendanceTable();
+                      syncSelectionToFirebase();
                     } else {
                       if (badge) {
                         badge.className = 'badge bg-warning text-dark px-3 py-2 fs-6';
