@@ -354,33 +354,34 @@ class FaceRecognitionSystem {
     }
   }
   async validateQRSession(qrId) {
+    if (!qrId) return false;
     if (!this.firebaseSync || !this.firebaseSync.isConnected) {
-      console.warn('⚠️ Cannot validate - Firebase offline');
-      return false; // ✅ Allow offline mode
+      console.warn('⚠️ Firebase offline - allowing offline QR validation');
+      return true; // Fail-open for offline mode
     }
 
     try {
       const snapshot = await this.firebaseSync.firebaseDB
         .ref(`mainSystem/activeQRs/${qrId}`).once('value');
-      const qrData = snapshot.val();
+      const activeQR = snapshot.val();
 
-      if (!qrData) {
-        console.warn('⚠️ QR not found in Firebase');
-        return false;
+      if (!activeQR) {
+        console.warn(`⚠️ QR ID ${qrId} not found in Firebase activeQRs node`);
+        return false; // Active QR required
       }
 
       const now = Date.now();
-      if (now > qrData.expiresAt) {
-        console.warn('⚠️ QR expired');
-        return false;
+      if (activeQR.expiresAt && now > activeQR.expiresAt) {
+        console.warn(`⚠️ QR ID ${qrId} expired at ${activeQR.expiresAt}`);
+        return false; // Expired QR rejected
       }
 
-      console.log('✅ QR is valid');
+      console.log(`✅ Active QR session verified: ${qrId}`);
       return true;
 
     } catch (error) {
       console.error('❌ Validation error:', error);
-      return false; // ✅ On error, allow (fail open)
+      return false;
     }
   }
 
@@ -397,12 +398,50 @@ class FaceRecognitionSystem {
         qrData = qrDataString;
       }
 
-      if (!qrData || typeof qrData !== 'object') {
-        this.showToast('❌ INVALID QR CODE: Missing payload data', 'danger');
+      if (!qrData || typeof qrData !== 'object' || !qrData.qrId) {
+        this.showToast('❌ INVALID QR CODE: Missing required payload fields', 'danger');
         return;
       }
 
-      // ✅ 1. DIRECTLY SET ALL FIELDS FROM SCANNED QR CODE PAYLOAD
+      // ✅ 1. VALIDATE QR SESSION IN FIREBASE (Must be active and unexpired)
+      const isValid = await this.validateQRSession(qrData.qrId);
+      if (!isValid) {
+        this.showToast(
+          '⚠️ QR CODE EXPIRED OR INVALID!\n\n' +
+          'This QR code has expired or been replaced.\n\n' +
+          'Please scan a NEW active QR code from the teacher.',
+          'danger'
+        );
+        return;
+      }
+
+      // ✅ 2. VALIDATE DIVISION MATCH FOR STUDENTS
+      if (this.userRole === 'student') {
+        const userDept = this.mainSystemConfig.selectedDepartment;
+        const userCourse = this.mainSystemConfig.selectedCourse;
+        const userYear = this.mainSystemConfig.selectedAcademicYear;
+        const userDiv = this.mainSystemConfig.selectedDivision;
+
+        const qrDept = qrData.department;
+        const qrCourse = qrData.course;
+        const qrYear = qrData.academicYear;
+        const qrDiv = qrData.division;
+
+        if (userDept && userCourse && userYear && userDiv) {
+          if (userDept !== qrDept || userCourse !== qrCourse || userYear !== qrYear || userDiv !== qrDiv) {
+            this.showToast(
+              '❌ WRONG DIVISION!\n\n' +
+              `This QR is for: ${qrDept}/${qrCourse}/${qrYear}/${qrDiv}\n\n` +
+              `Your division: ${userDept}/${userCourse}/${userYear}/${userDiv}\n\n` +
+              '⚠️ You can ONLY scan QR codes for YOUR OWN division!',
+              'danger'
+            );
+            return;
+          }
+        }
+      }
+
+      // ✅ 3. SET ALL FIELDS FROM THE VALID SCANNED QR CODE PAYLOAD
       this.mainSystemConfig.selectedDepartment = qrData.department || this.mainSystemConfig.selectedDepartment;
       this.mainSystemConfig.selectedCourse = qrData.course || this.mainSystemConfig.selectedCourse;
       this.mainSystemConfig.selectedAcademicYear = qrData.academicYear || this.mainSystemConfig.selectedAcademicYear;
@@ -411,7 +450,7 @@ class FaceRecognitionSystem {
       this.mainSystemConfig.selectedMonth = (qrData.month !== undefined && qrData.month !== null) ? qrData.month : this.mainSystemConfig.selectedMonth;
       this.mainSystemConfig.selectedYear = qrData.year || this.mainSystemConfig.selectedYear;
       this.mainSystemConfig.currentDay = qrData.day || this.mainSystemConfig.currentDay;
-      if (qrData.qrId) this.currentQRId = qrData.qrId;
+      this.currentQRId = qrData.qrId;
 
       // ✅ 2. SAVE SCANNED FIELDS TO LOCALSTORAGE
       const configToSave = {
@@ -582,8 +621,11 @@ class FaceRecognitionSystem {
         }
       };
     });
+  updateConfigDisplay() {
+    if (typeof window.updateConfigDisplay === 'function') {
+      window.updateConfigDisplay();
+    }
   }
-
 
   /**
    * Force read latest Firebase data (called periodically)
