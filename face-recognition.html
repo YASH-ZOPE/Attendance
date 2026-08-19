@@ -1755,11 +1755,12 @@ if (document.readyState === 'loading') {
             }
           }
 
-// Function to update the card display
+// Function to update the card display - FIREBASE REAL-TIME DATA FIRST PRIORITY
 function updateConfigDisplay() {
-  const storedConfig = JSON.parse(localStorage.getItem('faceRecDivisionConfig') || localStorage.getItem('attendanceConfig') || '{}');
   const mainConfig = (window.faceSystem && window.faceSystem.mainSystemConfig) ? window.faceSystem.mainSystemConfig : {};
+  const storedConfig = JSON.parse(localStorage.getItem('faceRecDivisionConfig') || localStorage.getItem('attendanceConfig') || '{}');
 
+  // Primary: Live Firebase state (mainConfig) | Secondary: LocalStorage backup
   const dept = mainConfig.selectedDepartment || storedConfig.department;
   const year = mainConfig.selectedAcademicYear || storedConfig.academicYear;
   const course = mainConfig.selectedCourse || storedConfig.course;

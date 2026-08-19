@@ -95,6 +95,7 @@ class FaceRecognitionSystem {
       if (role === 'student') {
         console.log('🔄 Student login - Clearing saved session');
         localStorage.removeItem('faceRecDivisionConfig');
+        localStorage.removeItem('attendanceConfig');
 
         // Lock camera button
         this.disableCameraButton();
@@ -388,209 +389,149 @@ class FaceRecognitionSystem {
       console.log('═══════════════════════════════════');
       console.log('RAW QR DATA:', qrDataString);
       console.log('═══════════════════════════════════');
-      const qrData = JSON.parse(qrDataString);
 
-      // ✅ STRICT: Require QR ID
-      if (!qrData.qrId) {
-        this.showToast(
-          '❌ INVALID QR CODE!\n\n' +
-          'This QR code is outdated or missing required data.\n\n' +
-          'Please generate a NEW QR code from the main system.',
-          'danger'
-        );
-        console.error('❌ QR rejected - missing qrId');
+      let qrData;
+      if (typeof qrDataString === 'string') {
+        qrData = JSON.parse(qrDataString);
+      } else {
+        qrData = qrDataString;
+      }
+
+      if (!qrData || typeof qrData !== 'object') {
+        this.showToast('❌ INVALID QR CODE: Missing payload data', 'danger');
         return;
       }
 
-      // ✅ NEW: VALIDATE DIVISION MATCH FOR STUDENTS
-      if (this.userRole === 'student') {
-        const userDept = this.mainSystemConfig.selectedDepartment;
-        const userCourse = this.mainSystemConfig.selectedCourse;
-        const userYear = this.mainSystemConfig.selectedAcademicYear;
-        const userDiv = this.mainSystemConfig.selectedDivision;
+      // ✅ 1. DIRECTLY SET ALL FIELDS FROM SCANNED QR CODE PAYLOAD
+      this.mainSystemConfig.selectedDepartment = qrData.department || this.mainSystemConfig.selectedDepartment;
+      this.mainSystemConfig.selectedCourse = qrData.course || this.mainSystemConfig.selectedCourse;
+      this.mainSystemConfig.selectedAcademicYear = qrData.academicYear || this.mainSystemConfig.selectedAcademicYear;
+      this.mainSystemConfig.selectedDivision = qrData.division || this.mainSystemConfig.selectedDivision;
+      this.mainSystemConfig.selectedSubject = qrData.subject || this.mainSystemConfig.selectedSubject;
+      this.mainSystemConfig.selectedMonth = (qrData.month !== undefined && qrData.month !== null) ? qrData.month : this.mainSystemConfig.selectedMonth;
+      this.mainSystemConfig.selectedYear = qrData.year || this.mainSystemConfig.selectedYear;
+      this.mainSystemConfig.currentDay = qrData.day || this.mainSystemConfig.currentDay;
+      if (qrData.qrId) this.currentQRId = qrData.qrId;
 
-        const qrDept = qrData.department;
-        const qrCourse = qrData.course;
-        const qrYear = qrData.academicYear;
-        const qrDiv = qrData.division;
-
-        // Check if QR matches student's division
-        if (userDept !== qrDept ||
-          userCourse !== qrCourse ||
-          userYear !== qrYear ||
-          userDiv !== qrDiv) {
-
-          this.showToast(
-            '❌ WRONG DIVISION!\n\n' +
-            `This QR is for: ${qrDept}/${qrCourse}/${qrYear}/${qrDiv}\n\n` +
-            `Your division: ${userDept}/${userCourse}/${userYear}/${userDiv}\n\n` +
-            '⚠️ You can ONLY scan QR codes for YOUR OWN division!',
-            'danger'
-          );
-
-          console.error('❌ QR rejected - division mismatch');
-          return; // ❌ STOP - don't process
-        }
-
-        console.log('✅ Division verified - QR matches student division');
-      }
-
-      // ✅ Validate QR ID in Firebase
-      console.log(`🔍 Validating QR ID: ${qrData.qrId}...`);
-
-      if (!this.firebaseSync || !this.firebaseSync.isConnected) {
-        this.showToast(
-          '⚠️ Firebase Not Connected!\n\n' +
-          'Cannot validate QR code without Firebase.\n' +
-          'Please check your internet connection.',
-          'danger'
-        );
-        return;
-      }
-
-      const isValid = await this.validateQRSession(qrData.qrId);
-
-      if (!isValid) {
-        this.showToast(
-          '⚠️ QR CODE EXPIRED OR INVALID!\n\n' +
-          'This QR code has expired or been replaced.\n\n' +
-          'Please scan a NEW QR code.',
-          'danger'
-        );
-        return;
-      }
-
-      // ✅ QR is valid - setup expiration watcher
-      this.currentQRId = qrData.qrId;
-      this.watchQRExpiration(qrData.qrId);
-      console.log(`✅ QR validated successfully - ID: ${qrData.qrId}`);
-
-      // ✅ Update mainSystemConfig with all scanned QR data for ALL roles
-      this.mainSystemConfig.selectedDepartment = qrData.department;
-      this.mainSystemConfig.selectedCourse = qrData.course;
-      this.mainSystemConfig.selectedAcademicYear = qrData.academicYear;
-      this.mainSystemConfig.selectedDivision = qrData.division;
-      this.mainSystemConfig.selectedSubject = qrData.subject;
-      this.mainSystemConfig.selectedMonth = qrData.month;
-      this.mainSystemConfig.selectedYear = qrData.year;
-      this.mainSystemConfig.currentDay = qrData.day;
-
-      // ✅ Save to localStorage for both keys
+      // ✅ 2. SAVE SCANNED FIELDS TO LOCALSTORAGE
       const configToSave = {
-        qrId: qrData.qrId,
-        department: qrData.department,
-        course: qrData.course,
-        academicYear: qrData.academicYear,
-        division: qrData.division,
-        subject: qrData.subject,
-        month: qrData.month,
-        year: qrData.year,
-        day: qrData.day,
+        qrId: qrData.qrId || 'SESSION_ACTIVE',
+        department: this.mainSystemConfig.selectedDepartment,
+        course: this.mainSystemConfig.selectedCourse,
+        academicYear: this.mainSystemConfig.selectedAcademicYear,
+        division: this.mainSystemConfig.selectedDivision,
+        subject: this.mainSystemConfig.selectedSubject,
+        month: this.mainSystemConfig.selectedMonth,
+        year: this.mainSystemConfig.selectedYear,
+        day: this.mainSystemConfig.currentDay,
         scannedAt: Date.now()
       };
 
       localStorage.setItem('faceRecDivisionConfig', JSON.stringify(configToSave));
       localStorage.setItem('attendanceConfig', JSON.stringify(configToSave));
 
-      // ✅ Update Firebase with the NEW scanned QR code subject & date so Firebase has the latest values
-      if (this.firebaseSync && this.firebaseSync.isConnected) {
-        const basePath = `mainSystem/attendanceData/${qrData.year}/${this.mainSystemConfig.selectedDepartment}/${this.mainSystemConfig.selectedCourse}/${this.mainSystemConfig.selectedAcademicYear}/${this.mainSystemConfig.selectedDivision}`;
-        try {
-          await Promise.all([
-            this.firebaseSync.firebaseDB.ref(`${basePath}/selectedSubject`).set(qrData.subject),
-            this.firebaseSync.firebaseDB.ref(`${basePath}/selectedMonth`).set(qrData.month),
-            this.firebaseSync.firebaseDB.ref(`${basePath}/selectedYear`).set(qrData.year),
-            this.firebaseSync.firebaseDB.ref(`${basePath}/currentDay`).set(qrData.day)
-          ]);
-          console.log(`✅ Firebase updated with new scanned QR values: ${qrData.subject}, Month: ${qrData.month}, Day: ${qrData.day}`);
-        } catch (fbErr) {
-          console.warn('⚠️ Could not sync scanned QR values to Firebase:', fbErr);
-        }
+      // ✅ 3. DIRECTLY UPDATE DISPLAY FIELDS ON FACE-RECOGNITION.HTML
+      this.updateConfigDisplay();
+      if (typeof window.updateConfigDisplay === 'function') {
+        window.updateConfigDisplay();
       }
 
-      // ✅ Re-setup Firebase live listeners with subject & month
-      this.firebaseSync.detachListeners();
-      this.firebaseSync.setupLiveListeners({
-        department: this.mainSystemConfig.selectedDepartment,
-        course: this.mainSystemConfig.selectedCourse,
-        academicYear: this.mainSystemConfig.selectedAcademicYear,
-        division: this.mainSystemConfig.selectedDivision,
-        year: qrData.year,
-        subject: qrData.subject,
-        month: qrData.month,
-        onSubjectChange: (newSubject, oldSubject) => this.handleFirebaseSubjectChange(newSubject, oldSubject),
-        onMonthChange: (newMonth, oldMonth) => this.handleFirebaseMonthChange(newMonth, oldMonth),
-        onYearChange: (newYear, oldYear) => this.handleFirebaseYearChange(newYear, oldYear),
-        onDayChange: (newDay, oldDay) => this.handleFirebaseDayChange(newDay, oldDay),
-        onAttendanceChange: (data) => this.handleFirebaseAttendanceChange(data)
-      });
-      console.log('✅ Live listeners attached for division');
+      // ✅ 4. IMMEDIATELY SHOW SECURITY CODE INPUT SECTION & FOCUS INPUT
+      const codeSection = document.getElementById('securityCodeSection');
+      const codeInput = document.getElementById('securityCodeInput');
+      const successIcon = document.getElementById('codeSuccessIcon');
+      const loadingSpinner = document.getElementById('codeLoadingSpinner');
+      const validationMsg = document.getElementById('codeValidationMsg');
 
-      // ✅ Update UI
-      this.updateConfigDisplay();
+      if (codeInput) {
+        codeInput.value = '';
+        codeInput.disabled = false;
+      }
+      if (successIcon) successIcon.style.display = 'none';
+      if (loadingSpinner) loadingSpinner.style.display = 'none';
+      if (validationMsg) validationMsg.style.display = 'none';
+      this.isVerifyingCode = false;
 
-      // ✅ ALWAYS require code for students
-      if (this.userRole === 'student') {
-        // Lock camera button
-        this.disableCameraButton();
+      if (codeSection) {
+        codeSection.style.display = 'block';
+        console.log('✅ Security code section displayed');
+      }
 
-        // ✅ CRITICAL: Clear any previous code entry state
-        const codeInput = document.getElementById('securityCodeInput');
-        const successIcon = document.getElementById('codeSuccessIcon');
-        const loadingSpinner = document.getElementById('codeLoadingSpinner');
-        const validationMsg = document.getElementById('codeValidationMsg');
+      if (codeInput) {
+        setTimeout(() => codeInput.focus(), 200);
+      }
 
-        if (codeInput) {
-          codeInput.value = '';
-          codeInput.disabled = false;
-        }
-        if (successIcon) successIcon.style.display = 'none';
-        if (loadingSpinner) loadingSpinner.style.display = 'none';
-        if (validationMsg) validationMsg.style.display = 'none';
-        this.isVerifyingCode = false;
-
-        // ✅ SHOW security code input section
-        const codeSection = document.getElementById('securityCodeSection');
-        if (codeSection) {
-          codeSection.style.display = 'block';
+      // ✅ 5. UPDATE FIREBASE WITH SCANNED QR VALUES IF CONNECTED
+      if (this.firebaseSync && this.firebaseSync.isConnected) {
+        const basePath = `mainSystem/attendanceData/${this.mainSystemConfig.selectedYear}/${this.mainSystemConfig.selectedDepartment}/${this.mainSystemConfig.selectedCourse}/${this.mainSystemConfig.selectedAcademicYear}/${this.mainSystemConfig.selectedDivision}`;
+        try {
+          await Promise.all([
+            this.firebaseSync.firebaseDB.ref(`${basePath}/selectedSubject`).set(this.mainSystemConfig.selectedSubject),
+            this.firebaseSync.firebaseDB.ref(`${basePath}/selectedMonth`).set(this.mainSystemConfig.selectedMonth),
+            this.firebaseSync.firebaseDB.ref(`${basePath}/selectedYear`).set(this.mainSystemConfig.selectedYear),
+            this.firebaseSync.firebaseDB.ref(`${basePath}/currentDay`).set(this.mainSystemConfig.currentDay)
+          ]);
+        } catch (fbErr) {
+          console.warn('⚠️ Firebase update note:', fbErr);
         }
 
-        // ✅ Auto-focus on code input
-        setTimeout(() => {
-          if (codeInput) codeInput.focus();
-        }, 300);
+        // Re-setup live listeners for attendance updates
+        this.firebaseSync.detachListeners();
+        this.firebaseSync.setupLiveListeners({
+          department: this.mainSystemConfig.selectedDepartment,
+          course: this.mainSystemConfig.selectedCourse,
+          academicYear: this.mainSystemConfig.selectedAcademicYear,
+          division: this.mainSystemConfig.selectedDivision,
+          year: this.mainSystemConfig.selectedYear,
+          subject: this.mainSystemConfig.selectedSubject,
+          month: this.mainSystemConfig.selectedMonth,
+          onSubjectChange: (newSubject) => {
+            if (newSubject && newSubject !== this.mainSystemConfig.selectedSubject) {
+              this.mainSystemConfig.selectedSubject = newSubject;
+              this.updateConfigDisplay();
+            }
+          },
+          onMonthChange: (newMonth) => {
+            if (newMonth !== null && newMonth !== undefined && newMonth !== this.mainSystemConfig.selectedMonth) {
+              this.mainSystemConfig.selectedMonth = newMonth;
+              this.updateConfigDisplay();
+            }
+          },
+          onYearChange: (newYear) => {
+            if (newYear && newYear !== this.mainSystemConfig.selectedYear) {
+              this.mainSystemConfig.selectedYear = newYear;
+              this.updateConfigDisplay();
+            }
+          },
+          onDayChange: (newDay) => {
+            if (newDay && newDay !== this.mainSystemConfig.currentDay) {
+              this.mainSystemConfig.currentDay = newDay;
+              this.updateConfigDisplay();
+            }
+          },
+          onAttendanceChange: (data) => this.handleFirebaseAttendanceChange(data)
+        });
+      }
 
-        this.showToast(
-          `✅ QR CODE SCANNED!\n\n` +
-          `Now enter the 4-digit security code from the teacher's screen.`,
-          'info'
-        );
+      this.showToast(
+        `✅ QR CODE SCANNED!\n\n` +
+        `Subject: ${this.mainSystemConfig.selectedSubject}\n` +
+        `Date: Day ${this.mainSystemConfig.currentDay}\n\n` +
+        `Now enter the 4-digit security code from the teacher's screen.`,
+        'info'
+      );
 
-        // ✅ IMPORTANT: Don't load face data until code is verified
-        console.log('⏳ Waiting for security code verification...');
-        return; // ❌ STOP - don't load faces yet
-      } else {
-        // Admin/Teacher - no code needed
+      // If user is not student (admin/teacher), enable camera & load faces immediately
+      if (this.userRole !== 'student') {
         this.enableCameraButton();
-
-        // ✅ Load face data immediately for admin/teacher
         await this.loadFaceMatcher();
         await this.updateStudentList();
         await this.updateStats();
       }
 
-      const divisionName = `${this.mainSystemConfig.selectedDepartment}/${this.mainSystemConfig.selectedCourse}/${this.mainSystemConfig.selectedAcademicYear}/${this.mainSystemConfig.selectedDivision}`;
-      this.showToast(
-        `✅ QR CODE ACCEPTED!\n\n` +
-        `Division: ${divisionName}\n` +
-        `Subject: ${qrData.subject}\n` +
-        `QR ID: ${qrData.qrId.substring(0, 8)}...`,
-        'success'
-      );
-
     } catch (error) {
-      this.showToast('❌ Invalid QR code format', 'danger');
-      console.error('QR scan error:', error);
+      console.error('❌ QR scan error:', error);
+      this.showToast('Invalid QR code format', 'danger');
     }
   }
 
@@ -841,6 +782,12 @@ class FaceRecognitionSystem {
     console.log(`🔔 Firebase subject changed: ${oldSubject} → ${newSubject}`);
 
     this.mainSystemConfig.selectedSubject = newSubject;
+
+    const storedConfig = JSON.parse(localStorage.getItem('faceRecDivisionConfig') || localStorage.getItem('attendanceConfig') || '{}');
+    storedConfig.subject = newSubject;
+    localStorage.setItem('faceRecDivisionConfig', JSON.stringify(storedConfig));
+    localStorage.setItem('attendanceConfig', JSON.stringify(storedConfig));
+
     this.updateConfigDisplay();
 
     if (!newSubject) {
@@ -910,6 +857,12 @@ class FaceRecognitionSystem {
     console.log(`🔔 Firebase month changed: ${oldMonth} → ${newMonth}`);
 
     this.mainSystemConfig.selectedMonth = newMonth;
+
+    const storedConfig = JSON.parse(localStorage.getItem('faceRecDivisionConfig') || localStorage.getItem('attendanceConfig') || '{}');
+    storedConfig.month = newMonth;
+    localStorage.setItem('faceRecDivisionConfig', JSON.stringify(storedConfig));
+    localStorage.setItem('attendanceConfig', JSON.stringify(storedConfig));
+
     this.updateConfigDisplay();
 
     if (newMonth !== null && newMonth !== undefined) {
