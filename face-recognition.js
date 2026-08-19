@@ -496,6 +496,22 @@ class FaceRecognitionSystem {
       localStorage.setItem('faceRecDivisionConfig', JSON.stringify(configToSave));
       localStorage.setItem('attendanceConfig', JSON.stringify(configToSave));
 
+      // ✅ Update Firebase with the NEW scanned QR code subject & date so Firebase has the latest values
+      if (this.firebaseSync && this.firebaseSync.isConnected) {
+        const basePath = `mainSystem/attendanceData/${qrData.year}/${this.mainSystemConfig.selectedDepartment}/${this.mainSystemConfig.selectedCourse}/${this.mainSystemConfig.selectedAcademicYear}/${this.mainSystemConfig.selectedDivision}`;
+        try {
+          await Promise.all([
+            this.firebaseSync.firebaseDB.ref(`${basePath}/selectedSubject`).set(qrData.subject),
+            this.firebaseSync.firebaseDB.ref(`${basePath}/selectedMonth`).set(qrData.month),
+            this.firebaseSync.firebaseDB.ref(`${basePath}/selectedYear`).set(qrData.year),
+            this.firebaseSync.firebaseDB.ref(`${basePath}/currentDay`).set(qrData.day)
+          ]);
+          console.log(`✅ Firebase updated with new scanned QR values: ${qrData.subject}, Month: ${qrData.month}, Day: ${qrData.day}`);
+        } catch (fbErr) {
+          console.warn('⚠️ Could not sync scanned QR values to Firebase:', fbErr);
+        }
+      }
+
       // ✅ Re-setup Firebase live listeners with subject & month
       this.firebaseSync.detachListeners();
       this.firebaseSync.setupLiveListeners({
@@ -759,6 +775,9 @@ class FaceRecognitionSystem {
    * Handle date change from Firebase
    */
   async handleFirebaseDayChange(newDay, oldDay) {
+    if (newDay === null || newDay === undefined) return;
+    if (this.mainSystemConfig.currentDay === newDay) return;
+
     // ✅ Prevent infinite loops with guard flag
     if (this.isHandlingDayChange) {
       console.log('⚠️ Already handling day change, skipping...');
@@ -820,6 +839,9 @@ class FaceRecognitionSystem {
    * Handle subject change from Firebase
    */
   async handleFirebaseSubjectChange(newSubject, oldSubject) {
+    if (!newSubject) return;
+    if (this.mainSystemConfig.selectedSubject === newSubject) return;
+
     console.log(`🔔 Firebase subject changed: ${oldSubject} → ${newSubject}`);
 
     this.mainSystemConfig.selectedSubject = newSubject;
@@ -886,6 +908,9 @@ class FaceRecognitionSystem {
    * Handle month change from Firebase
    */
   async handleFirebaseMonthChange(newMonth, oldMonth) {
+    if (newMonth === null || newMonth === undefined) return;
+    if (this.mainSystemConfig.selectedMonth === newMonth) return;
+
     console.log(`🔔 Firebase month changed: ${oldMonth} → ${newMonth}`);
 
     this.mainSystemConfig.selectedMonth = newMonth;
