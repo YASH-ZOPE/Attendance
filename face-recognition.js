@@ -208,40 +208,16 @@ class FaceRecognitionSystem {
 
           console.log('✅ Auto-setup Firebase listeners for student division from ID token');
 
-          // ✅ Also check for saved config (fallback)
-          const savedConfig = localStorage.getItem('faceRecDivisionConfig');
-          if (savedConfig) {
-            const config = JSON.parse(savedConfig);
-            const configAge = Date.now() - config.scannedAt;
-            const maxAge = 24 * 60 * 60 * 1000; // 24 hours
-
-            if (configAge < maxAge) {
-              // Update subject/month/day from saved config
-              this.mainSystemConfig.selectedSubject = config.subject;
-              this.mainSystemConfig.selectedMonth = config.month;
-              this.mainSystemConfig.selectedYear = config.year;
-              this.mainSystemConfig.currentDay = config.day;
-              
-              // Restore QR ID and start watching it
-              if (config.qrId) {
-                this.currentQRId = config.qrId;
-                this.watchQRExpiration(config.qrId);
-
-                // Show security code entry screen on reload if QR is active
-                const codeSection = document.getElementById('securityCodeSection');
-                if (codeSection) {
-                  codeSection.style.display = 'block';
-                  const codeInput = document.getElementById('securityCodeInput');
-                  if (codeInput) {
-                    codeInput.focus();
-                  }
-                }
-              }
-              console.log('✅ Loaded subject/date and QR ID from saved config');
-            } else {
-              console.log('⚠️ Saved config expired - cleared');
-              localStorage.removeItem('faceRecDivisionConfig');
+          // ✅ Require fresh QR scan on student page load
+          if (role === 'student') {
+            localStorage.removeItem('faceRecDivisionConfig');
+            localStorage.removeItem('attendanceConfig');
+            this.currentQRId = null;
+            const codeSection = document.getElementById('securityCodeSection');
+            if (codeSection) {
+              codeSection.style.display = 'none';
             }
+            this.disableCameraButton();
           }
         }
 
@@ -391,6 +367,15 @@ class FaceRecognitionSystem {
       console.log('RAW QR DATA:', qrDataString);
       console.log('═══════════════════════════════════');
 
+      const resetScanFailure = () => {
+        this.currentQRId = null;
+        localStorage.removeItem('faceRecDivisionConfig');
+        localStorage.removeItem('attendanceConfig');
+        const codeSection = document.getElementById('securityCodeSection');
+        if (codeSection) codeSection.style.display = 'none';
+        this.disableCameraButton();
+      };
+
       let qrData;
       if (typeof qrDataString === 'string') {
         qrData = JSON.parse(qrDataString);
@@ -399,6 +384,7 @@ class FaceRecognitionSystem {
       }
 
       if (!qrData || typeof qrData !== 'object' || !qrData.qrId) {
+        resetScanFailure();
         this.showToast('❌ INVALID QR CODE: Missing required payload fields', 'danger');
         return;
       }
@@ -406,6 +392,7 @@ class FaceRecognitionSystem {
       // ✅ 1. VALIDATE QR SESSION IN FIREBASE (Must be active and unexpired)
       const isValid = await this.validateQRSession(qrData.qrId);
       if (!isValid) {
+        resetScanFailure();
         this.showToast(
           '⚠️ QR CODE EXPIRED OR INVALID!\n\n' +
           'This QR code has expired or been replaced.\n\n' +
@@ -429,6 +416,7 @@ class FaceRecognitionSystem {
 
         if (userDept && userCourse && userYear && userDiv) {
           if (userDept !== qrDept || userCourse !== qrCourse || userYear !== qrYear || userDiv !== qrDiv) {
+            resetScanFailure();
             this.showToast(
               '❌ WRONG DIVISION!\n\n' +
               `This QR is for: ${qrDept}/${qrCourse}/${qrYear}/${qrDiv}\n\n` +
@@ -441,7 +429,7 @@ class FaceRecognitionSystem {
         }
       }
 
-      // ✅ 3. SET ALL FIELDS FROM THE VALID SCANNED QR CODE PAYLOAD
+      // ✅ 3. ONLY UPON SUCCESSFUL QR VALIDATION: SET ALL FIELDS
       this.mainSystemConfig.selectedDepartment = qrData.department || this.mainSystemConfig.selectedDepartment;
       this.mainSystemConfig.selectedCourse = qrData.course || this.mainSystemConfig.selectedCourse;
       this.mainSystemConfig.selectedAcademicYear = qrData.academicYear || this.mainSystemConfig.selectedAcademicYear;
@@ -452,7 +440,7 @@ class FaceRecognitionSystem {
       this.mainSystemConfig.currentDay = qrData.day || this.mainSystemConfig.currentDay;
       this.currentQRId = qrData.qrId;
 
-      // ✅ 2. SAVE SCANNED FIELDS TO LOCALSTORAGE
+      // ✅ 4. SAVE VALIDATED CONFIG TO LOCALSTORAGE
       const configToSave = {
         qrId: qrData.qrId || 'SESSION_ACTIVE',
         department: this.mainSystemConfig.selectedDepartment,
@@ -469,35 +457,43 @@ class FaceRecognitionSystem {
       localStorage.setItem('faceRecDivisionConfig', JSON.stringify(configToSave));
       localStorage.setItem('attendanceConfig', JSON.stringify(configToSave));
 
-      // ✅ 3. DIRECTLY UPDATE DISPLAY FIELDS ON FACE-RECOGNITION.HTML
+      // ✅ 5. UPDATE CARD DISPLAY
       this.updateConfigDisplay();
-      if (typeof window.updateConfigDisplay === 'function') {
-        window.updateConfigDisplay();
-      }
 
-      // ✅ 4. IMMEDIATELY SHOW SECURITY CODE INPUT SECTION & FOCUS INPUT
-      const codeSection = document.getElementById('securityCodeSection');
-      const codeInput = document.getElementById('securityCodeInput');
-      const successIcon = document.getElementById('codeSuccessIcon');
-      const loadingSpinner = document.getElementById('codeLoadingSpinner');
-      const validationMsg = document.getElementById('codeValidationMsg');
+      // ✅ 6. SHOW SECURITY CODE INPUT SECTION ONLY NOW FOR STUDENTS
+      if (this.userRole === 'student') {
+        this.disableCameraButton();
 
-      if (codeInput) {
-        codeInput.value = '';
-        codeInput.disabled = false;
-      }
-      if (successIcon) successIcon.style.display = 'none';
-      if (loadingSpinner) loadingSpinner.style.display = 'none';
-      if (validationMsg) validationMsg.style.display = 'none';
-      this.isVerifyingCode = false;
+        const codeSection = document.getElementById('securityCodeSection');
+        const codeInput = document.getElementById('securityCodeInput');
+        const successIcon = document.getElementById('codeSuccessIcon');
+        const loadingSpinner = document.getElementById('codeLoadingSpinner');
+        const validationMsg = document.getElementById('codeValidationMsg');
 
-      if (codeSection) {
-        codeSection.style.display = 'block';
-        console.log('✅ Security code section displayed');
-      }
+        if (codeInput) {
+          codeInput.value = '';
+          codeInput.disabled = false;
+        }
+        if (successIcon) successIcon.style.display = 'none';
+        if (loadingSpinner) loadingSpinner.style.display = 'none';
+        if (validationMsg) validationMsg.style.display = 'none';
+        this.isVerifyingCode = false;
 
-      if (codeInput) {
-        setTimeout(() => codeInput.focus(), 200);
+        if (codeSection) {
+          codeSection.style.display = 'block';
+        }
+
+        if (codeInput) {
+          setTimeout(() => codeInput.focus(), 200);
+        }
+
+        this.showToast(
+          `✅ VALID QR SCANNED!\n\n` +
+          `Subject: ${this.mainSystemConfig.selectedSubject}\n` +
+          `Now enter the 4-digit security code from the teacher's screen.`,
+          'info'
+        );
+        return;
       }
 
       // ✅ 5. UPDATE FIREBASE WITH SCANNED QR VALUES IF CONNECTED
