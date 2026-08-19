@@ -47,6 +47,7 @@ class FaceRecognitionSystem {
     };
     this.isHandlingDayChange = false;
     this.userRole = null;
+    window.faceSystem = this;
     this.monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
       'July', 'August', 'September', 'October', 'November', 'December'];
   }
@@ -464,28 +465,23 @@ class FaceRecognitionSystem {
       this.watchQRExpiration(qrData.qrId);
       console.log(`✅ QR validated successfully - ID: ${qrData.qrId}`);
 
-      // ✅ FOR ADMIN/TEACHER: Allow division change
-      // ✅ FOR STUDENTS: Division already validated above
-      if (this.userRole !== 'student') {
-        this.mainSystemConfig.selectedDepartment = qrData.department;
-        this.mainSystemConfig.selectedCourse = qrData.course;
-        this.mainSystemConfig.selectedAcademicYear = qrData.academicYear;
-        this.mainSystemConfig.selectedDivision = qrData.division;
-      }
-
-      // ✅ Update subject/date config (allowed for all roles)
+      // ✅ Update mainSystemConfig with all scanned QR data for ALL roles
+      this.mainSystemConfig.selectedDepartment = qrData.department;
+      this.mainSystemConfig.selectedCourse = qrData.course;
+      this.mainSystemConfig.selectedAcademicYear = qrData.academicYear;
+      this.mainSystemConfig.selectedDivision = qrData.division;
       this.mainSystemConfig.selectedSubject = qrData.subject;
       this.mainSystemConfig.selectedMonth = qrData.month;
       this.mainSystemConfig.selectedYear = qrData.year;
       this.mainSystemConfig.currentDay = qrData.day;
 
-      // ✅ Save to localStorage (with role-based logic)
+      // ✅ Save to localStorage for both keys
       const configToSave = {
         qrId: qrData.qrId,
-        department: this.mainSystemConfig.selectedDepartment,
-        course: this.mainSystemConfig.selectedCourse,
-        academicYear: this.mainSystemConfig.selectedAcademicYear,
-        division: this.mainSystemConfig.selectedDivision,
+        department: qrData.department,
+        course: qrData.course,
+        academicYear: qrData.academicYear,
+        division: qrData.division,
         subject: qrData.subject,
         month: qrData.month,
         year: qrData.year,

@@ -1781,8 +1781,15 @@ function updateConfigDisplay() {
   // Field 2: Date (day - month - year)
   let dateStr = 'Not Set';
   if (day && month !== null && month !== undefined && fullYear) {
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const monthLabel = typeof month === 'number' ? (monthNames[month] || month + 1) : month;
+    let monthLabel = month;
+    const parsedMonth = parseInt(month, 10);
+    if (!isNaN(parsedMonth) && parsedMonth >= 0 && parsedMonth < 12) {
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      monthLabel = monthNames[parsedMonth];
+    } else if (!isNaN(parsedMonth) && parsedMonth >= 1 && parsedMonth <= 12) {
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      monthLabel = monthNames[parsedMonth - 1];
+    }
     dateStr = `${day} - ${monthLabel} - ${fullYear}`;
   }
 
