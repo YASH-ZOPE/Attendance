@@ -621,10 +621,6 @@ class FaceRecognitionSystem {
         }
       };
     });
-  updateConfigDisplay() {
-    if (typeof window.updateConfigDisplay === 'function') {
-      window.updateConfigDisplay();
-    }
   }
 
   /**
