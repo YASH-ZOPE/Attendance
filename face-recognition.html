@@ -1755,35 +1755,50 @@ if (document.readyState === 'loading') {
             }
           }
 
-          // Add this function to update the simplified display
+// Function to update the card display
 function updateConfigDisplay() {
-  const config = JSON.parse(localStorage.getItem('attendanceConfig') || '{}');
-  
+  const storedConfig = JSON.parse(localStorage.getItem('faceRecDivisionConfig') || localStorage.getItem('attendanceConfig') || '{}');
+  const mainConfig = (window.faceSystem && window.faceSystem.mainSystemConfig) ? window.faceSystem.mainSystemConfig : {};
+
+  const dept = mainConfig.selectedDepartment || storedConfig.department;
+  const year = mainConfig.selectedAcademicYear || storedConfig.academicYear;
+  const course = mainConfig.selectedCourse || storedConfig.course;
+  const div = mainConfig.selectedDivision || storedConfig.division;
+  const subject = mainConfig.selectedSubject || storedConfig.subject;
+  const day = mainConfig.currentDay || storedConfig.day;
+  const month = (mainConfig.selectedMonth !== null && mainConfig.selectedMonth !== undefined) ? mainConfig.selectedMonth : storedConfig.month;
+  const fullYear = mainConfig.selectedYear || storedConfig.year;
+
   // Field 1: Department - Academic year - Course - Div.
-  const classInfo = [
-    config.department,
-    config.academicYear,
-    config.course,
-    config.division
-  ].filter(Boolean).join(' - ') || 'Not Set';
-  
-  document.getElementById('displayClassInfo').textContent = classInfo;
-  document.getElementById('displayClassInfo').classList.toggle('not-set', classInfo === 'Not Set');
-  
+  const classInfo = [dept, year, course, div].filter(Boolean).join(' - ') || 'Not Set';
+
+  const classEl = document.getElementById('displayClassInfo');
+  if (classEl) {
+    classEl.textContent = classInfo;
+    classEl.classList.toggle('not-set', classInfo === 'Not Set');
+  }
+
   // Field 2: Date (day - month - year)
   let dateStr = 'Not Set';
-  if (config.day && config.month && config.year) {
-    const shortYear = config.year.toString().slice(-2);
-    dateStr = `${config.day} - ${config.month} - ${shortYear}`;
+  if (day && month !== null && month !== undefined && fullYear) {
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthLabel = typeof month === 'number' ? (monthNames[month] || month + 1) : month;
+    dateStr = `${day} - ${monthLabel} - ${fullYear}`;
   }
-  
-  document.getElementById('displayDate').textContent = dateStr;
-  document.getElementById('displayDate').classList.toggle('not-set', dateStr === 'Not Set');
-  
-  // Field 3: Subject (keeping original behavior)
-  const subject = config.subject || 'Not Set';
-  document.getElementById('displaySubject').textContent = subject;
-  document.getElementById('displaySubject').classList.toggle('not-set', subject === 'Not Set');
+
+  const dateEl = document.getElementById('displayDate');
+  if (dateEl) {
+    dateEl.textContent = dateStr;
+    dateEl.classList.toggle('not-set', dateStr === 'Not Set');
+  }
+
+  // Field 3: Subject
+  const subjStr = subject || 'Not Set';
+  const subjEl = document.getElementById('displaySubject');
+  if (subjEl) {
+    subjEl.textContent = subjStr;
+    subjEl.classList.toggle('not-set', subjStr === 'Not Set');
+  }
 }
 
           // ==================== AUTHENTICATION CHECK ====================

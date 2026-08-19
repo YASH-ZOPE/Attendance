@@ -482,22 +482,21 @@ class FaceRecognitionSystem {
       // ✅ Save to localStorage (with role-based logic)
       const configToSave = {
         qrId: qrData.qrId,
-        department: this.mainSystemConfig.selectedDepartment, // Use mainSystemConfig (not qrData for students)
+        department: this.mainSystemConfig.selectedDepartment,
         course: this.mainSystemConfig.selectedCourse,
         academicYear: this.mainSystemConfig.selectedAcademicYear,
         division: this.mainSystemConfig.selectedDivision,
         subject: qrData.subject,
         month: qrData.month,
         year: qrData.year,
-        subject: qrData.subject,
-        month: qrData.month,
         day: qrData.day,
         scannedAt: Date.now()
       };
 
       localStorage.setItem('faceRecDivisionConfig', JSON.stringify(configToSave));
+      localStorage.setItem('attendanceConfig', JSON.stringify(configToSave));
 
-      // ✅ Re-setup Firebase live listeners
+      // ✅ Re-setup Firebase live listeners with subject & month
       this.firebaseSync.detachListeners();
       this.firebaseSync.setupLiveListeners({
         department: this.mainSystemConfig.selectedDepartment,
@@ -505,6 +504,8 @@ class FaceRecognitionSystem {
         academicYear: this.mainSystemConfig.selectedAcademicYear,
         division: this.mainSystemConfig.selectedDivision,
         year: qrData.year,
+        subject: qrData.subject,
+        month: qrData.month,
         onSubjectChange: (newSubject, oldSubject) => this.handleFirebaseSubjectChange(newSubject, oldSubject),
         onMonthChange: (newMonth, oldMonth) => this.handleFirebaseMonthChange(newMonth, oldMonth),
         onYearChange: (newYear, oldYear) => this.handleFirebaseYearChange(newYear, oldYear),
@@ -580,6 +581,16 @@ class FaceRecognitionSystem {
       console.error('QR scan error:', error);
     }
   }
+
+  /**
+   * Update config display UI elements
+   */
+  updateConfigDisplay() {
+    if (typeof window.updateConfigDisplay === 'function') {
+      window.updateConfigDisplay();
+    }
+  }
+
   /**
    * Connect to main attendance system database
    */
